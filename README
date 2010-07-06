@@ -1,33 +1,33 @@
-<h1>Scooter Framework</h1>
+Scooter Framework
+=================
 
-<h2>What is it</h2>
+What is it
+----------
 
-<p>This is an unreleased version of the latest Scooter Framework source code. Please notice that this version of Scooter is significantly different from the released version posted on <a href="http://www.scooterframework.com/">Scooter Framework website</a>. But it is a much better one.</p>
+This is an unreleased version of the latest Scooter Framework source code. Please notice that this version of Scooter is significantly different from the released version posted on <a href="http://www.scooterframework.com/">Scooter Framework website</a>. But it is a much better one.
 
-<h2>How to build</h2>
-<ol>
-  <li>Set JAVA_HOME environment variable pointing to a JDK installation.</li>
-  <li>Type 'ant' to get a list of targets</li>
-  <li>Type 'ant build' to create a scooter.jar</li>
-</ol>
+How to build
+------------
+1. Set JAVA_HOME environment variable pointing to a JDK installation.
+2. Type 'ant' to get a list of targets
+3. Type 'ant build' to create a scooter.jar
 
-<h2>How to create an app</h2>
-<p>Creating an app is much easier with this version. Just one command:</p>
-<pre><code>
+How to create an app
+--------------------
+Creating an app is much easier with this version. Just one command:
+
 >java -jar tools/create.jar blog
-</code></pre>
 
-<p>The blog application will be created under the webapps directory. You can create as many applications as you want. They will be all created under the same webapps directory.</p>
+The blog application will be created under the webapps directory. You can create as many applications as you want. They will be all created under the same webapps directory.
 
-<p>Use -help option to get more.</p>
+Use -help option to get more options.
 
-<h2>How to run an app</h2>
-<pre><code>
+How to run an app
+-----------------
+
 >java -jar tools/server.jar blog 9090
-</code></pre>
 
-<h2>TODO</h2>
-<ul>
-  <li>Recreate tools/generate.jar for this version.</li>
-  <li>Recreate tools/generate-signon.jar for this version.</li>
-</ul>
+TODO
+----
+1. Recreate tools/generate.jar for this version.
+2. Recreate tools/generate-signon.jar for this version.
