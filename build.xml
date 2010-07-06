@@ -1,0 +1,182 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+
+<project name="scooter_core" default="usage" basedir=".">
+
+    <!--Set the output directories-->
+    <property name="javac.source"           value="1.4"/>
+    <property name="javac.target"           value="1.4"/>
+    <property name="build.outdir"           value="build"/>
+    <property name="compile.outdir"         value="build/classes"/>
+    <property name="jar.outdir"             value="build/jar"/>
+    <property name="javadoc.outdir"         value="docs/javadoc"/>
+    <property name="junitreport.outdir"     value="docs/reports"/>
+    <property name="lib.dir"                value="lib"/>
+    <property name="src.dir"                value="source/src"/>
+    <property name="testsrc.dir"            value="source/test"/>
+    <property name="tools.dir"              value="tools"/>
+	
+    <property name="scooterjar.outdir"      value="lib"/>
+	<property name="scooterjar.name"        value="scooter.jar"/>
+	<property name="createjar.name"         value="create.jar"/>
+	<property name="generatejar.name"       value="generate.jar"/>
+	<property name="generatesignonjar.name" value="generate-signon.jar"/>
+	<property name="serverjar.name"         value="server.jar"/>
+
+    <!--Set the classpath-->
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+            <include name="**/*.zip"/>
+        </fileset>
+    </path>
+
+    <!--Set the source path-->
+    <path id="srcpath">
+        <pathelement location="${src.dir}"/>
+    </path>
+
+   	<target name="usage">
+        <echo message=""/>
+        <echo message="Scooter Framework Build Script"/>
+        <echo message="-----------------------------------------------"/>
+        <echo message=""/>
+        <echo message="Available targets are:"/>
+        <echo message=""/>
+        <echo message="all          --> build all and deploy scooter.jar, all tools jars and docs"/>
+        <echo message="build        --> build all and deploy scooter.jar"/>
+        <echo message="clean        --> clean all outputs"/>
+        <echo message="jar          --> package scooter.jar"/>
+        <echo message="javadoc      --> create Java Doc"/>
+        <echo message="test         --> run test"/>
+        <echo message="tools        --> package all tools jars"/>
+        <echo message="createjar    --> package tools/create.jar"/>
+        <echo message="serverjar    --> package tools/server.jar"/>
+        <echo message="usage        --> help (default)"/>
+        <echo message=""/>
+        <echo message="Please note that you need to have JAVA_HOME pointing to a JDK."/>
+        <echo message=""/>
+	</target>
+
+    <target name="init">
+        <tstamp/>
+        <echo>$${ant.java.version}=${ant.java.version}</echo>
+        <echo>$${ant.version}=${ant.version}</echo>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="${compile.outdir}"/>
+        
+        <javac destdir="${compile.outdir}" debug="true" encoding="Cp1252" 
+        	source="${javac.source}" target="${javac.target}">
+            <classpath refid="classpath"/>
+            <src path="${src.dir}"/>
+            <src path="${testsrc.dir}"/>
+        </javac>
+        
+        <copy todir="${compile.outdir}" preservelastmodified="true">
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+                <include name="**/**"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.outdir}"/>
+        <jar destfile="${jar.outdir}/${scooterjar.name}" 
+        	 basedir="${compile.outdir}" 
+    		 excludes="**/tools/**" 
+        />
+    </target>
+
+    <target name="createjar" depends="compile">
+        <delete file="MANIFEST.txt"/>
+        <manifest file="MANIFEST.txt">
+            <attribute name="Main-Class" value="com.scooterframework.tools.creator.AppCreator"/>
+            <attribute name="Class-Path" value="../lib/scooter.jar"/>
+        </manifest>
+        <jar destfile="${tools.dir}/${createjar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/creator/*.class" 
+        	 manifest="MANIFEST.txt"/>
+    </target>
+
+    <target name="serverjar" depends="compile">
+        <delete file="MANIFEST.txt"/>
+        <manifest file="MANIFEST.txt">
+            <attribute name="Main-Class" value="com.scooterframework.tools.webserver.StartServer"/>
+            <attribute name="Class-Path" value="servers/jetty/start.jar"/>
+        </manifest>
+        <jar destfile="${tools.dir}/${serverjar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/webserver/*.class" 
+        	 manifest="MANIFEST.txt"/>
+    </target>
+
+    <target name="javadoc" depends="init">
+        <mkdir dir="${javadoc.outdir}"/>
+        
+        <javadoc classpathref="classpath" 
+                 destdir="${javadoc.outdir}" 
+                 author="false" 
+                 version="false" 
+                 encoding="Cp1252" 
+                 additionalparam="-J-Xmx32m">
+            <fileset dir="${src.dir}">
+                <include name="**/*.java" />
+            </fileset>
+        </javadoc>
+    </target>
+
+    <target name="test" depends="compile">
+        <mkdir dir="${junitreport.outdir}"/>
+        <mkdir dir="${junitreport.outdir}/raw"/>
+        <mkdir dir="${junitreport.outdir}/html"/>
+        
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement path="${compile.outdir}" />
+            </classpath>
+            
+            <batchtest fork="yes" todir="${junitreport.outdir}/raw/">
+                <formatter type="xml" />
+                <fileset dir="${testsrc.dir}">
+                    <include name="**/*Test*.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <junitreport todir="${junitreport.outdir}">
+            <fileset dir="${junitreport.outdir}/raw/">
+                <include name="TEST-*.xml" />
+            </fileset>
+            <report format="frames" todir="${junitreport.outdir}\html\" />
+        </junitreport>
+    </target>
+
+    <target name="tools" depends="compile, createjar, serverjar">
+    </target>
+
+    <target name="build" depends="clean, jar, deploy_jar">
+    </target>
+
+    <target name="deploy_jar" depends="jar">
+        <copy file="${jar.outdir}/${scooterjar.name}" todir="${scooterjar.outdir}" preservelastmodified="true" />
+    </target>
+
+    <target name="undeploy_jar">
+        <delete file="${scooterjar.outdir}/${scooterjar.name}" />
+    </target>
+
+    <target name="clean">
+        <delete dir="${compile.outdir}"/>
+        <delete dir="${jar.outdir}"/>
+        <delete dir="${build.outdir}"/>
+        <delete dir="${javadoc.outdir}"/>
+        <delete dir="${junitreport.outdir}"/>
+    </target>
+
+    <target name="all" depends="build, tools, javadoc"/>
+
+</project>
