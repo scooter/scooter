@@ -46,3 +46,5 @@ TODO
 ----
 1. Recreate tools/generate.jar for this version.
 2. Recreate tools/generate-signon.jar for this version.
+
+The plugins directory is experimental. 
