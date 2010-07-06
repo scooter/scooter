@@ -1,12 +1,26 @@
 Scooter Framework
 =================
 
+----------
 What is it
 ----------
 This is an unreleased version of the latest Scooter Framework source code. 
 Please notice that this version of Scooter is significantly different from the 
 released version posted on http://www.scooterframework.com/". But this is a much better one.
 
+--------------------
+How to create an app
+--------------------
+Creating an app is much easier with this version. Just one command:
+>java -jar tools/create.jar blog
+
+The blog application will be created under the webapps directory. 
+You can create as many applications as you want. 
+They will be all created under the same webapps directory.
+
+Use -help option to get more options.
+
+------------
 How to build
 ------------
 1. Set JAVA_HOME environment variable pointing to a JDK installation.
@@ -14,19 +28,12 @@ How to build
 
 Type 'ant' to get a list of targets
 
-How to create an app
---------------------
-Creating an app is much easier with this version. Just one command:
->java -jar tools/create.jar blog
-
-The blog application will be created under the webapps directory. You can create as many applications as you want. They will be all created under the same webapps directory.
-
-Use -help option to get more options.
-
+-----------------
 How to run an app
 -----------------
 >java -jar tools/server.jar blog 9090
 
+--------------------------
 Can I run my archived apps
 --------------------------
 Yes. You can move the created app, e.g. blog from webapps to a different directory, such as myapps directory.
@@ -34,6 +41,7 @@ Yes. You can move the created app, e.g. blog from webapps to a different directo
 
 This -Dwebapps.name option is very useful when you upgrade scooter framework for your existing apps.
 
+----
 TODO
 ----
 1. Recreate tools/generate.jar for this version.
