@@ -14,14 +14,10 @@ How to create an app
 --------------------
 Creating an app is much easier with this version. Just one command:
 
+Creating an app under webapps directory:
 >java -jar tools/create.jar blog
 
-The blog application will be created under the webapps directory. 
-You can create as many applications as you want. 
-They will be all created under the same webapps directory.
-
-You can also create create a web app in your home directory:
-
+Creating an app in user's home directory:
 >java -jar tools/create.jar /home/users/john/projects/blog
 
 Use -help option to get more options.
@@ -43,14 +39,6 @@ How to build
 2. Type 'ant build' to create a scooter.jar
 
 Type 'ant' to get a list of targets
-
---------------------------
-Can I run my archived apps
---------------------------
-Yes. You can move the created app, e.g. blog from webapps to a different directory, such as myapps directory.
->java -Dwebapps.name=myapps -jar tools/server.jar blog
-
-This -Dwebapps.name option is very useful when you upgrade scooter framework for your existing apps.
 
 ----
 TODO
