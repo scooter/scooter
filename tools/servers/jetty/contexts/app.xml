@@ -27,7 +27,7 @@ detected.
   <!--  + war OR resourceBase                                          -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Set name="contextPath">/</Set>
-  <Set name="war"><SystemProperty name="scooter.home" default="."/>/<SystemProperty name="webapps.name" default="webapps"/>/<SystemProperty name="app.name" default="ROOT"/></Set>
+  <Set name="war"><SystemProperty name="webapps.path" default="webapps"/>/<SystemProperty name="app.name" default="ROOT"/></Set>
   
   <!-- Use this if you want url is like http://localhost:8080/blog in stead of http://localhost:8080
   <Set name="contextPath">/<SystemProperty name="app.name" default=""/></Set>

@@ -70,9 +70,7 @@ public class ControllerApplicationGenerator extends GeneratorImpl {
 	}
 	
 	protected String getRootPath() {
-		return props.getProperty("scooter.home") + File.separator + "webapps" +
-						File.separator + props.getProperty("app_name") + 
-						File.separator + "WEB-INF";
+		return props.getProperty("app_path") + File.separator + "WEB-INF";
 	}
 	
 	protected String getRelativePathToOutputFile() {

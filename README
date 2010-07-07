@@ -6,19 +6,35 @@ What is it
 ----------
 This is an unreleased version of the latest Scooter Framework source code. 
 Please notice that this version of Scooter is significantly different from the 
-released version posted on http://www.scooterframework.com/". But this is a much better one.
+released version posted on http://www.scooterframework.com/". 
+But this is a much better one.
 
 --------------------
 How to create an app
 --------------------
 Creating an app is much easier with this version. Just one command:
+
 >java -jar tools/create.jar blog
 
 The blog application will be created under the webapps directory. 
 You can create as many applications as you want. 
 They will be all created under the same webapps directory.
 
+You can also create create a web app in your home directory:
+
+>java -jar tools/create.jar /home/users/john/projects/blog
+
 Use -help option to get more options.
+
+-----------------
+How to run an app
+-----------------
+
+Run an app with port 9090
+>java -jar tools/server.jar blog 9090
+
+Run an app with default port 8080
+>java -jar tools/server.jar /home/users/john/projects/blog
 
 ------------
 How to build
@@ -27,11 +43,6 @@ How to build
 2. Type 'ant build' to create a scooter.jar
 
 Type 'ant' to get a list of targets
-
------------------
-How to run an app
------------------
->java -jar tools/server.jar blog 9090
 
 --------------------------
 Can I run my archived apps

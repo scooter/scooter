@@ -79,11 +79,11 @@ import com.scooterframework.web.controller.ActionContext;
  * be set through System property from command line. </p>
  * 
  * <pre>
- * Configurable System Properties and corresponding default values:
- *         class.file.location => applicationRootPath/webapps/{contextName}/WEB-INF/classes
- *      property.file.location => applicationRootPath/config
- *        source.file.location => applicationRootPath/src
- *     reference.file.location => applicationRootPath/references
+ * Configurable System Properties and corresponding default values for web application:
+ *         class.file.location => {app.path}/WEB-INF/classes
+ *      property.file.location => {app.path}/WEB-INF/config
+ *        source.file.location => {app.path}/WEB-INF/src
+ *     reference.file.location => {scooter.home}/lib
  * </pre>
  * 
  * @author (Fei) John Chen
@@ -442,11 +442,11 @@ public class ApplicationConfig {
         
         String rfl = System.getProperty(SYSTEM_KEY_REFERENCEFILE, "");
         if ("".equals(rfl)) {
-            rfl = applicationRootPath + File.separatorChar + "lib";
+            rfl = System.getProperty("scooter.home") + File.separatorChar + "lib";
             if (!FileUtil.pathExistAndHasFiles(rfl)) {
                 rfl = realPath 
 							+ File.separatorChar + "WEB-INF" 
-							+ File.separatorChar + "references";
+							+ File.separatorChar + "lib";
             }
         }
         referencesLibPath = rfl;

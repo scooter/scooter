@@ -21,7 +21,7 @@ import java.util.List;
  *     scooter.home -> path to scooter home
  *     app.name     -> application name
  *     app.logs     -> location of application logs
- *     app.path     -> path to the specific web app
+ *     app.path     -> path to a specific web app
  *     jetty.home   -> path to jetty server
  *     jetty.logs   -> location of jetty logs
  *     jetty.port   -> port number of jetty server
@@ -32,12 +32,34 @@ import java.util.List;
  * </pre>
  * 
  * Original Jetty command line options are also supported: 
+ * <tt>-DDEBUG, --help, --version, --stop</tt>
+ * 
+ * <p>
+ * Examples:
  * <pre>
- *     -DDEBUG, --help, --version, --stop
+    Usage:    
+        java -jar tools/server.jar app_name [port, [config ...]]    
+        
+    Examples:    
+        This page:    
+            java -jar tools/server.jar -help    
+        
+        Run Jetty Server with default jetty.xml in tools/servers/jetty/etc and port 8080:    
+            java -jar tools/server.jar blog    
+        
+        Run Jetty Server with default jetty.xml in tools/servers/jetty/etc but on port 8090:    
+            java -jar tools/server.jar blog 8090    
+        
+        Run Jetty Server with the blog sample app on port 8091:    
+            java -jar tools/server.jar examples/blog 8091    
+        
+        Run Jetty Server with the blog sample app installed in user home:    
+            java -jar tools/server.jar /home/john/blog   
+        
+        Run Jetty Server as JettyPlus (JNDI, JAAS etc.) with config files in tools/servers/jetty/etc:    
+            java -jar tools/server.jar blog etc/jetty-plus.xml etc/jetty.xml 
  * </pre>
- * 
- * Application classes can use these system properties.
- * 
+ * </p>
  *
  * @author (Fei) John Chen
  */
@@ -74,8 +96,29 @@ public class StartServer {
 			return;
 		}
 		
-		String appName = args[0];
+    	String webappsName = setSystemProperty("webapps.name", "webapps");
+		
+		String appName = "";
+		String webappsPath = "";
+		String webappPath = "";
+		String firstArg = args[0];
+		if (containsPath(firstArg)) {
+			String[] ss = getPathAndName(firstArg);
+			webappsPath = ss[0];
+			webappPath  = ss[1];
+			appName     = ss[2];
+		}
+		else {
+			appName = firstArg;
+	        webappsPath = scooterHome + File.separator + webappsName;
+	        webappPath = webappsPath + File.separator + appName;
+		}
+
         System.setProperty("app.name", appName);
+        webappsPath = setSystemProperty("webapps.path", webappsPath);
+        webappPath = setSystemProperty("app.path", webappPath);
+		
+        validateWebappExistence(webappPath);
         
     	boolean foundPort = false;
     	List jettyXMLs = new ArrayList();
@@ -102,15 +145,6 @@ public class StartServer {
     	else if (args.length == 1) {
     		jettyXMLs.add(jettyXML);
     	}
-    	
-    	String webappsName = setSystemProperty("webapps.name", "webapps");
-        
-        String webappsPath = scooterHome + File.separator + webappsName;
-        webappsPath = setSystemProperty("webapps.path", webappsPath);
-        
-        String webappPath = webappsPath + File.separator + appName;
-        webappPath = setSystemProperty("app.path", webappPath);
-        validateWebappExistence(webappPath);
         
         String jettyLogs = jettyHome + File.separator + "logs";
         jettyLogs = setSystemProperty("jetty.logs", jettyLogs);
@@ -160,6 +194,32 @@ public class StartServer {
         log(hr);
         startUp(jettyHome, jettyXMLs);
     }
+	
+	private static boolean containsPath(String s) {
+		boolean check = false;
+		if (s.indexOf(File.separatorChar) != -1 || s.indexOf('/') != -1) {
+			check = true;
+		}
+		return check;
+	}
+	
+	private static String[] getPathAndName(String s) {
+		String[] ss = new String[3];
+		File f = new File(s);
+		try {
+			String filePath = f.getCanonicalPath();
+			String parentPath = (new File(filePath)).getParentFile().getCanonicalPath();
+			ss[0] = parentPath;
+			ss[1] = filePath;
+			ss[2] = (parentPath.endsWith(File.separator))?
+					filePath.substring(parentPath.length()):
+					filePath.substring(parentPath.length() + 1);
+		}
+		catch(Exception ex) {
+			;
+		}
+		return ss;
+	}
 	
 	private static String setSystemProperty(String key, String defaultValue) {
 		String p = System.getProperty(key);
@@ -302,7 +362,10 @@ public class StartServer {
     	log("        java -jar tools/server.jar blog 8090");
     	log("");
     	log("    Run Jetty Server with the blog sample app on port 8091:");
-    	log("        java -Dwebapps.name=examples -jar tools/server.jar blog 8091");
+    	log("        java -jar tools/server.jar examples/blog 8091");
+    	log("");
+    	log("    Run Jetty Server with the blog sample app installed in user home:");
+    	log("        java -jar tools/server.jar /home/john/blog");
     	log("");
     	log("    Run Jetty Server as JettyPlus (JNDI, JAAS etc.) with config files in tools/servers/jetty/etc:");
     	log("        java -jar tools/server.jar blog etc/jetty-plus.xml etc/jetty.xml");

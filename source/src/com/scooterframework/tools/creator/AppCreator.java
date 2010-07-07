@@ -8,13 +8,37 @@
 package com.scooterframework.tools.creator;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
 
 import com.scooterframework.common.util.FileUtil;
 
 /**
- * Main class for a scooter-powered web application.
+ * AppCreator creates a web application. The web application can be created 
+ * outside of scooter installation directory.
+ * 
+ * <p>
+ * Examples:
+ * <pre>  
+        This page:    
+            java -jar tools/create.jar -help    
+        
+        Create a blog application backed by default database:    
+            java -jar tools/create.jar blog    
+        
+        Create a blog application in user home directory:    
+            java -jar tools/create.jar /home/john/projects/blog    
+        
+        Create a blog application backed by H2 database:    
+            java -jar tools/create.jar blog h2    
+        
+        Create a blog application backed by HSQLDB:    
+            java -jar tools/create.jar blog hsqldb    
+        
+        Create a blog application backed by Oracle:    
+            java -jar tools/create.jar blog oracle com.example.web    
+        Generated package prefix will be com.example.web.blog.   
+ * </pre>
+ * </p>
  * 
  * @author (Fei) John Chen
  */
@@ -29,20 +53,14 @@ public class AppCreator {
 		}
 		
 		try {
-			String scooterHome = System.getProperty("scooter.home");
-			if (scooterHome == null) {
-				scooterHome = detectRootPath();
-				System.setProperty("scooter.home", scooterHome);
-			}
-	    	String appLogs = scooterHome + File.separator + "logs";
-			System.setProperty("app.logs", appLogs);
-			
 			doTheWork(args);
 		}
 		catch(Exception ex) {
 			log("ERROR ERROR ERROR: " + ex.getMessage());
 			ex.printStackTrace();
 		}
+		
+		System.exit(0);
     }
     
     private static String detectRootPath() {
@@ -58,39 +76,59 @@ public class AppCreator {
         return path;
     }
     
-    private static void doTheWork(String[] args) throws IOException {
-    	String appName = "";
+    private static void doTheWork(String[] args) throws Exception {
+    	String scooterHome = setSystemProperty("scooter.home", detectRootPath());
+    	String appLogs = setSystemProperty("app.logs", (scooterHome + File.separator + "logs"));
+    	
+    	String sourceDir = scooterHome + File.separator + 
+    							"source" + File.separator + 
+    							"webapp";
+    	sourceDir = setSystemProperty("source.dir", sourceDir);
+    	
+    	String webappsName = setSystemProperty("webapps.name", "webapps");
+		
+		String appName = "";
+		String webappsPath = "";
+		String webappPath = "";
+		String firstArg = args[0];
+		if (containsPath(firstArg)) {
+			String[] ss = getPathAndName(firstArg);
+			webappsPath = ss[0];
+			webappPath  = ss[1];
+			appName     = ss[2];
+		}
+		else {
+			appName = firstArg;
+	        webappsPath = scooterHome + File.separator + webappsName;
+	        webappPath = webappsPath + File.separator + appName;
+		}
+		appName = appName.toLowerCase();
+
+        System.setProperty("app.name", appName);
+        webappsPath = setSystemProperty("webapps.path", webappsPath);
+        webappPath = setSystemProperty("app.path", webappPath);
+        
+    	String targetDir = webappPath;
     	String dbType = "mysql";
     	String pkgPrefix = null;
     	
     	int length = args.length;
     	if (length > 2) {
-    		appName = args[0];
-        	appName = appName.toLowerCase();
     		dbType = args[1].toLowerCase();
     		pkgPrefix = args[2] + "." + appName;
     	}
     	else if (length == 2) {
-    		appName = args[0];
-        	appName = appName.toLowerCase();
     		dbType = args[1].toLowerCase();
     		pkgPrefix = appName;
     	}
     	else if (length == 1) {
-    		appName = args[0];
-        	appName = appName.toLowerCase();
     		pkgPrefix = appName;
     	}
     	
-    	String scooterHome = System.getProperty("scooter.home");
     	log("scooter.home=" + scooterHome);
     	log("Creating " + appName + " ...");
-    	
-    	String sourceDir = scooterHome + File.separator + 
-    							"source" + File.separator + 
-    							"webapp";
-    	String targetDir = scooterHome + File.separator + 
-    							"webapps" + File.separator + appName;
+    	log("Source dir: " + sourceDir);
+    	log("Target dir: " + targetDir);
     	
     	FileUtil.copyDir(new File(sourceDir), new File(targetDir));
     	
@@ -98,6 +136,7 @@ public class AppCreator {
     	Properties allProps = new Properties();
     	allProps.setProperty("scooter.home", scooterHome);
     	allProps.setProperty("app_name", appName);
+    	allProps.setProperty("app_path", webappPath);
     	allProps.setProperty("package_prefix", pkgPrefix);
     	setMoreProperties(allProps, dbType);
     	
@@ -107,8 +146,41 @@ public class AppCreator {
     	cag.generate();
     	
 		log("");
-		
-		System.exit(0);
+	}
+	
+	private static boolean containsPath(String s) {
+		boolean check = false;
+		if (s.indexOf(File.separatorChar) != -1 || s.indexOf('/') != -1) {
+			check = true;
+		}
+		return check;
+	}
+	
+	private static String[] getPathAndName(String s) {
+		String[] ss = new String[3];
+		File f = new File(s);
+		try {
+			String filePath = f.getCanonicalPath();
+			String parentPath = (new File(filePath)).getParentFile().getCanonicalPath();
+			ss[0] = parentPath;
+			ss[1] = filePath;
+			ss[2] = (parentPath.endsWith(File.separator))?
+					filePath.substring(parentPath.length()):
+					filePath.substring(parentPath.length() + 1);
+		}
+		catch(Exception ex) {
+			;
+		}
+		return ss;
+	}
+	
+	private static String setSystemProperty(String key, String defaultValue) {
+		String p = System.getProperty(key);
+		if (p == null) {
+			System.setProperty(key, defaultValue);
+			p = defaultValue;
+		}
+		return p;
 	}
     
     private static void setMoreProperties(Properties templateProps, String databaseType) {
@@ -207,6 +279,9 @@ public class AppCreator {
     	log("");
     	log("    Create a blog application backed by default database:");
     	log("        java -jar tools/create.jar blog");
+    	log("");
+    	log("    Create a blog application in user home directory:");
+    	log("        java -jar tools/create.jar /home/john/projects/blog");
     	log("");
     	log("    Create a blog application backed by H2 database:");
     	log("        java -jar tools/create.jar blog h2");
