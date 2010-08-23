@@ -40,3 +40,22 @@ How to build
 
 Type 'ant' to get a list of targets
 
+------------
+How to test 
+------------
+
+Test Scooter framework:
+>ant test
+
+Unit test an application:
+>ant app_test_unit -DappPath=webapps/blog
+
+Functional test an application:
+>ant app_test_functional -DappPath=/home/users/john/projects/blog
+
+-----
+TO DO
+-----
+
+1. Complete functional test
+2. Update examples
