@@ -88,6 +88,6 @@ public class BelongsToRecordRelation extends RecordRelation {
             opts.putAll(m);
         }
         
-        return ActiveRecordUtil.getHomeInstance(getRelation().getTargetClass()).findFirst(fkData, opts);
+        return ActiveRecordUtil.getGateway(getRelation().getTargetClass()).findFirst(fkData, opts);
     }
 }

@@ -11,32 +11,37 @@ import java.io.File;
 import java.util.Properties;
 
 import com.scooterframework.common.util.FileUtil;
+import com.scooterframework.tools.common.ToolsUtil;
 
 /**
  * AppCreator creates a web application. The web application can be created 
- * outside of scooter installation directory.
+ * outside of Scooter installation directory.
  * 
  * <p>
- * Examples:
+ * Usage examples:
  * <pre>  
-        This page:    
-            java -jar tools/create.jar -help    
-        
-        Create a blog application backed by default database:    
-            java -jar tools/create.jar blog    
-        
-        Create a blog application in user home directory:    
-            java -jar tools/create.jar /home/john/projects/blog    
-        
-        Create a blog application backed by H2 database:    
-            java -jar tools/create.jar blog h2    
-        
-        Create a blog application backed by HSQLDB:    
-            java -jar tools/create.jar blog hsqldb    
-        
-        Create a blog application backed by Oracle:    
-            java -jar tools/create.jar blog oracle com.example.web    
-        Generated package prefix will be com.example.web.blog.   
+	Usage:
+	    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle) [app_domain]]
+	
+	Examples:
+	    This page:
+	        java -jar tools/create.jar -help
+	
+	    Create a blog application backed by default database:
+	        java -jar tools/create.jar blog
+	
+	    Create a blog application in user home directory:
+	        java -jar tools/create.jar /home/john/projects/blog
+	
+	    Create a blog application backed by H2 database:
+	        java -jar tools/create.jar blog h2
+	
+	    Create a blog application backed by HSQLDB:
+	        java -jar tools/create.jar blog hsqldb
+	
+	    Create a blog application backed by Oracle:
+	        java -jar tools/create.jar blog oracle com.example.web
+	    Generated package prefix will be com.example.web.blog.  
  * </pre>
  * </p>
  * 
@@ -55,7 +60,7 @@ public class AppCreator {
 		try {
 			doTheWork(args);
 		}
-		catch(Exception ex) {
+		catch(Throwable ex) {
 			log("ERROR ERROR ERROR: " + ex.getMessage());
 			ex.printStackTrace();
 		}
@@ -63,50 +68,30 @@ public class AppCreator {
 		System.exit(0);
     }
     
-    private static String detectRootPath() {
-        String path = "";
-        try {
-            path = (new File("")).getCanonicalPath();
-        }
-        catch(Exception ex) {
-            String errorMessage = "Failed to detect root path from current directory: " + ex.getMessage();
-            System.err.println(errorMessage);
-            System.out.println("Stop initializtion process. Exit now ...");
-        }
-        return path;
-    }
-    
-    private static void doTheWork(String[] args) throws Exception {
-    	String scooterHome = setSystemProperty("scooter.home", detectRootPath());
-    	String appLogs = setSystemProperty("app.logs", (scooterHome + File.separator + "logs"));
-    	
-    	String sourceDir = scooterHome + File.separator + 
-    							"source" + File.separator + 
-    							"webapp";
-    	sourceDir = setSystemProperty("source.dir", sourceDir);
-    	
-    	String webappsName = setSystemProperty("webapps.name", "webapps");
+    private static void doTheWork(String[] args) throws Throwable {
+    	String scooterHome = ToolsUtil.setSystemProperty("scooter.home", ToolsUtil.detectRootPath());
+    	String defaultWebappsName = ToolsUtil.setSystemProperty("webapps.name", "webapps");
 		
 		String appName = "";
 		String webappsPath = "";
 		String webappPath = "";
 		String firstArg = args[0];
-		if (containsPath(firstArg)) {
-			String[] ss = getPathAndName(firstArg);
+		if (ToolsUtil.containsPath(firstArg)) {
+			String[] ss = ToolsUtil.getPathAndName(firstArg);
 			webappsPath = ss[0];
 			webappPath  = ss[1];
 			appName     = ss[2];
 		}
 		else {
 			appName = firstArg;
-	        webappsPath = scooterHome + File.separator + webappsName;
+	        webappsPath = scooterHome + File.separator + defaultWebappsName;
 	        webappPath = webappsPath + File.separator + appName;
 		}
 		appName = appName.toLowerCase();
 
         System.setProperty("app.name", appName);
-        webappsPath = setSystemProperty("webapps.path", webappsPath);
-        webappPath = setSystemProperty("app.path", webappPath);
+        webappsPath = ToolsUtil.setSystemProperty("webapps.path", webappsPath);
+        webappPath = ToolsUtil.setSystemProperty("app.path", webappPath);
         
     	String targetDir = webappPath;
     	String dbType = "mysql";
@@ -125,10 +110,16 @@ public class AppCreator {
     		pkgPrefix = appName;
     	}
     	
-    	log("scooter.home=" + scooterHome);
+    	log("scooter.home: " + scooterHome);
     	log("Creating " + appName + " ...");
-    	log("Source dir: " + sourceDir);
     	log("Target dir: " + targetDir);
+    	
+    	String templateRoot = scooterHome + File.separator + 
+							"source" + File.separator + 
+							"templates";
+    	
+    	String sourceDir = templateRoot + File.separator + "webapp";
+    	sourceDir = ToolsUtil.setSystemProperty("source.dir", sourceDir);
     	
     	FileUtil.copyDir(new File(sourceDir), new File(targetDir));
     	
@@ -140,47 +131,15 @@ public class AppCreator {
     	allProps.setProperty("package_prefix", pkgPrefix);
     	setMoreProperties(allProps, dbType);
     	
-    	processAllFiles(new File(targetDir), allProps);
+    	ToolsUtil.processAllFiles(new File(targetDir), allProps);
     	
-    	ControllerApplicationGenerator cag = new ControllerApplicationGenerator(allProps);
+    	String acPath = templateRoot + File.separator + 
+							"controller" + File.separator + 
+							"ApplicationController.tmpl";
+    	ControllerApplicationGenerator cag = new ControllerApplicationGenerator(acPath, allProps);
     	cag.generate();
     	
 		log("");
-	}
-	
-	private static boolean containsPath(String s) {
-		boolean check = false;
-		if (s.indexOf(File.separatorChar) != -1 || s.indexOf('/') != -1) {
-			check = true;
-		}
-		return check;
-	}
-	
-	private static String[] getPathAndName(String s) {
-		String[] ss = new String[3];
-		File f = new File(s);
-		try {
-			String filePath = f.getCanonicalPath();
-			String parentPath = (new File(filePath)).getParentFile().getCanonicalPath();
-			ss[0] = parentPath;
-			ss[1] = filePath;
-			ss[2] = (parentPath.endsWith(File.separator))?
-					filePath.substring(parentPath.length()):
-					filePath.substring(parentPath.length() + 1);
-		}
-		catch(Exception ex) {
-			;
-		}
-		return ss;
-	}
-	
-	private static String setSystemProperty(String key, String defaultValue) {
-		String p = System.getProperty(key);
-		if (p == null) {
-			System.setProperty(key, defaultValue);
-			p = defaultValue;
-		}
-		return p;
 	}
     
     private static void setMoreProperties(Properties templateProps, String databaseType) {
@@ -243,23 +202,6 @@ public class AppCreator {
 		templateProps.setProperty("test_db_url", testDbURL);
 		templateProps.setProperty("production_db_url", productionDbURL);
 		templateProps.setProperty("username", username);
-    }
-    
-    private static void processAllFiles(File targetDir, Properties allProps) {
-    	File[] files = targetDir.listFiles();
-    	if (files == null) return;
-    	for (int i = 0; i < files.length; i++) {
-    		File file = files[i];
-    		if (file.isFile()) {
-    			if (FileUtil.isAsciiFile(file)) {
-    				FileProcessor fp = new FileProcessor(file, allProps);
-    				fp.process();
-    			}
-    		}
-    		else if (file.isDirectory()) {
-    			processAllFiles(file, allProps);
-    		}
-    	}
     }
 	
     private static void log(Object o) {

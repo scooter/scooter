@@ -96,7 +96,7 @@ public class JdbcPageListSource extends PageListSource {
     
     protected List retrieveList() {
         Map options = inputOptions;
-        return ActiveRecordUtil.getHomeInstance(modelClass).findAll(options, options);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(options, options);
     }
 
     private Class modelClass;

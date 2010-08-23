@@ -28,6 +28,7 @@ public class MyClassLoader extends ClassLoader {
     static private long key = 0L;
     private ClassManager caller;
     private String initiatingClassName;
+    private ClassWorkHelper cwh;
     
     private Map loadedClasses = Collections.synchronizedMap(new HashMap());
     
@@ -39,6 +40,7 @@ public class MyClassLoader extends ClassLoader {
         super(parent);
         this.caller = caller;
         key = key + 1;
+        cwh = new ClassWorkHelper(this);
     }
     
     public long getKey() {
@@ -57,16 +59,15 @@ public class MyClassLoader extends ClassLoader {
         
         // See if type has already been loaded 
         LoadedClass loadedClass = (LoadedClass)loadedClasses.get(className);
-        
         if (loadedClass == null) {
-            //record the newly loaded class
-            if (!FileMonitor.isClassMonitored(className) ||
-                 AutoLoaderConfig.getInstance().notAllowedToChange(className)) {
+        	//record the newly loaded class
+            if (!isAllowedToChange(className)) {
                 c = super.loadClass(className, resolve);
                 return c;
             }
             else {
-                c = findClass(className);
+                //c = findClass(className);
+                c = cwh.changeClass(className);
                 loadedClass = new LoadedClass(c, key);
                 loadedClasses.put(className, loadedClass);
             }
@@ -92,14 +93,14 @@ public class MyClassLoader extends ClassLoader {
     
     protected Class findClass(String className)
         throws ClassNotFoundException {
+    	
         byte[] classData = getClassBytes2(className);
         if (classData == null) {
             throw new ClassNotFoundException();
         }
         
         // Parse it
-        return defineClass(className, classData, 0,
-            classData.length);
+        return defineClass(className, classData, 0, classData.length);
     }
     
     protected byte[] getClassBytes2(String className) 
@@ -149,5 +150,16 @@ public class MyClassLoader extends ClassLoader {
         }
         
         return changed;
+    }
+    
+    private boolean isAllowedToChange(String className) {
+    	boolean check = true;
+		if ((!FileMonitor.isClassMonitored(className) || 
+				AutoLoaderConfig.getInstance().notAllowedToChange(className))
+				&& !className.startsWith("com.scooterframework.test") || 
+				className.endsWith("FrameworkSupport")) {
+			check = false;
+		}
+    	return check;
     }
 }

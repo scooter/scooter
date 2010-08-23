@@ -14,9 +14,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.scooterframework.tools.common.ToolsUtil;
+
 /**
- * StartServer class starts web server. This class exposes the following 
- * system properties if they have not been defined. 
+ * StartServer class starts web server. This class exposes the following
+ * system properties if they have not been defined.
  * <pre>
  *     scooter.home -> path to scooter home
  *     app.name     -> application name
@@ -27,37 +29,37 @@ import java.util.List;
  *     jetty.port   -> port number of jetty server
  *     jdk.home     -> path to JDK (only if tools.jar is detected)
  *     START        -> configuration file of jetty server
- *     webapps.name -> name of webapps directory (default is webapps) 
+ *     webapps.name -> name of webapps directory (default is webapps)
  *     webapps.path -> path to webapps directory
  * </pre>
- * 
- * Original Jetty command line options are also supported: 
+ *
+ * Original Jetty command line options are also supported:
  * <tt>-DDEBUG, --help, --version, --stop</tt>
- * 
+ *
  * <p>
  * Examples:
  * <pre>
-    Usage:    
-        java -jar tools/server.jar app_name [port, [config ...]]    
-        
-    Examples:    
-        This page:    
-            java -jar tools/server.jar -help    
-        
-        Run Jetty Server with default jetty.xml in tools/servers/jetty/etc and port 8080:    
-            java -jar tools/server.jar blog    
-        
-        Run Jetty Server with default jetty.xml in tools/servers/jetty/etc but on port 8090:    
-            java -jar tools/server.jar blog 8090    
-        
-        Run Jetty Server with the blog sample app on port 8091:    
-            java -jar tools/server.jar examples/blog 8091    
-        
-        Run Jetty Server with the blog sample app installed in user home:    
-            java -jar tools/server.jar /home/john/blog   
-        
-        Run Jetty Server as JettyPlus (JNDI, JAAS etc.) with config files in tools/servers/jetty/etc:    
-            java -jar tools/server.jar blog etc/jetty-plus.xml etc/jetty.xml 
+	Usage:
+	    java -jar tools/server.jar app_name [port, [config ...]]
+	
+	Examples:
+	    This page:
+	        java -jar tools/server.jar -help
+	
+	    Run Jetty Server with default jetty.xml in tools/servers/jetty/etc and port 8080:
+	        java -jar tools/server.jar blog
+	
+	    Run Jetty Server with default jetty.xml in tools/servers/jetty/etc but on port 8090:
+	        java -jar tools/server.jar blog 8090
+	
+	    Run Jetty Server with the blog sample app on port 8091:
+	        java -jar tools/server.jar examples/blog 8091
+	
+	    Run Jetty Server with the blog sample app installed in user home:
+	        java -jar tools/server.jar /home/john/blog
+	
+	    Run Jetty Server as JettyPlus (JNDI, JAAS etc.) with config files in tools/servers/jetty/etc:
+	        java -jar tools/server.jar blog etc/jetty-plus.xml etc/jetty.xml
  * </pre>
  * </p>
  *
@@ -74,52 +76,52 @@ public class StartServer {
 		try {
 			doTheWork(args);
 		}
-		catch(Exception ex) {
+		catch(Throwable ex) {
 			ex.printStackTrace();
 			log("ERROR ERROR ERROR: " + ex.getMessage());
 		}
     }
 
-	private static void doTheWork(String[] args) throws Exception {
+	private static void doTheWork(String[] args) throws Throwable {
     	String scooterHome = (new File("")).getCanonicalPath();
-    	scooterHome = setSystemProperty("scooter.home", scooterHome);
+    	scooterHome = ToolsUtil.setSystemProperty("scooter.home", scooterHome);
 
-        String jettyHome = scooterHome + File.separator + "tools" + 
+        String jettyHome = scooterHome + File.separator + "tools" +
         				File.separator + "servers" + File.separator + "jetty";
-        jettyHome = setSystemProperty("jetty.home", jettyHome);
+        jettyHome = ToolsUtil.setSystemProperty("jetty.home", jettyHome);
 
 		String START = jettyHome + File.separator + "start.config";
-		START = setSystemProperty("START", START);
-		
+		START = ToolsUtil.setSystemProperty("START", START);
+
 		if (args[0].startsWith("--")) {
 			startUp(args);
 			return;
 		}
-		
-    	String webappsName = setSystemProperty("webapps.name", "webapps");
-		
+
+    	String defaultWebappsName = ToolsUtil.setSystemProperty("webapps.name", "webapps");
+
 		String appName = "";
 		String webappsPath = "";
 		String webappPath = "";
 		String firstArg = args[0];
-		if (containsPath(firstArg)) {
-			String[] ss = getPathAndName(firstArg);
+		if (ToolsUtil.containsPath(firstArg)) {
+			String[] ss = ToolsUtil.getPathAndName(firstArg);
 			webappsPath = ss[0];
 			webappPath  = ss[1];
 			appName     = ss[2];
 		}
 		else {
 			appName = firstArg;
-	        webappsPath = scooterHome + File.separator + webappsName;
+	        webappsPath = scooterHome + File.separator + defaultWebappsName;
 	        webappPath = webappsPath + File.separator + appName;
 		}
 
         System.setProperty("app.name", appName);
-        webappsPath = setSystemProperty("webapps.path", webappsPath);
-        webappPath = setSystemProperty("app.path", webappPath);
-		
-        validateWebappExistence(webappPath);
-        
+        webappsPath = ToolsUtil.setSystemProperty("webapps.path", webappsPath);
+        webappPath = ToolsUtil.setSystemProperty("app.path", webappPath);
+
+        validatePathExistence(webappPath);
+
     	boolean foundPort = false;
     	List jettyXMLs = new ArrayList();
 
@@ -130,7 +132,7 @@ public class StartServer {
     		if (foundPort) {
     			port = args[1];
     			System.setProperty("jetty.port", port);
-    			
+
     			if (args.length == 2) {
     				jettyXMLs.add(jettyXML);
     			}
@@ -145,20 +147,23 @@ public class StartServer {
     	else if (args.length == 1) {
     		jettyXMLs.add(jettyXML);
     	}
-        
+
         String jettyLogs = jettyHome + File.separator + "logs";
-        jettyLogs = setSystemProperty("jetty.logs", jettyLogs);
-    	String appLogs = webappPath + File.separator + "WEB-INF" + 
+        jettyLogs = ToolsUtil.setSystemProperty("jetty.logs", jettyLogs);
+    	String appLogs = webappPath + File.separator + "WEB-INF" +
     								  File.separator + "log";
-    	appLogs = setSystemProperty("app.logs", appLogs);
-    	
+    	appLogs = ToolsUtil.setSystemProperty("app.logs", appLogs);
+
     	validateXMLsExistence(jettyHome, jettyXMLs);
         String jettyXMLsAsString = getXMLsAsString(jettyHome, jettyXMLs);
-        
+
 		String jdkHome = getJDKHome();
 		boolean foundToolsJar = existsToolsJar(jdkHome);
 		if (foundToolsJar) {
-			jdkHome = setSystemProperty("jdk.home", jdkHome);
+			jdkHome = ToolsUtil.setSystemProperty("jdk.home", jdkHome);
+		}
+		else {
+			throw new IllegalArgumentException("You must run this program from a JDK.");
 		}
 
         String hr = "=========================================";
@@ -194,41 +199,6 @@ public class StartServer {
         log(hr);
         startUp(jettyHome, jettyXMLs);
     }
-	
-	private static boolean containsPath(String s) {
-		boolean check = false;
-		if (s.indexOf(File.separatorChar) != -1 || s.indexOf('/') != -1) {
-			check = true;
-		}
-		return check;
-	}
-	
-	private static String[] getPathAndName(String s) {
-		String[] ss = new String[3];
-		File f = new File(s);
-		try {
-			String filePath = f.getCanonicalPath();
-			String parentPath = (new File(filePath)).getParentFile().getCanonicalPath();
-			ss[0] = parentPath;
-			ss[1] = filePath;
-			ss[2] = (parentPath.endsWith(File.separator))?
-					filePath.substring(parentPath.length()):
-					filePath.substring(parentPath.length() + 1);
-		}
-		catch(Exception ex) {
-			;
-		}
-		return ss;
-	}
-	
-	private static String setSystemProperty(String key, String defaultValue) {
-		String p = System.getProperty(key);
-		if (p == null) {
-			System.setProperty(key, defaultValue);
-			p = defaultValue;
-		}
-		return p;
-	}
 
 	private static boolean isNumber(String s) {
 		boolean status = true;
@@ -249,12 +219,11 @@ public class StartServer {
 		return list;
 	}
 
-	private static void validateWebappExistence(String webappPath) {
-		File f = new File(webappPath);
+	private static void validatePathExistence(String path) {
+		File f = new File(path);
         if (!f.exists()) {
             log("");
-            log("ERROR ERROR ERROR: Web application [" +
-            		webappPath + "] does not exist.");
+            log("ERROR ERROR ERROR: Path [" + path + "] does not exist.");
             log("");
             log("System exits now.");
             System.exit(-1);

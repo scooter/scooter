@@ -79,6 +79,7 @@ public class AutoLoaderConfig implements Observer {
         classpath = appendClassPath(outputClassLocation, getProperty("additional_classpath", classpath));
         classpath = appendClassPath(classpath, getAllWebInfLibFiles());
         classpath = appendClassPath(classpath, getAllReferencesLibFiles());
+        classpath = appendClassPath(classpath, getJDKToolsJar());
         log.info("class path: " + classpath);
         
         sourcepath = "";
@@ -124,7 +125,7 @@ public class AutoLoaderConfig implements Observer {
     
     private String appendClassPath(String current, String additional) {
         String result = "";
-        if (additional == null) additional = ""; 
+        if (additional == null || "".equals(additional)) return current; 
         if (current != null) {
             if (current.trim().endsWith(File.pathSeparator)) {
                 result = current + additional;
@@ -210,6 +211,17 @@ public class AutoLoaderConfig implements Observer {
 				list.add(file);
 			}
 	}
+    
+    private String getJDKToolsJar() {
+    	String s = System.getProperty("java.home");
+		s = s.substring(0, s.length()-4);
+		s = s + File.separator + "lib" + File.separator + "tools.jar";
+		
+        if (!(new File(s)).exists()) {
+			throw new IllegalArgumentException("You must run this program from a JDK.");
+        }
+		return s;
+    }
     
 
     public static synchronized AutoLoaderConfig getInstance() {

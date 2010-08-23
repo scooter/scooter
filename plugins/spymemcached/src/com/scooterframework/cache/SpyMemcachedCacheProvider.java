@@ -78,7 +78,7 @@ public class SpyMemcachedCacheProvider extends CacheProvider {
 		}
 	}
     
-    public void shutDown() {
+    public void onStop() {
     	client.shutdown(timeout, TimeUnit.SECONDS);
     }
 }

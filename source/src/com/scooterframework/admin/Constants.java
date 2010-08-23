@@ -41,9 +41,12 @@ public class Constants {
     public static final String CONFIGURED_MODE_SCOOTER_APP = "SCOOTER APP";
     public static final String CONFIGURED_MODE_SCOOTER_ORM = "SCOOTER ORM";
     
-//************************************************************************    
-// External Keys: exernal keys are sent to the application from somewhere.
-//************************************************************************
+    public static final String SKIP_CLASSWORK = "scooter.key.skip.classwork";
+    public static final String SKIP_CLASSWORK_TRUE = "true";
+    
+//*************************************************************************
+// External Keys: external keys are sent to the application from somewhere.
+//*************************************************************************
     public static final String HTTP_METHOD = "_method";
     
     /**

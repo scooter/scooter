@@ -202,14 +202,13 @@ public class ReferenceDataLoader implements Observer {
             if (donotRun || (runOnlyOnce && hasRun)) return;
             
             if (clz != null) {
-                ActiveRecord recordHome = ActiveRecordUtil.getHomeInstance(clz);
                 List records = null;
                 if (sql != null) {
-                    records = recordHome.findAllBySQL(sql);
+                    records = ActiveRecordUtil.getGateway(clz).findAllBySQL(sql);
                     ReferenceDataStore.setReferenceData(theName, records);
                 }
                 else {
-                    records = recordHome.findAll();
+                    records = ActiveRecordUtil.getGateway(clz).findAll();
                 }
                 ReferenceDataStore.setReferenceData(theName, convertRecordsToReferenceDataList(records));
             }

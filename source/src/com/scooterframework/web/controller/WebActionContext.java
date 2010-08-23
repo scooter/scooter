@@ -30,13 +30,10 @@ public class WebActionContext extends ActionContext {
     public WebActionContext(HttpServletRequest servletRequest,
                             HttpServletResponse servletResponse) {
         super();
-        initializeContext(servletRequest, servletResponse);
-    }
-    
-    public void initializeContext(HttpServletRequest servletRequest,
-                                  HttpServletResponse servletResponse) {
+        
         this.servletRequest = servletRequest;
         this.servletResponse = servletResponse;
+        this.servletContext = servletRequest.getSession().getServletContext();
         resetFlashMessage();
     }
     
@@ -156,7 +153,6 @@ public class WebActionContext extends ActionContext {
     public Map getContextDataAsMap() {
         Map hm = new HashMap();
         
-        ServletContext servletContext = getHttpServletRequest().getSession().getServletContext();
         Enumeration en = servletContext.getAttributeNames();
         while (en.hasMoreElements()) {
             String name  = (String)en.nextElement();
@@ -212,7 +208,7 @@ public class WebActionContext extends ActionContext {
      * @return Object
      */
     public Object getFromContextData(String key) {
-        return getHttpServletRequest().getSession().getServletContext().getAttribute(key);
+        return servletContext.getAttribute(key);
     }
     
     /**
@@ -252,7 +248,7 @@ public class WebActionContext extends ActionContext {
      * @param key
      */
     public void removeFromContextData(String key) {
-        getHttpServletRequest().getSession().getServletContext().removeAttribute(key);
+    	servletContext.removeAttribute(key);
     }
     
     /**
@@ -282,7 +278,7 @@ public class WebActionContext extends ActionContext {
      * @param object Object
      */
     public void storeToContext(String key, Object object) {
-        getHttpServletRequest().getSession().getServletContext().setAttribute(key, object);
+    	servletContext.setAttribute(key, object);
     }
     
     /**
@@ -307,6 +303,7 @@ public class WebActionContext extends ActionContext {
     
     private Map namedCycles = new HashMap();
     
+    protected ServletContext servletContext;
     protected HttpServletRequest servletRequest;
     protected HttpServletResponse servletResponse;
 }

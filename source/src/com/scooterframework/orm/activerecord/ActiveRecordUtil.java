@@ -8,11 +8,13 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.exception.GenericException;
 import com.scooterframework.common.exception.ObjectCreationException;
 import com.scooterframework.common.util.CurrentThreadCache;
@@ -379,7 +381,7 @@ public class ActiveRecordUtil {
             
             setGateInstance(record.getClass().getName(), new TableGateway(record));
             
-            if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+            if (DatabaseConfig.getInstance().isInDevelopmentEnvironment() || EnvConfig.getInstance().allowAutoCRUD()) {
                 String modelKey = getHomeInstanceKeyForCurrentThreadCache(record.getClass().getName());
                 CurrentThreadCache.set(modelKey, record);
                 return;
@@ -397,7 +399,7 @@ public class ActiveRecordUtil {
     public static TableGateway getGateway(String fullModelClassName) {
     	TableGateway gate = null;
         
-        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment() || EnvConfig.getInstance().allowAutoCRUD()) {
             String gateKey = getGateInstanceKey(fullModelClassName);
             gate = (TableGateway)CurrentThreadCache.get(gateKey);
             if (gate != null) return gate;
@@ -421,7 +423,7 @@ public class ActiveRecordUtil {
     	TableGateway gate = null;
         String fullModelClassName = home.getClass().getName();
         
-        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment() || EnvConfig.getInstance().allowAutoCRUD()) {
             String gateKey = getGateInstanceKey(fullModelClassName);
             gate = (TableGateway)CurrentThreadCache.get(gateKey);
             if (gate != null) return gate;
@@ -461,6 +463,66 @@ public class ActiveRecordUtil {
     }
     
     /**
+     * Returns a Calculator instance for the model class.
+     * 
+     * @param clz model class type
+     * @return a Calculator instance for the model class
+     */
+    public static Calculator getCalculator(Class clz) {
+    	return getCalculator(clz.getName());
+    }
+    
+    /**
+     * Returns a Calculator instance for the model class.
+     * 
+     * @param fullModelClassName
+     * @return a Calculator instance for the model class
+     */
+    public static Calculator getCalculator(String fullModelClassName) {
+    	Calculator cal = null;
+        
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment() || EnvConfig.getInstance().allowAutoCRUD()) {
+            String calKey = getCalculatorInstanceKey(fullModelClassName);
+            cal = (Calculator)CurrentThreadCache.get(calKey);
+            if (cal != null) return cal;
+        }
+        
+        Map calMap = getCalculatorInstanceMap();
+        cal = (Calculator)calMap.get(fullModelClassName);
+        if (cal == null) {
+            if (DEFAULT_RECORD_CLASS.equals(fullModelClassName)) {
+                throw new IllegalArgumentException("Calculator instance for type " + fullModelClassName + " must be created first.");
+            }
+            ActiveRecord home = getHomeInstance(fullModelClassName);
+            cal = new Calculator(home);
+            setCalculatorInstance(fullModelClassName, cal);
+        }
+        
+        return cal;
+    }
+    
+    /**
+     * Sets Calculator instance.
+     * 
+     * @param fullModelClassName model class name
+     * @param cal a Calculator instance
+     */
+    public static void setCalculatorInstance(String fullModelClassName, Calculator cal) {
+        if (cal != null) {
+            String calKey = getCalculatorInstanceKey(fullModelClassName);
+            
+            if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+                CurrentThreadCache.set(calKey, cal);
+                return;
+            }
+            
+            Map calMap = getCalculatorInstanceMap();
+            calMap.put(calKey, cal);
+        }
+    }
+    
+    
+    /**
      * Checks if a field name exists in a database table. 
      * 
      * @param clazz         the class type of an ActiveRecord record
@@ -472,6 +534,14 @@ public class ActiveRecordUtil {
             throw new GenericException("Field [" + fieldName + "] is not a column of table " + record.getTableName() + ".");
         }
     }
+
+    private static String getCalculatorInstanceKey(String modelClassName) {
+        return "cal_" + modelClassName;
+    }
+    
+    private static Map getCalculatorInstanceMap() {
+        return calculatorInstanceMap;
+    }
     
     private static String getHomeInstanceKey(ActiveRecord record) {
         //String uniqueKey = record.getClass().getName() + "-" + record.getConnectionName() + "-" + record.getTableName();
@@ -480,6 +550,10 @@ public class ActiveRecordUtil {
 
     private static String getHomeInstanceKeyForCurrentThreadCache(String modelClassName) {
         return "model_" + modelClassName;
+    }
+    
+    private static Map getHomeInstanceMap() {
+        return homeInstanceMap;
     }
 
     private static String getGateInstanceKey(String modelClassName) {
@@ -490,19 +564,20 @@ public class ActiveRecordUtil {
         return gateInstanceMap;
     }
     
-    private static Map getHomeInstanceMap() {
-        return homeInstanceMap;
-    }
+    /**
+     * calculatorInstanceMap stores Calculator instances.
+     */
+    private static Map calculatorInstanceMap = Collections.synchronizedMap(new HashMap());
     
     /**
      * gateInstanceMap stores TableGateway instances.
      */
-    private static Map gateInstanceMap = new HashMap();
+    private static Map gateInstanceMap = Collections.synchronizedMap(new HashMap());
     
     /**
      * homeInstanceMap stores ActiveRecord home instances.
      */
-    private static Map homeInstanceMap = new HashMap();
+    private static Map homeInstanceMap = Collections.synchronizedMap(new HashMap());
     
     public static final String DEFAULT_RECORD_CLASS = "com.scooterframework.orm.activerecord.ActiveRecord";
 }

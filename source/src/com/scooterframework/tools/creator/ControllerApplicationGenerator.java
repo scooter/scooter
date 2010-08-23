@@ -10,7 +10,7 @@ package com.scooterframework.tools.creator;
 import java.io.File;
 import java.util.Properties;
 
-import com.scooterframework.common.util.GeneratorImpl;
+import com.scooterframework.tools.common.GeneratorImpl;
 
 /**
  * This class generates controller class code.
@@ -21,10 +21,10 @@ public class ControllerApplicationGenerator extends GeneratorImpl {
 	private String packageName;
 	private String controllerClassName;
 	private boolean noPrefix;
-	private Properties props;
 	
-	public ControllerApplicationGenerator(Properties props) {
-		this.props = props;
+	public ControllerApplicationGenerator(String templateFilePath, Properties props) {
+		super(templateFilePath, props);
+		
 		String controllerNameCamel = "Application";
 		String classPrefix = props.getProperty("package_prefix") + ".controllers";
 		String classSuffix = "Controller";
@@ -40,23 +40,7 @@ public class ControllerApplicationGenerator extends GeneratorImpl {
 			tpl.append("package {package_name};").append(linebreak);
 			tpl.append("").append(linebreak);
 		}
-		tpl.append("import com.scooterframework.common.logging.LogUtil;").append(linebreak);
-		tpl.append("import com.scooterframework.web.controller.ActionControl;").append(linebreak);
-		tpl.append("").append(linebreak);
-		tpl.append("/**").append(linebreak);
-		tpl.append(" * {controller_class_name} class has methods that are available to all subclass").append(linebreak);
-		tpl.append(" * controllers. This is a place to add application-wide action methods and filters.").append(linebreak);
-		tpl.append(" */").append(linebreak);
-		tpl.append("public class {controller_class_name} extends ActionControl {").append(linebreak);
-		tpl.append("    //").append(linebreak);
-		tpl.append("    // Add more application-wide methods/filters here.").append(linebreak);
-		tpl.append("    //").append(linebreak);
-		tpl.append("").append(linebreak);
-		tpl.append("    /**").append(linebreak);
-		tpl.append("     * Declares a <tt>log</tt> instance that are available to all subclasses.").append(linebreak);
-		tpl.append("     */").append(linebreak);
-		tpl.append("    protected LogUtil log = LogUtil.getLogger(getClass().getName());").append(linebreak);
-		tpl.append("}").append(linebreak);
+		tpl.append(super.getTemplateContent());
 		return tpl.toString();
 	}
 	
@@ -70,16 +54,16 @@ public class ControllerApplicationGenerator extends GeneratorImpl {
 	}
 	
 	protected String getRootPath() {
-		return props.getProperty("app_path") + File.separator + "WEB-INF";
+		return getProperty("app_path") + File.separator + "WEB-INF";
 	}
 	
 	protected String getRelativePathToOutputFile() {
-		return (noPrefix)?sourceDirName:
-					(sourceDirName + File.separatorChar + 
+		return (noPrefix)?DIRECTORY_NAME_SRC:
+					(DIRECTORY_NAME_SRC + File.separatorChar + 
 					packageName.replace('.', File.separatorChar));
 	}
 	
 	protected String getOutputFileName() {
-		return controllerClassName + javaFileExtension;
+		return controllerClassName + FILE_EXTENSION_JAVA;
 	}
 }

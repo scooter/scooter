@@ -80,6 +80,16 @@ public class SqlExpressUtil {
     }
     
     /**
+     * Returns properties associated with a default database connection name.
+     * 
+     * @return properties of the connection name
+     */
+    public static Properties getDefaultConnectionProperties() {
+        Properties p = DatabaseConfig.getInstance().getDefaultDatabaseConnectionProperties();
+        return p;
+    }
+    
+    /**
      * Returns properties associated with a database connection name.
      * 
      * @param connName database connection name

@@ -77,7 +77,7 @@ public class XMemcachedCacheProvider extends CacheProvider {
 		}
 	}
     
-    public void shutDown() {
+    public void onStop() {
     	try {
 			client.shutdown();
 		} catch (Exception ex) {

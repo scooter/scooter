@@ -32,7 +32,7 @@ public class TagHelper {
      * @return a set of tag names
      */
     public static Set allTags() {
-        List tags = ActiveRecordUtil.getHomeInstance(Tag.class).findAll();
+        List tags = ActiveRecordUtil.getGateway(Tag.class).findAll();
         if (tags == null) return null;
         
         Set tagSet = new HashSet();
@@ -142,7 +142,6 @@ public class TagHelper {
         //get all current tags of the record
         Set currentTags = allTags(record);
 
-        ActiveRecord tagHome = ActiveRecordUtil.getHomeInstance(Tag.class);
         List tagRecords = new ArrayList();
         Iterator it = tagList.iterator();
         while(it.hasNext()) {
@@ -150,7 +149,7 @@ public class TagHelper {
             if (currentTags != null && currentTags.contains(tagName)) continue;
             currentTags.add(tagName);
             
-            ActiveRecord atag = tagHome.findFirst("name='" + tagName + "'");
+            ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag == null) {
                 atag = new Tag();
                 atag.setData("name=" + tagName);
@@ -176,12 +175,11 @@ public class TagHelper {
         List tagList = Converters.convertStringToList(tags);
         if (tagList == null) return null;
 
-        ActiveRecord tagHome = ActiveRecordUtil.getHomeInstance(Tag.class);
         List tagRecords = new ArrayList();
         Iterator it = tagList.iterator();
         while(it.hasNext()) {
             String tagName = (String)it.next();
-            ActiveRecord atag = tagHome.findFirst("name='" + tagName + "'");
+            ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag != null) {
                 tagRecords.add(atag);
             }
@@ -204,12 +202,11 @@ public class TagHelper {
         List tagList = Converters.convertStringToList(tags);
         if (tagList == null) return null;
 
-        ActiveRecord tagHome = ActiveRecordUtil.getHomeInstance(Tag.class);
         List tagRecords = new ArrayList();
         Iterator it = tagList.iterator();
         while(it.hasNext()) {
             String tagName = (String)it.next();
-            ActiveRecord atag = tagHome.findFirst("name='" + tagName + "'");
+            ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag == null) {
                 atag = new Tag();
                 atag.setData("name=" + tagName);
@@ -276,11 +273,10 @@ public class TagHelper {
         List tagList = Converters.convertStringToList(tags);
         if (tagList == null) return;
         
-        ActiveRecord tagHome = ActiveRecordUtil.getHomeInstance(Tag.class);
         Iterator it = tagList.iterator();
         while(it.hasNext()) {
             String tagName = (String)it.next();
-            ActiveRecord atag = tagHome.findFirst("name='" + tagName + "'");
+            ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag != null) {
                 atag.delete();
             }

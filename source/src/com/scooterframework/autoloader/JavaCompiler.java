@@ -32,6 +32,8 @@ public final class JavaCompiler {
 		"-sourcepath", AutoLoaderConfig.getInstance().getSourcePath()};
 	
 	public static String compile(String[] sourceFileNames) {
+		if (sourceFileNames == null || sourceFileNames.length == 0) return null;
+		
 		StringWriter compilerMessage = new StringWriter();
 		PrintWriter compilerMessageWriter = new PrintWriter(compilerMessage);
 		String args[] = constructCompilerArgs(sourceFileNames);

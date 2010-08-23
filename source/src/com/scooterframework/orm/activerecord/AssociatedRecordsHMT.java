@@ -469,7 +469,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
             }
         }
         
-        ActiveRecord joinRecord = ActiveRecordUtil.getHomeInstance(joinClass).findFirst(conditions);
+        ActiveRecord joinRecord = ActiveRecordUtil.getGateway(joinClass).findFirst(conditions);
         
         return joinRecord;
     }

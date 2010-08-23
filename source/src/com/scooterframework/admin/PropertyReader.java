@@ -60,10 +60,12 @@ public class PropertyReader {
             appProperties = PropertyFileUtil.loadPropertiesFromFile(fullFileName);
         }
         catch(Exception ex) {
+        	ex.printStackTrace();
             try {
                 appProperties = PropertyFileUtil.loadPropertiesFromResource(fullFileName);
             }
             catch(Exception exr) {
+            	ex.printStackTrace();
                 String errorMessage = "ERROR ERROR ERROR -- Error loading " + fullFileName + ": " + exr.getMessage();
                 log.fatal(errorMessage);
             }

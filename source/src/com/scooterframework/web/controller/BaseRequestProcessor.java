@@ -673,6 +673,7 @@ public class BaseRequestProcessor {
         HttpServletResponse response)
         throws IOException, ServletException {
         log.debug("doForward: " + uri);
+        
         if (uri != null && !uri.startsWith("/")) uri = "/" + uri;
         RequestDispatcher rd = getServletContext().getRequestDispatcher(uri);
         

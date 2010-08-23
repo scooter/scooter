@@ -13,7 +13,7 @@ import java.util.Map;
 
 import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.TableData;
-import com.scooterframework.test.ApplicationTest;
+import com.scooterframework.test.ScooterTest;
 
 /**
  * SqlServiceClientTest class
@@ -21,7 +21,7 @@ import com.scooterframework.test.ApplicationTest;
  * @author (Fei) John Chen
  *
  */
-public class SqlServiceClientTest extends ApplicationTest {
+public class SqlServiceClientTest extends ScooterTest {
 	
 	protected void setUp() {
 		super.setUp();

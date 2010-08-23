@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
-import com.scooterframework.test.ScooterApplicationTest;
+import com.scooterframework.test.ScooterTest;
+import com.scooterframework.test.models.Pet;
 import com.scooterframework.test.models.Vet;
 
 /**
@@ -22,52 +23,52 @@ import com.scooterframework.test.models.Vet;
  * @author (Fei) John Chen
  *
  */
-public class ActiveRecordCRUDTest extends ScooterApplicationTest {
+public class ActiveRecordCRUDTest extends ScooterTest {
 	
 	public void test_findAll() {
-		List allVets = vetHome.findAll();
+		List allVets = Vet.findAll();
 		assertEquals("total vets", 6, allVets.size());
 	}
 	
 	public void test_findById() {
-		ActiveRecord vet6 = vetHome.findById(new Integer(6));
+		ActiveRecord vet6 = Vet.findById(new Integer(6));
 		assertEquals("#6 vet's firstname", "Sharon", vet6.getField("first_name"));
 	}
 	
 	public void test_find() {
-		ActiveRecord vet4 = vetHome.findFirst("last_name='Ortega'");
+		ActiveRecord vet4 = Vet.findFirst("last_name='Ortega'");
 		assertEquals("#4 Ortega's id", "4", ""+vet4.getField("id"));
 	}
 
 	public void test_findByLastName() {
 		String[] lnames = {"Stevens"};
-		ActiveRecord vet5 = vetHome.findFirstBy("last_name", lnames);
+		ActiveRecord vet5 = Vet.findFirstBy("last_name", lnames);
 		assertEquals("#5 Stevens's id", "5", ""+vet5.getField("id"));
 	}
 
 	public void test_findByLastNameAndFirstName() {
 		String[] names = {"Stevens", "Henry"};
-		ActiveRecord vet5 = vetHome.findFirstBy("last_name_and_first_name", names);
+		ActiveRecord vet5 = Vet.findFirstBy("last_name_and_first_name", names);
 		assertEquals("#5 Stevens's id", "5", ""+vet5.getField("id"));
 	}
 
 	public void test_findAllByTypeAndOwner() {
 		String[] values = {"2", "3"};
-		List pets = petHome.findAllBy("type_id_and_owner_id", values);
+		List pets = Pet.findAllBy("type_id_and_owner_id", values);
 		assertEquals("Eduardo's two dogs", 2, pets.size());
 	}
 
 	public void test_findAllByTypeAndOwnerWithOptions() {
 		String[] values = {"2", "3"};
 		String options = "";
-		List pets = petHome.findAllBy("type_id_and_owner_id", values, options);
+		List pets = Pet.findAllBy("type_id_and_owner_id", values, options);
 		assertEquals("Eduardo's two dogs", 2, pets.size());
 	}
 
 	public void test_findBySQL() {
 		String sql = "select * from vets where last_name like '%s' ";
 		Map inputs = new HashMap();
-		List vets = vetHome.findAllBySQL(sql, inputs);
+		List vets = Vet.findAllBySQL(sql, inputs);
 		assertEquals("vets with last name ending with s", 3, vets.size());
 	}
 
@@ -75,7 +76,7 @@ public class ActiveRecordCRUDTest extends ScooterApplicationTest {
 		String sqlKey = "getVetByLastName";
 		Map inputs = new HashMap();
 		inputs.put("1", "Stevens");
-		List vets = vetHome.findAllBySQLKey(sqlKey, inputs);
+		List vets = Vet.findAllBySQLKey(sqlKey, inputs);
 		assertEquals("vets with last name as Stevens", 1, vets.size());
 		Iterator it = vets.iterator();
 		while(it.hasNext()) {
@@ -88,17 +89,17 @@ public class ActiveRecordCRUDTest extends ScooterApplicationTest {
 		String findNextID = "SELECT (max(id)+1) FROM vets";
 		Object nextID = SqlServiceClient.retrieveObjectBySQL(findNextID);
 		
-		ActiveRecord vet7 = new Vet();
+		ActiveRecord vet7 = Vet.newRecord();
 		vet7.setData("id", nextID);
 		vet7.setData("first_name", "John");
 		vet7.setData("last_name", "Chen");
 		vet7.save();
-		List allVets = vetHome.findAll();
+		List allVets = Vet.findAll();
 		assertEquals("total vets", 7, allVets.size());
 		
 		//find the newly created 
 		String sqlKey = "getLatestVet";
-		List vets = vetHome.findAllBySQLKey(sqlKey, null);
+		List vets = Vet.findAllBySQLKey(sqlKey, null);
 		assertEquals("newly added vet", 1, vets.size());
 		Iterator it = vets.iterator();
 		while(it.hasNext()) {
@@ -108,12 +109,12 @@ public class ActiveRecordCRUDTest extends ScooterApplicationTest {
 		}
 		
 		vet7.delete();
-		allVets = vetHome.findAll();
+		allVets = Vet.findAll();
 		assertEquals("total vets", 6, allVets.size());
 	}
     
     public void test_updateAll() {
-		ActiveRecord vet6 = vetHome.findById(new Integer(6));
+		ActiveRecord vet6 = Vet.findById(new Integer(6));
 		assertEquals("#6 vet's firstname", "Sharon", vet6.getField("first_name"));
         
         String oldFirstName = (String)vet6.getField("first_name");
@@ -124,14 +125,14 @@ public class ActiveRecordCRUDTest extends ScooterApplicationTest {
         inputs.put("last_name", "Doe");
         
         String conditionsSQL = "last_name = 'XXX'";
-        int count = vetHome.updateAll(inputs, conditionsSQL);
+        int count = Vet.updateAll(inputs, conditionsSQL);
 		assertEquals("No person named XXX", 0, count);
         
         conditionsSQL = "id = 6";
-        count = vetHome.updateAll(inputs, conditionsSQL);
+        count = Vet.updateAll(inputs, conditionsSQL);
 		assertEquals("Change #6 vet's firstname", 1, count);
         
-		vet6 = vetHome.findById(new Integer(6));
+		vet6 = Vet.findById(new Integer(6));
 		assertEquals("#6 vet's firstname is changed", "Jenny", vet6.getField("first_name"));
 		assertEquals("#6 vet's lastname is changed", "Doe", vet6.getField("last_name"));
         
@@ -141,10 +142,10 @@ public class ActiveRecordCRUDTest extends ScooterApplicationTest {
         Map conditionsData = new HashMap();
         conditionsData.put("id", "6");
         
-        count = vetHome.updateAll(inputs, conditionsSQL, conditionsData);
+        count = Vet.updateAll(inputs, conditionsSQL, conditionsData);
 		assertEquals("Change back #6 vet's firstname", 1, count);
         
-		vet6 = vetHome.findById(new Integer(6));
+		vet6 = Vet.findById(new Integer(6));
 		assertEquals("Confirm #6 vet's firstname is back", oldFirstName, vet6.getField("first_name"));
 		assertEquals("Confirm #6 vet's lastname is back", oldLastName, vet6.getField("last_name"));
     }

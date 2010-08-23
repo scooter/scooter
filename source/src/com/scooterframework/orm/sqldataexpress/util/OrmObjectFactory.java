@@ -10,7 +10,6 @@ package com.scooterframework.orm.sqldataexpress.util;
 import com.scooterframework.admin.ApplicationConfig;
 import com.scooterframework.autoloader.ClassManager;
 import com.scooterframework.common.util.ObjectFactory;
-import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 
 /**
  * OrmObjectFactory class has helper methods for object creation in db tier. 
@@ -35,8 +34,7 @@ public class OrmObjectFactory extends ObjectFactory
     public Class loadClass(String className) 
     throws ClassNotFoundException {
         Class c = null;
-        if (ApplicationConfig.getInstance().isWebApp() && 
-            DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+        if (!ApplicationConfig.getInstance().isOrmAlone()) {
             c = ClassManager.getInstance().loadMyClass(className);
         }
         else {

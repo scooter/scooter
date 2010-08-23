@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.scooterframework.common.util.CurrentThreadCache;
-import com.scooterframework.test.ApplicationTest;
+import com.scooterframework.test.ScooterTest;
 import com.scooterframework.transaction.TransactionManager;
 import com.scooterframework.transaction.TransactionManagerUtil;
 
@@ -21,7 +21,7 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * @author (Fei) John Chen
  *
  */
-public class SqlServiceClientTransactionTest extends ApplicationTest {
+public class SqlServiceClientTransactionTest extends ScooterTest {
 	
 	protected void setUp() {
 		super.setUp();

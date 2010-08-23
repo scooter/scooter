@@ -164,7 +164,7 @@ public class HasManyThroughRecordRelation extends RecordRelation {
 	        
 	        sb.append(QueryHelper.getAllSelectQueryClauses(prop));
 	        
-	        list = homeB.findAllBySQL(sb.toString(), fkData);
+	        list = ActiveRecordUtil.getGateway(homeB).findAllBySQL(sb.toString(), fkData);
         }
         
         return list;

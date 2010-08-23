@@ -11,7 +11,7 @@ import com.scooterframework.autoloader.ClassManager;
 import com.scooterframework.common.util.ObjectFactory;
 
 /**
- * WebObjectFactory class has helper methods for object creation in web tier. 
+ * AutoLoadedObjectFactory class has helper methods for object creation in web tier. 
  * 
  * @author (Fei) John Chen
  */
@@ -33,8 +33,7 @@ public class AutoLoadedObjectFactory extends ObjectFactory
     public Class loadClass(String className) 
     throws ClassNotFoundException {
         Class c = null;
-        if (ApplicationConfig.getInstance().isWebApp() && 
-            EnvConfig.getInstance().isInDevelopmentEnvironment()) {
+        if (!ApplicationConfig.getInstance().isOrmAlone()) {
             c = ClassManager.getInstance().loadMyClass(className);
         }
         else {

@@ -10,7 +10,7 @@ package com.scooterframework.web.util;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.scooterframework.test.ApplicationTest;
+import com.scooterframework.test.ScooterTest;
 
 /**
  * DTest class
@@ -18,7 +18,7 @@ import com.scooterframework.test.ApplicationTest;
  * @author (Fei) John Chen
  *
  */
-public class DTest extends ApplicationTest {
+public class DTest extends ScooterTest {
 	
 	/**
 	 * Test to display friendly time message

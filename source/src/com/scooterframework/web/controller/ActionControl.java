@@ -7,6 +7,7 @@
  */
 package com.scooterframework.web.controller;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.scooterframework.admin.ApplicationConfig;
 import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.util.Converters;
@@ -197,7 +203,7 @@ public class ActionControl {
                 }
             }
         }
-        return homeInstance(modelClass).findFirst(pkDataMap);
+        return ActiveRecordUtil.getGateway(modelClass).findFirst(pkDataMap);
     }
     
     /**
@@ -208,43 +214,43 @@ public class ActionControl {
      * @return a record instance
      */
     protected ActiveRecord findRecord(Class modelClass, Map conditions) {
-        return homeInstance(modelClass).findFirst(conditions);
+        return ActiveRecordUtil.getGateway(modelClass).findFirst(conditions);
     }
     
     protected ActiveRecord findRecord(Class modelClass, String conditions) {
-        return homeInstance(modelClass).findFirst(conditions);
+        return ActiveRecordUtil.getGateway(modelClass).findFirst(conditions);
     }
     
     protected ActiveRecord findRecord(Class modelClass, String conditions, String options) {
-        return homeInstance(modelClass).findFirst(conditions, options);
+        return ActiveRecordUtil.getGateway(modelClass).findFirst(conditions, options);
     }
     
     protected ActiveRecord findRecord(Class modelClass, Map conditions, Map options) {
-        return homeInstance(modelClass).findFirst(conditions, options);
+        return ActiveRecordUtil.getGateway(modelClass).findFirst(conditions, options);
     }
     
     protected List findAll(Class modelClass) {
-        return homeInstance(modelClass).findAll();
+        return ActiveRecordUtil.getGateway(modelClass).findAll();
     }
     
     protected List findAll(Class modelClass, String conditionsSQL) {
-        return homeInstance(modelClass).findAll(conditionsSQL);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(conditionsSQL);
     }
     
     protected List findAll(Class modelClass, String conditions, String options) {
-        return homeInstance(modelClass).findAll(conditions, options);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(conditions, options);
     }
     
     protected List findAll(Class modelClass, String conditions, Map options) {
-        return homeInstance(modelClass).findAll(conditions, options);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(conditions, options);
     }
     
     protected List findAll(Class modelClass, Map conditions) {
-        return homeInstance(modelClass).findAll(conditions);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(conditions);
     }
     
     protected List findAll(Class modelClass, Map conditions, Map options) {
-        return homeInstance(modelClass).findAll(conditions, options);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(conditions, options);
     }
     
     /**
@@ -394,6 +400,92 @@ public class ActionControl {
     }
     
     /**
+     * Alias of method <tt>params(String key)</tt>.
+     * 
+     * Returns a value corresponding to a key in request parameters or request 
+     * attributes.
+     * 
+     * @param key name of a key in the request parameters
+     * @return a value corresponding to a key in the request parameters
+     */
+    protected String p(String key) {
+        return params(key);
+    }
+    
+    /**
+     * Alias of method <tt>getUploadedFile(String key)</tt>.
+     * 
+     * Returns an upload file which is an instance of <tt>UploadFile</tt>. 
+     * 
+     * @return an instance of <tt>UploadFile</tt>
+     * @throws Exception
+     */
+    protected UploadFile paramsFile(String key) throws Exception {
+        return getUploadFile(key);
+    }
+    
+    /**
+     * Alias of method <tt>getUploadFiles()</tt>.
+     * 
+     * Returns a list of upload files. 
+     * 
+     * @return a list of <tt>UploadFile</tt> instances
+     * @throws Exception
+     */
+    protected List paramsFiles() throws Exception {
+        return getUploadFiles();
+    }
+    
+    /**
+     * Alias of method <tt>getUploadFilesMap()</tt>.
+     * 
+     * Returns a map of upload files. In each key/value pair, the key is the 
+     * field name in the http form, and the value is a <tt>UploadFile</tt> instance.
+     * 
+     * @return a map of field/upload file (UploadFile) pairs
+     * @throws Exception
+     */
+    protected Map paramsFilesMap() throws Exception {
+        return getUploadFilesMap();
+    }
+    
+    /**
+     * Alias of method <tt>paramsFile(String key)</tt>.
+     * 
+     * Returns an upload file which is an instance of <tt>UploadFile</tt>. 
+     * 
+     * @return an instance of <tt>UploadFile</tt>
+     * @throws Exception
+     */
+    protected UploadFile pFile(String key) throws Exception {
+        return paramsFile(key);
+    }
+    
+    /**
+     * Alias of method <tt>paramsFiles()</tt>.
+     * Returns a list of upload files. 
+     * 
+     * @return a list of <tt>UploadFile</tt> instances
+     * @throws Exception
+     */
+    protected List pFiles() throws Exception {
+        return paramsFiles();
+    }
+    
+    /**
+     * Alias of method <tt>paramsFilesMap()</tt>.
+     * 
+     * Returns a map of upload files. In each key/value pair, the key is the 
+     * field name in the http form, and the value is a <tt>UploadFile</tt> instance.
+     * 
+     * @return a map of field/upload file (UploadFile) pairs
+     * @throws Exception
+     */
+    protected Map pFilesMap() throws Exception {
+        return paramsFilesMap();
+    }
+    
+    /**
      * Returns a value corresponding to a key in the request parameters. The 
      * case of the key string is ignored.
      * 
@@ -515,6 +607,24 @@ public class ActionControl {
     
     protected void removeAllSessionData() {
         ACH.getAC().removeAllSessionData();
+    }
+    
+    /**
+     * Binds data to view attribute for view rendering.
+     * 
+     * @param key  a string representing a place holder on view
+     * @param data the data value to be filled in the view
+     */
+    protected void setViewData(String key, Object data) {
+    	storeToRequest(key, data);
+    }
+    
+    /**
+     * Returns content type of http request.
+     * @return http content type
+     */
+    protected String getHttpRequestContentType() {
+    	return ACH.getWAC().getHttpServletRequest().getContentType();
     }
     
     /**
@@ -1210,6 +1320,115 @@ public class ActionControl {
     public static String redirectTo(String uri) {
         return ActionResult.redirectTo(uri);
     }
+    
+    /**
+     * Returns root path to the application.
+     */
+    protected String applicationPath() {
+    	return ApplicationConfig.getInstance().getApplicationPath();
+    }
+    
+    /**
+     * Configures file upload setting. There is no limit in terms of maximum 
+     * size of files.
+     */
+    protected void configFileUpload() {
+    	fileFactory = new DiskFileItemFactory();
+    	fileUpload = new ServletFileUpload(fileFactory);
+    }
+    
+    /**
+     * Configures file upload setting.
+     * 
+     * @param maxMemorySize The threshold, in bytes, below which items will be retained in memory and above which they will be stored as a file.
+     * @param tempDirectory The data repository, which is the directory in which files will be created, should the item size exceed the threshold.
+     * @param maxRequestSize The maximum allowed size, in bytes. The default value of -1 indicates, that there is no limit.
+     * @param fileSizeMax Maximum size of a single upload file. The default value of -1 indicates, that there is no limit.
+     */
+    protected void configFileUpload(int maxMemorySize, String tempDirectory, long maxRequestSize, long fileSizeMax) {
+    	fileFactory = new DiskFileItemFactory(maxMemorySize, new File(tempDirectory));
+    	fileUpload = new ServletFileUpload(fileFactory);
+    	fileUpload.setSizeMax(maxRequestSize);
+    	fileUpload.setFileSizeMax(fileSizeMax);
+    }
+    
+    /**
+     * Returns a list of upload files. Each item in the list is an instance 
+     * of <tt>java.io.File</tt> instance.
+     * 
+     * @param fileRepository
+     * @return a list of upload files (File)
+     * @throws Exception
+     */
+    protected List getUploadFilesAsFiles(String fileRepository) throws Exception {
+    	List files = new ArrayList();
+		Iterator iter = prepareFileItems();
+		while (iter.hasNext()) {
+			FileItem item = (FileItem) iter.next();
+			if (!item.isFormField() && !"".equals(item.getName())) {
+				File f = new File(fileRepository + File.separator + item.getName());
+				files.add(f);
+			}
+		}
+		return files;
+    }
+    
+    /**
+     * Returns a list of upload files. Each item in the list is an instance 
+     * of <tt>UploadFile</tt> instance.
+     * 
+     * @return a list of upload files (UploadFile)
+     * @throws Exception
+     */
+    protected List getUploadFiles() throws Exception {
+    	List files = new ArrayList();
+		Iterator iter = prepareFileItems();
+		while (iter.hasNext()) {
+			FileItem item = (FileItem) iter.next();
+			if (!item.isFormField() && !"".equals(item.getName())) {
+				files.add(new UploadFile(item));
+			}
+		}
+		return files;
+    }
+    
+    /**
+     * Returns a map of upload files. In each key/value pair, the key is the 
+     * field name in the http form, and the value is a <tt>UploadFile</tt> instance.
+     * 
+     * @return a map of field/upload file (UploadFile) pairs
+     * @throws Exception
+     */
+    protected Map getUploadFilesMap() throws Exception {
+    	Map files = new HashMap();
+		Iterator iter = prepareFileItems();
+		while (iter.hasNext()) {
+			FileItem item = (FileItem) iter.next();
+			if (!item.isFormField() && !"".equals(item.getName())) {
+				files.put(item.getFieldName(), new UploadFile(item));
+			}
+		}
+		return files;
+    }
+    
+    /**
+     * Returns an upload file which is an instance of <tt>UploadFile</tt>. 
+     * 
+     * @return an instance of <tt>UploadFile</tt>
+     * @throws Exception
+     */
+    protected UploadFile getUploadFile(String key) throws Exception {
+		return (UploadFile)getUploadFilesMap().get(key);
+    }
+    
+    private Iterator prepareFileItems() throws Exception {
+    	if (fileUpload == null) {
+    		configFileUpload();
+    	}
+    	
+		List /* FileItem */items = fileUpload.parseRequest(ACH.getWAC().getHttpServletRequest());
+		return items.iterator();
+    }
 
     public static final String FILTER_TYPE_BEFORE = "before";
     public static final String FILTER_TYPE_AFTER = "after";
@@ -1233,4 +1452,7 @@ public class ActionControl {
     
     private static Map allFiltersMap = new HashMap();
     private static final String FILTER_KEY_SEPARATOR = "-";
+    
+    private DiskFileItemFactory fileFactory;
+    private ServletFileUpload fileUpload;
 }

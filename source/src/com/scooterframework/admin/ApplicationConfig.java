@@ -8,14 +8,17 @@
 package com.scooterframework.admin;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.scooterframework.autoloader.AutoLoaderConfig;
 import com.scooterframework.autoloader.ClassManager;
 import com.scooterframework.autoloader.FileMonitor;
-import com.scooterframework.cache.CacheProviderFactory;
 import com.scooterframework.common.logging.LogConfig;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.FileUtil;
@@ -23,6 +26,7 @@ import com.scooterframework.i18n.I18nConfig;
 import com.scooterframework.orm.activerecord.ReferenceDataLoader;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.config.SqlConfig;
+import com.scooterframework.orm.sqldataexpress.util.OrmObjectFactory;
 import com.scooterframework.web.controller.ActionContext;
 
 /**
@@ -55,7 +59,7 @@ import com.scooterframework.web.controller.ActionContext;
  * scooter.jar file and some config property files (<tt>database.properties</tt>, 
  * <tt>environment.properties</tt>, <tt>log4j.properties</tt>, and 
  * <tt>sql.properties</tt>). The config files must be on the classpath of the
- * calling application. </p>
+ * running application. </p>
  * 
  * <p>
  * In the <tt>ORM</tt> mode, application's file structure does not need to 
@@ -63,16 +67,17 @@ import com.scooterframework.web.controller.ActionContext;
  * want to include Scooter in their own data access layers.
  * </p>
  * 
- * <p>See sample standalone application <tt>scooter-orm</tt> for more details.</p>
+ * <p>See sample stand-alone application <tt>scooter-orm</tt> for more details.</p>
  * 
  * <p>
- * For either <tt>WEB</tt> or <tt>APP</tt> mode, application root path is 
- * required. It is set by  <tt>WebApplicationStartListener</tt> for web 
- * application or automatically detected for non-web application. 
+ * For either <tt>WEB</tt> or <tt>APP</tt> mode, application path is 
+ * required. It is automatically set by <tt>WebApplicationStartListener</tt> 
+ * for web application or detected for non-web application. 
  * </p>
  * 
- * <p>For example, it the application is located in <tt>c:\>project\petclinic</tt>, 
- * then the application root path would be '<tt>c:\>project\petclinic</tt>'.
+ * <p>For example, it the application is located in 
+ * <tt>c:\>project\petclinic</tt>, then the application path would 
+ * be '<tt>c:\>project\petclinic</tt>'.
  * </p>
  * 
  * <p>In either <tt>WEB</tt> or <tt>APP</tt> mode, the following properties can 
@@ -99,36 +104,25 @@ public class ApplicationConfig {
     private static ApplicationConfig me;
     private String configuredMode;
     
-    private ApplicationConfig(String configuredMode, String applicationRootPath, String contextName) {
-        this(configuredMode, "", applicationRootPath, contextName);
-    }
-    
-    private ApplicationConfig(String configuredMode, String realPath, String applicationRootPath, String contextName) {
-        if (applicationRootPath == null) {
-            throw new IllegalArgumentException("Application root path cannot be null.");
+    private ApplicationConfig(String configuredMode, String applicationPath, String contextName) {
+        if (applicationPath == null) {
+            throw new IllegalArgumentException("Application path cannot be null.");
         }
         
-        this.applicationRootPath = applicationRootPath;
+        this.applicationPath = applicationPath;
         this.contextName = contextName;
         this.configuredMode = configuredMode;
-        this.realPath = realPath;
-        
-    	String appLogs = System.getProperty("app.logs");
-    	if (appLogs == null) {
-    		appLogs = applicationRootPath + File.separator + "logs";
-    		System.setProperty("app.logs", appLogs);
-    	}
         
         log("Initializing " + configuredMode + " application ... ");
         
         if (Constants.CONFIGURED_MODE_SCOOTER_WEB.equals(configuredMode)) {
             log("           context name: " + contextName);
-            log("              root path: " + applicationRootPath);
+            log("               app path: " + applicationPath);
             initializeWeb();
         }
         else if (Constants.CONFIGURED_MODE_SCOOTER_APP.equals(configuredMode)) {
             log("           context name: " + contextName);
-            log("              root path: " + applicationRootPath);
+            log("               app path: " + applicationPath);
         	initializeApp();
         }
         else if (Constants.CONFIGURED_MODE_SCOOTER_ORM.equals(configuredMode)) {
@@ -138,10 +132,16 @@ public class ApplicationConfig {
             throw new IllegalArgumentException("Configured mode \"" + 
             		configuredMode + "\" is not supported");
         }
+        
+        initializePlugins();
     }
 	
 	private void log(String s) {
 		if (!noConsoleDisplay) System.out.println(s);
+	}
+	
+	private void initializePlugins() {
+		PluginManager.getInstance().startPlugins();
 	}
     
     
@@ -151,11 +151,11 @@ public class ApplicationConfig {
      * This method should be called the first time the application is 
      * accessed or by a start-up method of a web application. 
      */
-    public static ApplicationConfig configInstanceForWeb(String realPath, 
-    		String applicationRootPath, String contextName) {
+    public static ApplicationConfig configInstanceForWeb(String webappPath, 
+    		String contextName) {
         if (me == null) {
             me = new ApplicationConfig(Constants.CONFIGURED_MODE_SCOOTER_WEB, 
-            		realPath, applicationRootPath, contextName);
+            		webappPath, contextName);
         }
         return me;
     }
@@ -245,7 +245,7 @@ public class ApplicationConfig {
         }
         
         props.put(Constants.APP_KEY_APPLICATION_START_TIME, new Date(applicationStartTime));
-        props.put(Constants.APP_KEY_APPLICATION_ROOT_PATH, applicationRootPath);
+        props.put(Constants.APP_KEY_APPLICATION_ROOT_PATH, applicationPath);
         props.put(Constants.APP_KEY_APPLICATION_CONTEXT_NAME, contextName);
         props.put(Constants.APP_KEY_APPLICATION_DATABASE_NAME, dbc.getDefaultDatabaseConnectionName());
         
@@ -296,16 +296,26 @@ public class ApplicationConfig {
         }
         
         props.put(Constants.APP_KEY_APPLICATION_START_TIME, new Date(applicationStartTime));
-        props.put(Constants.APP_KEY_APPLICATION_ROOT_PATH, applicationRootPath);
+        props.put(Constants.APP_KEY_APPLICATION_ROOT_PATH, applicationPath);
         props.put(Constants.APP_KEY_APPLICATION_CONTEXT_NAME, contextName);
         props.put(Constants.APP_KEY_APPLICATION_DATABASE_NAME, dbc.getDefaultDatabaseConnectionName());
         
         ActionContext.storeToGlobal(Constants.APP_KEY_SCOOTER_PROPERTIES, props);
         
+        if(isApp() && !Constants.SKIP_CLASSWORK_TRUE.equals(System.getProperty(Constants.SKIP_CLASSWORK))) {
+            preloadClasses(sourceFileLocationPath, EnvConfig.getInstance().getControllerClassPrefix());
+            preloadClasses(sourceFileLocationPath, EnvConfig.getInstance().getModelClassPrefix());
+        }
+        //else if (isWebApp()) {
+            //preloadClasses(classFileLocationPath, "");
+        //}
+        
         applicationStarted = true;
     }
     
     public void endApplication() {
+    	//ClassManager.getInstance().createNewClassLoader("");
+    	
         if (rdLoader != null && ReferenceDataLoader.isStarted()) {
             rdLoader.stop();
         }
@@ -320,9 +330,9 @@ public class ApplicationConfig {
         
         DatabaseConfig.getInstance().destroy();
         
-        CacheProviderFactory.getInstance().shutDown();
-        
         applicationStarted = false;
+        
+        PluginManager.getInstance().stopPlugins();
     }
     
     public static String detectRootPath() {
@@ -342,8 +352,8 @@ public class ApplicationConfig {
         return applicationStartTime;
     }
     
-    public String getApplicationRootPath() {
-        return applicationRootPath;
+    public String getApplicationPath() {
+        return applicationPath;
     }
     
     public String getContextName() {
@@ -412,13 +422,13 @@ public class ApplicationConfig {
     }
     
     private void initializeWeb() {
-        webappLibPath = realPath 
+    	webappLibPath = applicationPath 
 							+ File.separatorChar + "WEB-INF" 
 							+ File.separatorChar + "lib";
         
         String cfl = System.getProperty(SYSTEM_KEY_CLASSFILE, "");
         if ("".equals(cfl)) {
-            cfl = realPath 
+            cfl = applicationPath 
 							+ File.separatorChar + "WEB-INF" 
 							+ File.separatorChar + "classes";
         }
@@ -426,7 +436,7 @@ public class ApplicationConfig {
         
         String pfl = System.getProperty(SYSTEM_KEY_PROPERTYFILE, "");
         if ("".equals(pfl)) {
-            pfl = realPath 
+            pfl = applicationPath 
 							+ File.separatorChar + "WEB-INF" 
 							+ File.separatorChar + "config";
         }
@@ -434,7 +444,7 @@ public class ApplicationConfig {
         
         String sfl = System.getProperty(SYSTEM_KEY_SOURCEFILE, "");
         if ("".equals(sfl)) {
-            sfl = realPath 
+            sfl = applicationPath 
 				            + File.separatorChar + "WEB-INF" 
 				            + File.separatorChar + "src";
         }
@@ -444,7 +454,7 @@ public class ApplicationConfig {
         if ("".equals(rfl)) {
             rfl = System.getProperty("scooter.home") + File.separatorChar + "lib";
             if (!FileUtil.pathExistAndHasFiles(rfl)) {
-                rfl = realPath 
+                rfl = applicationPath 
 							+ File.separatorChar + "WEB-INF" 
 							+ File.separatorChar + "lib";
             }
@@ -469,27 +479,27 @@ public class ApplicationConfig {
     }
     
     private void initializeApp() {
-        webappLibPath = applicationRootPath + File.separatorChar + "lib";
+    	webappLibPath = applicationPath + File.separatorChar + "lib";
         
         String cfl = System.getProperty(SYSTEM_KEY_CLASSFILE, "");
         if ("".equals(cfl)) {
-            cfl = applicationRootPath + File.separatorChar + "build" 
+            cfl = applicationPath + File.separatorChar + "build" 
                                       + File.separatorChar + "classes";
         }
         classFileLocationPath = cfl;
         
         String pfl = System.getProperty(SYSTEM_KEY_PROPERTYFILE, "");
         if ("".equals(pfl)) {
-            pfl = applicationRootPath + File.separatorChar + "source" 
-            						  + File.separatorChar + "test" 
-            						  + File.separatorChar + "config";
+            pfl = applicationPath + File.separatorChar + "source" 
+            					  + File.separatorChar + "test" 
+            					  + File.separatorChar + "config";
         }
         propertyFileLocationPath = pfl;
         
         String sfl = System.getProperty(SYSTEM_KEY_SOURCEFILE, "");
         if ("".equals(sfl)) {
-            sfl = applicationRootPath + File.separatorChar + "source" 
-            						  + File.separatorChar + "src";
+            sfl = applicationPath + File.separatorChar + "source" 
+            					  + File.separatorChar + "test";
         }
         sourceFileLocationPath = sfl;
         
@@ -512,7 +522,7 @@ public class ApplicationConfig {
         }
         
         if (!FileUtil.pathExistAndHasFiles(referencesLibPath)) {
-            log("ERROR ERROR ERROR => There are jar files in the lib location.");
+            log("ERROR ERROR ERROR => There are no jar files in the lib location.");
             log("Stop initializtion process. Exit now ...");
         }
         
@@ -527,6 +537,59 @@ public class ApplicationConfig {
         LogUtil.enableLogger();
     }
     
+    private void preloadClasses(String codeDir, String pkgPrefix) {
+    	if (codeDir == null) {
+    		log.error("Error in precompileClasses(): codeDir is null.");
+    	}
+    	
+		if (pkgPrefix == null) pkgPrefix = "";
+    	
+    	try {
+	    	File classDir = new File(codeDir);
+	    	Set classNames = new HashSet();
+	    	getClassNamesSet(codeDir, classNames);
+	    	Iterator it = classNames.iterator();
+	    	while(it.hasNext()) {
+	    		String classFileName = (String)it.next();
+	    		String className = classFileName.substring(classDir.getCanonicalPath().length());
+	    		if (className.startsWith(File.separator)) {
+	    			className = className.substring(1);
+	    		}
+	    		if (className.endsWith(".class")) {
+	    			className = className.substring(0, className.length() - 6);
+	    		}
+	    		else if (className.endsWith(".java")) {
+	    			className = className.substring(0, className.length() - 5);
+	    		}
+	    		else {
+	    			continue;
+	    		}
+	    		className = className.replace(File.separatorChar, '.');
+	    		if (className.startsWith(pkgPrefix) || "".equals(pkgPrefix)) {
+	    			OrmObjectFactory.getInstance().loadClass(className);
+	    		}
+	    	}
+    	} catch (Exception ex) {
+    		ex.printStackTrace();
+    		log.error("PrecompileClasses error in listing files under " + codeDir + ": " + ex.getMessage());
+    	}
+    }
+    
+    private void getClassNamesSet(String dirPath, Set items) throws IOException {
+    	File dir = new File(dirPath);
+    	File[] files = dir.listFiles();
+    	for (int i = 0; i < files.length; i++) {
+    		File f = files[i];
+    		String fullName = f.getCanonicalPath();
+    		if (f.isDirectory()) {
+    			getClassNamesSet(fullName, items);
+    		}
+    		else {
+    			items.add(fullName);
+    		}
+    	}
+    }
+    
     private static String detectContextName(String path) {
         if (path.endsWith(File.separator)) path = path.substring(0, path.length() -1);
         return path.substring(path.lastIndexOf(File.separatorChar) + 1);
@@ -535,8 +598,7 @@ public class ApplicationConfig {
     private LogConfig logConfig;
     private long applicationStartTime = 0L;
     private boolean applicationStarted;
-    private String realPath;
-    private String applicationRootPath;
+    private String applicationPath;
     private String contextName;
     private String classFileLocationPath;
     private String propertyFileLocationPath;

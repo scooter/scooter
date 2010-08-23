@@ -10,7 +10,7 @@ package com.scooterframework.cache;
 /**
  * CacheStore class provides convenient access to default cache provider.
  * 
- * All methods signatures are the same as those defined in <tt>Cache</tt> 
+ * <p>All methods signatures are the same as those defined in <tt>Cache</tt> 
  * interface except that they are all static here.
  * 
  * @author (Fei) John Chen
@@ -24,7 +24,7 @@ public class CacheStore {
 	 * if the cache contains no mapping for this key.
      */
 	public static Object get(String key) {
-		Cache c = CacheProviderFactory.getInstance().getDefaultCache();
+		Cache c = CacheProviderHelper.getDefaultCache();
 		return c.get(key);
 	}
 	
@@ -34,7 +34,7 @@ public class CacheStore {
 	 * @return true if successful
 	 */
 	public static boolean put(String key, Object obj) {
-		Cache c = CacheProviderFactory.getInstance().getDefaultCache();
+		Cache c = CacheProviderHelper.getDefaultCache();
 		return c.put(key, obj);
 	}
 	
@@ -43,7 +43,7 @@ public class CacheStore {
 	 * @return true if successful
 	 */
 	public static boolean remove(String key) {
-		Cache c = CacheProviderFactory.getInstance().getDefaultCache();
+		Cache c = CacheProviderHelper.getDefaultCache();
 		return c.remove(key);
 	}
 	
@@ -51,7 +51,7 @@ public class CacheStore {
 	 * Removes all key/value pairs from cache.
 	 */
 	public static void clear() {
-		Cache c = CacheProviderFactory.getInstance().getDefaultCache();
+		Cache c = CacheProviderHelper.getDefaultCache();
 		c.clear();
 	}
 }

@@ -89,6 +89,6 @@ public class HasManyRecordRelation extends RecordRelation {
             opts.putAll(m);
         }
         
-        return ActiveRecordUtil.getHomeInstance(getRelation().getTargetClass()).findAll(fkData, opts);
+        return ActiveRecordUtil.getGateway(getRelation().getTargetClass()).findAll(fkData, opts);
     }
 }

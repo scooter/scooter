@@ -9,7 +9,7 @@ package com.scooterframework.web.util;
 
 import java.util.Map;
 
-import com.scooterframework.test.ApplicationTest;
+import com.scooterframework.test.ScooterTest;
 
 /**
  * ATest class
@@ -17,7 +17,7 @@ import com.scooterframework.test.ApplicationTest;
  * @author (Fei) John Chen
  *
  */
-public class ATest extends ApplicationTest {
+public class ATest extends ScooterTest {
 	
 	/**
 	 * Test to create an ajax link for TEXT processing

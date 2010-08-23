@@ -28,7 +28,7 @@ public class ACH {
             return getAAC();
         }
         else {
-            throw new RuntimeException("Unknown ActionContext type: " + type + ".");
+            throw new IllegalArgumentException("Unknown ActionContext type: " + type + ".");
         }
     }
     

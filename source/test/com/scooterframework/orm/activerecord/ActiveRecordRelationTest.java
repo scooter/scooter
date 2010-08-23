@@ -10,9 +10,12 @@ package com.scooterframework.orm.activerecord;
 import java.util.Date;
 
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
-import com.scooterframework.test.ScooterApplicationTest;
+import com.scooterframework.test.ScooterTest;
+import com.scooterframework.test.models.Owner;
 import com.scooterframework.test.models.Pet;
 import com.scooterframework.test.models.Specialty;
+import com.scooterframework.test.models.Vet;
+import com.scooterframework.test.models.VetSpecialty;
 import com.scooterframework.test.models.Visit;
 import com.scooterframework.web.util.O;
 
@@ -21,7 +24,7 @@ import com.scooterframework.web.util.O;
  * 
  * @author (Fei) John Chen
  */
-public class ActiveRecordRelationTest extends ScooterApplicationTest {
+public class ActiveRecordRelationTest extends ScooterTest {
 	
 	private Object getNextPetID() {
 		String findNextID = "SELECT (max(id)+1) FROM pets";
@@ -39,51 +42,51 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 	}
 	
 	public void test_hasManyThrough_add_and_detach() {
-		ActiveRecord linda = vetHome.findFirst("first_name='Linda'");
+		ActiveRecord linda = Vet.findFirst("first_name='Linda'");
 		AssociatedRecords assocs = linda.allAssociated("specialties");
 		assertEquals("total specialties for Linda", 2, assocs.size());
-		assertEquals("total specialties before add", 3, specialtyHome.findAll().size());
-		assertEquals("total vetSpecialties before add", 5, vetSpecialtyHome.findAll().size());
+		assertEquals("total specialties before add", 3, Specialty.findAll().size());
+		assertEquals("total vetSpecialties before add", 5, VetSpecialty.findAll().size());
 		
-		ActiveRecord newSpecialty = new Specialty();
+		ActiveRecord newSpecialty = Specialty.newRecord();
 		newSpecialty.setData("id", getNextSpecialityID());
 		newSpecialty.setData("name", "Java");
 		assocs.add(newSpecialty);
 		
 		assertEquals("total specialties for Linda after add", 3, assocs.size());
-		assertEquals("total specialties after add", 4, specialtyHome.findAll().size());
-		assertEquals("total vetSpecialties after add", 6, vetSpecialtyHome.findAll().size());
+		assertEquals("total specialties after add", 4, Specialty.findAll().size());
+		assertEquals("total vetSpecialties after add", 6, VetSpecialty.findAll().size());
 		
 		//should delete the joint record, but keep the newly added specialty
 		assocs.detach(newSpecialty);
 		assertEquals("total specialties for Linda after detach", 2, assocs.count());
-		assertEquals("total specialties after detach", 4, specialtyHome.findAll().size());
-		assertEquals("total vetSpecialties after detach", 5, vetSpecialtyHome.findAll().size());
+		assertEquals("total specialties after detach", 4, Specialty.findAll().size());
+		assertEquals("total vetSpecialties after detach", 5, VetSpecialty.findAll().size());
 		
 		newSpecialty.delete();
-		assertEquals("total specialties after delete", 3, specialtyHome.findAll().size());
+		assertEquals("total specialties after delete", 3, Specialty.findAll().size());
 	}
 	
 	public void test_hasManyThrough_add_and_delete() {
-		ActiveRecord linda = vetHome.findFirst("first_name='Linda'");
+		ActiveRecord linda = Vet.findFirst("first_name='Linda'");
 		AssociatedRecords assocs = linda.allAssociated("specialties");
 		assertEquals("total specialties for Linda", 2, assocs.size());
-		assertEquals("total specialties before add", 3, specialtyHome.findAll().size());
-		assertEquals("total vetSpecialties before add", 5, vetSpecialtyHome.findAll().size());
-		
-		ActiveRecord newSpecialty = new Specialty();
+		assertEquals("total specialties before add", 3, Specialty.findAll().size());
+		assertEquals("total vetSpecialties before add", 5, VetSpecialty.findAll().size());
+
+		ActiveRecord newSpecialty = Specialty.newRecord();
 		newSpecialty.setData("id", getNextSpecialityID());
 		newSpecialty.setData("name", "Php");
 		assocs.add(newSpecialty);
 		
 		assertEquals("total specialties for Linda after add", 3, assocs.size());
-		assertEquals("total specialties after add", 4, specialtyHome.findAll().size());
-		assertEquals("total vetSpecialties after add", 6, vetSpecialtyHome.findAll().size());
+		assertEquals("total specialties after add", 4, Specialty.findAll().size());
+		assertEquals("total vetSpecialties after add", 6, VetSpecialty.findAll().size());
 				
 		assocs.delete(newSpecialty);
 		assertEquals("total specialties for Linda after delete", 2, assocs.count());
-		assertEquals("total specialties after delete", 3, specialtyHome.findAll().size());
-		assertEquals("total vetSpecialties after delete", 5, vetSpecialtyHome.findAll().size());
+		assertEquals("total specialties after delete", 3, Specialty.findAll().size());
+		assertEquals("total vetSpecialties after delete", 5, VetSpecialty.findAll().size());
 	}
 	
 	public void test_hasMany_add_and_delete_child() {
@@ -106,14 +109,14 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		 *             LEFT OUTER JOIN TYPES ON OWNERS_PETS.TYPE_ID=TYPES.ID 
 		 * WHERE OWNERS.ID = 6
 		 */
-		ActiveRecord owner6 = ownerHome.findFirst("id=6", "include:pets=>visits, pets=>type");
+		ActiveRecord owner6 = Owner.findFirst("id=6", "include:pets=>visits, pets=>type");
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		AssociatedRecords assocs = owner6.allAssociated("pets");
 		assertEquals("total pets for owner #6 before add a pet in assocs", 2, assocs.size());
 		assertEquals("total pets for owner #6 before add a pet", "2", ""+owner6.getField("pets_count"));
 		assertEquals("total visits for owner #6 before add a pet", 4, O.allAssociatedRecordsOf(owner6, "pets.visits").size());
 		
-		ActiveRecord wonda = new Pet();
+		ActiveRecord wonda = Pet.newRecord();
 		wonda.setData("id", getNextPetID());
 		wonda.setData("name", "wonda");
 		wonda.setData("birth_date", new Date());
@@ -138,7 +141,7 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		 * INSERT INTO VISITS (PET_ID, VISIT_DATE, DESCRIPTION) VALUES (14, null, 'visit 1 for wonda')
 		 */
 		//create a new visit for the new pet
-		ActiveRecord wondaVisit = new Visit();
+		ActiveRecord wondaVisit = Visit.newRecord();
 		wondaVisit.setData("id", getNextVisitID());
 		wondaVisit.setData("pet_id", wonda.getField("id"));
 		wondaVisit.setData("description", "visit 1 for wonda");
@@ -184,14 +187,14 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		 *             INNER JOIN TYPES ON OWNERS_PETS.TYPE_ID=TYPES.ID 
 		 * WHERE OWNERS.ID = 6
 		 */
-		ActiveRecord owner6 = ownerHome.findFirst("id=6", "strict_include:pets=>visits, pets=>type");
+		ActiveRecord owner6 = Owner.findFirst("id=6", "strict_include:pets=>visits, pets=>type");
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		AssociatedRecords assocs = owner6.allAssociated("pets");
 		assertEquals("total pets for owner #6 before add a pet in assocs", 2, assocs.size());
 		assertEquals("total pets for owner #6 before add a pet", "2", ""+owner6.getField("pets_count"));
 		assertEquals("total visits for owner #6 before add a pet", 4, O.allAssociatedRecordsOf(owner6, "pets.visits").size());
 		
-		ActiveRecord wonda = new Pet();
+		ActiveRecord wonda = Pet.newRecord();
 		wonda.setData("id", getNextPetID());
 		wonda.setData("name", "wonda");
 		wonda.setData("birth_date", new Date());
@@ -216,7 +219,7 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		 * INSERT INTO VISITS (PET_ID, VISIT_DATE, DESCRIPTION) VALUES (14, null, 'visit 1 for wonda')
 		 */
 		//create a new visit for the new pet
-		ActiveRecord wondaVisit = new Visit();
+		ActiveRecord wondaVisit = Visit.newRecord();
 		wondaVisit.setData("id", getNextVisitID());
 		wondaVisit.setData("pet_id", wonda.getField("id"));
 		wondaVisit.setData("description", "visit 1 for wonda");
@@ -246,7 +249,7 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		/**
 		 * SELECT OWNERS.* FROM OWNERS WHERE ID = 6
 		 */
-		ActiveRecord owner6 = ownerHome.findFirst("id=6");
+		ActiveRecord owner6 = Owner.findFirst("id=6");
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		
 		/**
@@ -265,7 +268,7 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		/**
 		 * SELECT PETS.* FROM PETS WHERE ID = 8
 		 */
-		ActiveRecord pet8 = petHome.findFirst("id=8");
+		ActiveRecord pet8 = Pet.findFirst("id=8");
 		
 		/**
 		 * UPDATE OWNERS SET PETS_COUNT = 1 WHERE ID = 6
@@ -296,14 +299,14 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		/**
 		 * SELECT PETS.* FROM PETS WHERE ID = 8
 		 */
-		ActiveRecord pet8 = petHome.findFirst("id=8");
+		ActiveRecord pet8 = Pet.findFirst("id=8");
 		assertEquals("name of pet #8", "Max", pet8.getField("name").toString());
 		assertEquals("owner id of pet #8", "6", pet8.getField("owner_id").toString());
 		
 		/**
 		 * SELECT OWNERS.* FROM OWNERS WHERE ID = 2
 		 */
-		ActiveRecord owner2 = ownerHome.findFirst("id=2");
+		ActiveRecord owner2 = Owner.findFirst("id=2");
 		assertEquals("first name of owner #2", "Betty", owner2.getField("first_name").toString());
 		assertEquals("total pets for owner #2 before adding a pet", "1", ""+owner2.getField("pets_count"));
 		
@@ -321,7 +324,7 @@ public class ActiveRecordRelationTest extends ScooterApplicationTest {
 		/**
 		 * SELECT OWNERS.* FROM OWNERS WHERE ID = 6
 		 */
-		ActiveRecord owner6 = ownerHome.findFirst("id=6");
+		ActiveRecord owner6 = Owner.findFirst("id=6");
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		assertEquals("total pets for owner #6 after detaching a pet", "1", ""+owner6.getField("pets_count"));
 		
