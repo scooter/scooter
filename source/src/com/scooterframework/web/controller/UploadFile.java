@@ -68,7 +68,7 @@ public class UploadFile {
 	 * @throws Exception
 	 */
 	public void writeTo(String dirPath) throws Exception {
-		write(new File(dirPath + File.pathSeparator + fi.getName()));
+		write(new File(dirPath + File.separator + fi.getName()));
 	}
 	
 	/**

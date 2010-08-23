@@ -1324,7 +1324,7 @@ public class ActionControl {
     /**
      * Returns root path to the application.
      */
-    protected String applicationPath() {
+    public static String applicationPath() {
     	return ApplicationConfig.getInstance().getApplicationPath();
     }
     
