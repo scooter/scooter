@@ -1,0 +1,133 @@
+$if(package_name)$
+$package_line$
+$endif$
+
+import static com.scooterframework.web.controller.ActionControl.*;
+
+import com.scooterframework.admin.Constants;
+import com.scooterframework.admin.FilterManagerFactory;
+import com.scooterframework.orm.activerecord.ActiveRecord;
+import com.scooterframework.orm.misc.Paginator;
+import com.scooterframework.web.util.R;
+
+import $full_model_class_name$;
+
+/**
+ * $controller_class_name$ class handles $resource_name$ related access.
+ */
+public class $controller_class_name$ extends ApplicationController {
+
+    /**
+     * Constructor
+     */
+    public $controller_class_name$() {
+    }
+
+    /**
+     * <tt>index</tt> method returns a list of <tt>$resource_name$</tt> records.
+     * If the value of <tt>paged</tt> parameter is <tt>true</tt>, a paginated list is returned.
+     */
+    public String index() {
+        if ("true".equals(p(Constants.PAGED))) {
+            Paginator page = jdbcPaginator($model_class_name$.class, params());
+            setViewData("$model_name$_page", page);
+            return forwardTo(viewPath("paged_list"));
+        }
+        setViewData("$list_key$", $model_class_name$.findAll());
+        return null;
+    }
+    
+    /**
+     * <tt>show</tt> method returns a <tt>$model_name$</tt> record.
+     */
+    public String show() {
+        ActiveRecord $model_name$ = $model_class_name$.findById(p("id"));
+        if ($model_name$ == null) {
+            flash("notice", "There is no $model_name$ record with primary key id as " + p("id") + ".");
+        }
+        else {
+            setViewData("$model_name$", $model_name$);
+        }
+        return null;
+    }
+    
+    /**
+     * <tt>add</tt> method prepares meta data for adding a new <tt>$model_name$</tt> record.
+     */
+    public String add() {
+        setViewData("$model_name$", $model_class_name$.newRecord());
+        return null;
+    }
+    
+    /**
+     * <tt>create</tt> method creates a new <tt>$model_name$</tt> record.
+     */
+    public String create() {
+        ActiveRecord new$model_name_camel$ = null;
+        try {
+            new$model_name_camel$ = $model_class_name$.newRecord();
+            new$model_name_camel$.setData(params());
+            new$model_name_camel$.save();
+            flash("notice", "$model_name_camel$ was successfully created.");
+            
+            return redirectTo(R.resourcePath("$resource_name$"));
+        }
+        catch(Exception ex) {
+            log.error("Error in create() caused by " + ex.getMessage());
+            flash("error", "There was a problem creating the $model_name$ record.");
+        }
+        
+        setViewData("$model_name$", new$model_name_camel$);
+        return forwardTo(viewPath("add"));
+    }
+    
+    /**
+     * <tt>edit</tt> method prepares data for editing an existing <tt>$model_name$</tt> record.
+     */
+    public String edit() {
+        return show();
+    }
+    
+    /**
+     * <tt>update</tt> method updates an existing <tt>$model_name$</tt> record.
+     */
+    public String update() {
+        ActiveRecord $model_name$ = null;
+        try {
+            $model_name$ = $model_class_name$.findById(p("id"));
+            if ($model_name$ != null) {
+                $model_name$.setData(params());
+                $model_name$.update();
+                flash("notice", "$model_name_camel$ was successfully updated.");
+                
+                return redirectTo(R.resourceRecordPath("$resource_name$", $model_name$));
+            }
+            else {
+                flash("notice", "There is no $model_name$ record with primary key id as " + p("id") + ".");
+            }
+        }
+        catch(Exception ex) {
+            log.error("Error in update() caused by " + ex.getMessage());
+            flash("error", "There was a problem updating the $model_name$ record.");
+        }
+        
+        setViewData("$model_name$", $model_name$);
+        return forwardTo(viewPath("edit"));
+    }
+    
+    /**
+     * <tt>delete</tt> method deletes a <tt>$model_name$</tt> record.
+     */
+    public String delete() {
+        ActiveRecord $model_name$ = $model_class_name$.findById(p("id"));
+        if ($model_name$ != null) {
+            $model_name$.delete();
+            flash("notice", "$model_name_camel$ was successfully deleted.");
+        }
+        else {
+            flash("notice", "There is no $model_name$ record with primary key id as " + p("id") + ".");
+        }
+        
+        return redirectTo(R.resourcePath("$resource_name$"));
+    }
+}

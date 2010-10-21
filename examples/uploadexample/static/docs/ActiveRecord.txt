@@ -1,0 +1,661 @@
+
+    /************************************************************************
+     *
+     * The following static methods should be implemented in subclass 
+     * either by custom coding or by load-time enhancement (default).
+     *
+     ************************************************************************/
+    
+    private static String UO = "should never be invoked. Use a subclass of ActiveRecord.";
+
+    /**
+     *
+     * FIND related
+     *
+     */
+
+    /**
+     * Finds the record with the given id, assuming ID is a column.
+     *
+     * If there is no column name like "ID", an exception will be thrown.
+     *
+     * @param id the id of the record
+     * @return the ActiveRecord associated with the <tt>id</tt>
+     */
+    public static ActiveRecord findById(Object id) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the SQL query.</p>
+     *
+     * @param sql       a valid SQL query string
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAllBySQL(String sql) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the SQL query.</p>
+     *
+     * @param sql       a valid SQL query string
+     * @param inputs    a map of name and value pairs
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAllBySQL(String sql, Map inputs) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the sql corresponding to the
+     * sql key. </p>
+     *
+     * @param sqlKey    a key to a sql string defined in <tt>sql.properties</tt> file
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAllBySQLKey(String sqlKey) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the sql corresponding to the
+     * sql key. </p>
+     *
+     * @param sqlKey    a key to a sql string defined in <tt>sql.properties</tt> file
+     * @param inputs    a map of name and value pairs
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAllBySQLKey(String sqlKey, Map inputs) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions.</p>
+     *
+     * <p>This is a dynamic finder method.
+     * See top of this class for dynamic finder examples.</p>
+     *
+     * @param columns  a string of column names linked by "_and_".
+     * @param values   an Object[] array
+     * @return  ActiveRecord
+     */
+    public static ActiveRecord findFirstBy(String columns, Object[] values) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions.</p>
+     *
+     * <p>This is a dynamic finder method.
+     * See top of this class for dynamic finder examples.</p>
+     *
+     * @param columns  a string of column names linked by "_and_".
+     * @param values   an Object[] array
+     * @return  ActiveRecord
+     */
+    public static ActiveRecord findLastBy(String columns, Object[] values) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions.</p>
+     *
+     * <p>This is a dynamic finder method.
+     * See top of this class for dynamic finder examples.</p>
+     *
+     * @param columns  a string of column names linked by "_and_".
+     * @param values   an Object[] array
+     * @return  List of ActiveRecord objects
+     */
+    public static List findAllBy(String columns, Object[] values) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions.</p>
+     *
+     * <p>This is a dynamic finder method.
+     * See top of this class for dynamic finder examples.</p>
+     *
+     * @param columns  a string of column names linked by "_and_".
+     * @param values   an Object[] array
+     * @param options  a map of options
+     * @return  List of ActiveRecord objects
+     */
+    public static List findAllBy(String columns, Object[] values, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions.</p>
+     *
+     * <p>This is a dynamic finder method.
+     * See top of this class for dynamic finder examples.</p>
+     *
+     * @param columns  a string of column names linked by "_and_".
+     * @param values   an Object[] array
+     * @param options  a string of options
+     * @return  List of ActiveRecord objects
+     */
+    public static List findAllBy(String columns, Object[] values, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records of a table.</p>
+     *
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll() {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(Map conditions) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @param options a map of options
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(Map conditions, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @param options a string of options
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(Map conditions, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(String conditionsSQL) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param options a string of options.
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(String conditionsSQL, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> and
+     * <tt>conditionsSQLData</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(String conditionsSQL, Map conditionsSQLData) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>,
+     * <tt>conditionsSQLData</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @param options a map of options.
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(String conditionsSQL, Map conditionsSQLData, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds all the records that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>,
+     * <tt>conditionsSQLData</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @param options a string of options.
+     * @return a list of ActiveRecord objects
+     */
+    public static List findAll(String conditionsSQL, Map conditionsSQLData, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record of a table.</p>
+     *
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst() {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(Map conditions) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @param options a map of options
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(Map conditions, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @param options a string of options
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(Map conditions, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(String conditionsSQL) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param options a string of options.
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(String conditionsSQL, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> and
+     * <tt>conditionsSQLData</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(String conditionsSQL, Map conditionsSQLData) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>,
+     * <tt>conditionsSQLData</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @param options a map of options.
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(String conditionsSQL, Map conditionsSQLData, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the first record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>,
+     * <tt>conditionsSQLData</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @param options a string of options.
+     * @return the first ActiveRecord found
+     */
+    public static ActiveRecord findFirst(String conditionsSQL, Map conditionsSQLData, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record of a table.</p>
+     *
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast() {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(Map conditions) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @param options a map of options
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(Map conditions, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @param options a string of options
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(Map conditions, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(String conditionsSQL) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param options a string of options.
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(String conditionsSQL, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> and
+     * <tt>conditionsSQLData</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(String conditionsSQL, Map conditionsSQLData) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>,
+     * <tt>conditionsSQLData</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @param options a map of options.
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(String conditionsSQL, Map conditionsSQLData, Map options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Finds the last record that satisfy the conditions and options.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>,
+     * <tt>conditionsSQLData</tt> and <tt>options</tt> examples.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @param options a string of options.
+     * @return the last ActiveRecord found
+     */
+    public static ActiveRecord findLast(String conditionsSQL, Map conditionsSQLData, String options) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    
+    /**
+     *
+     * UPDATE related
+     *
+     */
+    /**
+     * <p>Updates all the records of a table.</p>
+     *
+     * <p>This method sends a single SQL UPDATE statement to database. No
+     * callbacks are triggered. If callbacks are necessary for handling
+     * associations, use <tt>findAll</tt> method to retrieve a list of records
+     * and then call each record's <tt>update()</tt> method.</p>
+     *
+     * <p><tt>fieldData</tt> map is used to construct SET clause of the
+     * generated SQL. It consists of column name and its value pairs in the map.
+     * Primary key column and read-only columns are not updatable.</p>
+     *
+     * @param fieldData a map of field name and its data to be set on any records
+     * @return int number of records updated
+     */
+    public static int updateAll(Map fieldData) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Updates all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> examples.</p>
+     *
+     * <p>This method sends a single SQL UPDATE statement to database. No
+     * callbacks are triggered. If callbacks are necessary for handling
+     * associations, use <tt>findAll</tt> method to retrieve a list of records
+     * and then call each record's <tt>update()</tt> method.</p>
+     *
+     * <p><tt>fieldData</tt> map is used to construct SET clause of the
+     * generated SQL. It consists of column name and its value pairs in the map.
+     * Primary key column and read-only columns are not updatable.</p>
+     *
+     * @param fieldData a map of field name and its data to be set on any
+     *          records that satisfy the conditions.
+     * @param conditionsSQL a SQL fragment string
+     * @return int number of records updated
+     */
+    public static int updateAll(Map fieldData, String conditionsSQL) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Updates all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>
+     * and <tt>conditionsSQLData</tt> examples.</p>
+     *
+     * <p>This method sends a single SQL UPDATE statement to database. No
+     * callbacks are triggered. If callbacks are necessary for handling
+     * associations, use <tt>findAll</tt> method to retrieve a list of records
+     * and then call each record's <tt>update()</tt> method.</p>
+     *
+     * <p><tt>fieldData</tt> map is used to construct SET clause of the
+     * generated SQL. It consists of column name and its value pairs in the map.
+     * Primary key column and read-only columns are not updatable.</p>
+     *
+     * @param fieldData a map of field name and its data to be set.
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @return int number of records updated
+     */
+    public static int updateAll(Map fieldData, String conditionsSQL, Map conditionsSQLData) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+
+    /**
+     *
+     * DELETE related
+     *
+     */
+
+    /**
+     * Deletes the record with the given id.
+     *
+     * If there is no column name like "ID", an exception will be thrown.
+     *
+     * @param id key to the object with field name "ID"
+     * @return int number of records deleted
+     */
+    public static int deleteById(Object id) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * Deletes the record with the given data map containing primary keys.
+     *
+     * If not all primary key columns have data, an exception will be thrown.
+     *
+     * @param inputs a map of name and value pairs
+     * @return int number of records deleted
+     */
+    public static int deleteByPrimaryKeyMap(Map inputs) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Deletes all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditions</tt> examples.</p>
+     *
+     * <p>This method sends a single SQL DELETE statement to database. No
+     * callbacks are triggered. If callbacks are necessary for handling
+     * associations, use <tt>findAll</tt> method to retrieve a list of records
+     * and then call each record's <tt>delete()</tt> method.</p>
+     *
+     * @param conditions a map of column name and value pairs
+     * @return int number of records deleted
+     */
+    public static int deleteAll(Map conditions) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Deletes all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt> examples.</p>
+     *
+     * <p>This method sends a single SQL DELETE statement to database. No
+     * callbacks are triggered. If callbacks are necessary for handling
+     * associations, use <tt>findAll</tt> method to retrieve a list of records
+     * and then call each record's <tt>delete()</tt> method.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @return int number of records deleted
+     */
+    public static int deleteAll(String conditionsSQL) {
+        throw new UnsupportedOperationException(UO);
+    }
+
+    /**
+     * <p>Deletes all the records that satisfy the conditions.</p>
+     *
+     * <p>See top of this class for <tt>conditionsSQL</tt>
+     * and <tt>conditionsSQLData</tt> examples.</p>
+     *
+     * <p>This method sends a single SQL DELETE statement to database. No
+     * callbacks are triggered. If callbacks are necessary for handling
+     * associations, use <tt>findAll</tt> method to retrieve a list of records
+     * and then call each record's <tt>delete()</tt> method.</p>
+     *
+     * @param conditionsSQL a SQL fragment string
+     * @param conditionsSQLData a data map for dynamic attributes in <tt>conditionsSQL</tt>
+     * @return int number of records deleted
+     */
+    public static int deleteAll(String conditionsSQL, Map conditionsSQLData) {
+        throw new UnsupportedOperationException(UO);
+    }
+    
+   /**
+    *
+    * OTHER methods to be enhanced
+    *
+    */
+
+
+    /************************************************************************
+     *
+     * End of subclass static enhancement
+     *
+     ************************************************************************/
+

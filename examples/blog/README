@@ -1,0 +1,22 @@
+Blog Application
+================
+
+----------
+What is it
+----------
+This is Scooter-powered blog application. 
+See http://www.scooterframework.com/docs/blog.html for more details.
+
+-------------------
+How to run blog app
+-------------------
+
+Run blog with default port 8080
+linux/mac>%JAVA_HOME%/java -jar tools/server.jar examples/blog
+windows  >$JAVA_HOME/java  -jar tools/server.jar examples/blog
+
+Run blog installed in user home directory with port 9090
+linux/mac>%JAVA_HOME%/java -jar tools/server.jar /home/joe/blog 9090
+windows  >$JAVA_HOME/java  -jar tools/server.jar /home/joe/blog 9090
+
+Note: "JAVA_HOME" must point to a JDK. This is required by Scooter's autocompiler.

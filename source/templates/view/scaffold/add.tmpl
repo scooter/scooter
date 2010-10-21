@@ -1,0 +1,32 @@
+<%@ page import="
+	com.scooterframework.web.util.F,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.W"
+%>
+
+<h2>Add $model$</h2>
+<%=W.errorMessage("$model$")%>
+
+<%=F.formForOpen("$resource$", "$model$")%>
+$columns: { column |
+$if(column.isLongText)$
+<p>
+  <%=F.label("$column.columnNameLower$")%><br />
+  <textarea id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" cols="60" rows="10"><%=O.hv("$model$.$column.columnNameLower$")%></textarea>
+</p>
+$else$
+<p>
+  <%=F.label("$column.columnNameLower$")%><br />
+  <input type="text" id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" value="<%=O.hv("$model$.$column.columnNameLower$")%>" size="80" />
+</p>
+$endif$
+}$
+
+  <input id="$model$_submit" name="commit" type="submit" value="Create" />&nbsp;&nbsp;&nbsp;<input type="reset"/>
+<%=F.formForClose("$resource$")%>
+
+<br />
+
+<%=W.labelLink("List", R.resourcePath("$resource$"))%>|
+<%=W.labelLink("Paged List", R.resourcePath("$resource$") + "?paged=true")%>

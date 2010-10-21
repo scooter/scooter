@@ -1,0 +1,71 @@
+Scooter Framework
+=================
+
+----------
+What is it
+----------
+This is an unreleased version of the latest Scooter Framework source code. 
+Please notice that this version of Scooter is significantly different from the 
+released version posted on http://www.scooterframework.com/". 
+But this is a much better one.
+
+--------------------
+How to create an app
+--------------------
+Creating an app is much easier with this version. Just one command:
+
+Creating an app under webapps directory:
+>java -jar tools/create.jar blog
+
+Creating an app in user's home directory:
+>java -jar tools/create.jar /home/users/john/projects/blog
+
+Use -help option to get more options.
+
+
+-----------------
+How to run an app
+-----------------
+
+Run an app with port 9090
+>java -jar tools/server.jar blog 9090
+
+Run an app with default port 8080
+>java -jar tools/server.jar /home/users/john/projects/blog
+
+
+---------------------------------
+How to find out what are deployed
+---------------------------------
+http://localhost:8080/blog/files/list
+
+
+--------------------
+How to build scooter
+--------------------
+1. Set JAVA_HOME environment variable pointing to a JDK installation.
+2. Type 'ant build' to create a scooter.jar
+
+Type 'ant' to get a list of targets
+
+
+---------------------------
+How to test Scooter and App
+---------------------------
+
+Test Scooter framework:
+>ant test
+
+Unit test an application:
+>ant app_test_unit -DappPath=webapps/blog
+
+Functional test an application:
+>ant app_test_fun -DappPath=/home/users/john/projects/blog
+
+
+-----
+TODOs
+-----
+
+1. Update examples
+2. Update documentations

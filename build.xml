@@ -1,0 +1,345 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+
+<project name="scooter_core" default="usage" basedir=".">
+
+	<property name="javac.source"           value="1.5"/>
+	<property name="javac.target"           value="1.5"/>
+	<property name="build.outdir"           value="build"/>
+	<property name="compile.outdir"         value="build/classes"/>
+	<property name="jar.outdir"             value="build/jar"/>
+	<property name="javadoc.outdir"         value="docs/javadoc"/>
+	<property name="junitreport.outdir"     value="docs/reports"/>
+	<property name="lib.dir"                value="lib"/>
+	<property name="tools.dir"              value="tools"/>
+	<property name="plugins.dir"            value="plugins"/>
+
+	<!--Set framework properties-->
+	<property name="src.dir"                value="source/src"/>
+	<property name="testsrc.dir"            value="source/test"/>
+	<property name="scooterjar.outdir"      value="lib"/>
+	<property name="scooterjar.name"        value="scooter.jar"/>
+	<property name="createjar.name"         value="create.jar"/>
+	<property name="connectiontestjar.name" value="connection-test.jar"/>
+	<property name="generatejar.name"       value="generate.jar"/>
+	<property name="generatesignonjar.name" value="generate-signon.jar"/>
+	<property name="serverjar.name"         value="server.jar"/>
+	<property name="jetty.home"             value="tools/servers/jetty"/>
+	<property name="jetty.lib.dir"          value="${jetty.home}/lib"/>
+	<property name="jetty.startjar.name"    value="${jetty.home}/start.jar"/>
+
+	<!--Set app properties-->
+	<property name="app.build.outdir"           value="${appPath}/WEB-INF/build"/>
+	<property name="app.compile.outdir"         value="${appPath}/WEB-INF/classes"/>
+	<property name="app.src.dir"                value="${appPath}/WEB-INF/src"/>
+	<property name="app.lib.dir"                value="${appPath}/WEB-INF/lib"/>
+	<property name="app.testsrc.dir"            value="${appPath}/WEB-INF/test"/>
+	<property name="app.unittestsrc.dir"        value="${app.testsrc.dir}/unit"/>
+	<property name="app.functionaltestsrc.dir"  value="${app.testsrc.dir}/functional"/>
+	<property name="app.tests.outdir"           value="${appPath}/static/docs/tests"/>
+	<property name="app.unittests.outdir"       value="${app.tests.outdir}/unit"/>
+	<property name="app.functionaltests.outdir" value="${app.tests.outdir}/functional"/>
+
+	<!--Set the classpath-->
+	<path id="classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+			<include name="**/*.zip" />
+		</fileset>
+		<fileset dir="${jetty.lib.dir}">
+			<include name="servlet*.jar" />
+			<include name="jsp-2.1/jsp*.jar" />
+		</fileset>
+		<pathelement path="${java.class.path}"/>
+	</path>
+
+	<path id="app.classpath">
+		<path refid="classpath" />
+		<fileset dir="${app.lib.dir}">
+			<include name="**/*.jar" />
+			<include name="**/*.zip" />
+		</fileset>
+	</path>
+
+
+	<!--Set the source path-->
+	<path id="srcpath">
+		<pathelement location="${src.dir}" />
+	</path>
+
+	<target name="usage">
+		<echo message="" />
+		<echo message="=============================="/>
+		<echo message="Scooter Framework Build Script"/>
+		<echo message="=============================="/>
+		<echo message=""/>
+		<echo message="Available targets for Scooter are:"/>
+		<echo message="----------------------------------"/>
+		<echo message=""/>
+		<echo message="all                 --> build all and deploy scooter.jar, all tools jars and docs"/>
+		<echo message="build               --> build all and deploy scooter.jar"/>
+		<echo message="clean               --> clean all outputs"/>
+		<echo message="jar                 --> package scooter.jar"/>
+		<echo message="javadoc             --> create Java Doc"/>
+		<echo message="test                --> run test"/>
+		<echo message="tools               --> package all tools jars"/>
+		<echo message="createjar           --> package tools/create.jar"/>
+		<echo message="connectiontestjar   --> package tools/connection-test.jar"/>
+		<echo message="generatejar         --> package tools/generate.jar"/>
+		<echo message="generatesignonjar   --> package tools/generate-signon.jar"/>
+		<echo message="serverjar           --> package tools/server.jar"/>
+		<echo message="usage               --> help (default)"/>
+		<echo message=""/>
+		<echo message=""/>
+		<echo message="Available targets for an application are:"/>
+		<echo message="-----------------------------------------"/>
+		<echo message=""/>
+		<echo message="app_test_unit     -DappPath=[app path] --> run unit test for an app"/>
+		<echo message="app_test_fun      -DappPath=[app path] --> run functional test for an app"/>
+		<echo message=""/>
+		<echo message="Please note that you need to have JAVA_HOME pointing to a JDK."/>
+		<echo message=""/>
+	</target>
+
+	<target name="init">
+		<tstamp/>
+		<echo>$${ant.java.version}=${ant.java.version}</echo>
+		<echo>$${ant.version}=${ant.version}</echo>
+		<echo>$${basedir}=${basedir}</echo>
+	</target>
+
+	<target name="compile" depends="init">
+		<mkdir dir="${compile.outdir}"/>
+
+		<javac includeAntRuntime="false" destdir="${compile.outdir}" debug="true" encoding="Cp1252" 
+        	source="${javac.source}" target="${javac.target}">
+			<classpath refid="classpath"/>
+			<src path="${src.dir}"/>
+			<src path="${testsrc.dir}"/>
+		</javac>
+
+		<copy todir="${compile.outdir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java"/>
+				<include name="**/**"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${jar.outdir}"/>
+		<jar destfile="${jar.outdir}/${scooterjar.name}" 
+        	 basedir="${compile.outdir}" 
+    		 excludes="**/tools/creator/** **/tools/connection/** **/tools/generator/** **/tools/signon/**" 
+        />
+	</target>
+
+	<target name="createjar" depends="compile">
+		<delete file="MANIFEST.txt"/>
+		<manifest file="MANIFEST.txt">
+			<attribute name="Main-Class" value="com.scooterframework.tools.creator.AppCreator"/>
+			<attribute name="Class-Path" value="../lib/scooter.jar ../lib/stringtemplate/antlr-2.7.7.jar ../lib/stringtemplate/stringtemplate-3.2.1.jar"/>
+		</manifest>
+		<jar destfile="${tools.dir}/${createjar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/common/*.class **/tools/creator/*.class" 
+        	 manifest="MANIFEST.txt"/>
+	</target>
+
+	<target name="connectiontestjar" depends="compile">
+		<delete file="MANIFEST.txt"/>
+		<manifest file="MANIFEST.txt">
+			<attribute name="Main-Class" value="com.scooterframework.tools.connection.ConnectionCheck"/>
+			<attribute name="Class-Path" value="../lib/log4j/log4j-1.2.15.jar ../lib/apache-commons/commons-fileupload-1.2.2.jar ../lib/scooter.jar ../lib/javassist/javassist.jar ../lib/jdbc-clients/c3p0-0.9.1.2.jar ../lib/jdbc-clients/c3p0-oracle-thin-extras-0.9.1.2.jar ../lib/jdbc-clients/h2-1.2.137.jar ../lib/jdbc-clients/hsqldb-1.8.1.2.jar ../lib/jdbc-clients/mysql-connector-java-5.1.11-bin.jar ../lib/jdbc-clients/ojdbc5.jar"/>
+		</manifest>
+		<jar destfile="${tools.dir}/${connectiontestjar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/common/*.class **/tools/connection/*.class" 
+        	 manifest="MANIFEST.txt"/>
+	</target>
+
+	<target name="generatejar" depends="compile">
+		<delete file="MANIFEST.txt"/>
+		<manifest file="MANIFEST.txt">
+			<attribute name="Main-Class" value="com.scooterframework.tools.generator.CodeGenerator"/>
+			<attribute name="Class-Path" value="../lib/log4j/log4j-1.2.15.jar ../lib/apache-commons/commons-fileupload-1.2.2.jar ../lib/scooter.jar ../lib/javassist/javassist.jar ../lib/stringtemplate/antlr-2.7.7.jar ../lib/stringtemplate/stringtemplate-3.2.1.jar ../lib/jdbc-clients/c3p0-0.9.1.2.jar ../lib/jdbc-clients/c3p0-oracle-thin-extras-0.9.1.2.jar ../lib/jdbc-clients/h2-1.2.137.jar ../lib/jdbc-clients/hsqldb-1.8.1.2.jar ../lib/jdbc-clients/mysql-connector-java-5.1.11-bin.jar ../lib/jdbc-clients/ojdbc5.jar"/>
+		</manifest>
+		<jar destfile="${tools.dir}/${generatejar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/common/*.class **/tools/generator/*.class" 
+        	 manifest="MANIFEST.txt"/>
+	</target>
+
+	<target name="generatesignonjar" depends="compile">
+		<delete file="MANIFEST.txt"/>
+		<manifest file="MANIFEST.txt">
+			<attribute name="Main-Class" value="com.scooterframework.tools.signon.SignonGenerator"/>
+			<attribute name="Class-Path" value="../lib/log4j/log4j-1.2.15.jar ../lib/apache-commons/commons-fileupload-1.2.2.jar ../lib/scooter.jar ../lib/javassist/javassist.jar ../lib/stringtemplate/antlr-2.7.7.jar ../lib/stringtemplate/stringtemplate-3.2.1.jar"/>
+		</manifest>
+		<jar destfile="${tools.dir}/${generatesignonjar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/common/*.class **/tools/signon/*.class" 
+        	 manifest="MANIFEST.txt"/>
+	</target>
+
+	<target name="serverjar" depends="compile">
+		<delete file="MANIFEST.txt"/>
+		<manifest file="MANIFEST.txt">
+			<attribute name="Main-Class" value="com.scooterframework.tools.webserver.StartServer"/>
+			<attribute name="Class-Path" value="servers/jetty/start.jar"/>
+		</manifest>
+		<jar destfile="${tools.dir}/${serverjar.name}" 
+        	 basedir="${compile.outdir}" 
+        	 includes="**/tools/webserver/*.class **/tools/common/AmbiguousAppNameException.class **/tools/common/ToolsUtil.class" 
+        	 manifest="MANIFEST.txt"/>
+	</target>
+
+	<target name="javadoc" depends="init">
+		<mkdir dir="${javadoc.outdir}"/>
+
+		<javadoc useexternalfile="true" 
+			     classpathref="classpath" 
+                 destdir="${javadoc.outdir}" 
+                 author="false" 
+                 version="false" 
+                 encoding="Cp1252" 
+                 additionalparam="-J-Xmx32m">
+			<fileset dir="${src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</javadoc>
+	</target>
+
+	<target name="test" depends="compile">
+		<mkdir dir="${junitreport.outdir}"/>
+		<mkdir dir="${junitreport.outdir}/raw"/>
+		<mkdir dir="${junitreport.outdir}/html"/>
+
+		<junit printsummary="yes" haltonfailure="no" showoutput="yes">
+			<classpath>
+				<path refid="classpath"/>
+				<pathelement path="${compile.outdir}" />
+			</classpath>
+
+			<batchtest fork="yes" todir="${junitreport.outdir}/raw/">
+				<formatter type="xml" />
+				<fileset dir="${testsrc.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${junitreport.outdir}">
+			<fileset dir="${junitreport.outdir}/raw/">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${junitreport.outdir}\html\" />
+		</junitreport>
+	</target>
+
+	<target name="app.compile" depends="init">
+		<delete dir="${app.compile.outdir}"/>
+		<mkdir dir="${app.compile.outdir}"/>
+
+		<javac includeAntRuntime="false" destdir="${app.compile.outdir}" debug="true" encoding="Cp1252" 
+        	source="${javac.source}" target="${javac.target}">
+			<classpath refid="app.classpath"/>
+			<src path="${app.src.dir}"/>
+			<src path="${app.testsrc.dir}"/>
+		</javac>
+
+		<copy todir="${app.compile.outdir}" preservelastmodified="true">
+			<fileset dir="${app.src.dir}">
+				<exclude name="**/*.java"/>
+				<include name="**/**"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="app_test_unit" depends="app.compile">
+		<delete dir="${app.unittests.outdir}"/>
+		<mkdir dir="${app.unittests.outdir}"/>
+		<mkdir dir="${app.unittests.outdir}/raw"/>
+		<mkdir dir="${app.unittests.outdir}/html"/>
+
+		<junit printsummary="yes" haltonfailure="no" showoutput="yes">
+			<sysproperty key="appPath" value="${appPath}"/>
+
+			<classpath>
+				<path refid="app.classpath"/>
+				<pathelement path="${app.compile.outdir}" />
+			</classpath>
+
+			<batchtest fork="yes" todir="${app.unittests.outdir}/raw/">
+				<formatter type="xml" />
+				<fileset dir="${app.unittestsrc.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${app.unittests.outdir}">
+			<fileset dir="${app.unittests.outdir}/raw/">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${app.unittests.outdir}\html\" />
+		</junitreport>
+	</target>
+
+	<target name="app_test_fun" depends="app.compile">
+		<delete dir="${app.functionaltests.outdir}"/>
+		<mkdir dir="${app.functionaltests.outdir}"/>
+		<mkdir dir="${app.functionaltests.outdir}/raw"/>
+		<mkdir dir="${app.functionaltests.outdir}/html"/>
+
+		<junit printsummary="yes" haltonfailure="no" showoutput="yes">
+			<sysproperty key="appPath" value="${appPath}"/>
+			<sysproperty key="appPort" value="${appPort}"/>
+			<sysproperty key="webStarted" value="${webStarted}"/>
+
+			<classpath>
+				<pathelement location="${jetty.startjar.name}"/>
+				<path refid="app.classpath"/>
+				<pathelement path="${app.compile.outdir}" />
+			</classpath>
+
+			<batchtest fork="yes" todir="${app.functionaltests.outdir}/raw/">
+				<formatter type="xml" />
+				<fileset dir="${app.functionaltestsrc.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${app.functionaltests.outdir}">
+			<fileset dir="${app.functionaltests.outdir}/raw/">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${app.functionaltests.outdir}\html\" />
+		</junitreport>
+	</target>
+
+	<target name="tools" depends="compile, createjar, serverjar, connectiontestjar, generatejar, generatesignonjar">
+	</target>
+
+	<target name="build" depends="clean, jar, deploy_jar">
+	</target>
+
+	<target name="deploy_jar" depends="jar">
+		<copy file="${jar.outdir}/${scooterjar.name}" todir="${scooterjar.outdir}" preservelastmodified="true" />
+	</target>
+
+	<target name="undeploy_jar">
+		<delete file="${scooterjar.outdir}/${scooterjar.name}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${compile.outdir}"/>
+		<delete dir="${jar.outdir}"/>
+		<delete dir="${build.outdir}"/>
+		<delete dir="${javadoc.outdir}"/>
+		<delete dir="${junitreport.outdir}"/>
+	</target>
+
+	<target name="all" depends="build, tools, javadoc"/>
+
+</project>

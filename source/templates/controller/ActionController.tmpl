@@ -1,0 +1,29 @@
+$if(package_name)$
+$package_line$
+$endif$
+
+import static com.scooterframework.web.controller.ActionControl.*;
+
+import com.scooterframework.admin.FilterManagerFactory;
+
+
+/**
+ * $controller_class_name$ class handles $controller_name$ related access.
+ */
+public class $controller_class_name$ extends ApplicationController {
+
+	/**
+	 * Constructor
+	 */
+	public $controller_class_name$() {
+	}
+
+$actions: { action |
+	/**
+	 * $action$() method
+	 */
+	public String $action$() {
+		return null;
+	}
+}$
+}

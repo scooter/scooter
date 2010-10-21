@@ -1,0 +1,79 @@
+<%@ page import="
+	java.util.Iterator,
+	java.util.List,
+	com.scooterframework.orm.misc.Paginator,
+	com.scooterframework.orm.sqldataexpress.object.RESTified,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.W"
+%>
+
+<%
+Paginator paginator = (Paginator)request.getAttribute("$model$_page");
+List records = paginator.getRecordList();
+%>
+
+<h2>$model$ List</h2>
+
+<table>
+    <tr>
+        <td align="left">
+            Page <%=paginator.getCurrentPage()%>/<%=paginator.getPageCount()%>. </td>
+        <td align="right" class="multilink">
+            Showing <%=paginator.getStartIndex()%> - <%=paginator.getEndIndex()%> of <%=paginator.getTotalCount()%>&nbsp;
+            <%=W.pageLink("First",    R.resourcePath("$resource$"), paginator.getQueryStringFirst())%>&nbsp;|&nbsp;
+            <%=W.pageLink("Previous", R.resourcePath("$resource$"), paginator.getQueryStringPrevious())%>&nbsp;|&nbsp;
+            <%=W.pageLink("Next",     R.resourcePath("$resource$"), paginator.getQueryStringNext())%>&nbsp;|&nbsp;
+            <%=W.pageLink("Last",     R.resourcePath("$resource$"), paginator.getQueryStringLast())%>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+
+<table class="sTable">
+    <tr>$columns: { column |
+        <th>$column.columnHeader$</th>}$
+        <th>&nbsp;</th>
+    </tr>
+
+<%for (Iterator it = O.iteratorOf(records); it.hasNext();) {
+    RESTified $model$ = (RESTified)it.next();
+%>
+    <tr class="<%=W.cycle("odd, even")%>">$columns: { column |
+        <td><%=O.hp($model$, "$column.columnNameLower$")%></td>}$
+        <td class="multilink" nowrap>
+            <%=W.labelLink("show", R.resourceRecordPath("$resource$", $model$))%>
+            <%=W.labelLink("edit", R.editResourceRecordPath("$resource$", $model$))%>
+            <%=W.labelLink("delete", R.resourceRecordPath("$resource$", $model$), "confirm:'Are you sure?'; method:delete")%>
+        </td>
+    </tr>
+<%}%>
+</table>
+
+        </td>
+    </tr>
+    <tr>
+        <td align="left">
+        Page <%=paginator.getCurrentPage()%>/<%=paginator.getPageCount()%>. </td>
+        <td align="right" class="multilink">
+            Showing <%=paginator.getStartIndex()%> - <%=paginator.getEndIndex()%> of <%=paginator.getTotalCount()%>&nbsp;
+            <%=W.pageLink("First",    R.resourcePath("$resource$"), paginator.getQueryStringFirst())%>&nbsp;|&nbsp;
+            <%=W.pageLink("Previous", R.resourcePath("$resource$"), paginator.getQueryStringPrevious())%>&nbsp;|&nbsp;
+            <%=W.pageLink("Next",     R.resourcePath("$resource$"), paginator.getQueryStringNext())%>&nbsp;|&nbsp;
+            <%=W.pageLink("Last",     R.resourcePath("$resource$"), paginator.getQueryStringLast())%>
+        </td>
+    </tr>
+</table>
+
+<br />
+<%=W.diggStylePageLinks(paginator, R.resourcePath("$resource$"), 4, 11)%>
+
+<form action="<%=W.getURL(R.resourcePath("$resource$"))%>" method="GET">
+<input type="hidden" name="r" value="page">
+<input type="hidden" name="limit" value="<%=W.get("limit", "10")%>">
+<input type="hidden" name="paged" value="true">
+Go to page <input type="text" id="npage" name="npage" size="2"><input type="submit" value="Go" />
+</form>
+
+<%=W.labelLink("Add $model$", R.addResourcePath("$resource$"))%>|
+<%=W.labelLink("List", R.resourcePath("$resource$"))%>
