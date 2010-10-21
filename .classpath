@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="source/src"/>
+	<classpathentry kind="src" path="source/test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="lib" path="tools/servers/jetty/lib/servlet-api-2.5-20081211.jar"/>
+	<classpathentry kind="lib" path="tools/servers/jetty/lib/jsp-2.1/jsp-api-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
+	<classpathentry kind="lib" path="lib/apache-commons/commons-fileupload-1.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/apache-commons/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/apache-commons/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient/httpclient-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient/httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/jta.jar"/>
+	<classpathentry kind="lib" path="lib/javassist/javassist.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-clients/c3p0-0.9.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-clients/c3p0-oracle-thin-extras-0.9.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/junit/junit-4.8.2.jar"/>
+	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/markdown/markdownj-1.0.2b4-0.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/sitemesh/sitemesh-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/stringtemplate/antlr-2.7.7.jar"/>
+	<classpathentry kind="lib" path="lib/stringtemplate/stringtemplate-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/json/json.jar"/>
+	<classpathentry kind="lib" path="C:/dev/devenv/jdk1.5.0_22/lib/tools.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>
