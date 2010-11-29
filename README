@@ -27,7 +27,7 @@ Use -help option to get more options.
 How to create an AJAX-powered app in one command
 ------------------------------------------------
 
-Create complete AJAX-powered CRUD app:
+Use the "scaffold-ajax" option:
 >java -jar tools/generate.jar blog scaffold-ajax post
 
 
