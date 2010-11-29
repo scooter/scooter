@@ -31,7 +31,7 @@ public class $controller_class_name$ extends ApplicationController {
         if ("true".equals(p(Constants.PAGED))) {
             Paginator page = jdbcPaginator($model_class_name$.class, params());
             setViewData("$model_name$_page", page);
-            return forwardTo(viewPath("paged_list"));
+            return renderView("paged_list");
         }
         setViewData("$list_key$", $model_class_name$.findAll());
         return null;
@@ -78,7 +78,7 @@ public class $controller_class_name$ extends ApplicationController {
         }
         
         setViewData("$model_name$", new$model_name_camel$);
-        return forwardTo(viewPath("add"));
+        return renderView("add");
     }
     
     /**
@@ -112,7 +112,7 @@ public class $controller_class_name$ extends ApplicationController {
         }
         
         setViewData("$model_name$", $model_name$);
-        return forwardTo(viewPath("edit"));
+        return renderView("edit");
     }
     
     /**

@@ -5,3 +5,4 @@ build
 build/*
 tools/servers/jetty/work/*
 tools/servers/jetty/logs/*
+!.gitignore
