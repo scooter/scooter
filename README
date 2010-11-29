@@ -45,7 +45,7 @@ Run an app with default port 8080
 -----------------------------------------
 How to invoke http://localhost:8080/posts
 -----------------------------------------
-Change the contextPath to / in blog/WEB-INF/jetty-web.xml
+Change the contextPath from "/blog" to "/" in blog/WEB-INF/jetty-web.xml
 
 
 ---------------------------------
