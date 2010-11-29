@@ -14,7 +14,7 @@ File requestFile = (File)W.get("requestFile");
 
 <h2>Replace file</h2>
 
-<form action="<%=W.getURL("/files/doReplace")%>" method="POST" enctype="multipart/form-data">
+<form action="<%=W.getURL("/admin/files/doReplace")%>" method="POST" enctype="multipart/form-data">
   <label>Replace</label><br/><br/>
   <input type="text" name="f" value="<%=W.value("f")%>" /><br/><br/>
   <label>by</label><br/><br/>

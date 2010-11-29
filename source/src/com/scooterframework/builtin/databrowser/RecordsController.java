@@ -8,11 +8,12 @@
 package com.scooterframework.builtin.databrowser;
 
 import static com.scooterframework.web.controller.ActionControl.*;
+
 import java.util.Map;
 
 import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
-import com.scooterframework.builtin.BuiltinHelper;
+import com.scooterframework.builtin.AdminSignonController;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.misc.Paginator;
 import com.scooterframework.orm.sqldataexpress.object.RowData;
@@ -30,7 +31,7 @@ public class RecordsController extends ApplicationController {
 
 	static {
 		filterManagerFor(RecordsController.class).declareBeforeFilter(
-				BuiltinHelper.class, "validateRequest");
+				AdminSignonController.class, "loginRequired");
 	}
     
     public String index() {

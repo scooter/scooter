@@ -343,6 +343,13 @@ public class ApplicationConfig {
         return path;
     }
     
+    /**
+     * Returns number of sessions in the container.
+     */
+    public static int getSessionCount() {
+    	return WebSessionListener.getSessionCount();
+    }
+    
     public long getApplicationStartTime() {
         return applicationStartTime;
     }

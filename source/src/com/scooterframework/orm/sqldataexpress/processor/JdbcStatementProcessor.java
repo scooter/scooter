@@ -92,7 +92,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             log.debug("execute - outputFilters: " + outputFilters);
             
             boolean supportsGetGeneratedKeys = supportsGetGeneratedKeys();
-            if (supportsGetGeneratedKeys) {
+            if (supportsGetGeneratedKeys && !st.isSelectStatement()) {
                 pstmt = connection.prepareStatement(executableSql, Statement.RETURN_GENERATED_KEYS);
             }
             else {

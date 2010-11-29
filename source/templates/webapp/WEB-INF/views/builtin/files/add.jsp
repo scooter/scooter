@@ -14,7 +14,7 @@ File requestFile = (File)W.get("requestFile");
 
 <h2>Add file</h2>
 
-<form action="<%=W.getURL("/files/create")%>" method="POST">
+<form action="<%=W.getURL("/admin/files/create")%>" method="POST">
   <input type="hidden" name="f" value="<%=W.value("f")%>" />
   <label>Name</label>
   <input type="text" name="name" id="name" value="<%=W.value("name")%>" /><br/><br/>

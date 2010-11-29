@@ -23,17 +23,19 @@ import com.scooterframework.web.util.W;
  * @author (Fei) John Chen
  */
 public class BuiltinHelper {
-	public static String LINK_PREFIX_DIR = "/files/list?f=";
-	public static String LINK_PREFIX_FILE = "/files/show?f=";
+	public static String FILE_BROWSER_LINK_PREFIX = "/admin/files";
+	public static String FILE_BROWSER_LINK_PREFIX_DIR = FILE_BROWSER_LINK_PREFIX + "/list?f=";
+	public static String FILE_BROWSER_LINK_PREFIX_FILE = FILE_BROWSER_LINK_PREFIX + "/show?f=";
+	public static String FILE_BROWSER_LINK_ROOT = FILE_BROWSER_LINK_PREFIX_DIR + "/";
 	
     /**
-     * Checks if the request is valid.
+     * Checks if the request comes from localhost.
      * 
      * Currently only local requests are valid. 
      * 
      * @return true if the request is valid. 
      */
-    public String validateRequest() {
+    public String validateLocalRequest() {
         boolean valid = W.isLocalRequest();
         if (!valid) {
             flash("error", "You are not allowed to browse data because you are not from localhost.");
@@ -54,9 +56,9 @@ public class BuiltinHelper {
 
     	StringBuilder sb = new StringBuilder();
     	String contextName = ApplicationConfig.getInstance().getContextName();
-    	sb.append(W.labelLink(contextName, "/files/list?f=/")).append(" > ");
+    	sb.append(W.labelLink(contextName, FILE_BROWSER_LINK_ROOT)).append(" > ");
 
-		String link = "/files/list?f=";
+		String link = FILE_BROWSER_LINK_PREFIX_DIR;
 		StringTokenizer st = new StringTokenizer(path, "/");
 		int total = st.countTokens();
 		int index = 0;
@@ -85,7 +87,7 @@ public class BuiltinHelper {
 
     	StringBuilder sb = new StringBuilder();
     	String contextName = ApplicationConfig.getInstance().getContextName();
-    	sb.append(W.labelLink(contextName, "/files/list?f=/")).append(" > ");
+    	sb.append(W.labelLink(contextName, FILE_BROWSER_LINK_ROOT)).append(" > ");
     	
     	String appPath = ApplicationConfig.getInstance().getApplicationPath();
     	String cPath = "";
@@ -106,10 +108,10 @@ public class BuiltinHelper {
     			String token = st.nextToken();
 				link += "/" + token;
 				if (isDirPath(link)) {
-    				sb.append(W.labelLink(token, LINK_PREFIX_DIR + link));
+    				sb.append(W.labelLink(token, FILE_BROWSER_LINK_PREFIX_DIR + link));
 				}
 				else {
-					sb.append(W.labelLink(token, LINK_PREFIX_FILE + link));
+					sb.append(W.labelLink(token, FILE_BROWSER_LINK_PREFIX_FILE + link));
 				}
 				
     			if (index != total) {

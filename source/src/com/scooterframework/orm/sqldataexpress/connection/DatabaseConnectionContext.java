@@ -84,6 +84,28 @@ public interface DatabaseConnectionContext extends Serializable
     public String getVendor();
     
     /**
+     * Returns the schema of the database connection
+     *
+     * @return String
+     */
+    public String getSchema();
+    
+    /**
+     * Checks whether to use login id as schema.
+     *
+     * @return true if using login id as schema
+     */
+    public boolean useLoginAsSchema();
+    
+    /**
+     * Checks whether to use login username and password for 
+     * making a connection.
+     *
+     * @return true if using username and password for making a connection
+     */
+    public boolean useLoginForConnection();
+    
+    /**
      * Checks if transaction isolation level is specified. If not, the 
      * database's default transaction isolation level is used.
      * 
@@ -133,6 +155,9 @@ public interface DatabaseConnectionContext extends Serializable
     public static final String KEY_READONLY = DatabaseConfig.KEY_DB_CONNECTION_READONLY;
     public static final String KEY_TRANSACTION_ISOLATION_LEVEL = DatabaseConfig.KEY_DB_CONNECTION_TRANSACTION_ISOLATION_LEVEL;
     public static final String KEY_VENDOR = DatabaseConfig.KEY_DB_CONNECTION_VENDOR;
+    public static final String KEY_SCHEMA = DatabaseConfig.KEY_DB_CONNECTION_SCHEMA;
+    public static final String KEY_USE_LOGIN_AS_SCHEMA = DatabaseConfig.KEY_DB_CONNECTION_USE_LOGIN_AS_SCHEMA;
+    public static final String KEY_USE_LOGIN_FOR_CONNECTION = DatabaseConfig.KEY_DB_CONNECTION_USE_LOGIN_FOR_CONNECTION;
     public static final String KEY_MAX_POOL_SIZE = DatabaseConfig.KEY_DB_CONNECTION_MAX_POOL_SIZE;
     public static final String KEY_MIN_POOL_SIZE = DatabaseConfig.KEY_DB_CONNECTION_MIN_POOL_SIZE;
     public static final String KEY_ACQUIRE_INCREMENT = DatabaseConfig.KEY_DB_CONNECTION_ACQUIRE_INCREMENT;

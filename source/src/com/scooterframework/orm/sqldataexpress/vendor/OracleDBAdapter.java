@@ -18,9 +18,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Util;
+import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.object.Parameter;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceConstants;
@@ -34,13 +36,30 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 public class OracleDBAdapter extends DBAdapter {
 	
 	public String[] getCatalogAndSchema(String connName) {
-		String s = SqlExpressUtil.getConnectionUser(connName);
+		String s = getOracleSchema(connName);
         if (s != null) s = s.toUpperCase();
 		String[] s2 = new String[2];
 		s2[0] = null;
         s2[1] = s;
 		return s2;
 	}
+    
+    protected String getOracleSchema(String connName) {
+    	Properties p = SqlExpressUtil.getConnectionProperties(connName);
+    	String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
+    	if (isEmpty(schema)) {
+        	schema = "public";
+    	}
+    	else {
+    		if (useLoginAsSchema(schema)) {
+    			schema = getLoginUserId();
+    		}
+    		else {
+    			schema = SqlExpressUtil.getConnectionUser(connName);
+    		}
+    	}
+    	return schema;
+    }
     
     public String getOneRowSelectSQL(String catalog, String schema, String table) {
     	String selectSQL = "SELECT * FROM ";

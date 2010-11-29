@@ -8,9 +8,12 @@
 package com.scooterframework.web.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
+import java.util.Map.Entry;
 
+import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.orm.activerecord.ActiveRecord;
@@ -24,6 +27,20 @@ import com.scooterframework.orm.sqldataexpress.object.RESTified;
  * <tt>formForOpen</tt>, <tt>formForClose</tt> and <tt>label</tt> methods 
  * must be used together. If there is error for a field, the field's label 
  * element will be highlighted. </p>
+ * 
+ * <p><tt>formProperties</tt> is used to specify properties for 
+ * <tt>form</tt> tag, including AJAX properties.</p>
+ * 
+ * <p>Ajax Examples:</p>
+ * <pre>
+ * //add a post and then refresh the posts list
+ * formForOpen("posts", null, "data-ajax:true; data-target:#posts_list; data-handler:html")
+ * result: <form action="/posts" class="add_post" data-ajax="true" method="POST" data-target="#posts_list" data-handler="html">
+ * 
+ * //edit a post with id 45 and then refresh the posts list
+ * formForOpen("posts", post, "data-ajax:true; data-target:#posts_list; data-handler:html")
+ * result: <form action="/posts/45" class="edit_post" data-ajax="true" method="POST" data-target="#posts_list" data-handler="html">
+ * </pre>
  * 
  * @author (Fei) John Chen
  * 
@@ -103,6 +120,25 @@ public class F {
     
     /**
      * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a resource. 
+     * The <tt>objectKey</tt> is used to retrieve the corresponding object for 
+     * the resource. The object must be of RESTified type. If there is no 
+     * object mapped to the key, or the object's restful id is null, the form 
+     * is for adding a new object. Otherwise it is for editing the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param resourceName      name of the resource
+     * @param objectKey         key pointing to the object
+     * @param formProperties    string of form related properties
+     * @return form-open element for a resource object
+     */
+    public static String formForOpen(String resourceName, String objectKey, String formProperties) {
+        return insertFormProperties(formForOpen(resourceName, objectKey), formProperties);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a resource. 
      * If the object's restful id is null, the form is for adding a new object. 
      * Otherwise it is for editing the object.</p>
      * 
@@ -111,11 +147,28 @@ public class F {
      * @return form-open element for a resource object
      */
     public static String formForOpen(String resourceName, ActiveRecord object) {
-        RESTified record = getAndValidateObject(resourceName, object);
+        RESTified record = validateObject(resourceName, object);
         storeObjectToCurrentCache(object);
         String objectKey = ActiveRecordUtil.getModelName(object);
         storeObjectKeyToCurrentCache(objectKey);
         return R.formForResource(resourceName, record);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a resource. 
+     * If the object's restful id is null, the form is for adding a new object. 
+     * Otherwise it is for editing the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param resourceName      name of the resource
+     * @param object            an ActiveRecord object
+     * @param formProperties    string of form related properties
+     * @return form-open element for a resource object
+     */
+    public static String formForOpen(String resourceName, ActiveRecord object, String formProperties) {
+        return insertFormProperties(formForOpen(resourceName, object), formProperties);
     }
     
     /**
@@ -160,6 +213,37 @@ public class F {
     }
     
     /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource. </p>
+     * 
+     * <p>The <tt>parentObjectKey</tt> is used to retrieve the corresponding 
+     * object for the parent resource. The parent object must be of RESTified 
+     * type. </p>
+     * 
+     * <p>The <tt>objectKey</tt> is used to retrieve the corresponding object for 
+     * the nested resource. The object must be of RESTified type. </p>
+     * 
+     * <p>If there is no object mapped to the key, or the object's restful id is 
+     * null, the form is for adding a new object. Otherwise it is for editing 
+     * the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param parentResourceName    name of the parent resource
+     * @param parentObjectKey       key pointing to the parent object
+     * @param resourceName          name of the nested resource
+     * @param objectKey             key pointing to the object
+     * @param formProperties        string of form related properties
+     * @return form-open element for a nested resource object
+     */
+    public static String formForOpen(String parentResourceName, 
+            String parentObjectKey, String resourceName, String objectKey,
+            String formProperties) {
+        return insertFormProperties(formForOpen(parentResourceName, 
+                parentObjectKey, resourceName, objectKey), formProperties);
+    }
+    
+    /**
      * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource.</p> 
      * 
      * <p>The <tt>parentObjectKey</tt> is used to retrieve the corresponding 
@@ -181,6 +265,32 @@ public class F {
         String objectKey = ActiveRecordUtil.getModelName(object);
         storeObjectKeyToCurrentCache(objectKey);
         return R.formForNestedResourceRecord(parentResourceName, parentRecord, resourceName, object);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource.</p> 
+     * 
+     * <p>The <tt>parentObjectKey</tt> is used to retrieve the corresponding 
+     * object for the parent resource. The parent object must be of RESTified type. </p>
+     * 
+     * <p>If ActiveRecord object's restful id is null, the form is for adding a 
+     * new object. Otherwise it is for editing the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param parentResourceName    name of the parent resource
+     * @param parentObjectKey       key pointing to the parent object
+     * @param resourceName          name of the nested resource
+     * @param object                an ActiveRecord object
+     * @param formProperties        string of form related properties
+     * @return form-open element for a nested resource object
+     */
+    public static String formForOpen(String parentResourceName, 
+            String parentObjectKey, String resourceName, ActiveRecord object,
+            String formProperties) {
+        return insertFormProperties(formForOpen(parentResourceName, 
+                parentObjectKey, resourceName, object), formProperties);
     }
     
     /**
@@ -211,6 +321,33 @@ public class F {
     /**
      * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource. </p>
      * 
+     * <p>The <tt>objectKey</tt> is used to retrieve the corresponding object for 
+     * the nested resource. The object must be of RESTified type. </p>
+     * 
+     * <p>If there is no object mapped to the key, or the object's restful id is 
+     * null, the form is for adding a new object. Otherwise it is for editing 
+     * the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param parentResourceName    name of the parent resource
+     * @param parentObject          the parent object
+     * @param resourceName          name of the nested resource
+     * @param objectKey             key pointing to the object
+     * @param formProperties        string of form related properties
+     * @return form-open element for a nested resource object
+     */
+    public static String formForOpen(String parentResourceName, 
+            RESTified parentObject, String resourceName, String objectKey,
+            String formProperties) {
+        return insertFormProperties(formForOpen(parentResourceName, 
+        		parentObject, resourceName, objectKey), formProperties);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource. </p>
+     * 
      * <p>If ActiveRecord object's restful id is null, the form is for adding a 
      * new object. Otherwise it is for editing the object.</p>
      * 
@@ -227,6 +364,29 @@ public class F {
         String objectKey = ActiveRecordUtil.getModelName(object);
         storeObjectKeyToCurrentCache(objectKey);
         return R.formForNestedResourceRecord(parentResourceName, parentRecord, resourceName, object);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource. </p>
+     * 
+     * <p>If ActiveRecord object's restful id is null, the form is for adding a 
+     * new object. Otherwise it is for editing the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param parentResourceName    name of the parent resource
+     * @param parentObject          the parent object
+     * @param resourceName          name of the nested resource
+     * @param object                an ActiveRecord object
+     * @param formProperties        string of form related properties
+     * @return form-open element for a nested resource object
+     */
+    public static String formForOpen(String parentResourceName, 
+            RESTified parentObject, String resourceName, ActiveRecord object, 
+            String formProperties) {
+        return insertFormProperties(formForOpen(parentResourceName, 
+        		parentObject, resourceName, object), formProperties);
     }
     
     /**
@@ -267,6 +427,38 @@ public class F {
      * <tt>parentRestfuls</tt> is an array of either restful id strings or 
      * RESTified records of ancestors. </p>
      * 
+     * <p>The <tt>objectKey</tt> is used to retrieve the corresponding object for 
+     * the nested resource. The object must be of RESTified type. </p>
+     * 
+     * <p>If there is no object mapped to the key, or the object's restful id is 
+     * null, the form is for adding a new object. Otherwise it is for editing 
+     * the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param parentResourceNames   names of the parent resources
+     * @param parentRestfuls        the parent restful ids or RESTified objects
+     * @param resourceName          name of the nested resource
+     * @param objectKey             key pointing to the object
+     * @param formProperties        string of form related properties
+     * @return form-open element for a nested resource object
+     */
+    public static String formForOpen(String[] parentResourceNames, 
+            Object[] parentRestfuls, String resourceName, String objectKey, 
+            String formProperties) {
+        return insertFormProperties(formForOpen(parentResourceNames, 
+        		parentRestfuls, resourceName, objectKey), formProperties);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource.</p>
+     * 
+     * <p><tt>parentResourceNames</tt> is an array of ancestors. The oldest is 
+     * at the beginning of the array. 
+     * <tt>parentRestfuls</tt> is an array of either restful id strings or 
+     * RESTified records of ancestors. </p>
+     * 
      * <p>If ActiveRecord object's restful id is null, the form is for adding a 
      * new object. Otherwise it is for editing the object.</p>
      * 
@@ -283,6 +475,34 @@ public class F {
         String objectKey = ActiveRecordUtil.getModelName(object);
         storeObjectKeyToCurrentCache(objectKey);
         return R.formForNestedResourceRecord(parentResourceNames, parentRecords, resourceName, object);
+    }
+    
+    /**
+     * <p>Returns form-open element <tt>&lt;form&gt;</tt>for a nested resource.</p>
+     * 
+     * <p><tt>parentResourceNames</tt> is an array of ancestors. The oldest is 
+     * at the beginning of the array. 
+     * <tt>parentRestfuls</tt> is an array of either restful id strings or 
+     * RESTified records of ancestors. </p>
+     * 
+     * <p>If ActiveRecord object's restful id is null, the form is for adding a 
+     * new object. Otherwise it is for editing the object.</p>
+     * 
+     * <p><tt>formProperties</tt> refers to properties for 
+     * <tt>&lt;form&gt;</tt>. See top of this class for examples.</p>
+     * 
+     * @param parentResourceNames   names of the parent resources
+     * @param parentRestfuls        the parent restful ids or RESTified objects
+     * @param resourceName          name of the nested resource
+     * @param object                an ActiveRecord object
+     * @param formProperties        string of form related properties
+     * @return form-open element for a nested resource object
+     */
+    public static String formForOpen(String[] parentResourceNames, 
+            Object[] parentRestfuls, String resourceName, ActiveRecord object, 
+            String formProperties) {
+        return insertFormProperties(formForOpen(parentResourceNames, 
+        		parentRestfuls, resourceName, object), formProperties);
     }
     
     /**
@@ -378,5 +598,26 @@ public class F {
         if (stk.empty()) {
             CurrentThreadCache.clear(CURRENT_FORM_OBJECT_KEY_STACK);
         }
+    }
+    
+    private static String insertFormProperties(String formString, String formProperties) {
+    	if (formProperties == null || "".equals(formProperties)) return formString;
+    	
+    	String token = "<form ";
+    	if (formString == null || !formString.startsWith(token)) {
+    		throw new IllegalArgumentException("formString input must starts with \"<form \".");
+    	}
+    	
+    	Map<String, String> properties = Converters.convertStringToMap(formProperties, ":", ";");
+    	StringBuilder sb = new StringBuilder();
+    	sb.append("<form ");
+		Iterator<Entry<String, String>> it = properties.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, String> entry = it.next();
+			sb.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"").append(" ");
+		}
+    	sb.append(formString.substring(token.length()));
+    	
+    	return sb.toString();
     }
 }

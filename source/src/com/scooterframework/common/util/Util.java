@@ -8,6 +8,9 @@
 package com.scooterframework.common.util;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
@@ -886,5 +889,27 @@ public class Util {
         String sValue = (String)inputs.get(key);
         if (sValue != null) value = sValue;
         return value;
+    }
+    
+    /**
+     * Returns a MD5 digest string of the input string.
+     * 
+     * @param input the input string
+     * @return the MD5 digest string
+     */
+	public static String md5(String input) {
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            BigInteger number = new BigInteger(1, md.digest(input.getBytes()));
+            String hashtext = number.toString(16);
+            while (hashtext.length() < 32) {
+                hashtext = "0" + hashtext;
+            }
+            return hashtext;
+        }
+        catch(NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

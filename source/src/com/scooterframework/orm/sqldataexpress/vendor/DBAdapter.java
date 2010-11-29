@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.sqldataexpress.object.Parameter;
+import com.scooterframework.security.LoginHelper;
 
 /**
  * DBAdapter class. Subclass should implement all abstract methods listed in 
@@ -35,6 +36,35 @@ import com.scooterframework.orm.sqldataexpress.object.Parameter;
  */
 public abstract class DBAdapter {
     protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
+    
+    public static final String USE_LOGIN_USER_ID_AS_SCHEMA = "useLoginUserId";
+    
+    /**
+     * Checks if using login user id as schema. When the value of 
+     * <tt>schema</tt> as defined in <tt>database.properties</tt> file for 
+     * a database connection definition is <tt>useLoginUserId</tt>, this method
+     * should return <tt>true</tt>.
+     * 
+     * @param schema  schema name
+     * @return true if using login user id as schema
+     */
+    public boolean useLoginAsSchema(String schema) {
+    	return (USE_LOGIN_USER_ID_AS_SCHEMA.equalsIgnoreCase(schema))?true:false;
+    }
+    
+    /**
+     * Returns login user id.
+     */
+    public static String getLoginUserId() {
+    	return LoginHelper.loginUserId();
+    }
+    
+    /**
+     * Returns login user id.
+     */
+    public static String getLoginPassword() {
+    	return LoginHelper.loginPassword();
+    }
     
     /**
      * Returns both catalog and schema of a connection.
@@ -73,6 +103,14 @@ public abstract class DBAdapter {
      */
     public abstract String getOneRowSelectSQL(String catalog, String schema, String table);
     
+    /**
+     * Returns a SQL SELECT query which retrieves only one record from a table. 
+     * This query is used for retrieving meta data of the underlining table.
+     * 
+     * @param connName database connection name
+     * @param table   table name
+     * @return a SELECT query string
+     */
     public String getOneRowSelectSQL(String connName, String table) {
     	String[] s2 = getCatalogAndSchema(connName);
     	String catalog = s2[0];
@@ -87,13 +125,21 @@ public abstract class DBAdapter {
      * @param catalog catalog name
      * @param schema  schema name
      * @param table   table name
-     * @return a total count query string
+     * @return a SQL query string for counting total
      */
     public String getTotalCountSQL(String catalog, String schema, String table) {
     	String countSQL = "SELECT count(*) total FROM ";
         return countSQL + getExpandedTableName(catalog, schema, table);
     }
     
+    /**
+     * Returns a SQL query statement which is used to count all records of a 
+     * table, such as <tt>SELECT count(*) total FROM users</tt>.
+     * 
+     * @param connName database connection name
+     * @param table   table name
+     * @return a SQL query string for counting total
+     */
     public String getTotalCountSQL(String connName, String table) {
     	String[] s2 = getCatalogAndSchema(connName);
     	String catalog = s2[0];

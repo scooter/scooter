@@ -41,7 +41,8 @@ import com.scooterframework.web.controller.ACH;
 import com.scooterframework.web.controller.ActionContext;
 
 /**
- * <p>W(WebHelper) class has helper methods for web related request. </p>
+ * <p>W(WebHelper) class has helper methods for web related requests, including
+ * AJAX requests. </p>
  * 
  * <p><tt>buttonKeys</tt> supported:</br>
  * disabled, name, type, value, id, class, title, style, dir, lang, accesskey, 
@@ -72,17 +73,28 @@ import com.scooterframework.web.controller.ActionContext;
  * target, title, type
  * </p>
  * 
+ * <p>AJAX related links are supported through <tt>data-*</tt> keys:</p>
+ * <pre>
+ *   data-ajax: Its value is always true. This is the required property for AJAX.
+ *   data-confirm: A confirmation message to be popped up
+ *   data-method: HTTP method (GET, POST, UPDATE, DELETE) of AJAX link, "GET" is the default.
+ *   data-target: The target element in jQuery syntax, e.g. #posts_list.
+ *   data-handler: indicates how the returned message is handled, e.g. html.
+ *   data-type: The type of data expected from the server. See jQuery document.
+ * </pre>
+ * 
  * @author (Fei) John Chen
  */
 public class W {
 
     protected static LogUtil log = LogUtil.getLogger(W.class.getName());
     public static MarkdownProcessor mp = new MarkdownProcessor();
-    public static List buttonKeys = new ArrayList();
-    public static List imageKeys = new ArrayList();
-    public static List inputKeys = new ArrayList();
-    public static List linkKeys = new ArrayList();
-    public static List styleKeys = new ArrayList();
+    public static List<String> html5Keys = new ArrayList<String>();
+    public static List<String> buttonKeys = new ArrayList<String>();
+    public static List<String> imageKeys = new ArrayList<String>();
+    public static List<String> inputKeys = new ArrayList<String>();
+    public static List<String> linkKeys = new ArrayList<String>();
+    public static List<String> styleKeys = new ArrayList<String>();
     
     private static final String DELETE_ADDON = 
                     "f.style.display = 'none'; " + 
@@ -96,151 +108,153 @@ public class W {
                     "f.appendChild(m); ";
     
     static {
-        if (buttonKeys.size() == 0) {
-            buttonKeys.add("disabled");
-            buttonKeys.add("name");
-            buttonKeys.add("type");
-            buttonKeys.add("value");
-            buttonKeys.add("id");
-            buttonKeys.add("class");
-            buttonKeys.add("title");
-            buttonKeys.add("style");
-            buttonKeys.add("dir");
-            buttonKeys.add("lang");
-            buttonKeys.add("accesskey");
-            buttonKeys.add("tabindex");
-            buttonKeys.add("onblur");
-            buttonKeys.add("onclick");
-            buttonKeys.add("ondblclick");
-            buttonKeys.add("onfocus");
-            buttonKeys.add("onkeydown");
-            buttonKeys.add("onkeypress");
-            buttonKeys.add("onkeyup");
-            buttonKeys.add("onmousedown");
-            buttonKeys.add("onmousemove");
-            buttonKeys.add("onmouseout");
-            buttonKeys.add("onmouseover");
-            buttonKeys.add("onmouseup");
-        }
+    	html5Keys.add("data-ajax");
+    	html5Keys.add("data-confirm");
+    	html5Keys.add("data-method");
+    	html5Keys.add("data-target");
+    	html5Keys.add("data-handler");
+    	html5Keys.add("data-type");
+    	
+    	buttonKeys.addAll(html5Keys);
+        buttonKeys.add("disabled");
+        buttonKeys.add("name");
+        buttonKeys.add("type");
+        buttonKeys.add("value");
+        buttonKeys.add("id");
+        buttonKeys.add("class");
+        buttonKeys.add("title");
+        buttonKeys.add("style");
+        buttonKeys.add("dir");
+        buttonKeys.add("lang");
+        buttonKeys.add("accesskey");
+        buttonKeys.add("tabindex");
+        buttonKeys.add("onblur");
+        buttonKeys.add("onclick");
+        buttonKeys.add("ondblclick");
+        buttonKeys.add("onfocus");
+        buttonKeys.add("onkeydown");
+        buttonKeys.add("onkeypress");
+        buttonKeys.add("onkeyup");
+        buttonKeys.add("onmousedown");
+        buttonKeys.add("onmousemove");
+        buttonKeys.add("onmouseout");
+        buttonKeys.add("onmouseover");
+        buttonKeys.add("onmouseup");
+
+        imageKeys.addAll(html5Keys);
+        imageKeys.add("align");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
+        imageKeys.add("alt");
+        imageKeys.add("border");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
+        imageKeys.add("class");
+        imageKeys.add("dir");
+        imageKeys.add("height");
+        imageKeys.add("hspace");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
+        imageKeys.add("id");
+        imageKeys.add("ismap");
+        imageKeys.add("lang");
+        imageKeys.add("longdesc");
+        imageKeys.add("name");
+        imageKeys.add("onclick");
+        imageKeys.add("ondblclick");
+        imageKeys.add("onkeydown");
+        imageKeys.add("onkeypress");
+        imageKeys.add("onkeyup");
+        imageKeys.add("onmousedown");
+        imageKeys.add("onmousemove");
+        imageKeys.add("onmouseout");
+        imageKeys.add("onmouseover");
+        imageKeys.add("onmouseup");
+        imageKeys.add("src");
+        imageKeys.add("style");
+        imageKeys.add("title");
+        imageKeys.add("usemap");
+        imageKeys.add("vspace");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
+        imageKeys.add("width");
+
+        inputKeys.addAll(html5Keys);
+        inputKeys.add("disabled");
+        inputKeys.add("name");
+        inputKeys.add("type");
+        inputKeys.add("value");
         
-        if (imageKeys.size() == 0) {
-            imageKeys.add("align");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
-            imageKeys.add("alt");
-            imageKeys.add("border");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
-            imageKeys.add("class");
-            imageKeys.add("dir");
-            imageKeys.add("height");
-            imageKeys.add("hspace");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
-            imageKeys.add("id");
-            imageKeys.add("ismap");
-            imageKeys.add("lang");
-            imageKeys.add("longdesc");
-            imageKeys.add("name");
-            imageKeys.add("onclick");
-            imageKeys.add("ondblclick");
-            imageKeys.add("onkeydown");
-            imageKeys.add("onkeypress");
-            imageKeys.add("onkeyup");
-            imageKeys.add("onmousedown");
-            imageKeys.add("onmousemove");
-            imageKeys.add("onmouseout");
-            imageKeys.add("onmouseover");
-            imageKeys.add("onmouseup");
-            imageKeys.add("src");
-            imageKeys.add("style");
-            imageKeys.add("title");
-            imageKeys.add("usemap");
-            imageKeys.add("vspace");//deprecated in HTML4.01, not supported in XHTML 1.0 Strict DTD
-            imageKeys.add("width");
-        }
+        //standard attributes:
+        inputKeys.addAll(html5Keys);
+        inputKeys.add("id");
+        inputKeys.add("class");
+        inputKeys.add("title");
+        inputKeys.add("style");
+        inputKeys.add("dir");
+        inputKeys.add("lang");
         
-        if (inputKeys.size() == 0) {
-            inputKeys.add("disabled");
-            inputKeys.add("name");
-            inputKeys.add("type");
-            inputKeys.add("value");
-            
-            //standard attributes:
-            inputKeys.add("id");
-            inputKeys.add("class");
-            inputKeys.add("title");
-            inputKeys.add("style");
-            inputKeys.add("dir");
-            inputKeys.add("lang");
-            
-            //event attributes:
-            inputKeys.add("accesskey");
-            inputKeys.add("tabindex");
-            inputKeys.add("onblur");
-            inputKeys.add("onclick");
-            inputKeys.add("ondblclick");
-            inputKeys.add("onfocus");
-            inputKeys.add("onkeydown");
-            inputKeys.add("onkeypress");
-            inputKeys.add("onkeyup");
-            inputKeys.add("onmousedown");
-            inputKeys.add("onmousemove");
-            inputKeys.add("onmouseout");
-            inputKeys.add("onmouseover");
-            inputKeys.add("onmouseup");
-            inputKeys.add("onselect");
-            inputKeys.add("onchange");
-        }
-        
-        if (linkKeys.size() == 0) {
-            linkKeys.add("accesskey");
-            linkKeys.add("charset");
-            linkKeys.add("class");
-            linkKeys.add("coords");
-            linkKeys.add("dir");
-            linkKeys.add("hreflang");
-            linkKeys.add("id");
-            linkKeys.add("lang");
-            linkKeys.add("name");
-            linkKeys.add("onblue");
-            linkKeys.add("onclick");
-            linkKeys.add("ondblclick");
-            linkKeys.add("onfocus");
-            linkKeys.add("onkeydown");
-            linkKeys.add("onkeypress");
-            linkKeys.add("onkeyup");
-            linkKeys.add("onmousedown");
-            linkKeys.add("onmousemove");
-            linkKeys.add("onmouseout");
-            linkKeys.add("onmouseover");
-            linkKeys.add("onmouseup");
-            linkKeys.add("rel");
-            linkKeys.add("rev");
-            linkKeys.add("shape");
-            linkKeys.add("tabindex");
-            linkKeys.add("target");
-            linkKeys.add("title");
-            linkKeys.add("type");
-        }
-        
-        if (styleKeys.size() ==0) {
-            styleKeys.add("background-color");
-            styleKeys.add("background-image");
-            styleKeys.add("background-repeat");
-            styleKeys.add("border-color");
-            styleKeys.add("border-style");
-            styleKeys.add("border-width");
-            styleKeys.add("color");
-            styleKeys.add("font-family");
-            styleKeys.add("font-size");
-            styleKeys.add("font-style");
-            styleKeys.add("height");
-            styleKeys.add("list-style-image");
-            styleKeys.add("list-style-type");
-            styleKeys.add("margin");
-            styleKeys.add("outline-color");
-            styleKeys.add("outline-style");
-            styleKeys.add("outline-width");
-            styleKeys.add("padding");
-            styleKeys.add("text-align");
-            styleKeys.add("text-decoration");
-            styleKeys.add("vertical-align");
-        }
+        //event attributes:
+        inputKeys.add("accesskey");
+        inputKeys.add("tabindex");
+        inputKeys.add("onblur");
+        inputKeys.add("onclick");
+        inputKeys.add("ondblclick");
+        inputKeys.add("onfocus");
+        inputKeys.add("onkeydown");
+        inputKeys.add("onkeypress");
+        inputKeys.add("onkeyup");
+        inputKeys.add("onmousedown");
+        inputKeys.add("onmousemove");
+        inputKeys.add("onmouseout");
+        inputKeys.add("onmouseover");
+        inputKeys.add("onmouseup");
+        inputKeys.add("onselect");
+        inputKeys.add("onchange");
+
+        linkKeys.addAll(html5Keys);
+        linkKeys.add("accesskey");
+        linkKeys.add("charset");
+        linkKeys.add("class");
+        linkKeys.add("coords");
+        linkKeys.add("dir");
+        linkKeys.add("hreflang");
+        linkKeys.add("id");
+        linkKeys.add("lang");
+        linkKeys.add("name");
+        linkKeys.add("onblue");
+        linkKeys.add("onclick");
+        linkKeys.add("ondblclick");
+        linkKeys.add("onfocus");
+        linkKeys.add("onkeydown");
+        linkKeys.add("onkeypress");
+        linkKeys.add("onkeyup");
+        linkKeys.add("onmousedown");
+        linkKeys.add("onmousemove");
+        linkKeys.add("onmouseout");
+        linkKeys.add("onmouseover");
+        linkKeys.add("onmouseup");
+        linkKeys.add("rel");
+        linkKeys.add("rev");
+        linkKeys.add("shape");
+        linkKeys.add("tabindex");
+        linkKeys.add("target");
+        linkKeys.add("title");
+        linkKeys.add("type");
+    
+        styleKeys.add("background-color");
+        styleKeys.add("background-image");
+        styleKeys.add("background-repeat");
+        styleKeys.add("border-color");
+        styleKeys.add("border-style");
+        styleKeys.add("border-width");
+        styleKeys.add("color");
+        styleKeys.add("font-family");
+        styleKeys.add("font-size");
+        styleKeys.add("font-style");
+        styleKeys.add("height");
+        styleKeys.add("list-style-image");
+        styleKeys.add("list-style-type");
+        styleKeys.add("margin");
+        styleKeys.add("outline-color");
+        styleKeys.add("outline-style");
+        styleKeys.add("outline-width");
+        styleKeys.add("padding");
+        styleKeys.add("text-align");
+        styleKeys.add("text-decoration");
+        styleKeys.add("vertical-align");
     }
     
     /**
@@ -783,7 +797,7 @@ public class W {
         if (useBlank == null) useBlank = "false";
         String prompt = (String)optionsMap.get("prompt");
         
-        StringBuffer selectSB = new StringBuffer();
+        StringBuilder selectSB = new StringBuilder();
         selectSB.append("<select ");
         if (id != null && !"".equals(id)) 
             selectSB.append("id=\"").append(id).append("\" ");
@@ -844,8 +858,37 @@ public class W {
         return displayHtmlSelect(name, (List)get(dataListKey), options);
     }
     
-    //show all pages
+    /**
+     * Returns a string of Yahoo-style pagination page links. The following 
+     * is an example of the Yahoo-style page links for page limit of 10:
+     * 
+     * <pre>
+     * Showing 31 - 40 of 42  First |  Previous |  Next |  Last
+     * </pre>
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @return a string of Yahoo-style pagination links
+     */
     public static String yahooStylePageLinks(Paginator paginator, String actionPath) {
+    	return yahooStylePageLinks(paginator, actionPath, (String)null);
+    }
+    
+    /**
+     * Returns a string of Yahoo-style pagination page links. The following 
+     * is an example of the Yahoo-style page links for page limit of 10:
+     * 
+     * <pre>
+     * Showing 31 - 40 of 42  First |  Previous |  Next |  Last
+     * </pre>
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @param linkProperties  string of link related properties
+     * @return a string of Yahoo-style pagination links
+     */
+    public static String yahooStylePageLinks(Paginator paginator, 
+    		String actionPath, String linkProperties) {
         if (paginator == null || paginator.getTotalCount() == 0) return "";
         
         String queryStringFirst = paginator.getQueryStringFirst();
@@ -853,15 +896,22 @@ public class W {
         String queryStringNext = paginator.getQueryStringNext();
         String queryStringLast = paginator.getQueryStringLast();
         
-        StringBuffer linkSB = new StringBuffer();
+        StringBuilder linkSB = new StringBuilder();
         linkSB.append("Showing ").append(paginator.getStartIndex()).append(" - ");
         linkSB.append(paginator.getEndIndex()).append(" of ").append(paginator.getTotalCount()).append(" ");
+        
+        if (linkProperties == null || "".equals(linkProperties)) {
+        	linkProperties = "";
+        }
+        else {
+        	linkProperties += "; ";
+        }
         
         if (queryStringFirst == null || "".equals(queryStringFirst)) {
             linkSB.append("First");
         }
         else {
-            linkSB.append(pageLink("First", actionPath, queryStringFirst));
+            linkSB.append(pageLink("First", actionPath, queryStringFirst, linkProperties));
         }
         linkSB.append(" | ");
         
@@ -869,7 +919,7 @@ public class W {
             linkSB.append("Previous");
         }
         else {
-            linkSB.append(pageLink("Previous", actionPath, queryStringPrevious));
+            linkSB.append(pageLink("Previous", actionPath, queryStringPrevious, linkProperties));
         }
         linkSB.append(" | ");
         
@@ -877,7 +927,7 @@ public class W {
             linkSB.append("Next");
         }
         else {
-            linkSB.append(pageLink("Next", actionPath, queryStringNext));
+            linkSB.append(pageLink("Next", actionPath, queryStringNext, linkProperties));
         }
         linkSB.append(" | ");
         
@@ -885,13 +935,33 @@ public class W {
             linkSB.append("Last");
         }
         else {
-            linkSB.append(pageLink("Last", actionPath, queryStringLast));
+            linkSB.append(pageLink("Last", actionPath, queryStringLast, linkProperties));
         }
 
         return linkSB.toString();
     }
     
+    /**
+     * Returns a string of pagination page links. 
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @return a string of pagination links
+     */
     public static String paginationLinks(Paginator paginator, String actionPath) {
+    	return paginationLinks(paginator, actionPath, (String)null);
+    }
+    
+    /**
+     * Returns a string of pagination page links. 
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @param linkProperties  string of link related properties
+     * @return a string of pagination links
+     */
+    public static String paginationLinks(Paginator paginator, 
+    		String actionPath, String linkProperties) {
         if (paginator == null || paginator.getTotalCount() == 0) return "";
         
         int total = paginator.getPageCount();
@@ -899,7 +969,14 @@ public class W {
         int beginWindowIndex = 1;
         int endWindowIndex = total;
         
-        StringBuffer selectSB = new StringBuffer();
+        if (linkProperties == null || "".equals(linkProperties)) {
+        	linkProperties = "";
+        }
+        else {
+        	linkProperties += "; ";
+        }
+        
+        StringBuilder selectSB = new StringBuilder();
         
         //link for window
         for(int i=beginWindowIndex; i<=endWindowIndex; i++) {
@@ -909,7 +986,9 @@ public class W {
             }
             else {
                 //example: <a href="/page10" title="Go to page 10">10</a>
-                selectSB.append(pageLink("" + i, actionPath, paginator.getQueryStringPage(i), "title=Go to page " + i));
+                selectSB.append(pageLink("" + i, actionPath, 
+                		paginator.getQueryStringPage(i), 
+                		linkProperties + "title:Go to page " + i));
             }
             selectSB.append(" ");
         }
@@ -917,12 +996,67 @@ public class W {
         return selectSB.toString();
     }
     
-    //show all pages
-    public static String diggStylePageLinks(Paginator paginator, String actionPath) {
-        return diggStylePageLinks(paginator, actionPath, -1, -1);
+    /**
+     * Returns a string of window-style pagination page links. 
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @return a string of window-style pagination links
+     */
+    public static String windowStylePageLinks(Paginator paginator, 
+    		String actionPath) {
+        return windowStylePageLinks(paginator, actionPath, (String)null);
     }
     
-    public static String diggStylePageLinks(Paginator paginator, String actionPath, int side, int window) {
+    /**
+     * Returns a string of window-style pagination page links. 
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @param linkProperties  string of link related properties
+     * @return a string of window-style pagination links
+     */
+    public static String windowStylePageLinks(Paginator paginator, 
+    		String actionPath, String linkProperties) {
+        return windowStylePageLinks(paginator, actionPath, -1, -1, linkProperties);
+    }
+    
+    /**
+     * Returns a string of pagination page links. The following is an example 
+     * of the window-style page links for size=4 and window=11:
+     * 
+     * <pre> 
+     * « Previous 1 2 3 4 .... 6 7 8 9 10 11 12 13 14 15 16 .... 18 19 20 21 Next »
+     * </pre>
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @param side        Size of side window
+     * @param window      Width of total page links shown
+     * @return a string of window-style pagination links
+     */
+    public static String windowStylePageLinks(Paginator paginator, 
+    		String actionPath, int side, int window) {
+    	return windowStylePageLinks(paginator, actionPath, -1, -1, (String)null);
+    }
+    
+    /**
+     * Returns a string of pagination page links. The following is an example 
+     * of the window-style page links for size=4 and window=11:
+     * 
+     * <pre> 
+     * « Previous 1 2 3 4 .... 6 7 8 9 10 11 12 13 14 15 16 .... 18 19 20 21 Next »
+     * </pre>
+     * 
+     * @param paginator   The Paginator instance
+     * @param actionPath  Path to an action
+     * @param side        Size of side window
+     * @param window      Width of total page links shown
+     * @param linkProperties  string of link related properties
+     * @return a string of window-style pagination links
+     */
+    public static String windowStylePageLinks(Paginator paginator, 
+    		String actionPath, int side, int window, String linkProperties) {
         if (paginator == null || paginator.getTotalCount() == 0) return "";
         if (side <= 0) side = 0;
         
@@ -941,12 +1075,21 @@ public class W {
         boolean addLinkOnPrev = (current > 1)?true:false;
         boolean addLinkOnNext = (current < total)?true:false;
         
-        StringBuffer selectSB = new StringBuffer();
+        if (linkProperties == null || "".equals(linkProperties)) {
+        	linkProperties = "";
+        }
+        else {
+        	linkProperties += "; ";
+        }
+        
+        StringBuilder selectSB = new StringBuilder();
         
         //link for prev
         if (addLinkOnPrev) {
             //example: <a href="/page8" class="nextprev" title="Go to Previous Page">&#171; Previous</a>
-            selectSB.append(pageLink("&#171; Previous", actionPath, paginator.getQueryStringPrevious(), "class=nextprev, title=Go to Previous Page"));
+            selectSB.append(pageLink("&#171; Previous", actionPath, 
+            		paginator.getQueryStringPrevious(), linkProperties + 
+            		"class:nextprev; title:Go to Previous Page"));
         }
         else {
             //example: <span class="nextprev">&#171; Previous</span>
@@ -960,7 +1103,9 @@ public class W {
             //         <a href="/page2" title="Go to page 2">2</a>
             //         <span>&#8230;.</span>
             for (int i=1; i<=side; i++) {
-                selectSB.append(pageLink("" + i, actionPath, paginator.getQueryStringPage(i), "title=Go to page " + i));
+                selectSB.append(pageLink("" + i, actionPath, 
+                		paginator.getQueryStringPage(i), linkProperties + 
+                		"title:Go to page " + i));
                 selectSB.append(" ");
             }
             selectSB.append("<span>&#8230;.</span>").append(" ");
@@ -974,7 +1119,9 @@ public class W {
             }
             else {
                 //example: <a href="/page10" title="Go to page 10">10</a>
-                selectSB.append(pageLink("" + i, actionPath, paginator.getQueryStringPage(i), "title=Go to page " + i));
+                selectSB.append(pageLink("" + i, actionPath, 
+                		paginator.getQueryStringPage(i), linkProperties + 
+                		"title:Go to page " + i));
             }
             selectSB.append(" ");
         }
@@ -987,7 +1134,9 @@ public class W {
             //         <a href="/page193" title="Go to page 193">193</a>
             //         <a href="/page194" title="Go to page 194">194</a>
             for (int i=total-side+1; i<=total; i++) {
-                selectSB.append(pageLink("" + i, actionPath, paginator.getQueryStringPage(i), "title=Go to page " + i));
+                selectSB.append(pageLink("" + i, actionPath, 
+                		paginator.getQueryStringPage(i), linkProperties + 
+                		"title:Go to page " + i));
                 selectSB.append(" ");
             }
         }
@@ -995,7 +1144,9 @@ public class W {
         //link for next
         if (addLinkOnNext) {
             //example: <a href="/page10" class="nextprev" title="Go to Next Page">Next &#187;</a>
-            selectSB.append(pageLink("Next &#187;", actionPath, paginator.getQueryStringNext(), "class=nextprev, title=Go to Next Page"));
+            selectSB.append(pageLink("Next &#187;", actionPath, 
+            		paginator.getQueryStringNext(), linkProperties + 
+            		"class:nextprev, title:Go to Next Page"));
         }
         else {
             //example: <span class="nextprev">Next &#187;</span>
@@ -1204,7 +1355,7 @@ public class W {
      * @return a url string
      */
     public static String getURL(String actionPath) {
-        return getURL(actionPath, (Map)null);
+        return getURL(actionPath, (Map<String, String>)null);
     }
     
     /**
@@ -1259,10 +1410,10 @@ public class W {
      * @param options           a map of options
      * @return a url string
      */
-    public static String getURL(String actionPath, Map options) {
+    public static String getURL(String actionPath, Map<String, String> options) {
         if (actionPath == null || "".equals(actionPath)) return "";
         
-        if (options == null) options = new HashMap();
+        if (options == null) options = new HashMap<String, String>();
         
         if (!actionPath.startsWith("/")) {
             String controllerPath = getCurrentControllerPath();
@@ -1366,7 +1517,7 @@ public class W {
      * @return a string of html button code
      */
     public static String buttonTag(String face) {
-        return buttonTag(face, (Map)null);
+        return buttonTag(face, (Map<String, String>)null);
     }
     
     /**
@@ -1415,8 +1566,8 @@ public class W {
      * @param buttonProperties map of button related properties
      * @return a string of html button code
      */
-    public static String buttonTag(String face, Map buttonProperties) {
-        StringBuffer isb = new StringBuffer();
+    public static String buttonTag(String face, Map<String, String> buttonProperties) {
+        StringBuilder isb = new StringBuilder();
         isb.append("<button");
         String s = convertButtonPropertiesToString(buttonProperties);
         if (s != null && !"".equals(s)) {
@@ -1494,7 +1645,7 @@ public class W {
      * @param linkProperties    http link related properties
      * @return a url link
      */
-    public static String buttonLink(String face, Map buttonProperties, String actionPath, Map linkProperties) {
+    public static String buttonLink(String face, Map<String, String> buttonProperties, String actionPath, Map<String, String> linkProperties) {
         return labelLink(buttonTag(face, buttonProperties), actionPath, linkProperties);
     }
     
@@ -1509,7 +1660,7 @@ public class W {
      * @return a html submit button in a form
      */
     public static String submitButtonLink(String face, String actionPath) {
-        return submitButtonLink(face, actionPath, (Map)null);
+        return submitButtonLink(face, actionPath, (Map<String, String>)null);
     }
     
     /**
@@ -1563,7 +1714,7 @@ public class W {
      * @param options           http input related properties
      * @return a html submit button in a form
      */
-    public static String submitButtonLink(String face, String actionPath, Map options) {
+    public static String submitButtonLink(String face, String actionPath, Map<String, String> options) {
         String url = getURL(actionPath, options);
         
         String confirm = getMapProperty(options, "confirm", null);
@@ -1575,7 +1726,7 @@ public class W {
         
         String method = getMapProperty(options, "method", "GET");
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         
         String queryString = getQueryString(url);
         if (queryString != null && !"".equals(queryString)) {
@@ -1595,9 +1746,9 @@ public class W {
     }
     
     //<input type="hidden" name="ownerId" value="1"/>
-    private static StringBuffer convertQueryStringToHiddenFields(String queryString) {
-        StringBuffer sb = new StringBuffer();
-        Map m = Converters.convertStringToMap(queryString, "=", "&");
+    private static StringBuilder convertQueryStringToHiddenFields(String queryString) {
+        StringBuilder sb = new StringBuilder();
+        Map<String, String> m = Converters.convertStringToMap(queryString, "=", "&");
         Iterator it = m.keySet().iterator();
         while(it.hasNext()) {
             Object key = it.next();
@@ -1657,7 +1808,7 @@ public class W {
      * @return url link on the label
      */
     public static String labelLink(String label, String actionPath) {
-        return labelLink(label, actionPath, (Map)null);
+        return labelLink(label, actionPath, (Map<String, String>)null);
     }
     
     /**
@@ -1716,7 +1867,7 @@ public class W {
      * @param linkProperties    map of link related properties
      * @return url link on the label
      */
-    public static String labelLink(String label, String actionPath, Map linkProperties) {
+    public static String labelLink(String label, String actionPath, Map<String, String> linkProperties) {
     	if (isEmpty(label)) return "";
     	
         if (linkProperties != null) {
@@ -1739,7 +1890,7 @@ public class W {
         return createLabelLink(label, url, linkProperties);
     }
     
-    private static String createLabelLink(String label, String url, Map linkProperties) {
+    private static String createLabelLink(String label, String url, Map<String, String> linkProperties) {
         if (url == null || "".equals(url)) return label;
         
         String confirm = getMapProperty(linkProperties, "confirm", null);
@@ -1748,7 +1899,7 @@ public class W {
             String method = getMapProperty(linkProperties, "method", null);
             if (method != null) {
                 if ("delete".equalsIgnoreCase(method)) {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     sb.append("if (confirm(" + confirm + ")) { ");
                     sb.append("var f = document.createElement('form'); ");
                     sb.append(DELETE_ADDON);
@@ -1777,7 +1928,7 @@ public class W {
             linkProperties.put("onclick", popup);
         }
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<a href=\"").append(url).append("\" ").append(convertLinkPropertiesToString(linkProperties));
         sb.append(">").append(label).append("</a>");
         return sb.toString();
@@ -1793,7 +1944,7 @@ public class W {
      * @return a string of html image code
      */
     public static String imageTag(String imageSrc) {
-        return imageTag(imageSrc, (Map)null);
+        return imageTag(imageSrc, (Map<String, String>)null);
     }
     
     /**
@@ -1836,8 +1987,8 @@ public class W {
      * @param imageProperties   map of image related properties
      * @return a string of html image code
      */
-    public static String imageTag(String imageSrc, Map imageProperties) {
-        StringBuffer isb = new StringBuffer();
+    public static String imageTag(String imageSrc, Map<String, String> imageProperties) {
+        StringBuilder isb = new StringBuilder();
         isb.append("<img src=\"").append(imageSrc).append("\" ");
         isb.append(convertImagePropertiesToString(imageProperties));
         isb.append(" />");
@@ -1903,8 +2054,8 @@ public class W {
      * @param linkProperties    http link related properties
      * @return a url link
      */
-    public static String imageLink(String imageSrc, Map imageProperties, 
-        String actionPath, Map linkProperties) {
+    public static String imageLink(String imageSrc, Map<String, String> imageProperties, 
+        String actionPath, Map<String, String> linkProperties) {
         return labelLink(imageTag(imageSrc, imageProperties), actionPath, linkProperties);
     }
     
@@ -1916,7 +2067,7 @@ public class W {
      */
     public static String stylesheetLink(String stylesheetFileName) {
         String contextPath = getContextPath();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<link href=\"").append(contextPath).append("/stylesheets/").append(stylesheetFileName);
         sb.append("\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />");
         return sb.toString();
@@ -1930,7 +2081,7 @@ public class W {
      */
     public static String javascriptLink(String javascriptFileName) {
         String contextPath = getContextPath();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<script src=\"").append(contextPath).append("/javascripts/").append(javascriptFileName);
         sb.append("\" type=\"text/javascript\"></script>");
         return sb.toString();
@@ -1973,7 +2124,12 @@ public class W {
      * @return a url link
      */
     public static String pageLink(String label, String actionPath, String queryString, String linkProperties) {
-        linkProperties += noLinkOnEmptyQueryString + ":true";
+    	if (linkProperties != null && !"".equals(linkProperties)) {
+    		linkProperties += "; " + noLinkOnEmptyQueryString + ":true";
+    	}
+    	else {
+    		linkProperties = noLinkOnEmptyQueryString + ":true";
+    	}
         if (actionPath.indexOf('?') != -1) {
             actionPath += "&" + queryString;
         }
@@ -2014,10 +2170,10 @@ public class W {
      * @param properties a map of key value pairs
      * @return string
      */
-     public static String convertButtonPropertiesToString(Map properties) {
+    public static String convertButtonPropertiesToString(Map<String, String> properties) {
         if (properties == null || properties.size() == 0) return "";
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String propertiesString = Converters.convertMapToString(properties, buttonKeys, "=", " ", true);
         String stylesString     = Converters.convertMapToString(properties, styleKeys, ":", "; ", false);
         if (!"".equals(propertiesString)) sb.append(propertiesString);
@@ -2031,10 +2187,10 @@ public class W {
      * @param properties a map of key value pairs
      * @return string
      */
-    public static String convertImagePropertiesToString(Map properties) {
+    public static String convertImagePropertiesToString(Map<String, String> properties) {
         if (properties == null || properties.size() == 0) return "";
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String propertiesString = Converters.convertMapToString(properties, imageKeys, "=", " ", true);
         String stylesString     = Converters.convertMapToString(properties, styleKeys, ":", "; ", false);
         if (!"".equals(propertiesString)) sb.append(propertiesString);
@@ -2048,10 +2204,10 @@ public class W {
      * @param properties a map of key value pairs
      * @return string
      */
-    public static String convertInputPropertiesToString(Map properties) {
+    public static String convertInputPropertiesToString(Map<String, String> properties) {
         if (properties == null || properties.size() == 0) return "";
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String propertiesString = Converters.convertMapToString(properties, inputKeys, "=", " ", true);
         String stylesString     = Converters.convertMapToString(properties, styleKeys, ":", "; ", false);
         if (!"".equals(propertiesString)) sb.append(propertiesString);
@@ -2065,10 +2221,10 @@ public class W {
      * @param properties a map of key value pairs
      * @return string
      */
-    public static String convertLinkPropertiesToString(Map properties) {
+    public static String convertLinkPropertiesToString(Map<String, String> properties) {
         if (properties == null || properties.size() == 0) return "";
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String propertiesString = Converters.convertMapToString(properties, linkKeys, "=", " ", true);
         String stylesString     = Converters.convertMapToString(properties, styleKeys, ":", "; ", false);
         if (!"".equals(propertiesString)) sb.append(propertiesString);
@@ -2076,7 +2232,7 @@ public class W {
         return sb.toString();
     }
     
-    private static String getMapProperty(Map options, String key, String def) {
+    private static String getMapProperty(Map<String, String> options, String key, String def) {
         if (options == null) return def;
         String value = (String)options.get(key);
         return (value == null)?def:value;
@@ -2132,8 +2288,8 @@ public class W {
         return result;
     }
     
-    private static String parseErrorMessages(List errors) {
-        StringBuffer sb = new StringBuffer();
+    private static String parseErrorMessages(List<String> errors) {
+        StringBuilder sb = new StringBuilder();
         if (errors != null && errors.size() > 0) {
             Iterator it = errors.iterator();
             while(it.hasNext()) {
@@ -2191,9 +2347,9 @@ public class W {
      * @param properties map of properties
      * @return String formatted html string
      */
-    public static String taggedContent(String tag, String content, Map properties) {
-        StringBuffer sb = new StringBuffer();
-        Iterator it = properties.keySet().iterator();
+    public static String taggedContent(String tag, String content, Map<String, String> properties) {
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> it = properties.keySet().iterator();
         while(it.hasNext()) {
             Object key = it.next();
             Object value = properties.get(key);
@@ -2216,7 +2372,7 @@ public class W {
      * @param properties map of properties
      * @return String formatted html string
      */
-    public static String taggedContent(Object object, String field, String tag, String content, Map properties) {
+    public static String taggedContent(Object object, String field, String tag, String content, Map<String, String> properties) {
         String result = taggedContent(tag, content, properties);
         
         boolean errorOccurred = false;

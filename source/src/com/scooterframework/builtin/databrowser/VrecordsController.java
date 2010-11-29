@@ -10,7 +10,7 @@ package com.scooterframework.builtin.databrowser;
 import static com.scooterframework.web.controller.ActionControl.*;
 
 import com.scooterframework.admin.Constants;
-import com.scooterframework.builtin.BuiltinHelper;
+import com.scooterframework.builtin.AdminSignonController;
 import com.scooterframework.orm.misc.Paginator;
 
 /**
@@ -22,7 +22,7 @@ public class VrecordsController extends ApplicationController {
 
 	static {
 		filterManagerFor(VrecordsController.class).declareBeforeFilter(
-				BuiltinHelper.class, "validateRequest");
+				AdminSignonController.class, "loginRequired");
 	}
     
     public String index() {

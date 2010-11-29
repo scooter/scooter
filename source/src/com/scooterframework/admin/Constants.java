@@ -19,7 +19,7 @@ public class Constants {
 //************************************************************************
     public static final String CONTROLLER = "scooter.key.controller";
     public static final String CONTROLLER_PATH = "scooter.key.controller.path";
-    public static final String CONTROLLER_CLASS = "scooter.key.controller,class";
+    public static final String CONTROLLER_CLASS = "scooter.key.controller.class";
     public static final String CURRENT_LOCALE = "scooter.key.current.locale";
     public static final String ACTION = "scooter.key.action";
     public static final String MODEL = "scooter.key.model";
@@ -34,6 +34,7 @@ public class Constants {
     public static final String SKIP_PATH = "scooter.key.skip.path";
     public static final String REQUEST_HEADER = "scooter.key.request.header";
     public static final String REQUEST_PATH = "scooter.key.request.path";
+    public static final String REQUEST_PATH_REST = "scooter.key.request.path.restful";
     public static final String REQUEST_URI = "scooter.key.request.uri";
     public static final String LOCAL_REQUEST = "scooter.key.local.request";
     public static final String FILE_UPLOAD_REQUEST = "scooter.key.fileupload.request";
@@ -56,6 +57,11 @@ public class Constants {
     public static final String PRIMARY_KEY_SEPARATOR = "-";
     
     /**
+     * Default value when there is no format derived from request uri.
+     */
+    public static final String DEFAULT_RESPONSE_FORMAT = "html";
+    
+    /**
      * Default running environment is "DEVELOPMENT".
      */
     public static final String RUNNING_ENVIRONMENT_DEVELOPMENT = "DEVELOPMENT";
@@ -66,6 +72,7 @@ public class Constants {
 // External Keys: external keys are sent to the application from somewhere.
 //*************************************************************************
     public static final String HTTP_METHOD = "_method";
+    public static final String AJAX_REQUEST = "_ajax";
     
     /**
      * Http key "<tt>paged</tt>" indicates whether to use paginator to display 

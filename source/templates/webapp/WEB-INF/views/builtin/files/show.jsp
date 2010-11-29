@@ -1,11 +1,13 @@
 <%@ page import="
         java.io.File,
         com.scooterframework.builtin.BuiltinHelper,
+        com.scooterframework.builtin.FileInfo,
         com.scooterframework.web.util.W"
 %>
 
 <%
 File requestFile = (File)W.get("requestFile");
+String classCode = (String)W.get("classCode");
 %>
 
 <div id="locator">
@@ -15,13 +17,13 @@ File requestFile = (File)W.get("requestFile");
 <h2>Show file</h2>
 
 <% if (requestFile != null) { %>
-<h3><%=BuiltinHelper.getFileName(requestFile)%></h3>
+<h3><%=BuiltinHelper.getFileName(requestFile)%> (<%=W.labelLink("edit", new FileInfo(requestFile).getActionURI("edit"))%>)</h3>
 <%} %>
 
 <% if (requestFile != null) { %>
-<textarea rows="40" cols="80" readonly="readonly">
+<pre class="<%=classCode%>">
 <%=W.value("fileContent")%>
-</textarea>
+</pre>
 <%} else {%>
 <p>There is no file to show.</p>
 <%}%>

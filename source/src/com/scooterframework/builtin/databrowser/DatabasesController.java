@@ -9,7 +9,7 @@ package com.scooterframework.builtin.databrowser;
 
 import static com.scooterframework.web.controller.ActionControl.*;
 
-import com.scooterframework.builtin.BuiltinHelper;
+import com.scooterframework.builtin.AdminSignonController;
 import com.scooterframework.web.util.R;
 
 /**
@@ -21,7 +21,7 @@ public class DatabasesController extends ApplicationController {
 
 	static {
 		filterManagerFor(DatabasesController.class).declareBeforeFilter(
-				BuiltinHelper.class, "validateRequest");
+				AdminSignonController.class, "loginRequired");
 	}
 	
     public String index() {

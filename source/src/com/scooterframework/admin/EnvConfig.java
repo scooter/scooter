@@ -29,7 +29,7 @@ import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ActiveRecordUtil;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.web.controller.ActionContext;
-import com.scooterframework.web.controller.ViewFileNotFoundException;
+import com.scooterframework.web.controller.NoViewFileException;
 
 /**
  * EnvConfig class configurates the application during startup time.
@@ -52,6 +52,8 @@ public class EnvConfig implements Observer {
     //****************************************************
     // Default values for keys in the properties file
     //****************************************************
+    public static final String DEFAULT_VALUE_siteAdminUsername = null;
+    public static final String DEFAULT_VALUE_siteAdminPassword = null;
     public static final String DEFAULT_VALUE_modelClassPrefix = "models";
     public static final String DEFAULT_VALUE_modelClassSuffix = "";
     public static final String DEFAULT_VALUE_controllerClassPrefix = "controllers";
@@ -90,6 +92,8 @@ public class EnvConfig implements Observer {
     private Properties appProperties = null;
     private static Map defaultMimeTypesMap = Collections.synchronizedMap(new HashMap());
 
+    private String siteAdminUsername = DEFAULT_VALUE_siteAdminUsername;
+    private String siteAdminPassword = DEFAULT_VALUE_siteAdminPassword;
     private String modelClassPrefix = DEFAULT_VALUE_modelClassPrefix;
     private String modelClassSuffix = DEFAULT_VALUE_modelClassSuffix;
     private String controllerClassPrefix = DEFAULT_VALUE_controllerClassPrefix;
@@ -161,6 +165,8 @@ public class EnvConfig implements Observer {
 
         loadProperties();
 
+        siteAdminUsername = getProperty("site.admin.username", DEFAULT_VALUE_siteAdminUsername);
+        siteAdminPassword = getProperty("site.admin.password", DEFAULT_VALUE_siteAdminPassword);
         controllerClassPrefix = getProperty("controller.class.prefix", DEFAULT_VALUE_controllerClassPrefix);
         controllerClassSuffix = getProperty("controller.class.suffix", DEFAULT_VALUE_controllerClassSuffix);
         modelClassPrefix = getProperty("model.class.prefix", DEFAULT_VALUE_modelClassPrefix);
@@ -303,6 +309,20 @@ public class EnvConfig implements Observer {
      */
     public String getProperty(String key, String defaultValue) {
         return appProperties.getProperty(key, defaultValue);
+    }
+
+    /**
+     * Returns site admin username.
+     */
+    public String getSiteAdminUsername() {
+        return siteAdminUsername;
+    }
+
+    /**
+     * Returns site admin password.
+     */
+    public String getSiteAdminPassword() {
+        return siteAdminPassword;
     }
 
     /**
@@ -512,17 +532,21 @@ public class EnvConfig implements Observer {
             }
         }
 
-        if (!actionOrView.endsWith(EnvConfig.getInstance().getViewExtension())) {
+        if (!actionOrView.endsWith(EnvConfig.getInstance().getViewExtension()) &&
+        		actionOrView.indexOf('.') == -1) {
             actionOrView += EnvConfig.getInstance().getViewExtension();
         }
-
-        String uri = EnvConfig.getInstance().getWebPageDirectoryName() + controller + "/" + actionOrView;
+        
+        String uri = "";
+        if (!actionOrView.startsWith("/")) {
+        	uri = EnvConfig.getInstance().getWebPageDirectoryName() + controller + "/" + actionOrView;
+        }
+        else {
+        	uri = EnvConfig.getInstance().getWebPageDirectoryName() + controller + actionOrView;
+        }
         
         String realPath = getRealPath();
         String filePath = realPath + uri;
-        System.out.println("MMMMMMMMMMMMMMMMMMMM       realPath: " + realPath);
-        System.out.println("MMMMMMMMMMMMMMMMMMMM       filePath: " + filePath);
-        System.out.println("MMMMMMMMMMMMMMMMMMMM defaultViewDir: " + defaultViewDir);
         
         File f = new File(filePath);
         if (!f.exists()) {
@@ -534,7 +558,7 @@ public class EnvConfig implements Observer {
             else {
             	String errorMsg = "View file \"" + filePath + "\" does not exist.";
                 log.error(errorMsg);
-                throw new ViewFileNotFoundException(errorMsg);
+                throw new NoViewFileException(errorMsg, filePath);
             }
         }
 
@@ -918,16 +942,26 @@ public class EnvConfig implements Observer {
     	boolean result = false;
     	String mimeType = EnvConfig.getInstance().getMimeType(extension);
     	
-    	if ((mimeType != null && mimeType.startsWith("text")) ||
-    			"atom".equalsIgnoreCase(extension) ||
+    	if ((mimeType != null && (
+    			mimeType.startsWith("text") || 
+    			mimeType.endsWith("xml"))) ||
     			"csh".equalsIgnoreCase(extension) ||
     			"dtd".equalsIgnoreCase(extension) ||
-    			"js".equalsIgnoreCase(extension) ||
-    			"rss".equalsIgnoreCase(extension) ||
-    			"xhtml".equalsIgnoreCase(extension)
+    			"js".equalsIgnoreCase(extension)
     		) {
     		result = true;
     	}
     	return result;
+    }
+    
+    /**
+     * Checks if the content of the file can be highlighted. Only a selected
+     * types of file extensions are highlightable.
+     * 
+     * @param fileExtension
+     * @return true if highlightable
+     */
+    public boolean isHighlightable(String fileExtension) {
+    	return isTextFile(fileExtension);
     }
 }

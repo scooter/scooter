@@ -24,26 +24,26 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  * @author (Fei) John Chen
  */
 public class Table {
-    public static List getTables(String connName) {
+    public static List<TableInfo> getTables(String connName) {
     	String[] s2 = Database.getCatalogAndSchema(connName);
     	String catalog = s2[0];
     	String schema = s2[1];
     	return getTables(connName, catalog, schema);
     }
     
-    public static List getTables(String connName, String catalog, String schema) {
+    public static List<TableInfo> getTables(String connName, String catalog, String schema) {
         String[] types = {"TABLE"};
         return getTables(connName, catalog, schema, types);
     }
     
-    public static List getTables(String connName, String catalog, String schema, String[] types) {
+    public static List<TableInfo> getTables(String connName, String catalog, String schema, String[] types) {
         Connection conn = null;
-        List tableInfos = new ArrayList();
+        List<TableInfo> tableInfos = new ArrayList<TableInfo>();
         try {
             conn = SqlExpressUtil.getReadonlyConnection(connName);
-            List tmp = SqlExpressUtil.getDatabaseTables(conn, catalog, schema, null, types);
+            List<TableInfo> tmp = SqlExpressUtil.getDatabaseTables(conn, catalog, schema, null, types, false);
             if (tmp != null) {
-            	Iterator it = tmp.iterator();
+            	Iterator<TableInfo> it = tmp.iterator();
             	while(it.hasNext()) {
             		TableInfo ti = (TableInfo)it.next();
             		if (!SqlExpressUtil.isNiceDBString(ti.getName())) continue;

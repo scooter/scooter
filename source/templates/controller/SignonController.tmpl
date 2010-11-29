@@ -16,6 +16,7 @@ import com.scooterframework.security.LoginHelper;
 public class $controller_class_name$ extends ApplicationController {
 
     static {
+        filterManagerFor($controller_class_name$.class).declareBeforeFilter("loginRequired", "only", "main");
         filterManagerFor($controller_class_name$.class).declareBeforeFilter("validateInput", "only", "authenticate");
     }
     
@@ -26,6 +27,13 @@ public class $controller_class_name$ extends ApplicationController {
             flash("error", "Please submit both username and password.");
             return redirectTo("/$controller$/login");
         }
+        return null;
+    }
+    
+    /**
+     * main method
+     */
+    public String main() {
         return null;
     }
     

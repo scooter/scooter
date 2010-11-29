@@ -78,6 +78,11 @@ public class ActionResult {
     public static final String TAG_XML         = "xml=>";
     
     /**
+     * render tag
+     */
+    public static final String TAG_RENDER      = "render=>";
+    
+    /**
      * forward tag
      */
     public static final String TAG_FORWARD_TO  = "forwardTo=>";
@@ -242,7 +247,11 @@ public class ActionResult {
      * @return a string of result without the tag
      */
     public static String getResultContentByTag(Object result, String tag) {
-        if (result == null) return null;
+        if (result == null || tag == null) return null;
+        
+        if (!tag.endsWith(TAG_SYMBOL)) {
+        	tag += TAG_SYMBOL;
+        }
         
         String r = result.toString();
         if (checkResultTag(result, tag)) {

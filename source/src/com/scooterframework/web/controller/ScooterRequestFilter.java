@@ -129,9 +129,13 @@ public class ScooterRequestFilter implements Filter {
         else {
             request.setAttribute(Constants.SKIP_PATH, "Y");
         }
+        
+        if (isAjaxRequest((HttpServletRequest)request)) {
+        	request.setAttribute("__sitemesh__filterapplied", Boolean.TRUE);
+        }
 
-        String requestPath = requestInfo(request);
-        log.debug("============>>\"" + requestPath + "\"");
+        String requestPathREST = requestInfo(request);
+        log.debug("============>>\"" + requestPathREST + "\"");
         
         try {
         	chain.doFilter(request, response);
@@ -143,7 +147,7 @@ public class ScooterRequestFilter implements Filter {
         long after = System.currentTimeMillis();
         
         if (EnvConfig.getInstance().allowRecordBenchmark()) {
-            log.info("\"" + requestPath + "\" takes: " + (after - before) + " ms");
+            log.info("\"" + requestPathREST + "\" takes: " + (after - before) + " ms");
             if (EnvConfig.getInstance().allowRecordBenchmarkInHeader()) {
                 HttpServletResponseWrapper resw = new HttpServletResponseWrapper((HttpServletResponse)response);
                 resw.addHeader("Exec-Time", (after - before) + " ms");
@@ -163,8 +167,13 @@ public class ScooterRequestFilter implements Filter {
     protected String requestInfo(ServletRequest req) {
         HttpServletRequest request = (HttpServletRequest)req;
         String method = request.getMethod();
-        String queryString = request.getQueryString();
+        String contextPath = request.getContextPath();
         String requestURI = request.getRequestURI();
+        String requestPath = requestURI.substring(contextPath.length());
+        if (requestPath.length() > 1 && 
+        		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
+        	requestURI = requestURI.substring(0, requestURI.length()-1);
+        }
         
         //request header
         Properties headers = new Properties();
@@ -175,11 +184,13 @@ public class ScooterRequestFilter implements Filter {
             if (value != null) headers.setProperty(name, value);
         }
         
-        String requestPath = method + " " + requestURI;
-        if (queryString != null) requestPath += "?" + queryString;
+        String requestPathRESTful = method + " " + requestPath;
+        String queryString = request.getQueryString();
+        if (queryString != null) requestPathRESTful += "?" + queryString;
         
         CurrentThreadCache.set(Constants.REQUEST_HEADER, headers);
         CurrentThreadCache.set(Constants.REQUEST_PATH, requestPath);
+        CurrentThreadCache.set(Constants.REQUEST_PATH_REST, requestPathRESTful);
         CurrentThreadCache.set(Constants.REQUEST_URI, requestURI);
         
         if (isLocalRequest(request)) {
@@ -205,7 +216,11 @@ public class ScooterRequestFilter implements Filter {
             } catch (Exception ex) {}
         }
         
-        return requestPath;
+        return requestPathRESTful;
+    }
+    
+    protected boolean isAjaxRequest(HttpServletRequest request) {
+        return (request.getParameter(Constants.AJAX_REQUEST) != null)?true:false;
     }
     
     /**

@@ -198,6 +198,39 @@ public class ColumnInfo implements Serializable {
     }
     
     /**
+     * Checks if this column is of date type. 
+     * 
+     * <p>
+     * The following types from java.sql.Types are treated as date type:
+     * <ul>
+     *   <li>java.sql.Types.DATE       91 </li>
+     *   <li>java.sql.Types.TIMESTAMP  93 </li>
+     * </ul>
+     * </p>
+     * 
+     * @return true if it is of date type
+     */
+    public boolean isDate() {
+        return m_iDataType == Types.DATE;
+    }
+    
+    /**
+     * Checks if this column is of timestamp type. 
+     * 
+     * <p>
+     * The following types from java.sql.Types are treated as timestamp type:
+     * <ul>
+     *   <li>java.sql.Types.TIMESTAMP  93 </li>
+     * </ul>
+     * </p>
+     * 
+     * @return true if it is of timestamp type
+     */
+    public boolean isTimestamp() {
+        return m_iDataType == Types.TIMESTAMP;
+    }
+    
+    /**
      * Checks if a column is of numeric type. 
      * 
      * <p>

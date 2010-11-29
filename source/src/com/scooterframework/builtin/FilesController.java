@@ -31,7 +31,7 @@ public class FilesController {
 
 	static {
 		filterManagerFor(FilesController.class).declareBeforeFilter(
-				BuiltinHelper.class, "validateRequest");
+				AdminSignonController.class, "loginRequired");
 		
 		filterManagerFor(FilesController.class).declareBeforeFilter(
 				"validatePath", "except", "create, update, doCopy, doUpload, doReplace");
@@ -111,6 +111,14 @@ public class FilesController {
 				flash("error", "Failed to read file " + path);
 			}
 
+			String classCode = getFileExtension(requestFile);
+			if (EnvConfig.getInstance().isHighlightable(classCode)) {
+				classCode = classCode + "_code";
+			} else {
+				classCode = "code";
+			}
+			
+			setViewData("classCode", classCode);
 			setViewData("fileContent", sb.toString());
 		} else {
 			publishFile(requestFile);
@@ -137,7 +145,7 @@ public class FilesController {
 		try {
 			FileUtil.updateFile(newFile, content);
 			flash("notice", "File was successfully created.");
-			return redirectTo("/files/show?f=" + newPath);
+			return redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_FILE + newPath);
 		} catch (Exception ex) {
 			log.error("Error in create() caused by " + ex.getMessage());
 			flash("error", "There was a problem creating the file.");
@@ -178,7 +186,7 @@ public class FilesController {
 		try {
 			FileUtil.updateFile(requestFile, content);
 			flash("notice", "File was successfully updated.");
-			return redirectTo("/files/show?f=" + path);
+			return redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_FILE + path);
 		} catch (Exception ex) {
 			log.error("Error in update() caused by " + ex.getMessage());
 			flash("error", "There was a problem updating the file.");
@@ -200,7 +208,7 @@ public class FilesController {
 				flash("error", "The file was not deleted.");
 			}
 		}
-		return redirectTo("/files/list?f=" + parentPath);
+		return redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_DIR + parentPath);
 	}
 
 	public String copy() {
@@ -220,8 +228,9 @@ public class FilesController {
 		try {
 			FileUtil.copy(requestFile, targetFile);
 			flash("notice", "Copy was successful.");
-			return (targetFile.isDirectory()) ? redirectTo("/files/list?f="
-					+ target) : redirectTo("/files/show?f=" + target);
+			return (targetFile.isDirectory()) ? 
+					redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_DIR + target) : 
+					redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_FILE + target);
 		} catch (Exception ex) {
 			log.error("Error in doCopy() caused by " + ex.getMessage());
 			flash("error", "There was a problem in copying.");
@@ -247,8 +256,9 @@ public class FilesController {
 			boolean renamed = FileUtil.rename(requestFile, targetFile);
 			if (renamed) {
 				flash("notice", "Rename was successful.");
-				return (targetFile.isDirectory()) ? redirectTo("/files/list?f="
-						+ target) : redirectTo("/files/show?f=" + target);
+				return (targetFile.isDirectory()) ? 
+						redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_DIR + target) : 
+						redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_FILE + target);
 			} else {
 				flash("error", "Rename was not successful.");
 			}
@@ -275,7 +285,7 @@ public class FilesController {
             UploadFile uf = pFile("theFile");
             uf.writeTo(appPath + "/" + path);
             flash("notice", "File was successfully uploaded.");
-            return redirectTo("/files/list?f=" + path);
+            return redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_DIR + path);
         } catch (Exception ex) {
 			log.error("Error in doUpload() caused by " + ex.getMessage());
             flash("error", "There is a problem with upload.");
@@ -300,7 +310,7 @@ public class FilesController {
             UploadFile uf = pFile("theFile");
             uf.writeTo(requestFile);
             flash("notice", "File was successfully replaced.");
-            return redirectTo("/files/list?f=" + parentPath);
+            return redirectTo(BuiltinHelper.FILE_BROWSER_LINK_PREFIX_DIR + parentPath);
         } catch (Exception ex) {
 			log.error("Error in doReplace() caused by " + ex.getMessage());
         }

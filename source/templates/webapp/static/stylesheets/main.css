@@ -29,6 +29,12 @@ table.sTable tr.even { background-color: white; }
   border: 1px solid #aaa;
 }
 
+.sectionTitle { margin-top: 1.5em; }
+
+.left{float:left}
+.right{float:right}
+.clearer{clear:both}
+
 #siteName {
   float: left;
   color: blue;

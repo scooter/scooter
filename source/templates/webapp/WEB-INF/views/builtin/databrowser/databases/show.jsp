@@ -17,7 +17,6 @@ Properties connInfo = (Properties)request.getAttribute("database");
 String database = O.property(connInfo, NamedProperties.KEY_NAME);
 String[] s2 = Database.getCatalogAndSchema(database);
 String schema = (String)W.get("schema", s2[1]);
-String targetURL = "/databases/" + database;
 %>
 
 <div id="locator">
@@ -45,7 +44,7 @@ String targetURL = "/databases/" + database;
 </p>
 
 <%if (Database.isOracle(database)) {%>
-<form action="<%=W.getURL(targetURL)%>">
+<form action="<%=W.getURL(R.resourceRecordPath(resource, database))%>">
 <table>
     <tr>
         <td align="right"><b>Enter schema name:</b></td>

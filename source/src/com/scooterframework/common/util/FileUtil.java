@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -134,7 +135,8 @@ public class FileUtil {
 		BufferedReader in = null;
 		String line = null;
 		try {
-			in = new BufferedReader(new FileReader(file));
+			in = new BufferedReader(new InputStreamReader(new FileInputStream(
+					file), "utf-8"));
 			while ((line = in.readLine()) != null) {
 				contentLines.add(line);
 			}

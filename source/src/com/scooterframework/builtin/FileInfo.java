@@ -81,6 +81,6 @@ public class FileInfo {
 	}
 	
 	public String getActionURI(String action) {
-		return "/files/" + action + "?f=" + relativePath;
+		return BuiltinHelper.FILE_BROWSER_LINK_PREFIX + "/" + action + "?f=" + relativePath;
 	}
 }

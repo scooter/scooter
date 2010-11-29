@@ -57,15 +57,17 @@ public class DefaultContentHandler implements ContentHandler {
     	if (EnvConfig.getInstance().isTextFile(format)) {
     		content = convertObjectToString(content, format);
     	}
+    	
     	if ("xml".equalsIgnoreCase(format)) {
     		String s = (String)content;
     		if (!s.startsWith("<?xml")) s = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + s;
     		content = s;
     	}
+    	
     	ContentHandlerHelper.publish(response, content, mimeType);
     }
     
-    public static String convertObjectToString(Object data, String format) {
+    protected String convertObjectToString(Object data, String format) {
     	StringBuffer sb = new StringBuffer();
     	if (data instanceof Object[]) {
     		for (Object c : (Object[])data) {
@@ -95,19 +97,19 @@ public class DefaultContentHandler implements ContentHandler {
     	return sb.toString();
     }
     
-    private static String convertMapToString(Map map, String format) {
+    protected String convertMapToString(Map map, String format) {
     	StringBuffer sb = new StringBuffer();
-		if ("json".equals(format)) {
+		if ("json".equalsIgnoreCase(format)) {
 			sb.append((new JSONObject(map)).toString());
 		}
-		else if ("xml".equals(format)) {
+		else if ("xml".equalsIgnoreCase(format)) {
 			try {
 				sb.append(XML.toString((new JSONObject(map))));
 			} catch (JSONException ex) {
 				log.error("Failed to conver to xml string: " + ex.getMessage());
 			}
 		}
-		else if ("txt".equals(format) || "text".equals(format)) {
+		else if ("txt".equalsIgnoreCase(format) || "text".equalsIgnoreCase(format)) {
 			sb.append(map.toString());
 		}
 		else {
@@ -116,15 +118,15 @@ public class DefaultContentHandler implements ContentHandler {
     	return sb.toString();
     }
     
-    private static String convertActiveRecordToString(ActiveRecord record, String format) {
+    protected String convertActiveRecordToString(ActiveRecord record, String format) {
     	StringBuffer sb = new StringBuffer();
-		if ("json".equals(format)) {
+		if ("json".equalsIgnoreCase(format)) {
 			sb.append(record.toJSON());
 		}
-		else if ("xml".equals(format)) {
+		else if ("xml".equalsIgnoreCase(format)) {
 			sb.append(record.toXML());
 		}
-		else if ("txt".equals(format) || "text".equals(format)) {
+		else if ("txt".equalsIgnoreCase(format) || "text".equalsIgnoreCase(format)) {
 			sb.append(record.toString());
 		}
 		else {

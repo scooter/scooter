@@ -21,20 +21,17 @@ import com.scooterframework.tools.common.ToolsUtil;
  * Usage examples:
  * <pre>
 	Usage:
-	    java -jar tools/connectioncheck.jar [app_path] [connection name]
+	    java -jar tools/connection-test.jar [app_path] [connection name]
 	
 	Examples:
 	    This page:
-	        java -jar tools/connectioncheck.jar -help
-	
-	    Test blog app's default connection when blog is the only app under webapps:
-	        java -jar tools/connectiontest.jar
+	        java -jar tools/connection-test.jar -help
 	
 	    Test blog app's default connection:
-	        java -jar tools/connectioncheck.jar blog
+	        java -jar tools/connection-test.jar blog
 	
 	    Test blog app's db connection named oracle_db:
-	        java -jar tools/connectioncheck.jar blog oracle_db
+	        java -jar tools/connection-test.jar blog oracle_db
  * </pre>
  * </p>
  *
@@ -138,20 +135,17 @@ public class ConnectionCheck {
 
     private static void usage() {
     	log("Usage:");
-    	log("    java -jar tools/connectioncheck.jar [app_path] [connection name]");
+    	log("    java -jar tools/connection-test.jar [app_path] [connection name]");
     	log("");
     	log("Examples:");
     	log("    This page:");
-    	log("        java -jar tools/connectioncheck.jar -help");
-    	log("");
-    	log("    Test blog app's default connection when blog is the only app under webapps:");
-    	log("        java -jar tools/connectiontest.jar");
+    	log("        java -jar tools/connection-test.jar -help");
     	log("");
     	log("    Test blog app's default connection:");
-    	log("        java -jar tools/connectioncheck.jar blog");
+    	log("        java -jar tools/connection-test.jar blog");
     	log("");
     	log("    Test blog app's db connection named oracle_db:");
-    	log("        java -jar tools/connectioncheck.jar blog oracle_db");
+    	log("        java -jar tools/connection-test.jar blog oracle_db");
     	log("");
     }
 }

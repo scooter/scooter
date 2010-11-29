@@ -23,6 +23,14 @@ Creating an app in user's home directory:
 Use -help option to get more options.
 
 
+---------------------------------
+How to create an AJAX-powered app
+---------------------------------
+
+Create complete AJAX-powered CRUD app:
+>java -jar tools/generate.jar blog scaffold-ajax post
+
+
 -----------------
 How to run an app
 -----------------
@@ -32,6 +40,12 @@ Run an app with port 9090
 
 Run an app with default port 8080
 >java -jar tools/server.jar /home/users/john/projects/blog
+
+
+-----------------------------------------
+How to invoke http://localhost:8080/posts
+-----------------------------------------
+Change the contextPath to / in blog/WEB-INF/jetty-web.xml
 
 
 ---------------------------------

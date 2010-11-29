@@ -8,11 +8,15 @@
 package com.scooterframework.web.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,6 +28,7 @@ import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.admin.FilterManager;
 import com.scooterframework.admin.FilterManagerFactory;
+import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.ExpandedMessage;
@@ -56,6 +61,7 @@ import com.scooterframework.web.route.RouteConstants;
  * @author (Fei) John Chen
  */
 public class ActionControl {
+	private static LogUtil log = LogUtil.getLogger(ActionControl.class.getName());
     
     /**
      * Returns controller name which handles the request. The controller name 
@@ -101,8 +107,11 @@ public class ActionControl {
     /**
      * Returns request extension which is linked to key 
      * {@link com.scooterframework.admin.Constants#FORMAT}.
+     * 
+     * The value of <tt>format()</tt> is what is used as a default format 
+     * for response.
      */
-    public static String getRequestExtension() {
+    public static String format() {
     	return (String)ACH.getAC().getFromRequestData(Constants.FORMAT);
     }
     
@@ -423,6 +432,13 @@ public class ActionControl {
      */
     public static HttpServletResponse getHttpServletResponse() {
     	return ACH.getWAC().getHttpServletResponse();
+    }
+    
+    /**
+     * Returns the HTTP ServletContext instance.
+     */
+    public static ServletContext getServletContext() {
+        return ACH.getWAC().getHttpServletRequest().getSession().getServletContext();
     }
     
     /**
@@ -751,21 +767,47 @@ public class ActionControl {
     }
     
     /**
+     * Renders content. The format of the response is derived from request 
+     * extension. The default format is <tt>html</tt> which is defined by 
+     * {@link com.scooterframework.admin.Constants#DEFAULT_RESPONSE_FORMAT}.
+     * 
+	 * @param content  The content to be sent.
+     * @return a token of render
+     */
+    public static String render(Object content) {
+    	return render(content, format());
+    }
+    
+    /**
      * Renders content associated with a specific request format.
+     * 
+     * The default format is <tt>html</tt> which is defined by 
+     * {@link com.scooterframework.admin.Constants#DEFAULT_RESPONSE_FORMAT}.
      * 
 	 * @param content  The content to be sent.
 	 * @param format  The request format.
+     * @return a token of render
      */
-    public static void render(Object content, String format) {
+    public static String render(Object content, String format) {
+    	if (content == null) {
+    		log.warn("No rendering for a null content with format " + format);
+			getHttpServletRequest().setAttribute(Constants.REQUEST_RENDERED, "true");
+			return null;
+    	}
+    	
+    	if (format == null) {
+    		format = Constants.DEFAULT_RESPONSE_FORMAT;
+    	}
+    	
         ContentHandler handler = ContentHandlerFactory.getContentHandler(format);
         if (handler != null) {
         	try {
 				handler.handle(
-					ACH.getWAC().getHttpServletRequest(), 
-					ACH.getWAC().getHttpServletResponse(), 
+					getHttpServletRequest(), 
+					getHttpServletResponse(), 
 					content, 
 					format);
-				ACH.getWAC().getHttpServletRequest()
+				getHttpServletRequest()
 						.setAttribute(Constants.REQUEST_RENDERED, "true");
 			} catch (Exception ex) {
 				String error = "Error in render() for format \"" 
@@ -781,6 +823,8 @@ public class ActionControl {
 							+ "extending the Plugin class and "
 							+ "implementing the ContentHandler interface.");
         }
+        
+        return ActionResult.TAG_RENDER;
     }
     
     /**
@@ -837,7 +881,7 @@ public class ActionControl {
      * <tt>application/octet-stream</tt>.
      * 
 	 * @param file  The file to be published.
-	 * @param displayableName  The display name of the file.
+	 * @param displayableName  The display name of the file in the download dialog.
 	 * @param mimeType  The content MIME type.
 	 * @param forDownload  indicates whether this is for file download or display.
      */
@@ -863,19 +907,211 @@ public class ActionControl {
     	return EnvConfig.getInstance().isTextFile(file);
     }
     
+    /**
+     * Returns the file extension.
+     * 
+     * @param file the file to check
+     * @return file extension or null
+     */
+    public static String getFileExtension(File file) {
+    	String fName = file.getName();
+    	int lastDot = fName.lastIndexOf('.');
+    	return (lastDot != -1)?(fName.substring(lastDot + 1)):null;
+    }
+    
+    /**
+     * Returns all view data as a map. This includes data in both 
+     * parameter scope and request scope. 
+     * 
+     * @return a map of all view data
+     */
     public static Map getViewDataMap() {
-    	return null;//TODO
+    	return params();
     }
     
-    public static void renderView(String viewFile) {
-    	renderView(viewFile, getViewDataMap());
+    /**
+     * Renders a view template file with all properties in the container. 
+     * 
+     * The file extension of the view template is used to look up related 
+     * template engine. If the <tt>view</tt> does not have an extension 
+     * specified, the default extension is defined by <tt>view.extension</tt> 
+     * property in the <tt>environment.properties</tt> file. 
+     * 
+     * <p>Examples: </p>
+     * <pre>
+     *   //render view file show.jsp
+     *   renderView("show");
+     *   
+     *   //render view .../WEB-INF/views/products/show.jsp
+     *   renderView("products/show");
+     *   
+     *   //render view file /home/foo/templates/show.st with StringTemplate engine
+     *   renderView("/home/foo/templates/show.st");
+     *   
+     *   //render view file show.jsp and return result in text format
+     *   renderView("show", "text");
+     * </pre>
+     * 
+     * @param view  The render template file
+     * @return rendered content
+     */
+    public static String renderView(String view) {
+    	return renderView(view, getViewDataMap());
     }
     
-    public static void renderView(String viewFile, Map viewDataMap) {
-    	String format = getRequestExtension();
+    /**
+     * Renders a view template file with all properties in the container. 
+     * 
+     * The file extension of the view template is used to look up related 
+     * template engine. If the <tt>view</tt> does not have an extension 
+     * specified, the default extension is defined by <tt>view.extension</tt> 
+     * property in the <tt>environment.properties</tt> file. 
+     * 
+     * <p>Examples: </p>
+     * <pre>
+     *   //render view file show.jsp
+     *   renderView("show");
+     *   
+     *   //render view .../WEB-INF/views/products/show.jsp
+     *   renderView("products/show");
+     *   
+     *   //render view file /home/foo/templates/show.st with StringTemplate engine
+     *   renderView("/home/foo/templates/show.st");
+     *   
+     *   //render view file show.jsp and return result in text format
+     *   renderView("show.jsp", "text");
+     * </pre>
+     * 
+     * @param view  The render template file
+     * @param format  the response format
+     * @return rendered content
+     */
+    public static String renderView(String view, String format) {
+    	return renderView(view, format, getViewDataMap());
+    }
+    
+    /**
+     * Renders a view template file with view data in <tt>viewDataMap</tt>. 
+     * 
+     * The file extension of the view template is used to look up related 
+     * template engine. If the <tt>view</tt> does not have an extension 
+     * specified, the default extension is defined by <tt>view.extension</tt> 
+     * property in the <tt>environment.properties</tt> file. 
+     * 
+     * @param view  the render template file
+     * @param viewDataMap  data (name/value pairs) to be passed to the view
+     * @return rendered content
+     */
+    public static String renderView(String view, Map viewDataMap) {
+    	return renderView(view, format(), viewDataMap);
+    }
+    
+    /**
+     * Renders a view template file with view data in <tt>viewDataMap</tt>. 
+     * 
+     * The file extension of the view template is used to look up related 
+     * template engine. If the <tt>view</tt> does not have an extension 
+     * specified, the default extension is defined by <tt>view.extension</tt> 
+     * property in the <tt>environment.properties</tt> file. 
+     * 
+     * @param view  the render template file
+     * @param format  response format of the render template file
+     * @param viewDataMap  data (name/value pairs) to be passed to the view
+     * @return rendered content
+     */
+    public static String renderView(String view, String format, Map viewDataMap) {
+    	if (view == null) 
+    		throw new IllegalArgumentException("View can not be null for rendering.");
+    	
     	if (format == null) {
-    		format = "xx";//TODO: What is it?
+    		format = Constants.DEFAULT_RESPONSE_FORMAT;
     	}
+    	
+    	String viewPath = view;
+    	String viewExtension = "";
+    	String viewFile = "";
+    	int lastDot = view.lastIndexOf('.');
+    	if (lastDot != -1) {
+    		viewExtension = view.substring(lastDot + 1);
+    	}
+    	else {
+    		viewExtension = EnvConfig.getInstance().getViewExtension();
+    		viewPath = (viewExtension.startsWith("."))?
+    				(view + viewExtension):(view + '.' + viewExtension);
+    	}
+    	
+    	int lastSlash = viewPath.lastIndexOf('/');
+    	if (lastSlash == -1 && File.separatorChar != '/') {
+    		lastSlash = viewPath.lastIndexOf(File.separatorChar);
+    	}
+    	if (lastSlash != -1) {
+    		File p = new File(viewPath);
+    		if (!p.exists()) {
+    			viewPath = viewPath("", viewPath);
+    			viewFile = applicationPath() + viewPath;
+    		}
+    	}
+    	else {
+			viewPath = viewPath(viewPath);
+			viewFile = applicationPath() + viewPath;
+    	}
+    	
+    	//handle view
+    	try {
+            HttpServletRequest request = getHttpServletRequest();
+            HttpServletResponse response = getHttpServletResponse();
+            
+	    	if (viewExtension.equalsIgnoreCase("jsp") || viewExtension.equalsIgnoreCase(".jsp")) {
+	    		doForward(viewPath, request, response);
+	    	}
+	    	else {
+	    		TemplateHandler handler = 
+	    			TemplateHandlerFactory.getTemplateHandler(viewExtension);
+	    		if (handler == null) 
+	    			throw new IllegalArgumentException("There is no " + 
+	    					"template handler found for view template " + 
+	    					"of type \"" + viewExtension + "\".");
+	    		String result = handler.handle(new File(viewFile), viewDataMap);
+	    		render(result, format);
+	    	}
+    		request.setAttribute(Constants.REQUEST_RENDERED, "true");
+        } catch (Exception ex) {
+        	String errorMessage = "Failed to render view \"" + viewFile + "\" because " + ex.getMessage();
+        	log.error(errorMessage);
+        	throw new NoTemplateHandlerException(errorMessage, viewExtension);
+        }
+    	
+    	return null;
+    }
+    
+    /**
+     * <p>Do a forward to specified URI using a <tt>RequestDispatcher</tt>.
+     * This method is used by all methods needing to do a forward.</p>
+     *
+     * @param uri Context-relative URI to forward to
+     * @param request HTTP servlet request
+     * @param response HTTP servlet response
+     * @throws java.io.IOException
+     * @throws javax.servlet.ServletException
+     */
+    public static void doForward(
+    		String uri,
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException, ServletException {
+        log.debug("doForward: " + uri);
+    	if (uri == null) return;
+        
+        if (uri != null && !uri.startsWith("/")) uri = "/" + uri;
+        
+        RequestDispatcher rd = request.getSession().getServletContext().getRequestDispatcher(uri);
+        
+        if (rd == null) {
+            uri = "/WEB-INF/views/404.jsp";
+            log.error("Unable to locate \"" + uri + "\", forward to " + uri);
+            rd = getServletContext().getRequestDispatcher(uri);
+        }
+        rd.forward(request, response);
     }
     
     /**

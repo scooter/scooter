@@ -34,9 +34,11 @@
   </filter-mapping>
   
   <listener>
-    <listener-class>
-      com.scooterframework.admin.WebApplicationStartListener
-    </listener-class>
+    <listener-class>com.scooterframework.admin.WebApplicationStartListener</listener-class>
+  </listener>
+  
+  <listener>
+    <listener-class>com.scooterframework.admin.WebSessionListener</listener-class>
   </listener>
   
   <servlet>
@@ -59,7 +61,12 @@
     <servlet-name>scooter</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
-
+  
+  <!-- Expire a session after # minutes of inactivity -->
+  <session-config>
+    <session-timeout>15</session-timeout>
+  </session-config>
+  
   <!-- The Usual Welcome File List -->
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>

@@ -57,9 +57,9 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
     	
     	String requestHttpMethod = getRequestMethod(request);
         RequestInfo requestInfo = new RequestInfo(requestPath, requestHttpMethod);
-        log.debug("requestInfo: " + requestInfo);
+        log.debug("  requestInfo: " + requestInfo);
         RouteInfo routeInfo = MatchMaker.getInstance().match(requestInfo);
-        log.debug("  routeInfo: " + routeInfo);
+        log.debug("matched route: " + routeInfo);
         
         CurrentThreadCache.set(CACHE_KEY_ROUTE_TYPE, routeInfo.getRouteType());
         

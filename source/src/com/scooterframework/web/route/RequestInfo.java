@@ -126,20 +126,20 @@ public class RequestInfo {
 			segmentCount = 0;
 		} else {
 			String s = path;
-			if (path.startsWith("/"))
-				s = path.substring(1);
 
-			int lastDot = s.lastIndexOf('.');
-			int lastSlash = s.lastIndexOf('/');
+			int lastDot = path.lastIndexOf('.');
+			int lastSlash = path.lastIndexOf('/');
 			if (lastDot > lastSlash) {
-				int lastPKSeparator = s
+				int lastPKSeparator = path
 						.lastIndexOf(RouteConstants.PRIMARY_KEY_SEPARATOR);
 				if (lastDot > lastPKSeparator) {
-					format = s.substring(lastDot + 1);
+					format = path.substring(lastDot + 1);
 					s = s.substring(0, lastDot);
-					requestPath = path.substring(0, lastDot);
+					requestPath = s;
 				}
 			}
+			
+			if (s.startsWith("/")) s = s.substring(1);
 
 			pathSegments = s.split("/");
 			segmentCount = pathSegments.length;

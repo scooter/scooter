@@ -190,6 +190,9 @@ public class MainActionServlet extends HttpServlet {
      */
     protected void process(HttpServletRequest request, HttpServletResponse response, String httpMethod)
     throws IOException, ServletException {
+    	ACH.getWAC().setHttpServletRequest(request);
+    	ACH.getWAC().setHttpServletResponse(response);
+    	
         String hm = request.getParameter(Constants.HTTP_METHOD);
         if (hm == null) {
             hm = httpMethod;

@@ -11,9 +11,10 @@
 
     <decorator name="home" page="oneColumnLayout.jsp">
         <pattern>/</pattern>
-        <pattern>/routes</pattern>
-        <pattern>/databases</pattern>
-        <pattern>/databases/*</pattern>
+    </decorator>
+
+    <decorator name="admin" page="adminLayout.jsp">
+        <pattern>/admin/*</pattern>
     </decorator>
 
     <decorator name="panel" page="panel.jsp"/>

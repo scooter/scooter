@@ -58,17 +58,17 @@ public class DBAdapterFactory {
     	if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_MYSQL, connName)) {
     		dba = new MySQLDBAdapter();
     	}
-    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_H2, connName)) {
-    		dba = new H2DBAdapter();
+    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_POSTGRESQL, connName)) {
+    		dba = new PostgreSQLDBAdapter();
+    	}
+    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_ORACLE, connName)) {
+    		dba = new OracleDBAdapter();
     	}
     	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_HSQLDB, connName)) {
     		dba = new HsqlDBAdapter();
     	}
-    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_POSTGRESQL, connName)) {
-    		throw new IllegalArgumentException("PostgreSQL is not supported yet.");
-    	}
-    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_ORACLE, connName)) {
-    		dba = new OracleDBAdapter();
+    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_H2, connName)) {
+    		dba = new H2DBAdapter();
     	}
     	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_SYBASE, connName)) {
     		throw new IllegalArgumentException("Sybase is not supported yet.");

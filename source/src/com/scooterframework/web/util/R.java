@@ -197,7 +197,7 @@ public class R {
         Resource resource = resource(resourceName);
         String name = "add_" + resource.getModel();
         String id = name;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<form action=\"").append(W.getURL(pathTOResource));
         sb.append("\" class=\"").append(name).append("\" id=\"").append(id).append("\" method=\"POST\">");
         return sb.toString();
@@ -363,11 +363,11 @@ public class R {
         Resource resource = resource(resourceName);
         String name = "edit_" + resource.getModel();
         String id = name + "_" + resourceId;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<form action=\"").append(W.getURL(pathToResourceId));
         sb.append("\" class=\"").append(name).append("\" id=\"").append(id).append("\" method=\"POST\">").append("\n");
         sb.append("<div style=\"margin:0;padding:0\"><input name=\"");
-        sb.append(Constants.HTTP_METHOD).append("\" type=\"hidden\" value=\"put\" /></div>");
+        sb.append(Constants.HTTP_METHOD).append("\" type=\"hidden\" value=\"PUT\" /></div>");
         return sb.toString();
     }
     

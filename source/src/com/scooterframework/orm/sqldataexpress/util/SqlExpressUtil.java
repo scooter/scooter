@@ -69,9 +69,9 @@ public class SqlExpressUtil {
         return isEmpty(s)?null:s.toUpperCase();
     }
 
-    public static List getConnectionNames() {
-        List dbs = new ArrayList();
-        Iterator it = DatabaseConfig.getInstance().getPredefinedDatabaseConnectionNames();
+    public static List<String> getConnectionNames() {
+        List<String> dbs = new ArrayList<String>();
+        Iterator<String> it = DatabaseConfig.getInstance().getPredefinedDatabaseConnectionNames();
         while(it.hasNext()) {
             dbs.add(it.next());
         }
@@ -322,7 +322,7 @@ public class SqlExpressUtil {
     /**
      * Returns a list of TableInfo instances for the database connection.
      * 
-     * @param conn              the database connection
+     * @param conn  the database connection
      * @param catalog a catalog name; must match the catalog name as it
      *        is stored in the database; "" retrieves those without a catalog;
      *        <tt>null</tt> means that the catalog name should not be used to narrow
@@ -337,15 +337,21 @@ public class SqlExpressUtil {
      * @return a list of TableInfo instances
      * @throws java.sql.SQLException
      */
-    public static List getDatabaseTables(Connection conn, 
+    public static List<TableInfo> getDatabaseTables(Connection conn, 
                                                 String catalog, 
                                                 String schema, 
                                                 String tableName, 
-                                                String[] types) throws SQLException {
-        List list = new ArrayList();
+                                                String[] types,
+                                                boolean uppercase) throws SQLException {
+        if (uppercase) {
+        	catalog = toUpperCase(catalog);
+        	schema = toUpperCase(schema);
+        	tableName = toUpperCase(tableName);
+        }
+        
+        List<TableInfo> list = new ArrayList<TableInfo>();
         DatabaseMetaData dbmd = conn.getMetaData();
-        ResultSet rs = dbmd.getTables(toUpperCase(catalog), toUpperCase(schema), 
-        		toUpperCase(tableName), types);
+        ResultSet rs = dbmd.getTables(catalog, schema, tableName, types);
         while (rs.next()) {
             TableInfo ti = new TableInfo();
             ti.setCatalog(rs.getString("TABLE_CAT"));
@@ -362,11 +368,37 @@ public class SqlExpressUtil {
     /**
      * Returns a list of TableInfo instances for the database connection.
      * 
+     * @param conn  the database connection
+     * @param catalog a catalog name; must match the catalog name as it
+     *        is stored in the database; "" retrieves those without a catalog;
+     *        <tt>null</tt> means that the catalog name should not be used to narrow
+     *        the search
+     * @param schema a schema name; must match the schema name
+     *        as it is stored in the database; "" retrieves those without a schema;
+     *        <tt>null</tt> means that the schema name should not be used to narrow
+     *        the search
+     * @param tableName a table name; must match the
+     *        table name as it is stored in the database 
+     * @param types a list of table types to include; <tt>null</tt> returns all types 
+     * @return a list of TableInfo instances
+     * @throws java.sql.SQLException
+     */
+    public static List<TableInfo> getDatabaseTables(Connection conn, 
+                                                String catalog, 
+                                                String schema, 
+                                                String tableName, 
+                                                String[] types) throws SQLException {
+        return getDatabaseTables(conn, catalog, schema, tableName, types, true);
+    }
+    
+    /**
+     * Returns a list of TableInfo instances for the database connection.
+     * 
      * @param conn              the database connection
      * @return a list of TableInfo instances
      * @throws java.sql.SQLException
      */
-    public static List getDatabaseTables(Connection conn) throws SQLException {
+    public static List<TableInfo> getDatabaseTables(Connection conn) throws SQLException {
         return getDatabaseTables(conn, null, null, null, (String[])null);
     }
     
@@ -509,8 +541,6 @@ public class SqlExpressUtil {
             DAOUtil.closeResultSet(rs);
         }
         
-        if (sp == null) throw new UnsupportedStoredProcedureAPINameException("Failed to find db function with name " + name);
-        
         return sp;
     }
     
@@ -628,8 +658,6 @@ public class SqlExpressUtil {
         finally {
             DAOUtil.closeResultSet(rs);
         }
-        
-        if (sp == null) throw new UnsupportedStoredProcedureAPINameException("Failed to find stored procedure with name " + name);
         
         return sp;
     }

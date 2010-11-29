@@ -60,10 +60,10 @@ for (Iterator it = O.iteratorOf(routes); it.hasNext();) {
         <td nowrap="nowrap"><%=O.property(route, "URLPattern")%></td>
         <td><%=O.property(route, "controller")%></td>
         <td><%=O.property(route, "controllerClass")%></td>
-        <td><%=O.property(route, "action")%></td>
+        <td align="right"><%=O.property(route, "action")%></td>
         <td><%=O.property(route, "id")%></td>
-        <td><%=O.property(route, "format")%></td>
-        <td><%=O.property(route, "allowedFormats")%></td>
+        <td align="right"><%=O.property(route, "format")%></td>
+        <td align="right"><%=O.property(route, "allowedFormats")%></td>
         <td><%=O.property(route, "singular")%></td>
         <td nowrap="nowrap"><%=O.property(route, "namespace")%></td>
         <td nowrap="nowrap"><%=O.property(route, "pathPrefix")%></td>

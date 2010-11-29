@@ -637,7 +637,9 @@ public class Resource {
         int length = parents.length;
         for (int i = length-1; i >= 0; i--) {
             Resource parent = parents[i];
-            String parentPath = parent.getUnprifixedURL() + "/" + "$" + getNesteeIdFormat(parent);
+            String parentPath = (i == length-1)?
+            	parent.getScreenURLPattern() + "/" + "$" + getNesteeIdFormat(parent) : 
+            	parent.getUnprifixedURL() + "/" + "$" + getNesteeIdFormat(parent);
             nestedPath += parentPath + "/";
         }
         nestedPath = StringUtil.replace(nestedPath, "//", "/");

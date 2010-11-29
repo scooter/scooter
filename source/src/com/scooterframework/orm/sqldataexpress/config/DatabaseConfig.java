@@ -183,6 +183,16 @@ public class DatabaseConfig extends Observable implements Observer {
     public static final String KEY_DB_CONNECTION_SCHEMA = "schema";
     
     /**
+     * Key to represent <tt>use_login_as_schema</tt> property in database connection properties.
+     */
+    public static final String KEY_DB_CONNECTION_USE_LOGIN_AS_SCHEMA = "use_login_as_schema";
+    
+    /**
+     * Key to represent <tt>use_login_for_connection</tt> property in database connection properties.
+     */
+    public static final String KEY_DB_CONNECTION_USE_LOGIN_FOR_CONNECTION = "use_login_for_connection";
+    
+    /**
      * Key to represent <tt>adapterClassName</tt> property in database connection properties.
      */
     public static final String KEY_DB_CONNECTION_ADAPTER_CLASS_NAME = "adapterClassName";
@@ -218,7 +228,7 @@ public class DatabaseConfig extends Observable implements Observer {
     public static final String BUILTIN_DATABASE_NAME_POSTGRESQL = "PostgreSQL";
     public static final String BUILTIN_DATABASE_NAME_ORACLE     = "Oracle";
     public static final String BUILTIN_DATABASE_NAME_SYBASE     = "Sybase";
-    public static final Set ALL_BUILTIN_DATABASE_VENDORS = new HashSet();
+    public static final Set<String> ALL_BUILTIN_DATABASE_VENDORS = new HashSet<String>();
     
     //****************************************************
     // Default values for keys in the properties file
@@ -249,22 +259,22 @@ public class DatabaseConfig extends Observable implements Observer {
     private String autoAuditUpdate = DEFAULT_VALUE_autoAuditUpdate;
     private String additionalSQLDataTypeMapping = DEFAULT_VALUE_additionalSQLDataTypeMapping;
     
-    private List autoAuditListForCreate = null;
-    private List autoAuditListForUpdate = null;
-    private Map databaseConnectionsMap = new HashMap();
-    private List referenceDataNames = new ArrayList();
-    private Map referenceDataMap = new HashMap();
-    private Map connectionPoolDataSourcesMap = new HashMap();
+    private List<String> autoAuditListForCreate = null;
+    private List<String> autoAuditListForUpdate = null;
+    private Map<String, NamedProperties> databaseConnectionsMap = new HashMap<String, NamedProperties>();
+    private List<String> referenceDataNames = new ArrayList<String>();
+    private Map<String, NamedProperties> referenceDataMap = new HashMap<String, NamedProperties>();
+    private Map<String, ComboPooledDataSource> connectionPoolDataSourcesMap = new HashMap<String, ComboPooledDataSource>();
 
     /**
-     * <p>A map of sql data type name and its corresponding type (Integer).</p>
+     * <p>A map of SQL data type name and its corresponding type (Integer).</p>
      */
-    public static Map allSQLDataNameTypesMap = new HashMap();
+    public static Map<String, Integer> allSQLDataNameTypesMap = new HashMap<String, Integer>();
     
     /**
-     * <p>A map of sql data type code and its corresponding java class type name.</p>
+     * <p>A map of SQL data type code and its corresponding java class type name.</p>
      */
-    public static Map allSQLTypeJavaNamesMap = new HashMap();
+    public static Map<Integer, String> allSQLTypeJavaNamesMap = new HashMap<Integer, String>();
     
     static {
         me = new DatabaseConfig();
@@ -296,7 +306,7 @@ public class DatabaseConfig extends Observable implements Observer {
         ALL_BUILTIN_DATABASE_VENDORS.add(BUILTIN_DATABASE_NAME_ORACLE.toUpperCase());
         ALL_BUILTIN_DATABASE_VENDORS.add(BUILTIN_DATABASE_NAME_SYBASE.toUpperCase());
         
-        List allSQLTypesList = new ArrayList();
+        List<String> allSQLTypesList = new ArrayList<String>();
         allSQLTypesList.add("ARRAY:2003:java.sql.Array");           //Types.ARRAY
         allSQLTypesList.add("BIGINT:-5:java.lang.Long");            //Types.BIGINT
         allSQLTypesList.add("BINARY:-2:byte[]");                    //Types.BINARY
@@ -355,7 +365,7 @@ public class DatabaseConfig extends Observable implements Observer {
                 p.setProperty(KEY_DB_CONNECTION_NAME, name);
                 checkConnectionPoolProperties(name, p);
                 if (databaseConnectionsMap.containsKey(name)) {
-                    NamedProperties np = (NamedProperties)databaseConnectionsMap.get(name);
+                    NamedProperties np = databaseConnectionsMap.get(name);
                     np.setProperties(p);
                 }
                 else {
@@ -368,7 +378,7 @@ public class DatabaseConfig extends Observable implements Observer {
                 String name = key.substring(key.lastIndexOf('.') + 1);
                 Properties p = PropertyFileUtil.parseNestedPropertiesFromLine(getProperty(key), nameValueSpliter, propertyDelimiter);
                 if (referenceDataMap.containsKey(name)) {
-                    NamedProperties np = (NamedProperties)referenceDataMap.get(name);
+                    NamedProperties np = referenceDataMap.get(name);
                     np.setProperties(p);
                 }
                 else {
@@ -403,7 +413,7 @@ public class DatabaseConfig extends Observable implements Observer {
         
         int totalTypes = allSQLTypesList.size();
         for (int i = 0; i < totalTypes; i++) {
-            String entry = (String)allSQLTypesList.get(i);
+            String entry = allSQLTypesList.get(i);
             String[] items = entry.split(":");
             String typeName = items[0].trim();
             String typeCode = items[1].trim();
@@ -489,7 +499,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns map of sql data type name / data type code. 
      * @return map
      */
-    public Map getSQLDataNameTypesMap() {
+    public Map<String, Integer> getSQLDataNameTypesMap() {
         return allSQLDataNameTypesMap;
     }
     
@@ -497,7 +507,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns map of sql data type code / java type name. 
      * @return map
      */
-    public Map getSQLTypeJavaNamesMap() {
+    public Map<Integer, String> getSQLTypeJavaNamesMap() {
         return allSQLTypeJavaNamesMap;
     }
     
@@ -652,14 +662,14 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns database connection properties
      */
     public Properties getPredefinedDatabaseConnectionProperties(String connectionName) {
-        NamedProperties np = (NamedProperties)databaseConnectionsMap.get(connectionName);
+        NamedProperties np = databaseConnectionsMap.get(connectionName);
         return (np != null)?np.getProperties():(new Properties());
     }
     
     /**
      * Returns database connection names
      */
-    public Iterator getPredefinedDatabaseConnectionNames() {
+    public Iterator<String> getPredefinedDatabaseConnectionNames() {
         return databaseConnectionsMap.keySet().iterator();
     }
     
@@ -667,7 +677,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns properties of reference data specified by the name
      */
     public Properties getReferenceDataProperties(String referenceDataName) {
-        NamedProperties np = (NamedProperties)referenceDataMap.get(referenceDataName);
+        NamedProperties np = referenceDataMap.get(referenceDataName);
         return (np != null)?np.getProperties():(new Properties());
     }
     
@@ -676,7 +686,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * 
      * @return list of reference data names
      */
-    public List getReferenceDataNames() {
+    public List<String> getReferenceDataNames() {
         return referenceDataNames;
     }
     
@@ -685,7 +695,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * 
      * @return map of reference data
      */
-    public Map getReferenceDataMap() {
+    public Map<String, NamedProperties> getReferenceDataMap() {
         return referenceDataMap;
     }
     
@@ -707,7 +717,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns list of potential column names that are automatically audited
      * for create operation.
      */
-    public List getAutoAuditListForCreate() {
+    public List<String> getAutoAuditListForCreate() {
         return autoAuditListForCreate;
     }
     
@@ -715,7 +725,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns list of potential column names that are automatically audited 
      * for update operation.
      */
-    public List getAutoAuditListForUpdate() {
+    public List<String> getAutoAuditListForUpdate() {
         return autoAuditListForUpdate;
     }
     
@@ -752,7 +762,7 @@ public class DatabaseConfig extends Observable implements Observer {
      * Returns pooled data source for a connection name
      */
     public DataSource getPooledDataSource(String connectionName) {
-    	return (DataSource)connectionPoolDataSourcesMap.get(connectionName);
+    	return connectionPoolDataSourcesMap.get(connectionName);
     }
     
     /**
@@ -767,9 +777,9 @@ public class DatabaseConfig extends Observable implements Observer {
      */
 	public void destroy() {
 		try {
-            Iterator it = connectionPoolDataSourcesMap.keySet().iterator();
+            Iterator<String> it = connectionPoolDataSourcesMap.keySet().iterator();
             while(it.hasNext()) {
-                DataSources.destroy((DataSource)connectionPoolDataSourcesMap.get(it.next()));
+                DataSources.destroy(connectionPoolDataSourcesMap.get(it.next()));
             }
 		} catch (SQLException ex) {
 			log.error("ERROR ERROR ERROR failed to close connection pool: " + ex.getMessage());

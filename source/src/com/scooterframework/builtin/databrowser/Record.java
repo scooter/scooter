@@ -39,11 +39,11 @@ public class Record {
     	return SqlExpressUtil.getFinderSQL(connName, Table.getSafeTableName(connName, table));
     }
     
-    public static List getRows(String connName, String table) {
+    public static List<RowData> getRows(String connName, String table) {
         return getRows(connName, table, null);
     }
     
-    public static List getRows(String connName, String table, String whereClause) {
+    public static List<RowData> getRows(String connName, String table, String whereClause) {
 		RowInfo ri = getRowInfo(connName, table);
 
 		// prepare inputs map

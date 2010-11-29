@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Locale;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -192,7 +191,7 @@ public class BaseRequestProcessor {
         ActionProperties aps = new ActionProperties();
         aps.controllerPath = controllerPath;
         aps.controller = controller;
-        aps.controllerClassName = getControllerClassName(controllerPath);;
+        aps.controllerClassName = getControllerClassName(controllerPath);
         aps.action = action;
         aps.model = (DatabaseConfig.getInstance().usePluralTableName())?WordUtil.singularize(controller):controller;
         aps.format = format;
@@ -237,7 +236,12 @@ public class BaseRequestProcessor {
     protected String getRequestPath(HttpServletRequest request) {
         String contextPath = request.getContextPath();
         String requestURI = request.getRequestURI();
-        return requestURI.substring(contextPath.length());
+        String requestPath = requestURI.substring(contextPath.length());
+        if (requestPath.length() > 1 && 
+        		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
+        	requestURI = requestURI.substring(0, requestURI.length()-1);
+        }
+        return requestPath;
     }
     
     protected void processLocale(HttpServletRequest request,
@@ -352,7 +356,6 @@ public class BaseRequestProcessor {
                 }
             }
         } catch (Exception ex) {
-        	ex.printStackTrace();
             ExecutionException eex = 
                 new ExecutionException(controller.getClass().getName(), method.getName(), null, ex);
             throw eex;
@@ -396,8 +399,6 @@ public class BaseRequestProcessor {
     throws IOException, ServletException 
     {
     	if (hasRendered(request)) {
-    		log.warn("There is no further handling of result \"" + result 
-    				+ "\" because the action result has been rendered.");
     		return;
     	}
     	
@@ -417,10 +418,7 @@ public class BaseRequestProcessor {
             	processResultContentForRequestFormatType(request, response, content, tag);
         	}
         	else {
-        		String tag = "html";
-        		if (aps.format != null) {
-        			tag = aps.format;
-        		}
+        		String tag = (aps.format != null)?aps.format:Constants.DEFAULT_RESPONSE_FORMAT;
         		processResultContentForRequestFormatType(request, response, result, tag);
         	}
         }
@@ -442,7 +440,7 @@ public class BaseRequestProcessor {
 					"There is no handler found for format \""
 							+ format
 							+ "\". You may create your own as a plugin by "
-							+ "format the Plugin class and "
+							+ "extending the Plugin class and "
 							+ "implementing the ContentHandler interface.");
         }
 	}
@@ -603,6 +601,26 @@ public class BaseRequestProcessor {
     		ActionControl.flash("error", meaning);
     		understand = true;
     	}
+    	else if (ex instanceof NoRouteFoundException) {
+    		meaning = "Please verify either the route is missing or a view path is setup correctly.";
+    		log.error(meaning);
+    		ActionControl.flash("error", meaning);
+    		understand = true;
+    	}
+    	else if (ex instanceof NoTemplateHandlerException) {
+    		meaning = "Please add a template handler for template type \"" + 
+    			((NoTemplateHandlerException)ex).getTemplateType() + "\".";
+    		log.error(meaning);
+    		ActionControl.flash("error", meaning);
+    		understand = true;
+    	}
+    	else if (ex instanceof NoViewFileException) {
+    		meaning = "Please add a view file for view \"" + 
+    			((NoViewFileException)ex).getTargetView() + "\".";
+    		log.error(meaning);
+    		ActionControl.flash("error", meaning);
+    		understand = true;
+    	}
     	return understand;
     }
     
@@ -651,17 +669,7 @@ public class BaseRequestProcessor {
         HttpServletRequest request,
         HttpServletResponse response)
         throws IOException, ServletException {
-        log.debug("doForward: " + uri);
-        
-        if (uri != null && !uri.startsWith("/")) uri = "/" + uri;
-        RequestDispatcher rd = getServletContext().getRequestDispatcher(uri);
-        
-        if (rd == null) {
-            uri = "/WEB-INF/views/404.jsp";
-            log.error("Unable to locate \"" + uri + "\", forward to " + uri);
-            rd = getServletContext().getRequestDispatcher(uri);
-        }
-        rd.forward(request, response);
+        ActionControl.doForward(uri, request, response);
     }
     
     /**
@@ -685,6 +693,7 @@ public class BaseRequestProcessor {
 
                     tmp += values[length-1];
                     
+                    if ("password".equalsIgnoreCase(key)) tmp = "********";
                     log.debug("name=["+key+"] values=["+tmp+"]");
                 }
             }
@@ -713,7 +722,8 @@ public class BaseRequestProcessor {
      */
     protected boolean isRootAccess(String requestPath) {
         boolean rootAccess = false;
-        if ("/".equals(requestPath) || requestPath.startsWith("/index")) {
+        if ("".equals(requestPath) || 
+        	"/".equals(requestPath) || requestPath.startsWith("/index")) {
             rootAccess = true;
         }
         return rootAccess;

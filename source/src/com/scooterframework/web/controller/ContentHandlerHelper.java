@@ -62,6 +62,7 @@ public class ContentHandlerHelper {
 
 	/**
 	 * Sends content string to the requestor.
+	 * Default <tt>mimeType</tt> is <tt>text/plain</tt>.
 	 * 
 	 * @param response  The HTTP response object.
 	 * @param content  The content to be sent.
@@ -75,8 +76,14 @@ public class ContentHandlerHelper {
     	if (encoding == null) encoding = "utf-8";
     	
     	if (mimeType == null || "".equals(mimeType)) mimeType = "text/plain";
-        
-        response.setContentType(mimeType + "; charset="+encoding);
+    	
+    	mimeType = mimeType.toLowerCase();
+    	if (mimeType.indexOf("charset") == -1) {
+    		response.setContentType(mimeType + "; charset=" + encoding);
+    	}
+    	else {
+    		response.setContentType(mimeType);
+    	}
         response.setHeader("Cache-Control", "no-cache");
         response.setStatus(HttpServletResponse.SC_OK);
         
@@ -86,7 +93,8 @@ public class ContentHandlerHelper {
     }
 	
 	/**
-	 * Sends content bytes to the requestor.
+	 * Sends content bytes to the requestor. 
+	 * Default <tt>mimeType</tt> is <tt>application/octet-stream</tt>.
 	 * 
 	 * @param response  The HTTP response object.
 	 * @param content  The content to be sent.
@@ -101,7 +109,13 @@ public class ContentHandlerHelper {
     	
     	if (mimeType == null || "".equals(mimeType)) mimeType = "application/octet-stream";
         
-        response.setContentType(mimeType + "; charset="+encoding);
+    	mimeType = mimeType.toLowerCase();
+    	if (mimeType.indexOf("charset") == -1) {
+    		response.setContentType(mimeType + "; charset=" + encoding);
+    	}
+    	else {
+    		response.setContentType(mimeType);
+    	}
         response.setContentLength(content.length);
         //response.setHeader("Cache-Control", "no-cache");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -143,7 +157,7 @@ public class ContentHandlerHelper {
 	 * 
 	 * @param response  The HTTP response object.
 	 * @param file  The file to be sent.
-	 * @param displayableName  The display name of the file.
+	 * @param displayableName  The display name of the file in the download dialog.
 	 * @param mimeType  The content MIME type.
 	 * @param forDownload  indicates whether this is for file download or display.
 	 * @throws IOException

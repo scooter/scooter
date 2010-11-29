@@ -43,6 +43,11 @@ public class HsqlDBAdapter extends DBAdapter {
         	schema = (q == -1)?
             	url.substring(lastSlash + 1):url.substring(lastSlash + 1, q);
     	}
+    	else {
+    		if (useLoginAsSchema(schema)) {
+    			schema = getLoginUserId();
+    		}
+    	}
     	return schema;
     }
     

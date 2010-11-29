@@ -3,6 +3,7 @@
         java.util.List,
         com.scooterframework.builtin.BuiltinHelper,
         com.scooterframework.builtin.FileInfo,
+        com.scooterframework.web.util.T,
         com.scooterframework.web.util.W"
 %>
 
@@ -18,22 +19,22 @@ List<FileInfo> files = (List)request.getAttribute("files");
 <table class="sTable">
     <tr>
         <th>Name</th>
-        <th>Date Modified</th>
         <th>Type</th>
         <th>Size</th>
+        <th>Date Modified</th>
         <th>Actions</th>
     </tr>
 
 <%for (FileInfo fi : files) {%>
     <tr class="<%=W.cycle("odd, even")%>">
     <%if (fi.isDirectory()) { %>
-        <td><img title="folder" src="../static/images/folder.gif" alt="folder "/><%=W.labelLink(fi.getName(), fi.getActionURI("list"))%></td>
+        <td><img title="folder" src="../../static/images/folder.gif" alt="folder "/><%=W.labelLink(fi.getName(), fi.getActionURI("list"))%></td>
     <%} else { %>
-        <td><img title="file" src="../static/images/file.gif" alt="file "/><%=W.labelLink(fi.getName(), fi.getActionURI("show"))%></td>
+        <td><img title="file" src="../../static/images/file.gif" alt="file "/><%=W.labelLink(fi.getName(), fi.getActionURI("show"))%></td>
     <%} %>
-        <td><%=fi.getLastModified()%></td>
         <td><%=fi.getType()%></td>
-        <td><%=fi.getSizeDisplay()%></td>
+        <td align="right"><%=fi.getSizeDisplay()%></td>
+        <td><%=T.textOfDate(fi.getLastModified())%></td>
         <td class="multilink" nowrap>
             <%=W.labelLink((fi.isDirectory())?"add":"edit", (fi.isDirectory())?fi.getActionURI("add"):fi.getActionURI("edit"))%>
             <%=W.labelLink("delete", fi.getActionURI("delete"), "confirm:'Are you sure?'")%>

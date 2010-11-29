@@ -129,6 +129,33 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
     }
     
     /**
+     * Returns the schema of the database connection
+     *
+     * @return String
+     */
+    public String getSchema() {
+        return schema;
+    }
+    
+    /**
+     * Checks if using login id as schema.
+     *
+     * @return true if using login id as schema.
+     */
+    public boolean useLoginAsSchema() {
+        return useLoginAsSchema;
+    }
+    
+    /**
+     * Checks if using login username and password for making a connection.
+     *
+     * @return true if using login username and password for connection.
+     */
+    public boolean useLoginForConnection() {
+        return useLoginForConnection;
+    }
+    
+    /**
      * Checks if transaction isolation level is specified. If not, the 
      * database's default transaction isolation level is used.
      * 
@@ -212,6 +239,9 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
         username = prop.getProperty(DatabaseConnectionContext.KEY_USERNAME);
         password = prop.getProperty(DatabaseConnectionContext.KEY_PASSWORD);
         vendor = prop.getProperty(DatabaseConnectionContext.KEY_VENDOR);
+        schema = prop.getProperty(DatabaseConnectionContext.KEY_SCHEMA);
+        useLoginAsSchema = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_USE_LOGIN_AS_SCHEMA)))?true:false;
+        useLoginForConnection = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_USE_LOGIN_FOR_CONNECTION)))?true:false;
         readonly = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_READONLY)))?true:false;
         
         String til = prop.getProperty(DatabaseConnectionContext.KEY_TRANSACTION_ISOLATION_LEVEL);
@@ -279,6 +309,9 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
     protected boolean readonly = false;
     protected int transactionIsolationLevel = NO_SPECIFIED_TRANSACTION_ISOLATION;
     protected String vendor = null;
+    protected String schema = null;
+    protected boolean useLoginAsSchema = false;
+    protected boolean useLoginForConnection = false;
     protected Properties properties = new Properties();
     protected Properties roles = new Properties();
     

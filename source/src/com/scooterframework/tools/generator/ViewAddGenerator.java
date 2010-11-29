@@ -49,9 +49,30 @@ public class ViewAddGenerator extends ViewScaffoldGenerator {
 
 			String columnNameLower = columnName.toLowerCase();
 		    boolean isLongText = ri.isLongTextColumn(columnName, 255);
+		    boolean isDateColumn = ri.isDateColumn(columnName);
+		    boolean isTimestampColumn = ri.isTimestampColumn(columnName);
+		    int size = 80;
+		    if (isDateColumn || isTimestampColumn) {
+		    	size = 30;
+		    }
+		    else if (isLongText) {
+		    	size = 60;
+		    }
+		    
+		    String columnFormat = "";
+		    if (isDateColumn) {
+		    	columnFormat = "(yyyy-mm-dd)";
+		    }
+		    else if (isTimestampColumn) {
+		    	columnFormat = "(yyyy-mm-dd hh-mm-ss)";
+		    }
 		    
 		    Map column = new HashMap();
 		    column.put("isLongText", isLongText);
+		    column.put("isDateColumn", isDateColumn);
+		    column.put("isTimestampColumn", isTimestampColumn);
+		    column.put("size", size);
+		    column.put("columnFormat", columnFormat);
 		    column.put("columnNameLower", columnNameLower);
 		    columns.add(column);
 		}

@@ -31,7 +31,7 @@ public class NamedRoute extends RegularRoute {
 	public boolean isRouteFor(RequestInfo requestInfo) {
 		String internalPath = getScreenURLPattern();
 		if (!internalPath.startsWith("/")) internalPath = "/" + internalPath;
-		if(!internalPath.equals(requestInfo.getRequestPath())) return false;
+		if(!internalPath.equalsIgnoreCase(requestInfo.getRequestPath())) return false;
 		
 		if (!isAllowedMethod(requestInfo.getRequestHttpMethod())) return false;
 		

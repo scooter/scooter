@@ -462,7 +462,53 @@ public class RowInfo implements Serializable {
     }
     
     /**
-     * checks whether a column is a numeric column.
+     * checks whether a column is a date type column.
+     * 
+     * @param colName the column name to be checked.
+     * @return true if the column is of date type.
+     */
+    public boolean isDateColumn(String colName) {
+        boolean status = false;
+        
+        Iterator it = columnInfos.iterator();
+        while (it.hasNext()) {
+            ColumnInfo ci = (ColumnInfo) it.next();
+            if (colName.equalsIgnoreCase(ci.getColumnName())) {
+            	if (ci.isDate()) {
+            		status = true;
+            	}
+            	break;
+            }
+        }
+        
+        return status;
+    }
+    
+    /**
+     * checks whether a column is a timestamp type column.
+     * 
+     * @param colName the column name to be checked.
+     * @return true if the column is of date type.
+     */
+    public boolean isTimestampColumn(String colName) {
+        boolean status = false;
+        
+        Iterator it = columnInfos.iterator();
+        while (it.hasNext()) {
+            ColumnInfo ci = (ColumnInfo) it.next();
+            if (colName.equalsIgnoreCase(ci.getColumnName())) {
+            	if (ci.isTimestamp()) {
+            		status = true;
+            	}
+            	break;
+            }
+        }
+        
+        return status;
+    }
+    
+    /**
+     * checks whether a column is a numeric type column.
      * 
      * @param colName the column name to be checked.
      * @return true if the column is of numeric type.
@@ -473,10 +519,11 @@ public class RowInfo implements Serializable {
         Iterator it = columnInfos.iterator();
         while (it.hasNext()) {
             ColumnInfo ci = (ColumnInfo) it.next();
-            if (colName.equalsIgnoreCase(ci.getColumnName()) &&
-                (ci.isNumeric())) {
-                status = true;
-                break;
+            if (colName.equalsIgnoreCase(ci.getColumnName())) {
+            	if (ci.isNumeric()) {
+            		status = true;
+            	}
+            	break;
             }
         }
         

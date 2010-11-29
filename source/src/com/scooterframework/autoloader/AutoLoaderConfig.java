@@ -87,7 +87,7 @@ public class AutoLoaderConfig implements Observer {
         classpath = appendClassPath(classpath, getAllWebInfLibFiles());
         classpath = appendClassPath(classpath, getAllOtherLibFiles(pluginsLocation));
         classpath = appendClassPath(classpath, getAllOtherLibFiles(referencesLocation));
-        classpath = appendClassPath(classpath, getJDKToolsJar());
+        //classpath = appendClassPath(classpath, getJDKToolsJar());
         log.debug("class path: " + classpath);
         
         sourcepath = "";

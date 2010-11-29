@@ -21,7 +21,6 @@
         <Set name="minThreads">10</Set>
         <Set name="maxThreads">200</Set>
         <Set name="lowThreads">20</Set>
-        <Set name="SpawnOrShrinkAt">2</Set>
       </New>
 
       <!-- Optional Java 5 bounded threadpool with job queue 

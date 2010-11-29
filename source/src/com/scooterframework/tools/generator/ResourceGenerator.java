@@ -16,7 +16,7 @@ import com.scooterframework.tools.common.AbstractGenerator;
 import com.scooterframework.tools.common.GeneratorHelper;
 
 /**
- * This class generates model class code.
+ * This class updates resources.properties file.
  *
  * @author (Fei) John Chen
  */

@@ -14,7 +14,7 @@ File requestFile = (File)W.get("requestFile");
 
 <h2>Copy file or directory</h2>
 
-<form action="<%=W.getURL("/files/doCopy")%>" method="POST">
+<form action="<%=W.getURL("/admin/files/doCopy")%>" method="POST">
   <label>Source</label>
   <input type="text" name="f" value="<%=W.value("f")%>" readonly="readonly" size="60" /><br/><br/>
   <label>Target</label>

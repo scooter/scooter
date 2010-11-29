@@ -31,9 +31,9 @@ public class GeneratorHelper {
 	public static int UPDATE_EXISTING_FILE = 1;
 	public static int UNDETERMINED = 999;
 
-	public static List loadToStringListFromResource(String resourceFileName)
+	public static List<String> loadToStringListFromResource(String resourceFileName)
 			throws Exception {
-		List lines = new ArrayList();
+		List<String> lines = new ArrayList<String>();
 		InputStream is = null;
 		BufferedReader br = null;
 		try {
@@ -72,21 +72,21 @@ public class GeneratorHelper {
 
 	public static String loadToStringFromResource(String resourceFileName)
 			throws Exception {
-		List lines = loadToStringListFromResource(resourceFileName);
+		List<String> lines = loadToStringListFromResource(resourceFileName);
 		if (lines == null)
 			return (String) null;
 		String linebreak = System.getProperty("line.separator", "\r\n");
 		StringBuffer sb = new StringBuffer();
-		Iterator it = lines.iterator();
+		Iterator<String> it = lines.iterator();
 		while (it.hasNext()) {
 			sb.append(it.next()).append(linebreak);
 		}
 		return sb.toString();
 	}
 
-	public static List loadToStringListFromFile(String fullFileName)
+	public static List<String> loadToStringListFromFile(String fullFileName)
 			throws Exception {
-		List lines = new ArrayList();
+		List<String> lines = new ArrayList<String>();
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(
@@ -111,12 +111,12 @@ public class GeneratorHelper {
 
 	public static String loadToStringFromFile(String fullFileName)
 			throws Exception {
-		List lines = loadToStringListFromFile(fullFileName);
+		List<String> lines = loadToStringListFromFile(fullFileName);
 		if (lines == null)
 			return (String) null;
 		String linebreak = System.getProperty("line.separator", "\r\n");
 		StringBuffer sb = new StringBuffer();
-		Iterator it = lines.iterator();
+		Iterator<String> it = lines.iterator();
 		while (it.hasNext()) {
 			sb.append(it.next()).append(linebreak);
 		}
@@ -126,19 +126,19 @@ public class GeneratorHelper {
 	public static int outputTo(String content, String rootPath,
 			String relativePathToFile, String fileName, boolean overwrite)
 			throws Exception {
-		List l = new ArrayList();
+		List<String> l = new ArrayList<String>();
 		l.add(content);
 		return outputTo(l, rootPath, relativePathToFile, fileName, overwrite);
 	}
 
 	public static int outputTo(String content, String fullPathToOutputFile, boolean overwrite)
 			throws Exception {
-		List l = new ArrayList();
+		List<String> l = new ArrayList<String>();
 		l.add(content);
 		return outputTo(l, fullPathToOutputFile, overwrite);
 	}
 
-	public static int outputTo(List content, String rootPath,
+	public static int outputTo(List<String> content, String rootPath,
 			String relativePathToFile, String fileName, boolean overwrite)
 			throws Exception {
 		File file = new File(rootPath);
@@ -170,7 +170,7 @@ public class GeneratorHelper {
 		return status;
 	}
 
-	public static int outputTo(List content, String fullPathToOutputFile, boolean overwrite)
+	public static int outputTo(List<String> content, String fullPathToOutputFile, boolean overwrite)
 			throws Exception {
 		String fullFileName = fullPathToOutputFile;
 
@@ -205,18 +205,18 @@ public class GeneratorHelper {
 
 	public static void writeToFile(String content, String fileFullName)
 			throws Exception {
-		List l = new ArrayList();
+		List<String> l = new ArrayList<String>();
 		l.add(content);
 		writeToFile(l, fileFullName);
 	}
 
-	public static void writeToFile(List content, String fileFullName)
+	public static void writeToFile(List<String> content, String fileFullName)
 			throws Exception {
 		PrintWriter out = null;
 		try {
 			out = new PrintWriter(new BufferedWriter(new FileWriter(
 					fileFullName)));
-			Iterator it = content.iterator();
+			Iterator<String> it = content.iterator();
 			while (it.hasNext()) {
 				out.print(it.next());
 			}

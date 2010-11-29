@@ -123,7 +123,7 @@ public class StartServer {
         ToolsUtil.validatePathExistence(webappPath);
 
     	boolean foundPort = false;
-    	List jettyXMLs = new ArrayList();
+    	List<String> argItems = new ArrayList<String>();
 
     	String port = "8080";
     	String jettyXML = "etc/jetty.xml";
@@ -134,18 +134,18 @@ public class StartServer {
     			System.setProperty("jetty.port", port);
 
     			if (args.length == 2) {
-    				jettyXMLs.add(jettyXML);
+    				argItems.add(jettyXML);
     			}
     			else {
-    				jettyXMLs.addAll(getXMLs(args, 2));
+    				argItems.addAll(getXMLs(args, 2));
     			}
     		}
     		else {
-    			jettyXMLs.addAll(getXMLs(args, 1));
+    			argItems.addAll(getXMLs(args, 1));
     		}
         }
     	else if (args.length == 1) {
-    		jettyXMLs.add(jettyXML);
+    		argItems.add(jettyXML);
     	}
 
         String jettyLogs = jettyHome + File.separator + "logs";
@@ -154,17 +154,17 @@ public class StartServer {
     								  File.separator + "log";
     	appLogs = ToolsUtil.setSystemProperty("app.logs", appLogs);
 
-    	validateXMLsExistence(jettyHome, jettyXMLs);
-        String jettyXMLsAsString = getXMLsAsString(jettyHome, jettyXMLs);
+    	validateXMLsExistence(jettyHome, argItems);
+        String jettyXMLsAsString = getXMLsAsString(jettyHome, argItems);
 
-		String jdkHome = getJDKHome();
-		boolean foundToolsJar = existsToolsJar(jdkHome);
-		if (foundToolsJar) {
-			jdkHome = ToolsUtil.setSystemProperty("jdk.home", jdkHome);
-		}
-		else {
-			throw new IllegalArgumentException("You must run this program from a JDK.");
-		}
+//		String jdkHome = getJDKHome();
+//		boolean foundToolsJar = existsToolsJar(jdkHome);
+//		if (foundToolsJar) {
+//			jdkHome = ToolsUtil.setSystemProperty("jdk.home", jdkHome);
+//		}
+//		else {
+//			throw new IllegalArgumentException("You must run this program from a JDK.");
+//		}
 
         String hr = "=========================================";
 
@@ -190,15 +190,15 @@ public class StartServer {
         log("  jetty.xmls: " + jettyXMLsAsString);
         log("");
 
-        if (!foundToolsJar) {
-        	log("No tools.jar found in \"" + jdkHome + File.separator + "lib\". ");
-        	log("tools.jar is required if using DEVELOPMENT mode.");
-        	log("");
-        }
+//        if (!foundToolsJar) {
+//        	log("No tools.jar found in \"" + jdkHome + File.separator + "lib\". ");
+//        	log("tools.jar is required if using DEVELOPMENT mode.");
+//        	log("");
+//        }
         log("Use Ctrl-C to shutdown server");
         log("");
         log(hr);
-        startUp(jettyHome, jettyXMLs);
+        startUp(jettyHome, argItems);
     }
 
 	private static boolean isNumber(String s) {
@@ -212,18 +212,20 @@ public class StartServer {
 		return status;
 	}
 
-	private static List getXMLs(String[] ary, int start) {
-		List list = new ArrayList();
+	private static List<String> getXMLs(String[] ary, int start) {
+		List<String> list = new ArrayList<String>();
 		for (int i = start; i < ary.length; i++) {
 			list.add(ary[i]);
 		}
 		return list;
 	}
 
-	private static void validateXMLsExistence(String jettyHome, List names) {
-		Iterator it = names.iterator();
+	private static void validateXMLsExistence(String jettyHome, List<String> names) {
+		Iterator<String> it = names.iterator();
 		while(it.hasNext()) {
 			String name = (String)it.next();
+			if (!name.endsWith(".xml")) continue;
+			
 			String jettyXMLPath = jettyHome + File.separator + name;
 			File jx = new File(jettyXMLPath);
             if (!jx.exists()) {
@@ -237,9 +239,9 @@ public class StartServer {
 		}
 	}
 
-	private static String getXMLsAsString(String jettyHome, List jettyXMLs) {
+	private static String getXMLsAsString(String jettyHome, List<String> jettyXMLs) {
 		StringBuffer sb = new StringBuffer();
-		Iterator it = jettyXMLs.iterator();
+		Iterator<String> it = jettyXMLs.iterator();
 		while(it.hasNext()) {
 			sb.append(jettyHome).append(File.separator);
 			sb.append(it.next()).append(", ");
@@ -272,14 +274,17 @@ public class StartServer {
     	invokeMain(cl, jettyMainClassName, args);
     }
 
-    public static void startUp(String jettyHome, List jettyXMLs)
+    public static void startUp(String jettyHome, List<String> argItems)
     throws Exception
     {
     	ClassLoader cl = Thread.currentThread().getContextClassLoader();
     	String jettyMainClassName = "org.mortbay.start.Main";
-    	String[] args=(String[])jettyXMLs.toArray(new String[jettyXMLs.size()]);
-    	for (int i = 0; i < jettyXMLs.size(); i++) {
-    		args[i] = jettyHome + File.separator + args[i];
+    	String[] args=(String[])argItems.toArray(new String[argItems.size()]);
+    	for (int i = 0; i < argItems.size(); i++) {
+    		String s = args[i];
+    		if (s.endsWith(".xml") && s.startsWith("etc")) {
+        		args[i] = jettyHome + File.separator + s;
+    		}
     	}
 
     	invokeMain(cl, jettyMainClassName, args);

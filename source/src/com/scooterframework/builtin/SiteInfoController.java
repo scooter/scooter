@@ -22,9 +22,22 @@ public class SiteInfoController {
 
 	static {
 		filterManagerFor(SiteInfoController.class).declareBeforeFilter(
-				BuiltinHelper.class, "validateRequest");
+				AdminSignonController.class, "loginRequired");
 	}
     
+	/**
+	 * basic action returns site info.
+	 */
+    public String basic() {
+    	setViewData("auto.rest", (RouteConfig.getInstance().allowAutoREST()?"On":"Off"));
+    	setViewData("auto.crud", (EnvConfig.getInstance().allowAutoCRUD()?"On":"Off"));
+    	setViewData("routes", MatchMaker.getInstance().getAllRoutes());
+        return null;
+    }
+    
+	/**
+	 * routes action returns all routes.
+	 */
     public String routes() {
     	setViewData("auto.rest", (RouteConfig.getInstance().allowAutoREST()?"On":"Off"));
     	setViewData("auto.crud", (EnvConfig.getInstance().allowAutoCRUD()?"On":"Off"));

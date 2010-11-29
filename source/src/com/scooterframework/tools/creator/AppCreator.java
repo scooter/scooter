@@ -10,8 +10,11 @@ package com.scooterframework.tools.creator;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.scooterframework.common.util.FileUtil;
+import com.scooterframework.common.util.Util;
+import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.tools.common.Generator;
 import com.scooterframework.tools.common.ToolsUtil;
 
@@ -54,7 +57,8 @@ public class AppCreator {
      * @param args
      */
     public static void main(String[] args) {
-    	if (args.length < 1 || args[0].equalsIgnoreCase("-help")) {
+    	if (args.length < 1 || args[0].equalsIgnoreCase("-help") || 
+    			args[0].equalsIgnoreCase("--help")) {
 			usage();
 			return;
 		}
@@ -112,6 +116,51 @@ public class AppCreator {
     		pkgPrefix = appName;
     	}
     	
+    	/*
+    	 * Site admin related info
+    	 */
+    	String username = null;
+		String password = null;
+		String pconfirm = null;
+		Scanner sc = new Scanner(System.in);
+		System.out.print("Enter site admin username: ");
+		if (sc.hasNext()) {
+			username = sc.next();
+		}
+		
+		if (username == null) {
+			System.exit(0);
+		}
+		
+		while(true) {
+			System.out.print("Enter site admin password: ");
+			if (sc.hasNext()) {
+				password = sc.next();
+			}
+
+			if (password == null) {
+				System.exit(0);
+			}
+
+			System.out.print("Enter the password  again: ");
+			if (sc.hasNext()) {
+				pconfirm = sc.next();
+			}
+			
+			if (password.equals(pconfirm)) {
+				break;
+			}
+			else if (pconfirm == null) {
+				System.exit(0);
+			}
+			else {
+				password = null;
+				pconfirm = null;
+				log("You did not confirm the password successfully. Try again.");
+			}
+		}
+		log("You've entered: " + username + "/" + password);
+    	
     	log("scooter.home: " + scooterHome);
     	log("Creating " + appName + " ...");
     	log("Target dir: " + targetDir);
@@ -128,9 +177,12 @@ public class AppCreator {
     	//create all properties
     	Map allProps = new HashMap();
     	allProps.put("scooter.home", scooterHome);
+    	allProps.put("app_name_title", WordUtil.titleize(appName));
     	allProps.put("app_name", appName);
     	allProps.put("app_path", webappPath);
     	allProps.put("package_prefix", pkgPrefix);
+    	allProps.put("site.admin.username", username);
+    	allProps.put("site.admin.password", Util.md5(password));
     	allProps.put(Generator.TEMPLATE_PARSER_TYPE, Generator.TEMPLATE_PARSER_Q);
     	setMoreProperties(allProps, dbType);
     	

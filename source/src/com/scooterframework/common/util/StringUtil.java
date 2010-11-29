@@ -454,7 +454,7 @@ public class StringUtil {
     }
     
     public static String removeLastToken(String word, String token) {
-        if (word == null) return word;
+        if (word == null || token == null || "".equals(token)) return word;
         
         String newWord = word;
         int pos = word.lastIndexOf(token);

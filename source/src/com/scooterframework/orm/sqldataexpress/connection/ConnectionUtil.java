@@ -21,6 +21,7 @@ import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.exception.CreateConnectionFailureException;
 import com.scooterframework.orm.sqldataexpress.util.OrmObjectFactory;
+import com.scooterframework.security.LoginHelper;
 
 /**
  * ConnectionUtil class
@@ -45,13 +46,19 @@ public class ConnectionUtil {
 		beforeConnection(dcc);
 
 		Connection connection = null;
-
-		if (dcc.getUsername() == null) {
-			connection = createConnection(dcc.getDataSourceName(), dcc
-					.getLoginTimeout());
-		} else {
-			connection = createConnection(dcc.getDataSourceName(), dcc
-					.getUsername(), dcc.getPassword(), dcc.getLoginTimeout());
+		
+		if (dcc.useLoginForConnection()) {
+			connection = createConnection(dcc.getDataSourceName(), 
+					loginUsername(), loginPassword(), dcc.getLoginTimeout());
+		}
+		else {
+			if (dcc.getUsername() == null) {
+				connection = createConnection(dcc.getDataSourceName(), dcc
+						.getLoginTimeout());
+			} else {
+				connection = createConnection(dcc.getDataSourceName(), dcc
+						.getUsername(), dcc.getPassword(), dcc.getLoginTimeout());
+			}
 		}
 
 		if (connection == null)
@@ -163,13 +170,19 @@ public class ConnectionUtil {
 
 		Connection connection = null;
 
-		if (dcc.getUsername() == null) {
-			connection = createConnection(dcc.getDriverClassName(), dcc
-					.getUrl(), dcc.getLoginTimeout());
-		} else {
-			connection = createConnection(dcc.getDriverClassName(), dcc
-					.getUrl(), dcc.getUsername(), dcc.getPassword(), dcc
-					.getLoginTimeout());
+		if (dcc.useLoginForConnection()) {
+			connection = createConnection(dcc.getDriverClassName(), dcc.getUrl(), 
+					loginUsername(), loginPassword(), dcc.getLoginTimeout());
+		}
+		else {
+			if (dcc.getUsername() == null) {
+				connection = createConnection(dcc.getDriverClassName(), dcc
+						.getUrl(), dcc.getLoginTimeout());
+			} else {
+				connection = createConnection(dcc.getDriverClassName(), dcc
+						.getUrl(), dcc.getUsername(), dcc.getPassword(), dcc
+						.getLoginTimeout());
+			}
 		}
 
 		if (connection == null)
@@ -280,11 +293,17 @@ public class ConnectionUtil {
 
 		Connection connection = null;
 
-		if (dcc.getUsername() == null) {
-			connection = createPooledConnection(dcc.getConnectionName(), dcc.getLoginTimeout());
-		} else {
+		if (dcc.useLoginForConnection()) {
 			connection = createPooledConnection(dcc.getConnectionName(), 
-            dcc.getUsername(), dcc.getPassword(), dcc.getLoginTimeout());
+		            loginUsername(), loginPassword(), dcc.getLoginTimeout());
+		}
+		else {
+			if (dcc.getUsername() == null) {
+				connection = createPooledConnection(dcc.getConnectionName(), dcc.getLoginTimeout());
+			} else {
+				connection = createPooledConnection(dcc.getConnectionName(), 
+	            dcc.getUsername(), dcc.getPassword(), dcc.getLoginTimeout());
+			}
 		}
 
 		if (connection == null)
@@ -370,7 +389,7 @@ public class ConnectionUtil {
 		return connection;
 	}
     
-	protected String getSetRoleStatement(Properties roles) {
+	public static String getSetRoleStatement(Properties roles) {
 		String roleStr = "";
 		Set keys = roles.keySet();
 		if (keys != null) {
@@ -430,6 +449,14 @@ public class ConnectionUtil {
 					dcc.getAfterConnectionMethodName(),
 					new Object[] { connection });
 		}
+	}
+	
+	private static String loginUsername() {
+		return LoginHelper.loginUserId();
+	}
+	
+	private static String loginPassword() {
+		return LoginHelper.loginPassword();
 	}
 
 	private static LogUtil log = LogUtil.getLogger(ConnectionUtil.class

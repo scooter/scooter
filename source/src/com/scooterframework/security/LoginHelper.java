@@ -7,6 +7,7 @@
  */
 package com.scooterframework.security;
 
+import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.web.controller.ACH;
 
@@ -40,6 +41,30 @@ public class LoginHelper {
         
         return (userId != null)?userId.toString():null;
     }
+
+    /**
+     * Returns the password of the current logged-in user which has been 
+     * saved to session.
+     * 
+     * @return the password of the current logged-in user.
+     */
+    public static String loginPassword() {
+        Object userPwd = null;
+        try {
+            userPwd = ACH.getAC().getFromSessionData(SESSION_KEY_LOGIN_PASSWORD);
+            if (userPwd == null) {
+                ActiveRecord user = loginUser();
+                if (user != null) {
+                    userPwd = user.getField("password");
+                    if (userPwd != null) cacheLoggedInUserId(userPwd);
+                }
+            }
+        }
+        catch(Exception ex) {
+        }
+        
+        return (userPwd != null)?userPwd.toString():null;
+    }
     
     /**
      * Returns the current logged-in user record which has been saved to 
@@ -61,6 +86,18 @@ public class LoginHelper {
     }
     
     /**
+     * Checks if the admin user is already logged in.
+     * 
+     * @return true if the current user is already logged in.
+     */
+    public static boolean isAdminLoggedIn() {
+    	String username = loginUserId();
+        String sau = EnvConfig.getInstance().getSiteAdminUsername();
+    	if (sau != null && sau.equals(username)) return true;
+        return false;
+    }
+    
+    /**
      * Stores logged-in <tt>user</tt> record to the user's http session. 
      * 
      * @param user an ActiveRecord instance.
@@ -72,10 +109,19 @@ public class LoginHelper {
     /**
      * Stores logged-in user's id to the user's http session. 
      * 
-     * @param userId
+     * @param userId  the login user id
      */
     public static void cacheLoggedInUserId(Object userId) {
         ACH.getAC().storeToSession(SESSION_KEY_LOGIN_USER_ID, userId);
+    }
+    
+    /**
+     * Stores logged-in user's password to the user's http session. 
+     * 
+     * @param password  the login password
+     */
+    public static void cacheLoggedInPassword(Object password) {
+        ACH.getAC().storeToSession(SESSION_KEY_LOGIN_PASSWORD, password);
     }
     
     /**
@@ -109,6 +155,7 @@ public class LoginHelper {
         ACH.getAC().removeAllSessionData();
     }
     
+    public static final String SESSION_KEY_LOGIN_PASSWORD = "login_password";
     public static final String SESSION_KEY_LOGIN_USER_ID = "login_user_id";
     public static final String SESSION_KEY_LOGIN_USER_OBJECT = "login_user_object";
 }

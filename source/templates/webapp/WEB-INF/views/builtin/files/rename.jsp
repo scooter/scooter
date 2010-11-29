@@ -14,7 +14,7 @@ File requestFile = (File)W.get("requestFile");
 
 <h2>Rename file or directory</h2>
 
-<form action="<%=W.getURL("/files/doRename")%>" method="POST">
+<form action="<%=W.getURL("/admin/files/doRename")%>" method="POST">
   <label>Old Name</label>
   <input type="text" name="f" value="<%=W.value("f")%>" readonly="readonly" size="60" /><br/><br/>
   <label>New Name</label>

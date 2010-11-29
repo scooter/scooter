@@ -40,16 +40,29 @@ for (Iterator it = O.columnNames(record); it.hasNext();) {
     Object columnValue = record.getField(columnName);
     boolean isRequired = ri.isRequiredColumn(columnName);
     boolean isLongText = ri.isLongTextColumn(columnName, 255);
-    if (isLongText) {
+    boolean isDateColumn = ri.isDateColumn(columnName);
+    boolean isTimestampColumn = ri.isTimestampColumn(columnName);
+    int size = 80;
+    if (isDateColumn || isTimestampColumn) size = 30;
 %>
+
+<%  if (isDateColumn) { %>
+    <script type="text/javascript">
+        $(function(){$('#<%=columnName%>').datepicker({ dateFormat: 'yy-mm-dd' });});
+    </script>
+<%  } %>
+
+<%  if (isLongText) { %>
     <tr>
         <td align="right"><%if (isRequired) {%><span class="required">*</span><%}%><b><%=WordUtil.titleize(columnName)%>:</b></td>
-        <td><textarea name="<%=columnName%>" cols="60" rows="10"><%=T.text(columnValue)%></textarea></td>
+        <td><textarea id="<%=columnName%>" name="<%=columnName%>" cols="60" rows="10"><%=T.text(columnValue)%></textarea></td>
     </tr>
 <%  } else { %>
     <tr>
         <td align="right"><%if (isRequired) {%><span class="required">*</span><%}%><b><%=WordUtil.titleize(columnName)%>:</b></td>
-        <td><input type="TEXT" name="<%=columnName%>" value="<%=T.text(columnValue)%>" size="80" /></td>
+        <td><input type="TEXT" id="<%=columnName%>" name="<%=columnName%>" value="<%=T.text(columnValue)%>" size="80" /></td>
+<%        if (isDateColumn) { %> (yyyy-mm-dd) <% } %>
+<%        if (isTimestampColumn) { %> (yyyy-mm-dd hh-mm-ss) <% } %>
     </tr>
 <%
     }
