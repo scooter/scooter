@@ -23,9 +23,9 @@ Creating an app in user's home directory:
 Use -help option to get more options.
 
 
----------------------------------
-How to create an AJAX-powered app
----------------------------------
+------------------------------------------------
+How to create an AJAX-powered app in one command
+------------------------------------------------
 
 Create complete AJAX-powered CRUD app:
 >java -jar tools/generate.jar blog scaffold-ajax post
