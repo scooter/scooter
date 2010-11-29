@@ -48,10 +48,16 @@ How to invoke http://localhost:8080/posts
 Change the contextPath from "/blog" to "/" in blog/WEB-INF/jetty-web.xml
 
 
+-------------------------------------------------
+How to find out how many concurrent user sessions
+-------------------------------------------------
+http://localhost:8080/blog/admin/site
+
+
 ---------------------------------
 How to find out what are deployed
 ---------------------------------
-http://localhost:8080/blog/files/list
+http://localhost:8080/blog/admin/files/list
 
 
 --------------------
