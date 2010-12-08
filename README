@@ -22,14 +22,12 @@ Creating an app in user's home directory:
 
 Use -help option to get more options.
 
-
 ------------------------------------------------
 How to create an AJAX-powered app in one command
 ------------------------------------------------
 
 Use the "scaffold-ajax" option:
 >java -jar tools/generate.jar blog scaffold-ajax post
-
 
 -----------------
 How to run an app
@@ -41,24 +39,20 @@ Run an app with port 9090
 Run an app with default port 8080
 >java -jar tools/server.jar /home/users/john/projects/blog
 
-
 -----------------------------------------
 How to invoke http://localhost:8080/posts
 -----------------------------------------
 Change the contextPath from "/blog" to "/" in blog/WEB-INF/jetty-web.xml
-
 
 -------------------------------------------------
 How to find out how many concurrent user sessions
 -------------------------------------------------
 http://localhost:8080/blog/admin/site
 
-
 ---------------------------------
 How to find out what are deployed
 ---------------------------------
 http://localhost:8080/blog/admin/files/list
-
 
 --------------------
 How to build scooter
@@ -67,7 +61,6 @@ How to build scooter
 2. Type 'ant build' to create a scooter.jar
 
 Type 'ant' to get a list of targets
-
 
 ---------------------------
 How to test Scooter and App
@@ -87,5 +80,5 @@ Functional test an application:
 TODOs
 -----
 
-1. Update examples
-2. Update documentations
+1. Update PetClinic and TwitterDemo examples
+2. Add more documentations
