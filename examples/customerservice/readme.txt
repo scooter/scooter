@@ -28,7 +28,7 @@ Site admin username/password is admin/welcome.
 2. Start web server (no need to restart web server in the following steps)
 scooter>java -jar tools/server.jar customerservice
 
-3. Create database
+3. Create database. The database script is in static/docs directory.
 mysql>source customerservice_development.sql
 
 CREATE TABLE entries (

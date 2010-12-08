@@ -38,7 +38,7 @@ public class PostgreSQLDBAdapter extends DBAdapter {
         	schema = "public";
     	}
     	else {
-    		if (useLoginAsSchema(schema)) {
+    		if (useLoginAsSchema(connName)) {
     			schema = getLoginUserId();
     		}
     	}

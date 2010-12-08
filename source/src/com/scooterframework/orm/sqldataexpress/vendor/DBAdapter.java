@@ -23,9 +23,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Map;
+import java.util.Properties;
 
 import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.object.Parameter;
+import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 import com.scooterframework.security.LoginHelper;
 
 /**
@@ -41,15 +44,17 @@ public abstract class DBAdapter {
     
     /**
      * Checks if using login user id as schema. When the value of 
-     * <tt>schema</tt> as defined in <tt>database.properties</tt> file for 
-     * a database connection definition is <tt>useLoginUserId</tt>, this method
-     * should return <tt>true</tt>.
+     * <tt>use_login_as_schema</tt> as defined in 
+     * <tt>database.properties</tt> file for a database connection 
+     * definition is <tt>true</tt>, this method should return <tt>true</tt>.
      * 
-     * @param schema  schema name
+     * @param connName  the database connection name
      * @return true if using login user id as schema
      */
-    public boolean useLoginAsSchema(String schema) {
-    	return (USE_LOGIN_USER_ID_AS_SCHEMA.equalsIgnoreCase(schema))?true:false;
+    public boolean useLoginAsSchema(String connName) {
+    	Properties p = SqlExpressUtil.getConnectionProperties(connName);
+    	String s = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_USE_LOGIN_AS_SCHEMA);
+    	return ("true".equalsIgnoreCase(s))?true:false;
     }
     
     /**

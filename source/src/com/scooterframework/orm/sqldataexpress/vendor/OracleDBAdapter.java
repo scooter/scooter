@@ -51,7 +51,7 @@ public class OracleDBAdapter extends DBAdapter {
         	schema = "public";
     	}
     	else {
-    		if (useLoginAsSchema(schema)) {
+    		if (useLoginAsSchema(connName)) {
     			schema = getLoginUserId();
     		}
     		else {

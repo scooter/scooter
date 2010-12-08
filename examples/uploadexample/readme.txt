@@ -1,5 +1,5 @@
 File Upload Example Application
-============================
+===============================
 
 This example demonstrates how easy it is to create a file upload application 
 by using Scooter framework.

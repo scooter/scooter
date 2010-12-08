@@ -44,7 +44,7 @@ public class H2DBAdapter extends DBAdapter {
             	url.substring(schemaToken + 1):url.substring(schemaToken + 1, split);
     	}
     	else {
-    		if (useLoginAsSchema(schema)) {
+    		if (useLoginAsSchema(connName)) {
     			schema = getLoginUserId();
     		}
     	}

@@ -10,6 +10,12 @@
 <%
 File requestFile = (File)request.getAttribute("requestFile");
 List<FileInfo> files = (List)request.getAttribute("files");
+
+String dirName = "static";
+if ("true".equals(System.getProperty("tomcat", "false"))) {
+    dirName = dirName + "/" + dirName;
+}
+String path = request.getContextPath() + "/" + dirName;
 %>
 
 <div id="locator">
@@ -28,9 +34,9 @@ List<FileInfo> files = (List)request.getAttribute("files");
 <%for (FileInfo fi : files) {%>
     <tr class="<%=W.cycle("odd, even")%>">
     <%if (fi.isDirectory()) { %>
-        <td><img title="folder" src="../../static/images/folder.gif" alt="folder "/><%=W.labelLink(fi.getName(), fi.getActionURI("list"))%></td>
+        <td><img title="folder" src="<%=path%>/images/folder.gif" alt="folder "/><%=W.labelLink(fi.getName(), fi.getActionURI("list"))%></td>
     <%} else { %>
-        <td><img title="file" src="../../static/images/file.gif" alt="file "/><%=W.labelLink(fi.getName(), fi.getActionURI("show"))%></td>
+        <td><img title="file" src="<%=path%>/images/file.gif" alt="file "/><%=W.labelLink(fi.getName(), fi.getActionURI("show"))%></td>
     <%} %>
         <td><%=fi.getType()%></td>
         <td align="right"><%=fi.getSizeDisplay()%></td>

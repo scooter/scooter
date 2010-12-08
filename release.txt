@@ -1,4 +1,4 @@
-                     Scooter Framework Version 1.0.RC3
+                     Scooter Framework Version 1.0.0
                             Release Notes
 
 
@@ -25,6 +25,36 @@ http://dev.mysql.com/doc/refman/5.5/en/identifier-case-sensitivity.html
 
 Summary of Releases
 ===================
+scooter-1.0.0 20101208
+ + New feature: Password protected Site Administration.
+ + New feature: jQuery integration.
+ + New feature: Rewrote Ajax handling by using jQuery.
+ + New feature: Addition of "About" and "Contact" screens.
+ + New feature: Addition of favicon.ico.
+ + New feature: built-in tool "File Browser".
+ + New feature: Support PostgreSQL database.
+ + New feature: 50+ more static ActiveRecord APIs. Thanks suggestions from femto Zhang.
+ + New feature: Flexible view rendering APIs in ActionControl.
+ + New feature: tools/connection-test.jar for connection testing without starting Scooter.
+ + New feature: Upload APIs in ActionControl.
+ + New feature: Code generation generates functional tests along with unit tests code.
+ + New feature: Plugin mechanism to extend Scooter functionality.
+ + New feature: Memcached support through plugin.
+ + New feature: Handle requests of different extensions.
+ + New feature: Integrated with StringTemplate and handle *.st view files.
+ 
+ + Simplifed application creation.
+ + Improved application structure.
+ + Rewrote layout template.
+ + Controller does not need to inherit framework super class.
+ + Improved Data Browser's Record APIs. Thanks code contribution from Viv(Vivek).
+ + Improved SiteInfo view which counts concurrent users.
+ + Added more connection properties (use_login_as_schema, use_login_for_connection) in database.properties.
+ + Switched to the latest Jetty-6.1.26.
+ + Many tiny updates.
+ + Required to use JDK1.5 or higher.
+
+
 scooter-1.0.RC3 20100509
  + Fixed bug: auto compiler would not work if application name starts with java
  + Fixed bug: failed to retrieve primary key of a table in Oracle database

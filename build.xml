@@ -1,15 +1,17 @@
 <?xml version = '1.0' encoding = 'windows-1252'?>
 
-<project name="scooter_core" default="usage" basedir=".">
+<project name="scooter" default="usage" basedir=".">
 
 	<property name="javac.source"           value="1.5"/>
 	<property name="javac.target"           value="1.5"/>
 	<property name="build.outdir"           value="build"/>
 	<property name="compile.outdir"         value="build/classes"/>
 	<property name="jar.outdir"             value="build/jar"/>
+    <property name="war.outdir"             value="build/war"/>
 	<property name="javadoc.outdir"         value="docs/javadoc"/>
 	<property name="junitreport.outdir"     value="docs/reports"/>
 	<property name="lib.dir"                value="lib"/>
+	<property name="support.dir"            value="support"/>
 	<property name="tools.dir"              value="tools"/>
 	<property name="plugins.dir"            value="plugins"/>
 
@@ -28,6 +30,7 @@
 	<property name="jetty.startjar.name"    value="${jetty.home}/start.jar"/>
 
 	<!--Set app properties-->
+    <property name="app.dir"                    value="${appPath}"/>
 	<property name="app.build.outdir"           value="${appPath}/WEB-INF/build"/>
 	<property name="app.compile.outdir"         value="${appPath}/WEB-INF/classes"/>
 	<property name="app.src.dir"                value="${appPath}/WEB-INF/src"/>
@@ -38,6 +41,7 @@
 	<property name="app.tests.outdir"           value="${appPath}/static/docs/tests"/>
 	<property name="app.unittests.outdir"       value="${app.tests.outdir}/unit"/>
 	<property name="app.functionaltests.outdir" value="${app.tests.outdir}/functional"/>
+
 
 	<!--Set the classpath-->
 	<path id="classpath">
@@ -54,6 +58,14 @@
 			<include name="jsp-2.1/jsp*.jar" />
 		</fileset>
 		<pathelement path="${java.class.path}"/>
+	</path>
+
+	<path id="ant.classpath">
+		<path refid="classpath" />
+		<fileset dir="${support.dir}">
+			<include name="**/*.jar" />
+			<include name="**/*.zip" />
+		</fileset>
 	</path>
 
 	<path id="app.classpath">
@@ -99,8 +111,7 @@
 		<echo message=""/>
 		<echo message="app_test_unit     -DappPath=[app path] --> run unit test for an app"/>
 		<echo message="app_test_fun      -DappPath=[app path] --> run functional test for an app"/>
-		<echo message=""/>
-		<echo message="Please note that you need to have JAVA_HOME pointing to a JDK."/>
+		<echo message="war               -DappPath=[app path] --> create WAR file for an app"/>
 		<echo message=""/>
 	</target>
 
@@ -339,11 +350,52 @@
 	<target name="clean">
 		<delete dir="${compile.outdir}"/>
 		<delete dir="${jar.outdir}"/>
+		<delete dir="${war.outdir}"/>
 		<delete dir="${build.outdir}"/>
 		<delete dir="${javadoc.outdir}"/>
 		<delete dir="${junitreport.outdir}"/>
 	</target>
 
 	<target name="all" depends="build, tools, javadoc"/>
+	
+    <target name="get_app_name">
+        <script language="javascript" classpathref="ant.classpath" manager="bsf"> <![CDATA[
+            appPath = scooter.getProperty("appPath");
+            lastSlash = appPath.lastIndexOf('/');
+            appName = appPath.substring(lastSlash + 1);
+            scooter.setProperty("appName", appName);
+        ]]> </script>
+    </target>
+    
+    <target name="war" depends="get_app_name">
+        <echo>creating war file for application "${appName}"</echo>
+    	
+        <delete dir="${build.outdir}/tmp"/>
+    	
+        <mkdir dir="${build.outdir}/tmp"/>
+        <mkdir dir="${war.outdir}"/>
+        
+        <copy todir="${build.outdir}/tmp" preservelastmodified="true">
+            <fileset dir="${app.dir}">
+				<exclude name="**/*.java"/>
+                <include name="**/**"/>
+            </fileset>
+        </copy>
+        
+        <copy todir="${build.outdir}/tmp/WEB-INF/lib" preservelastmodified="true" flatten="true">
+    		<fileset dir="${lib.dir}">
+    			<include name="**/*.jar" />
+    			<include name="**/*.zip" />
+    		</fileset>
+    		<fileset dir="${plugins.dir}">
+    			<include name="**/*.jar" />
+    			<include name="**/*.zip" />
+    		</fileset>
+        </copy>
+        
+        <jar destfile="${war.outdir}/${appName}.war" basedir="${build.outdir}/tmp" />
+    	
+        <delete dir="${build.outdir}/tmp"/>
+    </target>
 
 </project>

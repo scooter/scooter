@@ -1,0 +1,1 @@
+The message we found is <%=request.getAttribute("content")%>

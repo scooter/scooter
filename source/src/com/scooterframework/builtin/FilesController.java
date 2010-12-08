@@ -41,7 +41,7 @@ public class FilesController {
 		String path = p("f");
 		if (path == null) {
 			path = "/";
-			storeToRequest("f", path);
+			setViewData("f", path);
 		}
 		
 		File file = getFile(path);
@@ -150,7 +150,7 @@ public class FilesController {
 			log.error("Error in create() caused by " + ex.getMessage());
 			flash("error", "There was a problem creating the file.");
 		}
-		return forwardTo(viewPath("add"));
+		return renderView("add");
 	}
 
 	public String edit() {
@@ -191,7 +191,7 @@ public class FilesController {
 			log.error("Error in update() caused by " + ex.getMessage());
 			flash("error", "There was a problem updating the file.");
 		}
-		return forwardTo(viewPath("edit"));
+		return renderView("edit");
 	}
 
 	public String delete() {
@@ -235,7 +235,7 @@ public class FilesController {
 			log.error("Error in doCopy() caused by " + ex.getMessage());
 			flash("error", "There was a problem in copying.");
 		}
-		return forwardTo(viewPath("copy"));
+		return renderView("copy");
 	}
 
 	public String rename() {
@@ -266,7 +266,7 @@ public class FilesController {
 			log.error("Error in doRename() caused by " + ex.getMessage());
 			flash("error", "There was a problem in renaming.");
 		}
-		return forwardTo(viewPath("rename"));
+		return renderView("rename");
 	}
 
 	public String upload() {
@@ -290,7 +290,7 @@ public class FilesController {
 			log.error("Error in doUpload() caused by " + ex.getMessage());
             flash("error", "There is a problem with upload.");
         }
-		return forwardTo(viewPath("upload"));
+		return renderView("upload");
 	}
 
 	public String replace() {
@@ -315,6 +315,6 @@ public class FilesController {
 			log.error("Error in doReplace() caused by " + ex.getMessage());
         }
         flash("error", "There is a problem with replace.");
-		return forwardTo(viewPath("replace"));
+		return renderView("replace");
 	}
 }
