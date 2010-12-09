@@ -25,10 +25,11 @@ http://dev.mysql.com/doc/refman/5.5/en/identifier-case-sensitivity.html
 
 Summary of Releases
 ===================
-scooter-1.0.0 20101208
+scooter-1.0.0 20101209
  + New feature: Password protected Site Administration.
  + New feature: jQuery integration.
- + New feature: Rewrote Ajax handling by using jQuery and ideas from Rails3.0.
+ + New feature: jQuery-UI integration.
+ + New feature: Rewrote Ajax handling by using jQuery.
  + New feature: Addition of "About" and "Contact" screens.
  + New feature: Addition of favicon.ico.
  + New feature: built-in tool "File Browser".

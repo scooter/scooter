@@ -404,7 +404,7 @@ public class TableGateway {
      * @return a list of ActiveRecord objects
      */
     public List findAll(String conditionsSQL, String options) {
-        return findAll(conditionsSQL, Converters.convertSqlOptionStringToMap(options));
+        return findAll(conditionsSQL, (Map)null, Converters.convertSqlOptionStringToMap(options));
     }
     
     /**
@@ -540,7 +540,7 @@ public class TableGateway {
      * @return the first ActiveRecord found
      */
     public ActiveRecord findFirst(String conditionsSQL, String options) {
-        return findFirst(conditionsSQL, Converters.convertSqlOptionStringToMap(options));
+        return findFirst(conditionsSQL, (Map)null, Converters.convertSqlOptionStringToMap(options));
     }
     
     /**
@@ -570,8 +570,11 @@ public class TableGateway {
      */
     public ActiveRecord findFirst(String conditionsSQL, Map conditionsSQLData, Map options) {
     	if (options == null) options = new HashMap();
-        options.put(DataProcessor.input_key_records_offset, "0");
-        options.put(DataProcessor.input_key_records_limit,  "1");
+    	if (!options.containsKey(ActiveRecordConstants.key_include) && 
+    			!options.containsKey(ActiveRecordConstants.key_strict_include)) {
+            options.put(DataProcessor.input_key_records_offset, "0");
+            options.put(DataProcessor.input_key_records_limit,  "1");
+    	}
         List list = findAll(conditionsSQL, conditionsSQLData, options);
         return (list != null && list.size() > 0)?((ActiveRecord)list.get(0)):null;
     }
@@ -667,7 +670,7 @@ public class TableGateway {
      * @return the last ActiveRecord found
      */
     public ActiveRecord findLast(String conditionsSQL, String options) {
-        return findLast(conditionsSQL, Converters.convertSqlOptionStringToMap(options));
+        return findLast(conditionsSQL, (Map)null, Converters.convertSqlOptionStringToMap(options));
     }
     
     /**
