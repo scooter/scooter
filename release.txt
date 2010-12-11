@@ -21,15 +21,26 @@ Please refer to the following MySQL document on work around:
 http://dev.mysql.com/doc/refman/5.5/en/identifier-case-sensitivity.html
 
 
+Failed to connect to MySQL
+--------------------------
+At least two people reported that they failed to connect to MySQL database:
+http://groups.google.com/group/scooter-framework/browse_thread/thread/af37380b9771f3d9
+
+This problem is not related to Scooter, but related to MySQL setup. Many people 
+have reported this issue and workarounds: 
+http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-connector-through-tomcat-or-externally
+
+
 
 
 Summary of Releases
 ===================
-scooter-1.0.0 20101209
+scooter-1.0.0 20101210
  + New feature: Password protected Site Administration.
  + New feature: jQuery integration.
  + New feature: jQuery-UI integration.
  + New feature: Rewrote Ajax handling by using jQuery.
+ + New feature: Generate Ajax-based scaffold app.
  + New feature: Addition of "About" and "Contact" screens.
  + New feature: Addition of favicon.ico.
  + New feature: built-in tool "File Browser".
