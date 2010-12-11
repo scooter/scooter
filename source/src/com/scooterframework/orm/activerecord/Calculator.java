@@ -26,8 +26,17 @@ public class Calculator {
      * 
      * @param recordHome home instance of an entity
      */
-    public Calculator(ActiveRecord recordHome) {
+    Calculator(ActiveRecord recordHome) {
         this.recHome = recordHome;
+    }
+
+    /**
+     * <p>Gets a calculator for a model.</p>
+     * 
+     * @param modelClass  the model class
+     */
+    public static Calculator getCalculator(Class modelClass) {
+        return ActiveRecordUtil.getCalculator(modelClass);
     }
     
     /**

@@ -1,0 +1,111 @@
+body { background-color: white; }
+
+body, p, ol, ul, td {
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size:   13px;
+  line-height: 18px;
+}
+
+table {
+    padding:         0px;
+    margin:          0px;
+    border-collapse: collapse; 
+}
+
+a { color: #000; }
+a:visited { color: #666; }
+a:hover { color: #fff; background-color:#0000FF; }
+
+table.sTable td { padding: 2px; border: #c1cdd8 1px solid }
+table.sTable th { padding: 2px; border: #c1cdd8 1px solid }
+table.sTable th { background-color: #CCCCCC; }
+table.sTable tr.odd { background-color: #F2F2F2; }
+table.sTable tr.even { background-color: white; }
+
+.code {
+  background-color: #eee;
+  padding: 10px;
+  font-size: 12px;
+  border: 1px solid #aaa;
+}
+
+.sectionTitle { margin-top: 1.5em; }
+
+.left{float:left}
+.right{float:right}
+.clearer{clear:both}
+
+#siteName {
+  float: left;
+  color: blue;
+}
+
+#topLinks {
+  float: right;
+}
+
+#locator {
+  clear: left;
+  margin: 10px 0;
+}
+
+#container {
+  width: 760px;
+  min-width: 760px;
+  margin: 0 auto;
+  padding: 0px;
+}
+
+#header {
+  height: 60px;
+  margin: 10px 0;
+  text-align: left;
+  padding-top: 1px;
+  border-bottom: 4px solid blue;
+}
+
+#footer {
+  clear: both;
+  margin-top: 10px;
+  height: 60px;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  border-top: 2px solid blue;
+}
+
+#container hr, #footer hr {
+  height: 4px;
+  color: silver;
+}
+
+#sidemenu {
+  font-size: 100%;
+  float: right;
+  min-height: 300px;
+  width: 150px;
+  padding: 10px;
+  border-left: 2px solid blue;
+}
+
+#sidemenu ul {
+  list-style: none; 
+  margin-left: 0px;
+  padding: 0;
+}
+
+.fieldWithErrors {
+  padding: 2px;
+  background-color: red;
+  display: table;
+}
+
+#errorDetails {
+  width: 400px;
+  border: 3px solid red;
+  padding: 7px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  background-color: #FFDAF3;
+}
+

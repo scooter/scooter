@@ -26,7 +26,7 @@ import com.scooterframework.tools.common.ToolsUtil;
  * Usage examples:
  * <pre>  
 	Usage:
-	    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle) [app_domain]]
+	    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle, postgresql) [app_domain]]
 	
 	Examples:
 	    This page:
@@ -268,7 +268,7 @@ public class AppCreator {
     	log("    This is a utility that creates a Scooter-powered web application.");
     	log("");
     	log("Usage:");
-    	log("    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle) [app_domain]]");
+    	log("    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle, postgresql) [app_domain]]");
     	log("");
     	log("Examples:");
     	log("    This page:");
