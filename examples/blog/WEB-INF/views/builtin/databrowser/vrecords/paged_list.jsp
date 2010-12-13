@@ -88,7 +88,7 @@ String view = (String)request.getAttribute("view");
 </table>
 
 <p align="center">
-<%=W.diggStylePageLinks(paginator, R.resourcePath(resource), 4, 11)%>
+<%=W.windowStylePageLinks(paginator, R.resourcePath(resource), 4, 11)%>
 
 <form action="<%=W.getURL(R.resourcePath(resource))%>" method="GET">
 <input type="hidden" name="r" value="page">
