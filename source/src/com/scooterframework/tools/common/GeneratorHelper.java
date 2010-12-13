@@ -11,9 +11,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -214,8 +216,8 @@ public class GeneratorHelper {
 			throws Exception {
 		PrintWriter out = null;
 		try {
-			out = new PrintWriter(new BufferedWriter(new FileWriter(
-					fileFullName)));
+			out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(new File(fileFullName)), "UTF-8")));
 			Iterator<String> it = content.iterator();
 			while (it.hasNext()) {
 				out.print(it.next());
