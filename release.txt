@@ -1,4 +1,4 @@
-                     Scooter Framework Version 1.0.0
+                     Scooter Framework Version 1.0.1
                             Release Notes
 
 
@@ -35,6 +35,11 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 
 Summary of Releases
 ===================
+scooter-1.0.1 20101212
+ + Fixed bug: create.jar failed to preserve utf-8 encoding of template files.
+ + Fixed bug: wrong api name for window style pagination.
+
+
 scooter-1.0.0 20101210
  + New feature: Password protected Site Administration.
  + New feature: jQuery integration.
