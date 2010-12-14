@@ -32,24 +32,27 @@ public class H2DBAdapter extends DBAdapter {
 		return s2;
 	}
     
-    protected String getH2Schema(String connName) {
-    	Properties p = SqlExpressUtil.getConnectionProperties(connName);
-    	String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
-    	if (isEmpty(schema)) {
-    		String url = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_URL);
-        	if (url == null || url.indexOf("SCHEMA=") == -1) return "PUBLIC";
-        	int schemaToken = url.indexOf("SCHEMA=");
-        	int split = url.indexOf(';', schemaToken);
-        	schema = (split == -1)?
-            	url.substring(schemaToken + 1):url.substring(schemaToken + 1, split);
-    	}
-    	else {
-    		if (useLoginAsSchema(connName)) {
-    			schema = getLoginUserId();
-    		}
-    	}
-    	return schema;
-    }
+	protected String getH2Schema(String connName) {
+		Properties p = SqlExpressUtil.getConnectionProperties(connName);
+		String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
+		if (isEmpty(schema)) {
+			if (useLoginAsSchema(connName)) {
+				schema = getLoginUserId();
+			}
+
+			if (isEmpty(schema)) {
+				String url = p
+						.getProperty(DatabaseConfig.KEY_DB_CONNECTION_URL);
+				if (url == null || url.indexOf("SCHEMA=") == -1)
+					return "PUBLIC";
+				int schemaToken = url.indexOf("SCHEMA=");
+				int split = url.indexOf(';', schemaToken);
+				schema = (split == -1) ? url.substring(schemaToken + 1) : url
+						.substring(schemaToken + 1, split);
+			}
+		}
+		return schema;
+	}
     
     public String getOneRowSelectSQL(String catalog, String schema, String table) {
     	String selectSQL = "SELECT TOP 1 * FROM ";

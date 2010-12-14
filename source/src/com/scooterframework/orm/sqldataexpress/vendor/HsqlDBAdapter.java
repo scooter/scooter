@@ -32,24 +32,27 @@ public class HsqlDBAdapter extends DBAdapter {
 		return s2;
 	}
     
-    protected String getHsqldbSchema(String connName) {
-    	Properties p = SqlExpressUtil.getConnectionProperties(connName);
-    	String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
-    	if (isEmpty(schema)) {
-    		String url = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_URL);
-        	if (url == null || url.indexOf('/') == -1) return null;
-        	int lastSlash = url.lastIndexOf('/');
-        	int q = url.indexOf('?');
-        	schema = (q == -1)?
-            	url.substring(lastSlash + 1):url.substring(lastSlash + 1, q);
-    	}
-    	else {
-    		if (useLoginAsSchema(connName)) {
-    			schema = getLoginUserId();
-    		}
-    	}
-    	return schema;
-    }
+	protected String getHsqldbSchema(String connName) {
+		Properties p = SqlExpressUtil.getConnectionProperties(connName);
+		String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
+		if (isEmpty(schema)) {
+			if (useLoginAsSchema(connName)) {
+				schema = getLoginUserId();
+			}
+
+			if (isEmpty(schema)) {
+				String url = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_URL);
+				if (url == null || url.indexOf('/') == -1)
+					return null;
+
+				int lastSlash = url.lastIndexOf('/');
+				int q = url.indexOf('?');
+				schema = (q == -1) ?
+				url.substring(lastSlash + 1) : url.substring(lastSlash + 1, q);
+			}
+		}
+		return schema;
+	}
     
     public String getOneRowSelectSQL(String catalog, String schema, String table) {
     	String selectSQL = "SELECT TOP 1 * FROM ";

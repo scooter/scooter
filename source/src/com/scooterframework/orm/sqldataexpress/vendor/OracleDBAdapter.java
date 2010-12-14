@@ -44,22 +44,20 @@ public class OracleDBAdapter extends DBAdapter {
 		return s2;
 	}
     
-    protected String getOracleSchema(String connName) {
-    	Properties p = SqlExpressUtil.getConnectionProperties(connName);
-    	String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
-    	if (isEmpty(schema)) {
-        	schema = "public";
-    	}
-    	else {
-    		if (useLoginAsSchema(connName)) {
-    			schema = getLoginUserId();
-    		}
-    		else {
-    			schema = SqlExpressUtil.getConnectionUser(connName);
-    		}
-    	}
-    	return schema;
-    }
+	protected String getOracleSchema(String connName) {
+		Properties p = SqlExpressUtil.getConnectionProperties(connName);
+		String schema = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_SCHEMA);
+		if (isEmpty(schema)) {
+			if (useLoginAsSchema(connName)) {
+				schema = getLoginUserId();
+			}
+			
+			if (isEmpty(schema)) {
+				schema = SqlExpressUtil.getConnectionUser(connName);
+			}
+		}
+		return schema;
+	}
     
     public String getOneRowSelectSQL(String catalog, String schema, String table) {
     	String selectSQL = "SELECT * FROM ";

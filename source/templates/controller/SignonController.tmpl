@@ -50,7 +50,8 @@ public class $controller_class_name$ extends ApplicationController {
         String password = p("password");
 
         /************* Remove this block ************/
-            LoginHelper.cacheLoggedInUserId(username);//Save the login user id to session
+            LoginHelper.cacheLoggedInUserId(username);
+            LoginHelper.cacheLoggedInPassword(password);
             return redirectTo("/$controller$/main");
         
 
