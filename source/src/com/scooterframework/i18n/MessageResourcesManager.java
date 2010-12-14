@@ -275,7 +275,7 @@ public class MessageResourcesManager {
 			return (Properties)fileMessagesMap.get(fileName);
 		}
         
-        Properties props = PropertyReader.loadPropertiesFromFile((File)allMessageFiles.get(fileName));
+        Properties props = PropertyReader.loadOrderedPropertiesFromFile((File)allMessageFiles.get(fileName));
         fileMessagesMap.put(fileName, props);
         return props;
 	}

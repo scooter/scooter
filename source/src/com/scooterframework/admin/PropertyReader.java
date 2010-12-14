@@ -29,21 +29,7 @@ public class PropertyReader {
      */
     public static Properties loadPropertiesFromFile(File file) {
         String fullFileName = file.getPath();
-        
-        Properties appProperties = null;
-        try {
-            appProperties = PropertyFileUtil.loadPropertiesFromFile(fullFileName);
-        }
-        catch(Exception ex) {
-            try {
-                appProperties = PropertyFileUtil.loadPropertiesFromResource(fullFileName);
-            }
-            catch(Exception exr) {
-                String errorMessage = "ERROR ERROR ERROR -- Error loading " + fullFileName + ": " + exr.getMessage();
-                log.fatal(errorMessage);
-            }
-        }
-        return appProperties;
+        return _loadPropertiesFromFile(fullFileName);
 	}
     
     /**
@@ -54,7 +40,10 @@ public class PropertyReader {
      */
     public static Properties loadPropertiesFromFile(String fileName) {
         String fullFileName = PropertyFileChangeMonitor.getInstance().getFullFileName(fileName);
-        
+        return _loadPropertiesFromFile(fullFileName);
+	}
+
+    private static Properties _loadPropertiesFromFile(String fullFileName) {
         Properties appProperties = null;
         try {
             appProperties = PropertyFileUtil.loadPropertiesFromFile(fullFileName);
@@ -79,8 +68,23 @@ public class PropertyReader {
      * @param fileName name of the property file
      * @return ordered properties in the resource
      */
+    public static Properties loadOrderedPropertiesFromFile(File file) {
+        String fullFileName = file.getPath();
+        return _loadOrderedPropertiesFromFile(fullFileName);
+	}
+    
+    /**
+     * Load all ordered properties from a file 
+     * 
+     * @param fileName name of the property file
+     * @return ordered properties in the resource
+     */
     public static Properties loadOrderedPropertiesFromFile(String fileName) {
         String fullFileName = PropertyFileChangeMonitor.getInstance().getFullFileName(fileName);
+        return _loadOrderedPropertiesFromFile(fullFileName);
+	}
+
+    private static Properties _loadOrderedPropertiesFromFile(String fullFileName) {
         Properties appProperties = null;
         try {
             appProperties = PropertyFileUtil.loadOrderedPropertiesFromFile(fullFileName);
