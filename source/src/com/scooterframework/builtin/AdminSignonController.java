@@ -72,7 +72,8 @@ public class AdminSignonController {
         String sap = EnvConfig.getInstance().getSiteAdminPassword();
         if (sau != null && sap != null && 
         		sau.equals(username) && sap.equals(Util.md5(password))) {
-            LoginHelper.cacheLoggedInUserId(username);//Save the login user id to session
+            LoginHelper.cacheLoggedInUserId(username);
+            LoginHelper.cacheLoggedInPassword(password);
             return redirectTo("/admin/signon/main");
         }
         
