@@ -65,7 +65,7 @@ public class PropertyReader {
     /**
      * Load all ordered properties from a file 
      * 
-     * @param fileName name of the property file
+     * @param file  the property file
      * @return ordered properties in the resource
      */
     public static Properties loadOrderedPropertiesFromFile(File file) {

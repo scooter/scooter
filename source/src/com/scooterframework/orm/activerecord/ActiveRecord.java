@@ -52,10 +52,10 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * is created. The following is an example for <tt>posts</tt> table.
  * </p>
  *
- * <pre>
+ * <blockquote><pre>
  * public class Post extends ActiveRecord {
  * }
- * </pre>
+ * </pre></blockquote>
  *
  * <p>
  * If not specified, the table name an ActiveRecord class maps to is the
@@ -69,13 +69,13 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * methods: hasOne, belongsTo, hasMany, hasManyThrough, etc. For example:
  * </p>
  *
- * <pre>
+ * <blockquote><pre>
  * public class Post extends ActiveRecord {
  *     public void registerRelations() {
  *         hasMany("comments");
  *     }
  * }
- * </pre>
+ * </pre></blockquote>
  *
  * <p>
  * To modify an attribute of a record, you need to use one of the
@@ -98,26 +98,26 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * column name in the RowInfo object. If the key is not a column name, its
  * value is ignored. This will generate a SQL where clause fragment based
  * on equality with the SQL AND operator. For example:</p>
- * <pre>
+ * <blockquote><pre>
  * conditions map: {firstName=John, lastName=Doe}
  * translate to SQL: firstName=?firstName AND lastName=?lastName
- * </pre>
+ * </pre></blockquote>
  *
  * <p>The key of <tt>conditions</tt> map is corresponding to a
  * column name in the RowInfo object. If the key is not a column name, its
  * value is ignored.</p>
  *
  * <p><tt>conditionsSQL</tt> String specifies a SQL fragment. For example:</p>
- * <pre>
+ * <blockquote><pre>
  * conditionsSQL: "id in (1, 3, 5, 7) and content like '%Java%'"
- * </pre>
+ * </pre></blockquote>
  *
  * <p><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> map allows
  * dynamic data in a SQL fragment. For example:</p>
- * <pre>
+ * <blockquote><pre>
  * conditionsSQL: "first_name=?1 OR last_name=?2"
  * conditionsSQLData: 1=John, 2=Doe
- * </pre>
+ * </pre></blockquote>
  *
  *<h3>Specifying options</h3>
  *
@@ -128,27 +128,38 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * are separated by ':' character. For example, an option string like the
  * following: </p>
  * <blockquote><pre>
- *      conditions_sql: id in (1, 2, 3); include: category, user;
- *      order_by: first_name, salary DESC; cascade: delete
+ * conditions_sql: id in (1, 2, 3); include: category, user;
+ * order_by: first_name, salary DESC; cascade: delete
  * </pre></blockquote>
  *
  * is equivalent to a HashMap with the following entries:
  * <blockquote><pre>
- *      key                 value
- *      --------------      -----
- *      conditions_sql  =>  id in (1, 2, 3)
- *      include         =>  category, user
- *      order_by        =>  first_name, salary desc
- *      cascade         =>  delete
+ * key                 value
+ * --------------      -----
+ * conditions_sql  =>  id in (1, 2, 3)
+ * include         =>  category, user
+ * order_by        =>  first_name, salary desc
+ * cascade         =>  delete
  * </pre></blockquote>
+ * 
+ * <p><tt>include</tt> option is used for eager loading. For example, </p>
+ * <blockquote><pre>
+ * ActiveRecord owner = Owner.findFirst("owners.id=" + p("id"), "include:pets=>visits, pets=>type");
+ * </pre></blockquote>
+ * 
+ * <p>The above line of code will retrieve an owner record of a specific id 
+ * value along with the owner's visits of his/her pets and types of pets in 
+ * one single SQL query statement.</p>
  *
  * <p>
  * Options string or map are used in finder methods such as find and findAll
- * related methods. Properties string or map are also used in association
+ * related methods. Options string or map are also used in association
  * methods such as <tt>hasMany</tt> and <tt>hasManyThrough</tt>. The
  * following is a list of allowed properties:
- * model, mapping, finder_sql, conditions_sql, include, join_type,
- * order_by, sort, order, unique, cascade. Please note that <tt>model</tt>
+ * <tt>model</tt>, <tt>mapping</tt>, <tt>finder_sql</tt>, 
+ * <tt>conditions_sql</tt>, <tt>include</tt>, <tt>join_type</tt>,
+ * <tt>order_by</tt>, <tt>sort</tt>, <tt>order</tt>, <tt>unique</tt>, 
+ * <tt>cascade</tt>. Please note that <tt>model</tt>
  * property is only used in setting up relations.
  * </p>
  *
@@ -158,19 +169,19 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * <tt>findAllBy</tt>, <tt>findFirstBy</tt>, and <tt>findLastBy</tt>. The
  * first input parameter of these methods is <tt>columns</tt> which is a string
  * of column names linked by <tt>_and_</tt>, such as:
- * <pre>
+ * <blockquote><pre>
  *     {columnName}_and_{columnName}_and_...
- * </pre>
+ * </pre></blockquote>
  *
  * <p>A client can call this method as follows:</p>
- * <pre>
- *     employeeHome.findAllBy("firstName_and_lastName_and_age", {"John", "Doe", new Integer(29)});
- *     employeeHome.findAllBy("city", {"LA"});
- * </pre>
+ * <blockquote><pre>
+ *     Employee.findAllBy("firstName_and_lastName_and_age", {"John", "Doe", new Integer(29)});
+ *     Employee.findAllBy("city", {"LA"});
+ * </pre></blockquote>
  *
- * <p>
- * Validators: see java doc of Validators class.
- * </p>
+ *<h3>Validators</h3>
+ *
+ * <p>See java doc of {@link com.scooterframework.common.validation.Validators Validators} class.</p>
  *
  * @author (Fei) John Chen
  */
@@ -1702,7 +1713,7 @@ implements RESTified, Serializable {
      * </p>
      *
      * <p>
-     * Example propertie string:
+     * Example property string:
      * In a property string, each name-value pair is separated by ';'
      * character, while within each name-value pair, name and value strings
      * are separated by ':' character.
