@@ -14,7 +14,7 @@ For example:
     - Buy rose
     - Pick up kids
 
-The dash "-" in front of each item will be translated to <li> in Markdown wiki.
+The dash "-" in front of each item will be translated to <ul><li> in Markdown wiki.
 For more information on Markdown wiki, visit http://daringfireball.net/projects/markdown/basics
 
 --------------------------
@@ -42,7 +42,7 @@ Site admin username/password is admin/welcome.
 2. Start web server
 scooter>java -jar tools/server.jar ajaxtodo
 
-3. Create Ajax-backed CRUD on posts
+3. Create Ajax-backed TODO list application
 scooter>java -jar tools/generate.jar ajaxtodo scaffold-ajax entry
 
 4. Browser open url: http://localhost:8080/ajaxtodo/entries and add an entry
