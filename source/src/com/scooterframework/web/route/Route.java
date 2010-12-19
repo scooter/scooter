@@ -197,7 +197,7 @@ abstract public class Route {
 	protected boolean isAllowedFormat(String fmat) {
 		boolean allowed = false;
         if (allowed_formats != null) {
-            if (allowed_formats.indexOf(fmat) != -1) {
+            if (fmat != null && allowed_formats.toLowerCase().indexOf(fmat.toLowerCase()) != -1) {
                 allowed = true;
             }
         }
@@ -209,7 +209,7 @@ abstract public class Route {
             }
             else {
                 if (fmat != null) {
-                    if (fmat.equals(format) || dynamicFormat) allowed = true;
+                    if (fmat.equalsIgnoreCase(format) || dynamicFormat) allowed = true;
                 }
             }
         }
@@ -239,6 +239,8 @@ abstract public class Route {
     }
 	
 	protected boolean isAllowedMethod(String method) {
+		if (method == null) return false;
+		
         boolean allowed = false;
         if (allowed_methods != null) {
             if (allowed_methods.toUpperCase().indexOf(RouteConstants.ROUTE_HTTP_METHOD_ANY) != -1) {

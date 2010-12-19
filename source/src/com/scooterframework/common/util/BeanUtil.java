@@ -8,8 +8,11 @@
 package com.scooterframework.common.util;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 
+import com.scooterframework.admin.ApplicationConfig;
 import com.scooterframework.common.exception.ExecutionException;
 import com.scooterframework.common.exception.MethodCreationException;
 
@@ -19,6 +22,7 @@ import com.scooterframework.common.exception.MethodCreationException;
  * @author (Fei) John Chen
  */
 public class BeanUtil {
+	private static Map<String, Method> allMethods = new ConcurrentHashMap<String, Method>();
 
     /**
      * Returns method of an object.
@@ -38,17 +42,50 @@ public class BeanUtil {
         }
         
         Method method = null;
-        //String methodKey = clz.getName() + "." + methodName;
-        //Method method = (Method)allMethods.get(methodKey);
-        //if (method != null) return method;
+        String methodKey = clz.getName() + "." + methodName.toLowerCase();
+        if (ApplicationConfig.getInstance().isInDevelopmentEnvironment()) {
+        	method = (Method)CurrentThreadCache.get(methodKey);
+        	if (method != null) {
+        		return method;
+        	}
+        	else {
+        		Method[] methods = clz.getMethods();
+        		for (Method m : methods) {
+        			if (methodName.equalsIgnoreCase(m.getName())) {
+        				method = m;
+        				CurrentThreadCache.set(methodKey, method);
+        				break;
+        			}
+        		}
+        	}
+        	
+        	if (method == null) {
+        		throw new MethodCreationException(clz.getName(), methodName);
+        	}
+        	else {
+        		return method;
+        	}
+        }
         
-        try {
-            method = clz.getMethod(methodName, (Class[])null);
-            //allMethods.put(methodKey, method);
+        method = (Method)allMethods.get(methodKey);
+        if (method != null) {
+        	return method;
         }
-        catch(NoSuchMethodException ex) {
-            throw new MethodCreationException(clz.getName(), methodName, ex);
+        else {
+    		Method[] methods = clz.getMethods();
+    		for (Method m : methods) {
+    			if (methodName.equalsIgnoreCase(m.getName())) {
+    				method = m;
+    				allMethods.put(methodKey, method);
+    				break;
+    			}
+    		}
+    		
+    		if (method == null) {
+        		throw new MethodCreationException(clz.getName(), methodName);
+        	}
         }
+        
         return method;
     }
     

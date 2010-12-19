@@ -634,7 +634,7 @@ public class EnvConfig implements Observer {
      * @return full java class name
      */
     public String getControllerClassName(String controllerPath) {
-        String fullName = Converters.convertToJavaClassLikeString(controllerPath);
+        String fullName = Converters.convertToJavaClassLikeString(controllerPath.toLowerCase());
         String prefix = getControllerClassPrefix();
         String suffix = getControllerClassSuffix();
 

@@ -7,8 +7,8 @@
  */
 package com.scooterframework.orm.sqldataexpress.util;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
@@ -300,11 +300,11 @@ public class DBStore {
         return "dba." + connName;
     }
 
-    private Map storedProcedures = new HashMap();
-    private Map functions = new HashMap();
-    private Map jdbcStatements = new HashMap();
-    private Map tables = new HashMap();
-    private Map classTableMap = new HashMap();
-    private Map pkMap = new HashMap();
-    private Map adapterMap = new HashMap();
+    private Map storedProcedures = new ConcurrentHashMap();
+    private Map functions = new ConcurrentHashMap();
+    private Map jdbcStatements = new ConcurrentHashMap();
+    private Map tables = new ConcurrentHashMap();
+    private Map classTableMap = new ConcurrentHashMap();
+    private Map pkMap = new ConcurrentHashMap();
+    private Map adapterMap = new ConcurrentHashMap();
 }
