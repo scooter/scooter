@@ -4,8 +4,8 @@ Scooter Framework
 ----------
 What is it
 ----------
-This is the latest Scooter Framework source code. For the officially 
-released version, please visit http://www.scooterframework.com.
+This is the latest Scooter Framework source code. 
+See release.txt for detailed updates.
 
 --------------------
 How to create an app
@@ -77,6 +77,4 @@ Functional test an application:
 -----
 TODOs
 -----
-
-1. Update PetClinic and TwitterDemo examples
-2. Add more documentations
+1. Add more documentations
