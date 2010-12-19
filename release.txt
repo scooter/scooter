@@ -36,7 +36,8 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 Summary of Releases
 ===================
 
-scooter-1.0.x (unreleased)
+scooter-1.0.x
+ + Fixed bug: Improved file upload error handling.
  + Fixed bug: Route/url mapping is case sensitive.
  + Fixed bug: Rewrote the ajax example.
  + Fixed bug: Updated JavaDoc of some classes.
