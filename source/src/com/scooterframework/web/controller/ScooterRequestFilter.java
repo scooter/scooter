@@ -28,8 +28,10 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.common.exception.FileUploadException;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 
 /**
  * ScooterRequestFilter can be attached to either an individual servlet
@@ -213,7 +215,9 @@ public class ScooterRequestFilter implements Filter {
                 	}
                 }
                 CurrentThreadCache.set(Constants.FILE_UPLOAD_REQUEST_FILES, files);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            	CurrentThreadCacheClient.storeError(new FileUploadException(ex));
+            }
         }
         
         return requestPathRESTful;
