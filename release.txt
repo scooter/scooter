@@ -36,21 +36,19 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 Summary of Releases
 ===================
 
-scooter-1.0.x
- + Fixed bug: Improved file upload error handling.
- + Fixed bug: Route/url mapping is case sensitive.
- + Fixed bug: Rewrote the ajax example.
- + Fixed bug: Updated JavaDoc of some classes.
- + Fixed bug: password was not recorded for admin.
+scooter-1.0.2 20101220
+ + Converted all view templates to UTF-8 encoding.
+ + Improved file upload error handling.
+ + Route/url mapping is case sensitive.
+ + Rewrote the ajax example.
+ + Updated JavaDoc of some classes.
+ + Password was not recorded for admin.
  
-
-
 scooter-1.0.1 20101213
  + Fixed bug: create.jar failed to preserve utf-8 encoding of template files.
  + Fixed bug: wrong api name for window style pagination.
  + Fixed bug: failed to show Chinese text.
  + Fixed bug: oracle schema was not detected properly.
-
 
 scooter-1.0.0 20101210
  + New feature: Password protected Site Administration.

@@ -1,4 +1,4 @@
-<%@ page import="
+﻿<%@ page import="
         java.util.Iterator,
         java.util.List,
         com.scooterframework.admin.Constants,
@@ -91,4 +91,4 @@ Go to page <input type="text" id="npage" name="npage" size="2"><input type="subm
 
 <br/>
 
-<%=W.diggStylePageLinks(paginator, "paged_list", 4, 11)%>
+<%=W.windowStylePageLinks(paginator, "paged_list", 4, 11)%>

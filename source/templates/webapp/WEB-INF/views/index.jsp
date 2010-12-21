@@ -1,4 +1,4 @@
-<%@ page import="
+﻿<%@ page import="
         com.scooterframework.admin.EnvConfig,
         com.scooterframework.web.controller.MainActionServlet,
         com.scooterframework.web.util.W"
