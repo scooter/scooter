@@ -15,16 +15,10 @@ import java.util.Map;
 import org.antlr.stringtemplate.StringTemplate;
 
 import com.scooterframework.common.logging.LogUtil;
-import com.scooterframework.common.util.FileUtil;
 import com.scooterframework.tools.common.GeneratorHelper;
 
 /**
- * DefaultContentHandler is responsible for handling content of a request 
- * format when the specific handler for the format is not available.
- * 
- * <p>
- * The content for the following request format is treated as text:
- * json, txt, text, and xml.
+ * StringTemplateHandler handles a StringTemplate-based template files.
  * 
  * @author (Fei) John Chen
  */
@@ -32,7 +26,7 @@ public class StringTemplateHandler implements TemplateHandler {
 	private static LogUtil log = LogUtil.getLogger(StringTemplateHandler.class.getName());
 	
 	/**
-     * Handles processing the <tt>content</tt> with <tt>dataMap</tt>.
+     * Handles processing the <tt>content</tt> with <tt>props</tt>.
 	 * 
 	 * @param content  The content to be processed.
 	 * @param props  properties (name/value pairs) to be used to process the content
@@ -45,15 +39,15 @@ public class StringTemplateHandler implements TemplateHandler {
     }
     
     /**
-     * Handles processing the <tt>viewTemplate</tt> with <tt>dataMap</tt>.
+     * Handles processing the <tt>viewTemplate</tt> with <tt>props</tt>.
      * 
      * @param viewTemplate
-     * @param dataMap
+	 * @param props  properties (name/value pairs) to be used to process the content
      * @return processed content as string
      */
-    public String handle(File viewTemplate, Map dataMap) {
+    public String handle(File viewTemplate, Map props) {
     	String content = getTemplateFileContent(viewTemplate);
-    	return handle(content, dataMap);
+    	return handle(content, props);
     }
 
 	protected String getTemplateFileContent(File templateFile) {

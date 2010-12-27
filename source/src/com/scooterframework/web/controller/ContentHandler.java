@@ -23,13 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 public interface ContentHandler {
 	
 	/**
-     * Handles result content of a http request. The <tt>extension</tt> is the
-     * extension corresponding to a mime type such as "html", "xml" etc.
+     * Handles result content of a http request. The <tt>format</tt> is the
+     * format corresponding to a mime type such as "html", "xml" etc.
 	 * 
 	 * @param request  The http request object.
 	 * @param response  The http response object.
 	 * @param content  The content to be sent.
-	 * @param extension  The content extension.
+	 * @param format  The content format.
 	 * @throws IOException
 	 * @throws ServletException
      */
@@ -37,5 +37,5 @@ public interface ContentHandler {
     		HttpServletRequest request,
 			HttpServletResponse response,
 			Object content,
-			String extension) throws IOException, ServletException;
+			String format) throws IOException, ServletException;
 }
