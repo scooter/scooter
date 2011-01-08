@@ -1,6 +1,19 @@
-AJAX-backed TODO List Application
-=================================
+AJAX Examples
+=============
+This example app includes the following examples:
 
+Example 1: Regular non-AJAX link vs. AJAX link
+----------------------------------------------
+This example demonstrates how easy it is to convert a regular HTTP link to an AJAX link.
+
+Example 2: Retrieving and displaying JSON data
+-------------------------------------------
+This example demonstrates how easy it is to use JSON data retrieved from the server.
+Please notice that ajaxexamples/static/javascripts/app.js is modified to customize the 
+handling of JSON data. Open app.js to see how JSON data is used.
+
+Example 3: A complete sample app -- AJAX-Backed Wiki-Powered TODO List
+----------------------------------------------------------------------
 This example demonstrates how easy it is to create an ajax-backed application 
 by using Scooter framework.
 
@@ -24,7 +37,7 @@ How to run the application
 Run the app with default port 8080
 scooter>java -jar tools/server.jar examples/ajaxtodo
 
-Browse http://localhost:8080/ajaxtodo to see the AJAX link to show current time.
+Browse http://localhost:8080/ajaxtodo to see links to the examples.
 Browse http://localhost:8080/ajaxtodo/entries to perform CRUD on entries through AJAX.
 
 -------------------------------

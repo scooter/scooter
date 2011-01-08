@@ -6,17 +6,22 @@
 <h2><%=W.label("welcome.message")%></h2>
 <h4>Have a fun drive!</h4>
 
-<h2 class="sectionTitle">Getting started</h2>
-
+<b>Example 1: Regular non-AJAX link vs. AJAX link</b><br/>
 <a href="http://localhost:8080/ajaxtodo/time/current">Show Time (non ajax)</a>
 <a href="http://localhost:8080/ajaxtodo/time/current" data-ajax="true" data-target="#display_time">Show Time (ajax)</a>
+<span id="display_time"><i>&lt;&lt;Time will be displayed here&gt;&gt;</i></span>
+<br/><br/>
 
-<div id="display_time">show it here</div>
+<b>Example 2: Retrieving and showing JSON data</b><br/>
+<a href="http://localhost:8080/ajaxtodo/data/retrieve" data-ajax="true" data-target="#display_data" data-type="json" data-handler="json">Show json data</a>
+<span id="display_data"><i>&lt;&lt;JSON data will be displayed below&gt;&gt;</i></span>
+<br/><br/>
 
-<br/>
-
+<b>Example 3: A complete sample app</b><br/>
 <a href="http://localhost:8080/ajaxtodo/entries">My AJAX-Backed Wiki-Powered TODO List</a> 
 (using <a href="http://daringfireball.net/projects/markdown/basics" target="markdown">MarkDown</a> wiki syntax)
+
+<h2 class="sectionTitle">Getting started</h2>
 
 <h4>Create your database (if you use database)</h4>
 <ul style="margin-top: -10px;">
