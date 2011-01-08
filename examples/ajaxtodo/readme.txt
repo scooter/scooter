@@ -7,7 +7,7 @@ Example 1: Regular non-AJAX link vs. AJAX link
 This example demonstrates how easy it is to convert a regular HTTP link to an AJAX link.
 
 Example 2: Retrieving and displaying JSON data
--------------------------------------------
+----------------------------------------------
 This example demonstrates how easy it is to use JSON data retrieved from the server.
 Please notice that ajaxexamples/static/javascripts/app.js is modified to customize the 
 handling of JSON data. Open app.js to see how JSON data is used.
