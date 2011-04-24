@@ -98,7 +98,7 @@ public class ApplicationConfig {
     public static final String SYSTEM_KEY_PLUGINFILE = "plugin.file.location";
     public static final String SYSTEM_KEY_REFERENCEFILE = "reference.file.location";
     
-    private static ApplicationConfig me;
+    private static volatile ApplicationConfig me;
     private String configuredMode;
     private String runningEnvironment = Constants.RUNNING_ENVIRONMENT_DEVELOPMENT;
     
@@ -205,12 +205,12 @@ public class ApplicationConfig {
      * <tt>getInstanceForOrmAlone()</tt> method before using this 
      * <tt>getInstance()</tt> method.
      */
-    public static synchronized ApplicationConfig getInstance() {
+    public static ApplicationConfig getInstance() {
         if (me == null) {
             throw new IllegalArgumentException("You should use either " + 
             "'getInstanceForWeb()' or 'getInstanceForApp()' or " + 
             "'getInstanceForOrmAlone()' method before " + 
-            "using this 'getInstance()' method.");
+            "using this 'getInstance()' method. If this is a web app, check your context path.");
         }
         
         return me;

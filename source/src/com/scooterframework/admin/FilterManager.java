@@ -40,7 +40,7 @@ public class FilterManager {
     private Map<String, List<ActionControlFilter>> actionBeforeFiltersMap = new ConcurrentHashMap<String, List<ActionControlFilter>>();
     private Map<String, List<ActionControlFilter>> actionAfterFiltersMap = new ConcurrentHashMap<String, List<ActionControlFilter>>();
 
-    private static Map<String, ActionFilterData> allFiltersMap = new ConcurrentHashMap<String, ActionFilterData>();
+    private static ConcurrentHashMap<String, ActionFilterData> allFiltersMap = new ConcurrentHashMap<String, ActionFilterData>();
     private static final String FILTER_KEY_SEPARATOR = "-";
 
 	private Class<?> ownerClass;
@@ -193,8 +193,11 @@ public class FilterManager {
     	String key = fileterKey(filterType, filterClz, filters);
     	ActionFilterData filter = null;
         if (!allFiltersMap.containsKey(key)) {
-            filter = new ActionFilterData(filterClz, filterType, filters);
-            allFiltersMap.put(key, filter);
+        	ActionFilterData newFilter = new ActionFilterData(filterClz, filterType, filters);
+            filter = allFiltersMap.putIfAbsent(key, newFilter);
+            if (filter == null) {
+            	filter = newFilter;
+            }
         }
         else {
             filter = allFiltersMap.get(key);
@@ -209,8 +212,11 @@ public class FilterManager {
         String key = fileterKey(filterType, filterClz, filters, option, actions);
         ActionFilterData filter = null;
         if (!allFiltersMap.containsKey(key)) {
-            filter = new ActionFilterData(filterClz, filterType, option, filters, actions);
-            allFiltersMap.put(key, filter);
+        	ActionFilterData newFilter = new ActionFilterData(filterClz, filterType, option, filters, actions);
+            filter = allFiltersMap.putIfAbsent(key, newFilter);
+            if (filter == null) {
+            	filter = newFilter;
+            }
         }
         else {
             filter = allFiltersMap.get(key);
