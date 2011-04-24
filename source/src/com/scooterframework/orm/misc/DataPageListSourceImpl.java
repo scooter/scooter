@@ -8,7 +8,6 @@
 package com.scooterframework.orm.misc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class DataPageListSourceImpl extends PageListSource {
      * 
      * @param dataList a list of data. 
      */
-    public DataPageListSourceImpl(List dataList) {
+    public DataPageListSourceImpl(List<Object> dataList) {
          this(dataList, null);
     }
     
@@ -35,7 +34,7 @@ public class DataPageListSourceImpl extends PageListSource {
      * @param dataList a list of data to be paginated.
      * @param inputOptions Map of control information.
      */
-    public DataPageListSourceImpl(List dataList, Map inputOptions) {
+    public DataPageListSourceImpl(List<Object> dataList, Map<String, String> inputOptions) {
          this(dataList, inputOptions, true);
     }
     
@@ -47,7 +46,7 @@ public class DataPageListSourceImpl extends PageListSource {
      * @param recount <tt>true</tt> if recount of total records is allowed;
      *		    <tt>false</tt> otherwise.
      */
-    public DataPageListSourceImpl(List dataList, Map inputOptions, boolean recount) {
+    public DataPageListSourceImpl(List<Object> dataList, Map<String, String> inputOptions, boolean recount) {
         super(inputOptions, recount);
         this.dataList = dataList;
     }
@@ -56,15 +55,15 @@ public class DataPageListSourceImpl extends PageListSource {
     	return (dataList != null)?dataList.size():0;
     }
     
-    protected List retrieveList() {
+    protected List<Object> retrieveList() {
         if (dataList == null) return null;
         
-        List pagedList = new ArrayList(limit);
+        List<Object> pagedList = new ArrayList<Object>(limit);
         int startIndex = offset + 1;
         int endIndex   = offset + limit;
         if (endIndex > totalCount) endIndex = totalCount;
         
-        for (int i=startIndex; i<=endIndex; i++) {
+		for (int i = startIndex; i <= endIndex; i++) {
             pagedList.add(dataList.get(i-1));
         }
         
@@ -74,5 +73,5 @@ public class DataPageListSourceImpl extends PageListSource {
     /**
      * data list
      */
-    private List dataList;
+    private List<Object> dataList;
 }

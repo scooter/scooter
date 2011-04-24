@@ -18,7 +18,7 @@ import com.scooterframework.common.logging.LogUtil;
  * @author (Fei) John Chen
  */
 public class ViewsController extends ApplicationController {
-	protected static LogUtil log = LogUtil.getLogger(TablesController.class.getName());
+	private static final LogUtil log = LogUtil.getLogger(TablesController.class.getName());
 
 	static {
 		filterManagerFor(ViewsController.class).declareBeforeFilter(

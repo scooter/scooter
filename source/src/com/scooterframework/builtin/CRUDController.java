@@ -37,7 +37,7 @@ public class CRUDController {
     public String list() {
         String model = getModel();
         ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
-        List recordList = ActiveRecordUtil.getGateway(recordHome).findAll(ACH.getAC().getParameterDataAsMap());
+        List<ActiveRecord> recordList = ActiveRecordUtil.getGateway(recordHome).findAll(ACH.getAC().getParameterDataAsMap());
         setViewData(model + "_list", recordList);
         return null;
     }
@@ -45,7 +45,7 @@ public class CRUDController {
     public String paged_list() {
         String model = getModel();
         ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
-        Map requestParametersMap = ACH.getAC().getParameterDataAsMap();
+        Map<String, Object> requestParametersMap = ACH.getAC().getParameterDataAsMap();
         Paginator page = new Paginator(new JdbcPageListSource(recordHome.getClass()), requestParametersMap);
         setViewData("paged_" + model + "_list", page);
         return ActionResult.forwardTo(viewPath("paged_list"));
@@ -54,7 +54,7 @@ public class CRUDController {
     public String show() {
         String model = getModel();
         ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
-        Map pkDataMap = ACH.getAC().retrievePrimaryKeyDataMapFromRequest(recordHome.getPrimaryKeyNames());
+        Map<String, Object> pkDataMap = ACH.getAC().retrievePrimaryKeyDataMapFromRequest(recordHome.getPrimaryKeyNames());
         ActiveRecord record = ActiveRecordUtil.getGateway(recordHome).findFirst(pkDataMap);
         if (record == null) {
             flash("notice", "There is no " + model + 
@@ -77,9 +77,10 @@ public class CRUDController {
         ActiveRecord newRecord = null;
         String model = getModel();
         try {
-            ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
+            @SuppressWarnings("unused")
+			ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
             newRecord = generateActiveRecordInstance(model);
-            Map requestParameters = ACH.getAC().getParameterDataAsMap();
+            Map<String, Object> requestParameters = ACH.getAC().getParameterDataAsMap();
             newRecord.setData(requestParameters);
             newRecord.save();
             flash("notice", "Successfully created a new " + model + " record.");
@@ -102,10 +103,10 @@ public class CRUDController {
     public String update() {
         ActiveRecord record = null;
         String model = getModel();
-        Map pkDataMap =  null;
+        Map<String, Object> pkDataMap =  null;
         try {
             ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
-            Map requestParameters = ACH.getAC().getParameterDataAsMap();
+            Map<String, Object> requestParameters = ACH.getAC().getParameterDataAsMap();
             pkDataMap = ACH.getAC().retrievePrimaryKeyDataMapFromRequest(recordHome.getPrimaryKeyNames());
             record = ActiveRecordUtil.getGateway(recordHome).findFirst(pkDataMap);
             if (record != null) {
@@ -134,7 +135,7 @@ public class CRUDController {
     public String delete() {
         String model = getModel();
         ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
-        Map pkDataMap = ACH.getAC().retrievePrimaryKeyDataMapFromRequest(recordHome.getPrimaryKeyNames());
+        Map<String, Object> pkDataMap = ACH.getAC().retrievePrimaryKeyDataMapFromRequest(recordHome.getPrimaryKeyNames());
         ActiveRecord record = ActiveRecordUtil.getGateway(recordHome).findFirst(pkDataMap);
         if (record != null) {
             int count = record.delete();
@@ -204,7 +205,7 @@ public class CRUDController {
      * a query string appended in the path.
      */
     protected String actionPath(String action, ActiveRecord record) {
-        Map pkDataMap = record.getPrimaryKeyDataMap();
+        Map<String, Object> pkDataMap = record.getPrimaryKeyDataMap();
         String nameValuePairs = Converters.convertMapToUrlString(pkDataMap);
         if (nameValuePairs == null || "".equals(nameValuePairs)) {
             return actionPath(action);

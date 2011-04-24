@@ -22,7 +22,7 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  */
 public class DBAdapterFactory {
     protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
-    private static DBAdapterFactory me;
+    private static final DBAdapterFactory me;
     
     static {
         me = new DBAdapterFactory();
@@ -35,7 +35,10 @@ public class DBAdapterFactory {
         return me;
     }
     
-    public DBAdapter getAdapter(String connName) {
+    public synchronized DBAdapter getAdapter(String connName) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
     	DBAdapter dba = DBStore.getInstance().getDBAdapter(connName);
     	
     	if (dba == null) {
@@ -63,6 +66,9 @@ public class DBAdapterFactory {
     	}
     	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_ORACLE, connName)) {
     		dba = new OracleDBAdapter();
+    	}
+    	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_SQLSERVER, connName)) {
+    		dba = new SQLServerDBAdapter();
     	}
     	else if (SqlExpressUtil.isBuiltinVendor(DatabaseConfig.BUILTIN_DATABASE_NAME_HSQLDB, connName)) {
     		dba = new HsqlDBAdapter();

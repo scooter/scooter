@@ -127,7 +127,7 @@ public class ValidationResults implements Serializable
      *
      * @return Vector errorMessageList
      */
-    public List getErrorMessages() {
+    public List<Message> getErrorMessages() {
         return errorMessageList;
     }
     
@@ -159,7 +159,9 @@ public class ValidationResults implements Serializable
         int size = size();
         String[] strary = new String[size];
         for (int i=0; i<size; i++) {
-            strary[i] = ((Message)errorMessageList.get(i)).getContent();
+        	Message message = errorMessageList.get(i);
+        	if (message == null) continue;
+            strary[i] = message.getContent();
         }
         return strary;
     }
@@ -171,7 +173,7 @@ public class ValidationResults implements Serializable
      * @return a string array 
      */
     public String[] getFullMessagesOn(String key) {
-        List errs = getErrorsOn(key);
+        List<Message> errs = getErrorsOn(key);
         if (errs == null || errs.size() == 0) return null;
         
         int size = errs.size();
@@ -189,14 +191,15 @@ public class ValidationResults implements Serializable
      * @param key a key to an error, usually is a column name
      * @return list of errors
      */
-    public List getErrorsOn(String key) {
+    public List<Message> getErrorsOn(String key) {
         if (!failed() || key == null || "".equals(key)) return null;
         
-        List errs = new ArrayList();
+        List<Message> errs = new ArrayList<Message>();
         int size = size();
         for (int i=0; i<size; i++) {
-            Message msg = (Message)errorMessageList.get(i);
-            if (key.equalsIgnoreCase(msg.getId())) errs.add(msg);
+            Message message = errorMessageList.get(i);
+            if (message == null) continue;
+            if (key.equalsIgnoreCase(message.getId())) errs.add(message);
         }
         
         return errs;
@@ -214,8 +217,9 @@ public class ValidationResults implements Serializable
         boolean status = false;
         int size = size();
         for (int i=0; i<size; i++) {
-            Message msg = (Message)errorMessageList.get(i);
-            if (key.equalsIgnoreCase(msg.getId())) {
+            Message message = (Message)errorMessageList.get(i);
+            if (message == null) continue;
+            if (key.equalsIgnoreCase(message.getId())) {
                 status = true;
                 break;
             }
@@ -231,10 +235,10 @@ public class ValidationResults implements Serializable
      */
     public String toString() {
         String newLineMark = "\n\r";
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(errorMessageList.size());
         sb.append(" error(s).").append(newLineMark);
-        Iterator it = errorMessageList.iterator();
+        Iterator<Message> it = errorMessageList.iterator();
         while(it.hasNext()) {
             sb.append(it.next()).append(newLineMark);
         }
@@ -258,7 +262,7 @@ public class ValidationResults implements Serializable
     public String toXML() {
         String newLine = "\r\n";
         String indent = "  ";//2 spaces
-        StringBuffer xml = new StringBuffer();
+        StringBuilder xml = new StringBuilder();
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append(newLine);
         xml.append("<errors>").append(newLine);
         String[] messages = getFullMessages();
@@ -273,5 +277,5 @@ public class ValidationResults implements Serializable
     }
 
     private boolean bFailed = false;
-    private List errorMessageList = new ArrayList();
+    private List<Message> errorMessageList = new ArrayList<Message>();
 }

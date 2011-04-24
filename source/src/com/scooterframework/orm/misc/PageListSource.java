@@ -26,7 +26,7 @@ public abstract class PageListSource {
      * 
      * @param inputOptions Map of control information.
      */
-    public PageListSource(Map inputOptions) {
+    public PageListSource(Map<String, String> inputOptions) {
          this(inputOptions, true);
     }
     
@@ -37,12 +37,11 @@ public abstract class PageListSource {
      * @param recount <tt>true</tt> if recount of total records is allowed;
      *		    <tt>false</tt> otherwise.
      */
-    public PageListSource(Map inputOptions, boolean recount) {
+    public PageListSource(Map<String, String> inputOptions, boolean recount) {
         this.inputOptions = inputOptions;
         if (this.inputOptions == null) {
-        	this.inputOptions = new HashMap();
+        	this.inputOptions = new HashMap<String, String>();
         }
-        this.inputOptions.put(DataProcessor.input_key_use_pagination, "Y");
         
         this.recount = recount;
     }
@@ -83,19 +82,14 @@ public abstract class PageListSource {
     }
     
     /**
-     * Returns Map of input parameters.
-     */
-    public Map getInputsX() {
-        return inputOptions;
-    }
-    
-    /**
      * Merges data from an input map with the existing inputOptions map.
      */
-    public void setInputs(Map inputs) {
+    public void setInputs(Map<String, String> inputs) {
         if (inputs == null || inputs.keySet().size() == 0) return;
         
-        if (inputOptions != null) inputOptions.putAll(inputs);
+        if (inputOptions != null) {
+        	inputOptions.putAll(inputs);
+        }
     }
     
     /**
@@ -108,7 +102,7 @@ public abstract class PageListSource {
     /**
      * Returns retrieved record list.
      */
-    public List getRecordList() {
+    public List<?> getRecordList() {
         return recordList;
     }
     
@@ -129,6 +123,7 @@ public abstract class PageListSource {
     protected void execute() {
         // count records
         if (recount || !totalCounted) {
+            inputOptions.put(DataProcessor.input_key_use_pagination, "N");
             totalCount = countTotalRecords();
             totalCounted = true;
         }
@@ -137,11 +132,12 @@ public abstract class PageListSource {
         offset = checkOffset();
         
         // reorg parameters by using internal keys
-        inputOptions.put(DataProcessor.input_key_records_limit,  new Integer(limit));
-        inputOptions.put(DataProcessor.input_key_records_offset, new Integer(offset));
+        inputOptions.put(DataProcessor.input_key_records_limit,  Integer.valueOf(limit).toString());
+        inputOptions.put(DataProcessor.input_key_records_offset, Integer.valueOf(offset).toString());
         
         // retrieve data
         if (totalCount > 0) {
+            inputOptions.put(DataProcessor.input_key_use_pagination, "Y");
             recordList = retrieveList();
         }
     }
@@ -159,9 +155,9 @@ public abstract class PageListSource {
      * 
      * @return list of records
      */
-    protected abstract List retrieveList();
+    protected abstract List<? extends Object> retrieveList();
 
-	protected Map inputOptions;
+	protected Map<String, String> inputOptions;
     
     /**
      * Maximum number of records per page
@@ -190,7 +186,7 @@ public abstract class PageListSource {
     /**
      * paged record list
      */
-    protected List recordList;
+    protected List<?> recordList;
     
     protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
 }

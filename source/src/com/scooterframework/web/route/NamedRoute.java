@@ -54,8 +54,8 @@ public class NamedRoute extends RegularRoute {
 	}
     
     protected void validation() {
-		if (dynamicController || controller == null) {
-			throw new IllegalArgumentException("controller cannot be empty or undefined in route named " + name + ".");
+		if (dynamicController || (controller == null && controllerClass == null)) {
+			throw new IllegalArgumentException("Either controller or controllerClass should be defined in route named " + name + ".");
 		}
 		
 		if (dynamicAction || action == null) {

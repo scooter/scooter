@@ -25,10 +25,7 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  */
 public class Table {
     public static List<TableInfo> getTables(String connName) {
-    	String[] s2 = Database.getCatalogAndSchema(connName);
-    	String catalog = s2[0];
-    	String schema = s2[1];
-    	return getTables(connName, catalog, schema);
+    	return getTables(connName, null, null);
     }
     
     public static List<TableInfo> getTables(String connName, String catalog, String schema) {
@@ -40,6 +37,36 @@ public class Table {
         Connection conn = null;
         List<TableInfo> tableInfos = new ArrayList<TableInfo>();
         try {
+        	if (catalog == null || schema == null) {
+            	String[] s2 = Database.getCatalogAndSchema(connName);
+            	String _catalog = s2[0];
+            	String _schema = s2[1];
+            	if (catalog == null) {
+            		catalog = _catalog;
+            	} else {
+            		if (_catalog != null && !catalog.equalsIgnoreCase(_catalog)) {
+						throw new IllegalArgumentException(
+								"Failed in "
+										+ "getTables: the input catalog is '"
+										+ catalog
+										+ "', while the catalog derived from connName is '"
+										+ _catalog + "'.");
+					}
+            	}
+            	if (schema == null) {
+            		schema = _schema;
+            	} else {
+            		if (_schema != null && !schema.equalsIgnoreCase(_schema)) {
+						throw new IllegalArgumentException(
+								"Failed in "
+										+ "getTables: the input schema is '"
+										+ schema
+										+ "', while the schema derived from connName is '"
+										+ _schema + "'.");
+					}
+            	}
+        	}
+        	
             conn = SqlExpressUtil.getReadonlyConnection(connName);
             List<TableInfo> tmp = SqlExpressUtil.getDatabaseTables(conn, catalog, schema, null, types, false);
             if (tmp != null) {
@@ -66,7 +93,7 @@ public class Table {
     }
     
     public static RowInfo getTableHeaderInfo(String connName, String table) {
-    	TableInfo ti = SqlExpressUtil.lookupAndRegisterTable(connName, table);
+    	TableInfo ti = SqlExpressUtil.lookupTableInfo(connName, table);
     	return (ti != null)?ti.getHeader():null;
     }
     

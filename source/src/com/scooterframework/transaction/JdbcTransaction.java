@@ -7,8 +7,6 @@
  */
 package com.scooterframework.transaction;
 
-import java.util.Iterator;
-
 import com.scooterframework.orm.sqldataexpress.connection.UserDatabaseConnection;
 import com.scooterframework.orm.sqldataexpress.exception.TransactionException;
 import com.scooterframework.orm.sqldataexpress.util.DAOUtil;
@@ -46,9 +44,7 @@ public class JdbcTransaction extends AbstractTransactionImpl {
         try {
             super.commit();
             
-            Iterator it = connList.iterator();
-            while(it.hasNext()) {
-                UserDatabaseConnection udc = (UserDatabaseConnection)it.next();
+            for (UserDatabaseConnection udc : connList) {
                 DAOUtil.commit(udc.getConnection());
             }
         }
@@ -64,9 +60,7 @@ public class JdbcTransaction extends AbstractTransactionImpl {
         try {
             super.rollback();
             
-            Iterator it = connList.iterator();
-            while(it.hasNext()) {
-                UserDatabaseConnection udc = (UserDatabaseConnection)it.next();
+            for (UserDatabaseConnection udc : connList) {
                 DAOUtil.rollback(udc.getConnection());
             }
         }

@@ -7,16 +7,26 @@
  */
 package com.scooterframework.admin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.scooterframework.common.logging.LogUtil;
+
+/**
+ * EventsManager class manages events.
+ * 
+ * @author (Fei) John Chen
+ *
+ */
 public class EventsManager {
-	private static EventsManager me;
-	private Map<String, List<Listener>> listenersMap = new HashMap<String, List<Listener>>();
+    private LogUtil log = LogUtil.getLogger(this.getClass().getName());
+    
+	private static final EventsManager me = new EventsManager();
+	private final ConcurrentHashMap<String, List<Listener>> listenersMap = 
+		new ConcurrentHashMap<String, List<Listener>>();
 	
 	private EventsManager() {
 	}
@@ -27,7 +37,6 @@ public class EventsManager {
 	 * @return the singleton instance of the <tt>EventsManager</tt>.
 	 */
 	public static EventsManager getInstance() {
-		if (me == null) me = new EventsManager();
 		return me;
 	}
 	
@@ -40,10 +49,13 @@ public class EventsManager {
 	public void registerListener(String eventType, Listener listener) {
 		List<Listener> listeners = listenersMap.get(eventType);
 		if (listeners == null) {
-			listeners = new ArrayList<Listener>();
-			listenersMap.put(eventType, listeners);
+			listeners = new CopyOnWriteArrayList<Listener>();
+			List<Listener> oldListeners = listenersMap.putIfAbsent(eventType, listeners);
+			if (oldListeners != null) {
+				listeners = oldListeners;
+			}
 		}
-		listeners.add(listener);
+		if (!listeners.contains(listener)) listeners.add(listener);
 	}
 	
 	/**
@@ -65,12 +77,9 @@ public class EventsManager {
 	 * @param listener The event listener to be removed.
 	 */
 	public void removeListener(Listener listener) {
-		Set<Entry<String, List<Listener>>> set = listenersMap.entrySet();
-		for (Entry<String, List<Listener>> entry : set) {
+		for (Map.Entry<String, List<Listener>> entry : listenersMap.entrySet()) {
 			List<Listener> listeners = entry.getValue();
-			if (listeners != null && listeners.contains(listener)) {
-				listeners.remove(listener);
-			}
+			listeners.remove(listener);
 		}
 	}
 	
@@ -81,14 +90,17 @@ public class EventsManager {
 	 */
 	public void publishEvent(Event event) {
 		if (event == null) return;
-		notifyListeners(event);
-	}
-	
-	private void notifyListeners(Event event) {
 		List<Listener> listeners = listenersMap.get(event.getEventType());
 		if (listeners != null) {
-			for (Listener listener: listeners) {
-				listener.handleEvent(event);
+			for (Iterator<Listener> it = listeners.iterator(); it.hasNext();) {
+				Listener listener = it.next();
+				try {
+					listener.handleEvent(event);
+				}
+				catch (RuntimeException ex) {
+					log.error("Error in calling listener: " + ex.getMessage());
+					it.remove();
+				}
 			}
 		}
 	}

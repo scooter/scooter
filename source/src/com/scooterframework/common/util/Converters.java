@@ -37,7 +37,7 @@ public class Converters {
      *       or firstName&lastName&age&...
      * 
      */
-    public static List convertStringToList(String nameString) {
+    public static List<String> convertStringToList(String nameString) {
         return convertStringToList(nameString, ",|&");
     }
 
@@ -52,7 +52,7 @@ public class Converters {
      *       or firstName&lastName&age&...
      * 
      */
-    public static List convertStringToList(String nameString, boolean allowTrim) {
+    public static List<String> convertStringToList(String nameString, boolean allowTrim) {
         return convertStringToList(nameString, ",|&", true);
     }
     
@@ -64,7 +64,7 @@ public class Converters {
      *       or firstName|lastName|age|...
      * 
      */
-    public static List convertStringToList(String nameString, String delimiter) {
+    public static List<String> convertStringToList(String nameString, String delimiter) {
     	return convertStringToList(nameString, delimiter, true);
     }
     
@@ -76,18 +76,18 @@ public class Converters {
      *       or firstName|lastName|age|...
      * 
      */
-    public static List convertStringToList(String nameString, String delimiter, boolean allowTrim) {
-        if (nameString == null || "".equals(nameString.trim())) return new ArrayList();
+    public static List<String> convertStringToList(String nameString, String delimiter, boolean allowTrim) {
+        if (nameString == null || "".equals(nameString.trim())) return new ArrayList<String>();
         
         StringTokenizer st = new StringTokenizer(nameString, delimiter);
         String name = "";
-        ArrayList dataList = new ArrayList();
+        ArrayList<String> dataList = new ArrayList<String>();
         while (st.hasMoreTokens()) {
             name = (allowTrim)?st.nextToken().trim():st.nextToken();
             dataList.add(name);
         }
         
-        //add the original string to the return list if nothing is splited. 
+        //add the original string to the return list if nothing is split. 
         if (dataList.size() == 0) dataList.add(nameString);
         
         return dataList;
@@ -104,7 +104,7 @@ public class Converters {
      *       or firstName&lastName&age&...
      * 
      */
-    public static List convertStringToUniqueList(String nameString) {
+    public static List<String> convertStringToUniqueList(String nameString) {
         return convertStringToUniqueList(nameString, ",|&");
     }
     
@@ -117,18 +117,18 @@ public class Converters {
      *       or firstName|lastName|age|...
      * 
      */
-    public static List convertStringToUniqueList(String nameString, String delimiter) {
-        if (nameString == null || "".equals(nameString.trim())) return new ArrayList();
+    public static List<String> convertStringToUniqueList(String nameString, String delimiter) {
+        if (nameString == null || "".equals(nameString.trim())) return new ArrayList<String>();
         
         StringTokenizer st = new StringTokenizer(nameString, delimiter);
         String name = "";
-        ArrayList dataList = new ArrayList();
+        ArrayList<String> dataList = new ArrayList<String>();
         while (st.hasMoreTokens()) {
             name = st.nextToken().trim();
             if (!dataList.contains(name)) dataList.add(name);
         }
         
-        //add the original string to the return list if nothing is splited. 
+        //add the original string to the return list if nothing is split. 
         if (dataList.size() == 0) dataList.add(nameString);
         
         return dataList;
@@ -145,7 +145,7 @@ public class Converters {
      *       or firstName&lastName&age&...
      * 
      */
-    public static Set convertStringToSet(String nameString) {
+    public static Set<String> convertStringToSet(String nameString) {
         return convertStringToSet(nameString, ",|&");
     }
     
@@ -160,7 +160,7 @@ public class Converters {
      *       or firstName&lastName&age&...
      * 
      */
-    public static Set convertStringToSet(String nameString, boolean allowTrim) {
+    public static Set<String> convertStringToSet(String nameString, boolean allowTrim) {
         return convertStringToSet(nameString, ",|&", allowTrim);
     }
     
@@ -172,7 +172,7 @@ public class Converters {
      *       or firstName|lastName|age|...
      * 
      */
-    public static Set convertStringToSet(String nameString, String delimiter) {
+    public static Set<String> convertStringToSet(String nameString, String delimiter) {
         return convertStringToSet(nameString, delimiter, true);
     }
     
@@ -184,12 +184,12 @@ public class Converters {
      *       or firstName|lastName|age|...
      * 
      */
-    public static Set convertStringToSet(String nameString, String delimiter, boolean allowTrim) {
-        if (nameString == null || "".equals(nameString.trim())) return new HashSet();
+    public static Set<String> convertStringToSet(String nameString, String delimiter, boolean allowTrim) {
+        if (nameString == null || "".equals(nameString.trim())) return new HashSet<String>();
         
         StringTokenizer st = new StringTokenizer(nameString, delimiter);
         String name = "";
-        Set dataSet = new HashSet();
+        Set<String> dataSet = new HashSet<String>();
         while (st.hasMoreTokens()) {
             name = (allowTrim)?st.nextToken().trim():st.nextToken();
             dataSet.add(name);
@@ -215,7 +215,7 @@ public class Converters {
      *       or firstName=John&lastName=Doe&age=10&...
      * 
      */
-    public static Map convertStringToMap(String nameValuePairs) {
+    public static Map<String, String> convertStringToMap(String nameValuePairs) {
         return convertStringToMap(nameValuePairs, ",|&");
     }
     
@@ -230,7 +230,7 @@ public class Converters {
      *       or firstName=John|lastName=Doe|age=10|...
      * 
      */
-    public static Map convertStringToMap(String nameValuePairs, String propertyDelimiter) {
+    public static Map<String, String> convertStringToMap(String nameValuePairs, String propertyDelimiter) {
         return convertStringToMap(nameValuePairs, "=", propertyDelimiter);
     }
     
@@ -242,7 +242,7 @@ public class Converters {
      * Example: 
      * An example property string may be like the following:
      * <pre>
-     * condition : role_type = 1, id = 100; orderby : first_name desc
+     * condition : role_type = 1, id = 100; order_by : first_name DESC
      * </pre>
      * 
      * <p>Here the nameValueSpliter is ":", and the propertyDelimiter is ";".</p>
@@ -252,15 +252,15 @@ public class Converters {
      * @param propertyDelimiter a char that separates pairs in a string line
      * @return properties 
      */
-    public static Map convertStringToMap(String nameValuePairs, String nameValueSpliter, String propertyDelimiter) {
-        if (nameValuePairs == null || "".equals(nameValuePairs.trim())) return new HashMap();
+    public static Map<String, String> convertStringToMap(String nameValuePairs, String nameValueSpliter, String propertyDelimiter) {
+        if (nameValuePairs == null || "".equals(nameValuePairs.trim())) return new HashMap<String, String>();
         
         int spliterLength = nameValueSpliter.length();
         
         StringTokenizer st = new StringTokenizer(nameValuePairs, propertyDelimiter);
         String name = "";
         String value = "";
-        Map dataMap = new HashMap();
+        Map<String, String> dataMap = new HashMap<String, String>();
         while (st.hasMoreTokens()) {
             String tmp = st.nextToken().trim();
             int equalIndex = tmp.indexOf(nameValueSpliter);
@@ -281,7 +281,7 @@ public class Converters {
      * Example: 
      * An example property string may be like the following:
      * <pre>
-     * condition : role_type = 1, id = 100; orderby : first_name desc
+     * condition : role_type = 1, id = 100; order_by : first_name DESC
      * </pre>
      * 
      * <p>Here the nameValueSpliter is ":", and the propertyDelimiter is ";".</p>
@@ -295,12 +295,9 @@ public class Converters {
         if (nameValuePairs == null || "".equals(nameValuePairs.trim())) return new Properties();
         
         Properties dataProperties = new Properties();
-        Map dataMap = convertStringToMap(nameValuePairs, nameValueSpliter, propertyDelimiter);
-        Iterator it = dataMap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            String value = (String)dataMap.get(key);
-            dataProperties.put(key, value);
+        Map<String, String> dataMap = convertStringToMap(nameValuePairs, nameValueSpliter, propertyDelimiter);
+        for (Map.Entry<String, String> entry : dataMap.entrySet()) {
+            dataProperties.put(entry.getKey(), entry.getValue());
         }
         
         return dataProperties;
@@ -321,7 +318,7 @@ public class Converters {
     }
     
     /**
-     * Converts sql option string which contains name and value pairs to a 
+     * Converts SQL option string which contains name and value pairs to a 
      * Map object.
      * 
      * In an option string, each name-value pair is separated by ';' 
@@ -331,7 +328,7 @@ public class Converters {
      * For example, an option string like the following 
      * <blockquote><pre>
      *      conditions_sql: id in (1, 2, 3); include: category, user; 
-     *      order_by: first_name, salary desc; cascade: delete
+     *      order_by: first_name, salary DESC; cascade: delete
      * </pre></blockquote>
      * 
      * will be converted to a HashMap with the following entries:
@@ -340,11 +337,11 @@ public class Converters {
      *      --------------      -----
      *      conditions_sql  =>  id in (1, 2, 3)
      *      include         =>  category, user
-     *      order_by        =>  first_name, salary desc
+     *      order_by        =>  first_name, salary DESC
      *      cascade         =>  delete
      * </pre></blockquote>
      */
-    public static Map convertSqlOptionStringToMap(String options) {
+    public static Map<String, String> convertSqlOptionStringToMap(String options) {
         return convertStringToMap(options, ":", ";");
     }
     
@@ -360,7 +357,7 @@ public class Converters {
      * the converted string will be
      * title:test page;shape:rect
      */
-    public static String convertMapToString(Map map, 
+    public static String convertMapToString(Map<String, String> map, 
                     String pairSpliter, String separator) {
         return convertMapToString(map, null, pairSpliter, separator, false);
     }
@@ -378,19 +375,19 @@ public class Converters {
      * or
      * title:test page;shape:rect if doubleQuoteValue = false
      */
-    public static String convertMapToString(Map map, List filters, 
+    public static <T> String convertMapToString(Map<String, T> map, List<String> filters, 
                     String pairSpliter, String separator, boolean doubleQuoteValue) {
         if (map == null || map.size() == 0) return "";
         
         String returnStr = "";
-        StringBuffer sb = new StringBuffer();
-        Iterator it = map.keySet().iterator();
-        while (it.hasNext()) {
-            Object key = it.next();
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, T> entry : map.entrySet()) {
+            String key = entry.getKey();
             if (filters == null || filters.contains(key)) {
-                Object value = map.get(key);
-                if (doubleQuoteValue) value = "\"" + value + "\"";
-                sb.append(key).append(pairSpliter).append(value).append(separator);
+            	T value = entry.getValue();
+            	String s = (value != null)?value.toString():"";
+                if (doubleQuoteValue) s = "\"" + s + "\"";
+                sb.append(key).append(pairSpliter).append(s).append(separator);
             }
         }
         returnStr = sb.toString();
@@ -405,11 +402,11 @@ public class Converters {
     /**
      * converts a Map object to URL-like string.
      * 
-     * The final url-like string has the following format: 
+     * The final URL-like string has the following format: 
      *          firstName=John&lastName=Doe&age=10...
      * 
      */
-    public static String convertMapToUrlString(Map map) {
+    public static <T> String convertMapToUrlString(Map<String, T> map) {
         return convertMapToString(map, null, "=", "&", false);
     }
     
@@ -419,9 +416,9 @@ public class Converters {
      * @param values string array
      * @return a list of string values
      */
-    public static List convertArrayToList(String[] values) {
-        if (values == null || values.length == 0) return new ArrayList();
-        List l = new ArrayList();
+    public static List<String> convertArrayToList(String[] values) {
+        if (values == null || values.length == 0) return new ArrayList<String>();
+        List<String> l = new ArrayList<String>();
         for (int i = 0; i < values.length; i++) {
             l.add(values[i]);
         }
@@ -435,15 +432,15 @@ public class Converters {
      * @param values list of objects
      * @return array of strings
      */
-    public static String[] convertListToStringArray(List values) {
+    public static <T> String[] convertListToStringArray(List<T> values) {
         if (values == null || values.size() == 0) return null;
         int total = values.size();
-        String[] results = new String[total];
+        String[] a = new String[total];
         for (int i = 0; i < total; i++) {
-            Object o = values.get(i);
-            results[i] = (o != null)?o.toString():null;
+        	T t = values.get(i);
+            a[i] = (t != null)?t.toString():null;
         }
-        return results;
+        return a;
     }
     
     /**
@@ -452,14 +449,12 @@ public class Converters {
      * @param values list of objects
      * @return array of objects
      */
-    public static Object[] convertListToArray(List values) {
+    public static <T> T[] convertListToArray(List<T> values) {
         if (values == null || values.size() == 0) return null;
         int total = values.size();
-        Object[] results = new Object[total];
-        for (int i = 0; i < total; i++) {
-            results[i] = values.get(i);
-        }
-        return results;
+        @SuppressWarnings("unchecked")
+		T[] a = (T[])new Object[total];
+        return values.toArray(a);
     }
     
     /**
@@ -521,49 +516,35 @@ public class Converters {
     }
     
     /**
-     * Converts a string to uppercase.
+     * Converts a string to upper case.
      * 
-     * @param s
-     * @return a string in uppercase.
+     * @param object  input object
+     * @return a string in upper case.
      */
-    public static String toUpperCase(String s) {
-        return (s != null)?s.toUpperCase():s;
+    public static String toUpperCase(Object object) {
+        return (object != null)?object.toString().toUpperCase():(String)null;
     }
     
     /**
-     * Converts to uppercase.
-     * 
-     * @param o an object
-     */
-    public static Object toUpperCase(Object o) {
-        if (o == null) return o;
-        if (o instanceof String) return toUpperCase((String)o);
-        if (o instanceof Collection) {
-            return toUpperCase((Collection)o);
-        }
-        return o;
-    }
-    
-    /**
-     * Converts to uppercase.
+     * Converts to upper case.
      * 
      * @param items a collection
      */
-    public static Collection toUpperCase(Collection items) {
+    public static Collection<String> toUpperCase(Collection<String> items) {
         if (items == null || items.isEmpty()) return items;
         
-        Collection c = null;
+        Collection<String> c = null;
         if (items instanceof List) {
-        	c = new ArrayList();
+        	c = new ArrayList<String>();
         }
         else if (items instanceof Set) {
-        	c = new HashSet();
+        	c = new HashSet<String>();
         }
         else {
-        	c = new ArrayList();
+        	c = new ArrayList<String>();
         }
         
-        Iterator it = items.iterator();
+        Iterator<String> it = items.iterator();
         while(it.hasNext()) {
             c.add(toUpperCase(it.next()));
         }
@@ -579,15 +560,25 @@ public class Converters {
      * @param m the original map
      * @return a new map
      */
-    public static Map reverseMap(Map m) {
-        if (m == null) return m;
-        Map n = new HashMap(m.size());
-        Iterator it = m.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            Object value = m.get(key);
-            n.put(value, key);
+    public static <K, V> Map<V, K> reverseMap(Map<K, V> m) {
+        if (m == null) return null;
+        Map<V, K> n = new HashMap<V, K>(m.size());
+        for (Map.Entry<K, V> entry : m.entrySet()) {
+            K k = entry.getKey();
+            V v = entry.getValue();
+            n.put(v, k);
         }
         return n;
+    }
+    
+    public static Map<String, String> convertMapToMapSS(Map<String, ?> map) {
+    	if (map == null) return null;
+    	Map<String, String> mapSS = new HashMap<String, String>();
+    	for (Map.Entry<String, ?> entry : map.entrySet()) {
+    		String k = entry.getKey();
+    		Object v = entry.getValue();
+    		mapSS.put(k, (v != null)?v.toString():(String)null);
+    	}
+    	return mapSS;
     }
 }

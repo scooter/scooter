@@ -8,10 +8,8 @@
 package com.scooterframework.web.util;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
-import java.util.Map.Entry;
 
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
@@ -538,8 +536,8 @@ public class F {
      * @param options   options for the label tag
      * @return error-aware label tag string
      */
-    public static String label(String field, Map options) {
-        if (options == null) options = new HashMap();
+    public static String label(String field, Map<String, String> options) {
+        if (options == null) options = new HashMap<String, String>();
         Object object = getObjectFromCurrentCache();
         Object objectKey = getObjectKeyFromCurrentCache();
         options.put("for", tagId(objectKey, field));
@@ -550,10 +548,11 @@ public class F {
         return objectKey + "_" + field;
     }
     
-    private static Stack getCurrentCacheObjectStack() {
-        Stack stk = (Stack)CurrentThreadCache.get(CURRENT_FORM_OBJECT_STACK);
+    private static Stack<Object> getCurrentCacheObjectStack() {
+        @SuppressWarnings("unchecked")
+		Stack<Object> stk = (Stack<Object>)CurrentThreadCache.get(CURRENT_FORM_OBJECT_STACK);
         if (stk == null) {
-            stk = new Stack();
+            stk = new Stack<Object>();
             CurrentThreadCache.set(CURRENT_FORM_OBJECT_STACK, stk);
         }
         return stk;
@@ -568,17 +567,18 @@ public class F {
     }
     
     private static void removeObjectFromCurrentCache() {
-        Stack stk = getCurrentCacheObjectStack();
+        Stack<Object> stk = getCurrentCacheObjectStack();
         stk.pop();
         if (stk.empty()) {
             CurrentThreadCache.clear(CURRENT_FORM_OBJECT_STACK);
         }
     }
     
-    private static Stack getCurrentCacheObjectKeyStack() {
-        Stack stk = (Stack)CurrentThreadCache.get(CURRENT_FORM_OBJECT_KEY_STACK);
+    private static Stack<Object> getCurrentCacheObjectKeyStack() {
+        @SuppressWarnings("unchecked")
+		Stack<Object> stk = (Stack<Object>)CurrentThreadCache.get(CURRENT_FORM_OBJECT_KEY_STACK);
         if (stk == null) {
-            stk = new Stack();
+            stk = new Stack<Object>();
             CurrentThreadCache.set(CURRENT_FORM_OBJECT_KEY_STACK, stk);
         }
         return stk;
@@ -593,7 +593,7 @@ public class F {
     }
     
     private static void removeObjectKeyFromCurrentCache() {
-        Stack stk = getCurrentCacheObjectKeyStack();
+        Stack<Object> stk = getCurrentCacheObjectKeyStack();
         stk.pop();
         if (stk.empty()) {
             CurrentThreadCache.clear(CURRENT_FORM_OBJECT_KEY_STACK);
@@ -611,9 +611,7 @@ public class F {
     	Map<String, String> properties = Converters.convertStringToMap(formProperties, ":", ";");
     	StringBuilder sb = new StringBuilder();
     	sb.append("<form ");
-		Iterator<Entry<String, String>> it = properties.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<String, String> entry = it.next();
+		for (Map.Entry<String, String> entry : properties.entrySet()) {
 			sb.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"").append(" ");
 		}
     	sb.append(formString.substring(token.length()));

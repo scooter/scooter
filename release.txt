@@ -1,40 +1,42 @@
-                     Scooter Framework Version 1.0.1
-                            Release Notes
-
+                     Scooter Framework Release Notes
 
 
 Known Issues in This Release
 ============================
 
-Running Shared Tomcat on Linux
-------------------------------
-Auto compiler may not work properly on some linux versions. The workaround is 
-to put tools.jar file under webapps/YouApp/WEB-INF/lib/ directory before 
-running startup script under the tools/servers/tomcat/bin directory. 
-
-
 Using table name of mixed case in MySQL on Linux
 ------------------------------------------------
-Scooter's data browser would not work on Linux platform if a table name consists 
-of both lowercase and uppercase letters. 
+Scooter's data browser would not work on Linux platform if a table name 
+consists of both lowercase and uppercase letters. 
 Please refer to the following MySQL document on work around: 
 http://dev.mysql.com/doc/refman/5.5/en/identifier-case-sensitivity.html
 
-
 Failed to connect to MySQL
 --------------------------
-At least two people reported that they failed to connect to MySQL database:
-http://groups.google.com/group/scooter-framework/browse_thread/thread/af37380b9771f3d9
-
-This problem is not related to Scooter, but related to MySQL setup. Many people 
-have reported this issue and workarounds: 
+This problem is a MySQL configuration issue. Many people have reported 
+this issue and some has provided workarounds: 
+http://stackoverflow.com/questions/2102912/cant-make-jdbc-connection-to-mysql-using-java-intellij-and-linux
 http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-connector-through-tomcat-or-externally
-
-
 
 
 Summary of Releases
 ===================
+
+scooter-1.1.0 20110424
+ + New feature: Auto compilation audio & visual notification
+ + New feature: Query interface for Active Record.
+ + New feature: Allowing non-default databases for Active Record.
+ + New feature: Support for FreeMarker templates.
+ + New feature: Support for MS SQL Server database.
+ + New feature: Generating scaffold code from any database connection.
+ + New feature: Compilation error screen.
+ + New feature: Added Eclipse project files (.classpath and .project) for each project.
+ + Updated Greeting example with more examples.
+ + Added more methods in ActionControl class to handle different HTML elements
+ + Added message keys for about, contact and home
+ + Completely upgraded code base to JDK5.
+ + Updated JavaDoc of some classes.
+ + Many small improvements.
 
 scooter-1.0.2 20101220
  + Converted all view templates to UTF-8 encoding.

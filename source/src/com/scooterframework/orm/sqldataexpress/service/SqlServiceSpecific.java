@@ -23,24 +23,24 @@ public interface SqlServiceSpecific
      * Retrieve a single row data from database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return TableData        The row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRow(Map inputs, String processorType, String processorName) 
+    public TableData retrieveRow(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException;
     
     /**
      * Retrieve a list of rows from database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return TableData        The list of row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRows(Map inputs, String processorType, String processorName) 
+    public TableData retrieveRows(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException;
     
     /**
@@ -56,13 +56,13 @@ public interface SqlServiceSpecific
      * If the limitOrFixed = -1, all records are retrieved. 
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @param limitOrFixed      Number of desired (limit) or fixed records to retrieve
      * @return TableData        The row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRows(Map inputs, String processorType, String processorName, int limitOrFixed) 
+    public TableData retrieveRows(Map<String, Object> inputs, String processorType, String processorName, int limitOrFixed) 
     throws BaseSQLException;
     
     /**
@@ -80,14 +80,14 @@ public interface SqlServiceSpecific
      * offset defaults to 0. 
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @param limitOrFixed      Number of desired (limit) or fixed records to retrieve
      * @param offset            int for offset
      * @return TableData        The row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRows(Map inputs, 
+    public TableData retrieveRows(Map<String, Object> inputs, 
                                   String processorType, 
                                   String processorName, 
                                   int limitOrFixed,
@@ -99,34 +99,34 @@ public interface SqlServiceSpecific
      * Insert data to database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public void insert(Map inputs, String processorType, String processorName) 
+    public void insert(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException;
     
     /**
      * Delete data from database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return int              number of rows deleted
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public int delete(Map inputs, String processorType, String processorName) 
+    public int delete(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException;
     
     /**
      * Update data in database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return int              number of rows updated
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public int update(Map inputs, String processorType, String processorName) 
+    public int update(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException;
 }

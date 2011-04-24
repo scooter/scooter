@@ -7,12 +7,11 @@
  */
 package com.scooterframework.orm.activerecord;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ReferenceDataStore class holds static reference data for all users.
@@ -27,7 +26,7 @@ public class ReferenceDataStore implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 5382025995336758728L;
     
-    private static Map refData = Collections.synchronizedMap(new HashMap());
+    private static Map<String, List<ReferenceData>> refData = new ConcurrentHashMap<String, List<ReferenceData>>();
     private static Date refDataLoadedTime = null;
 	
 	/**
@@ -40,12 +39,13 @@ public class ReferenceDataStore implements java.io.Serializable {
         
         ReferenceData rd = null;
 
-        List list = (List) refData.get(type);
+        List<ReferenceData> list = refData.get(type);
         if ( list != null ) {
-            Iterator it = list.iterator();
+            Iterator<ReferenceData> it = list.iterator();
             while (it.hasNext()) {
-                ReferenceData tmp = (ReferenceData) it.next();
-                if (tmp.getKeyData() != null && keyData.toString().equalsIgnoreCase(tmp.getKeyData().toString())) {
+                ReferenceData tmp = it.next();
+                if (tmp != null && tmp.getKeyData() != null && 
+                		keyData.equalsIgnoreCase(tmp.getKeyData().toString())) {
                     rd = tmp;
                     break;
                 }
@@ -65,12 +65,13 @@ public class ReferenceDataStore implements java.io.Serializable {
         
         ReferenceData rd = null;
 
-        List list = (List) refData.get(type);
+        List<ReferenceData> list = refData.get(type);
         if ( list != null ) {
-            Iterator it = list.iterator();
+            Iterator<ReferenceData> it = list.iterator();
             while (it.hasNext()) {
-                ReferenceData tmp = (ReferenceData) it.next();
-                if (tmp.getValueData() != null && valueData.toString().equalsIgnoreCase(tmp.getValueData().toString())) {
+                ReferenceData tmp = it.next();
+                if (tmp != null && tmp.getValueData() != null && 
+                		valueData.toString().equalsIgnoreCase(tmp.getValueData().toString())) {
                     rd = tmp;
                     break;
                 }
@@ -85,8 +86,8 @@ public class ReferenceDataStore implements java.io.Serializable {
      * 
      * @return List
      */
-    public static List getReferenceDataList(String type) {
-        return (List) refData.get(type);
+    public static List<ReferenceData> getReferenceDataList(String type) {
+        return refData.get(type);
     }
 
     /**
@@ -94,7 +95,7 @@ public class ReferenceDataStore implements java.io.Serializable {
      *
      * @param dataMap a map of reference data
      */
-    public static void setReferenceData(Map dataMap) {
+    public static void setReferenceData(Map<String, List<ReferenceData>> dataMap) {
         if (dataMap == null || dataMap.size() == 0) return;
         refData = dataMap;
         refDataLoadedTime = new Date();
@@ -106,7 +107,7 @@ public class ReferenceDataStore implements java.io.Serializable {
      * @param type type of the data
      * @param data a list of reference data
      */
-    public static void setReferenceData(String type, List data) {
+    public static void setReferenceData(String type, List<ReferenceData> data) {
         if (data == null) return;
         
         refData.put(type, data);
@@ -119,6 +120,6 @@ public class ReferenceDataStore implements java.io.Serializable {
      * @return a date instance
      */
     public static Date getLastReferenceDataLoadedTime() {
-        return refDataLoadedTime;
+        return (refDataLoadedTime == null)?refDataLoadedTime:(new Date(refDataLoadedTime.getTime()));
     }
 }

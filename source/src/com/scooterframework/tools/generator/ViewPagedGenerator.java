@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.scooterframework.common.util.WordUtil;
-import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.web.util.O;
 
 /**
@@ -23,32 +22,34 @@ import com.scooterframework.web.util.O;
  * @author (Fei) John Chen
  */
 public class ViewPagedGenerator extends ViewScaffoldGenerator {
-	public ViewPagedGenerator(String templateFilePath, Map props, String controller, String model) {
-		super(templateFilePath, props, controller, model);
+	public ViewPagedGenerator(String templateFilePath,
+			Map<String, String> props, String connName, String controller,
+			String model) {
+		super(templateFilePath, props, connName, controller, model);
 	}
 
 	protected String getAction() {
 		return "paged_list";
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
-		
-		List columns = new ArrayList();
-		ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
-		Iterator it = O.columnNames(recordHome);
+	@Override
+	protected Map<String, Object> getTemplateProperties() {
+		Map<String, Object> templateProps = new HashMap<String, Object>();
+
+		List<Map<String, String>> columns = new ArrayList<Map<String, String>>();
+		Iterator<String> it = O.columnNames(recordHome);
 		while(it.hasNext()) {
-			Map column = new HashMap();
-			String columnName = (String)it.next();
+			Map<String, String> column = new HashMap<String, String>();
+			String columnName = it.next();
 			column.put("columnName", columnName);
 			column.put("columnHeader", WordUtil.titleize(columnName));
 			column.put("columnNameLower", columnName.toLowerCase());
 		    columns.add(column);
 		}
-		
+
 		templateProps.put("columns", columns);
 		templateProps.putAll(super.getTemplateProperties());
-		
+
 		return templateProps;
 	}
 }

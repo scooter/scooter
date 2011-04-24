@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.test.ScooterTestHelper;
 import com.scooterframework.transaction.TransactionManager;
 import com.scooterframework.transaction.TransactionManagerUtil;
@@ -40,7 +39,7 @@ public class SqlServiceClientTransactionTest extends ScooterTestHelper {
 			
 			Object nextID = getNextPetID();
 			String sql = "INSERT INTO pets (id, name, type_id, owner_id) VALUES (?id, ?name, 1, 10)";
-			Map inputs = new HashMap();
+			Map<String, Object> inputs = new HashMap<String, Object>();
 			inputs.put("id", nextID);
 			inputs.put("name", "Lingling");
 			int insertCount = SqlServiceClient.executeSQL(sql, inputs);
@@ -77,8 +76,8 @@ public class SqlServiceClientTransactionTest extends ScooterTestHelper {
 	@Test
 	public void test_transactional_executeSQL_inputs() {
 		String countSql = "SELECT count(*) FROM pets";
-		String tType = (String)CurrentThreadCache.get("key.TransactionStarterType");
-		Object tr = CurrentThreadCache.get("key.Transactions");
+//		String tType = (String)CurrentThreadCache.get("key.TransactionStarterType");
+//		Object tr = CurrentThreadCache.get("key.Transactions");
 		
         TransactionManager tm =  TransactionManagerUtil.getTransactionManager();
     	
@@ -90,7 +89,7 @@ public class SqlServiceClientTransactionTest extends ScooterTestHelper {
 
 			Object nextID = getNextPetID();
 			String sql = "INSERT INTO pets (id, name, type_id, owner_id) VALUES (?id, ?name, 1, 10)";
-			Map inputs = new HashMap();
+			Map<String, Object> inputs = new HashMap<String, Object>();
 			inputs.put("id", nextID);
 			inputs.put("name", "Pingping");
 			int insertCount = SqlServiceClient.executeSQL(sql, inputs);

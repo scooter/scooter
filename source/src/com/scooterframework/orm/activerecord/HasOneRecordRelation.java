@@ -76,14 +76,14 @@ public class HasOneRecordRelation extends RecordRelation {
 
     protected ActiveRecord retrieveAssociatedData(String options) {
         //set target's FK with owner's PK data
-        Map fkData = getFKDataMapForOther();
+        Map<String, Object> fkData = getFKDataMapForOther();
         if (fkData == null) return null;
         
         //merge the two options maps
-        Map opts = getRelation().getProperties();
+        Map<String, String> opts = getRelation().getProperties();
         if (options != null && !"".equals(options)) {
-            if (opts == null) opts = new HashMap();
-            Map m = Converters.convertSqlOptionStringToMap(options);
+            if (opts == null) opts = new HashMap<String, String>();
+            Map<String, String> m = Converters.convertSqlOptionStringToMap(options);
             opts.putAll(m);
         }
 

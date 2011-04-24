@@ -8,7 +8,6 @@
 package com.scooterframework.web.util;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.scooterframework.admin.Constants;
@@ -36,7 +35,7 @@ public class R {
             restfulId = (String)rest;
         }
         else if (rest instanceof RESTified) {
-            restfulId = (rest != null)?((RESTified)rest).getRestfulId():null;
+            restfulId = ((RESTified)rest).getRestfulId();
         }
         else {
             throw new IllegalArgumentException("Only String or RESTified types " + 
@@ -45,8 +44,9 @@ public class R {
         return restfulId;
     }
 
-    private static Map getFieldValues() {
-        return (Map)W.request(RouteConstants.FIELD_VALUES);
+    @SuppressWarnings("unchecked")
+	private static Map<String, String> getFieldValues() {
+        return (Map<String, String>)W.request(RouteConstants.FIELD_VALUES);
     }
 
     /**
@@ -124,11 +124,11 @@ public class R {
         return _resourceRecordPath(resourceName, resourceId, getFieldValues());
     }
     
-    private static String _resourcePath(String resourceName, Map fieldValues) {
+    private static String _resourcePath(String resourceName, Map<String, String> fieldValues) {
         return resource(resourceName).getScreenURL(fieldValues);
     }
     
-    private static String _resourceRecordPath(String resourceName, String resourceId, Map fieldValues) {
+    private static String _resourceRecordPath(String resourceName, String resourceId, Map<String, String> fieldValues) {
     	if (M.isEmpty(resourceId)) return "";
     	
         Resource resource = resource(resourceName);
@@ -402,27 +402,25 @@ public class R {
      * @param mapToKeep
      * @param mapTmp
      */
-    private static void mergeMap(Map mapToKeep, Map mapTmp) {
-        Iterator it = mapTmp.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            Object value2 = mapTmp.get(key);
-            if (value2 != null) {
-                mapToKeep.put(key, value2);
+    private static void mergeMap(Map<String, String> mapToKeep, Map<String, String> mapTmp) {
+        for(Map.Entry<String, String> entry : mapTmp.entrySet()) {
+            String value = entry.getValue();
+            if (value != null) {
+                mapToKeep.put(entry.getKey(), value);
             }
         }
     }
     
-    private static String _nestedResourcePath(String resourceName, Map parentsMap) {
-        Map map = getFieldValues();
+    private static String _nestedResourcePath(String resourceName, Map<String, String> parentsMap) {
+        Map<String, String> map = getFieldValues();
         mergeMap(map, parentsMap);
         return _resourcePath(resourceName, map);
     }
     
     private static String _nestedResourceRecordPath(String resourceName, 
                                                     String resourceId, 
-                                                    Map parentsMap) {
-        Map map = getFieldValues();
+                                                    Map<String, String> parentsMap) {
+        Map<String, String> map = getFieldValues();
         mergeMap(map, parentsMap);
         return _resourceRecordPath(resourceName, resourceId, map);
     }
@@ -439,7 +437,7 @@ public class R {
         String parentPath = resourceRecordPath(parentResourceName, parentRestfulId);
         if (!parentPath.startsWith("/")) parentPath = "/" + parentPath;
         
-        Map map = new HashMap();
+        Map<String, String> map = new HashMap<String, String>();
         map.put(getParentResourceIdFormat(parentResourceName), parentRestfulId);
         String childrenPath = _nestedResourcePath(resourceName, map);
         if (!childrenPath.startsWith("/")) childrenPath = "/" + childrenPath;
@@ -456,7 +454,7 @@ public class R {
         
         int length = parentResourceNames.length;
         String parentsPath = "";
-        Map map = new HashMap(length);
+        Map<String, String> map = new HashMap<String, String>(length);
         for (int i = 0; i < length; i++) {
             String parentResourceName = parentResourceNames[i];
             String parentRestfulId = getRestfulId(parentRestfuls[i]);
@@ -500,7 +498,7 @@ public class R {
         String parentPath = resourceRecordPath(parentResourceName, parentRestfulId);
         if (!parentPath.startsWith("/")) parentPath = "/" + parentPath;
         
-        Map map = new HashMap();
+        Map<String, String> map = new HashMap<String, String>();
         map.put(getParentResourceIdFormat(parentResourceName), parentRestfulId);
         String childrenPath = _nestedResourceRecordPath(resourceName, resourceId, map);
         if (!childrenPath.startsWith("/")) childrenPath = "/" + childrenPath;
@@ -525,7 +523,7 @@ public class R {
         
         int length = parentResourceNames.length;
         String parentsPath = "";
-        Map map = new HashMap(length);
+        Map<String, String> map = new HashMap<String, String>(length);
         for (int i = 0; i < length; i++) {
             String parentResourceName = parentResourceNames[i];
             String parentRestfulId = getRestfulId(parentRestfuls[i]);

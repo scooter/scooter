@@ -8,11 +8,10 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.exception.GenericException;
@@ -47,13 +46,12 @@ public class ActiveRecordUtil {
         if (!r1.getTableName().equalsIgnoreCase(r2.getTableName())) return false;
         
         boolean same = true;
-        Map m1 = r1.getPrimaryKeyDataMap();
-        Map m2 = r2.getPrimaryKeyDataMap();
+        Map<String, Object> m1 = r1.getPrimaryKeyDataMap();
+        Map<String, Object> m2 = r2.getPrimaryKeyDataMap();
         if (m1.size() == m2.size()) {
-            Iterator it1 = m1.keySet().iterator();
-            while(it1.hasNext()) {
-                Object key = it1.next();
-                Object value1 = m1.get(key);
+            for (Map.Entry<String, Object> entry : m1.entrySet()) {
+                String key = entry.getKey();
+                Object value1 = entry.getValue();
                 Object value2 = m2.get(key);
                 if (value1 == null || value2 == null || 
                     !value1.toString().equalsIgnoreCase(value2.toString())) {
@@ -73,7 +71,7 @@ public class ActiveRecordUtil {
      * @param record
      * @throws WrongRecordTypeException exception if unexpected.
      */
-    public static void validateRecordType(Class expected, ActiveRecord record) {
+    public static void validateRecordType(Class<? extends ActiveRecord> expected, ActiveRecord record) {
         if (expected == null || record == null) return;
         
         // make sure the record type is valid
@@ -92,19 +90,19 @@ public class ActiveRecordUtil {
      * Removes duplicated items from list one.
      * 
      * @param one   the original list
-     * @param two   the list to be substracted
+     * @param two   the list to be subtracted
      * @return new list
      */
-    public static List remains(List one, List two) {
+    public static List<? extends ActiveRecord> remains(List<? extends ActiveRecord> one, List<? extends ActiveRecord> two) {
         if (one == null) return one;
         if (two == null) return one;
-        List tmp = new ArrayList();
-        Iterator it1 = one.iterator();
+        List<ActiveRecord> tmp = new ArrayList<ActiveRecord>();
+        Iterator<? extends ActiveRecord> it1 = one.iterator();
         while(it1.hasNext()) {
             ActiveRecord r1 = (ActiveRecord)it1.next();
             String pk1 = r1.getPrimaryKeyDataMap().toString();
             boolean itemInListTwo = false;
-            Iterator it2 = two.iterator();
+            Iterator<? extends ActiveRecord> it2 = two.iterator();
             while(it2.hasNext()) {
                 ActiveRecord r2 = (ActiveRecord)it2.next();
                 String pk2 = r2.getPrimaryKeyDataMap().toString();
@@ -116,8 +114,8 @@ public class ActiveRecordUtil {
             if (itemInListTwo) tmp.add(r1);
         }
         
-        List nl = new ArrayList();
-        Iterator it3 = one.iterator();
+        List<ActiveRecord> nl = new ArrayList<ActiveRecord>();
+        Iterator<? extends ActiveRecord> it3 = one.iterator();
         while(it3.hasNext()) {
             ActiveRecord r1 = (ActiveRecord)it3.next();
             if (!tmp.contains(r1)) nl.add(r1);
@@ -130,7 +128,7 @@ public class ActiveRecordUtil {
      * 
      * @return String
      */
-    public static String getFullClassName(Class c) {
+    public static String getFullClassName(Class<? extends ActiveRecord> c) {
         return (c == null)?"":c.getName();
     }
     
@@ -145,7 +143,7 @@ public class ActiveRecordUtil {
      * @param modelClass    an ActiveRecord class type
      * @return model name
      */
-    public static String getModelName(Class modelClass) {
+    public static String getModelName(Class<? extends ActiveRecord> modelClass) {
         String model = "";
         String className = modelClass.getName();
         if (className.equals(ActiveRecord.class.getName())) {
@@ -222,7 +220,7 @@ public class ActiveRecordUtil {
      * @param c an ActiveRecord class type
      * @return String
      */
-    public static String getTableName(Class c) {
+    public static String getTableName(Class<? extends ActiveRecord> c) {
         return getHomeInstance(c).getTableName();
     }
     
@@ -233,21 +231,39 @@ public class ActiveRecordUtil {
      * @param c an ActiveRecord class type
      * @return String
      */
-    public static String getSimpleTableName(Class c) {
+    public static String getSimpleTableName(Class<? extends ActiveRecord> c) {
         return getHomeInstance(c).getSimpleTableName();
     }
     
     /**
      * <p>Generates an instance of ActiveRecord. <tt>model</tt> value is used 
-     * to deduce the table name related to the ActiveRecord instance.</p>
+     * to deduce the table name related to the ActiveRecord instance. The 
+     * meta data of the <tt>model</tt> is obtained from the default database
+     * connection name as specified by the <tt>database.properties</tt> file 
+     * or from the {@link com.scooterframework.orm.activerecord.ActiveRecord#getConnectionName() getConnectionName()} method of the underlying model class.</p>
      * 
-     * @param className class name of the ActiveRecord instance to be created.
-     * @param model    model name of the ActiveRecord class.
+     * @param className  class name of the ActiveRecord instance to be created.
+     * @param model      model name of the ActiveRecord class.
      * @return an ActiveRecord instance
      */
     public static ActiveRecord generateActiveRecordInstance(String className, String model) {
+        return generateActiveRecordInstance(className, null, model);
+    }
+    
+    /**
+     * <p>Generates an instance of ActiveRecord. <tt>connName</tt> is the 
+     * database connection name from where the meta data of the <tt>model</tt> 
+     * is obtained. <tt>model</tt> value is used to deduce the table name 
+     * related to the ActiveRecord instance.</p>
+     * 
+     * @param className  class name of the ActiveRecord instance to be created
+     * @param connName   db connection name
+     * @param model      model name of the ActiveRecord class
+     * @return an ActiveRecord instance
+     */
+    public static ActiveRecord generateActiveRecordInstance(String className, String connName, String model) {
         ActiveRecord record = null;
-        Class c = null;
+        Class<?> c = null;
         try {
             c = OrmObjectFactory.getInstance().loadClass(className);
             if ( c != null ) {
@@ -258,9 +274,16 @@ public class ActiveRecordUtil {
                 
                 tableName = DatabaseConfig.getInstance().getFullTableName(tableName);
                 
-                Class[] parameterTypes = {String.class};
-                Object[] initargs = {tableName};
-                record = (ActiveRecord)newInstance(c, parameterTypes, initargs);
+                if (connName == null) {
+                    Class<?>[] parameterTypes = {String.class};
+                    Object[] initargs = {tableName};
+                    record = (ActiveRecord)newInstance(c, parameterTypes, initargs);
+                }
+                else {
+                    Class<?>[] parameterTypes = {String.class, String.class};
+                    Object[] initargs = {connName, tableName};
+                    record = (ActiveRecord)newInstance(c, parameterTypes, initargs);
+                }
             }
         } catch (Exception ex) {
         	ex.printStackTrace();
@@ -278,7 +301,7 @@ public class ActiveRecordUtil {
      * @return a new instance
      * @throws java.lang.Exception
      */
-    public static Object newInstance(Class c, Class[] parameterTypes, Object[] initargs) 
+    public static Object newInstance(Class<?> c, Class<?>[] parameterTypes, Object[] initargs) 
     throws Exception {
         if (c == null) return null;
         
@@ -337,14 +360,14 @@ public class ActiveRecordUtil {
      * @return a home instance of a model
      */
     public static ActiveRecord getHomeInstance(String fullModelClassName) {
-        String modelKey = getHomeInstanceKeyForCurrentThreadCache(fullModelClassName);
+        String modelKey = getHomeInstanceKey(fullModelClassName);
         ActiveRecord record = null;
         if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
             record = (ActiveRecord)CurrentThreadCache.get(modelKey);
             if (record != null) return record;
         }
         
-        Map homeMap = getHomeInstanceMap();
+        Map<String, ActiveRecord> homeMap = getHomeInstanceMap();
         record = (ActiveRecord)homeMap.get(modelKey);
         if (record == null) {
             if (DEFAULT_RECORD_CLASS.equals(fullModelClassName)) {
@@ -363,7 +386,7 @@ public class ActiveRecordUtil {
      * @param clz   class of the model
      * @return a home instance of a model
      */
-    public static ActiveRecord getHomeInstance(Class clz) {
+    public static ActiveRecord getHomeInstance(Class<? extends ActiveRecord> clz) {
         return getHomeInstance(clz.getName());
     }
     
@@ -382,18 +405,18 @@ public class ActiveRecordUtil {
             
             setGateInstance(record.getClass().getName(), new TableGateway(record));
 
-            String modelKey = getHomeInstanceKeyForCurrentThreadCache(record.getClass().getName());
+            String modelKey = getHomeInstanceKey(record.getClass().getName());
             if (DatabaseConfig.getInstance().isInDevelopmentEnvironment() || EnvConfig.getInstance().allowAutoCRUD()) {
                 CurrentThreadCache.set(modelKey, record);
                 return;
             }
             
-            Map homeMap = getHomeInstanceMap();
+            Map<String, ActiveRecord> homeMap = getHomeInstanceMap();
             homeMap.put(modelKey, record);
         }
     }
     
-    public static TableGateway getGateway(Class modelClass) {
+    public static TableGateway getGateway(Class<? extends ActiveRecord> modelClass) {
     	return getGateway(modelClass.getName());
     }
     
@@ -406,8 +429,8 @@ public class ActiveRecordUtil {
             if (gate != null) return gate;
         }
         
-        Map gateMap = getGateInstanceMap();
-        gate = (TableGateway)gateMap.get(gateKey);
+        Map<String, TableGateway> gateMap = getGateInstanceMap();
+        gate = gateMap.get(gateKey);
         if (gate == null) {
             if (DEFAULT_RECORD_CLASS.equals(fullModelClassName)) {
                 throw new IllegalArgumentException("TableGateway instance for type " + fullModelClassName + " must be created first.");
@@ -430,8 +453,8 @@ public class ActiveRecordUtil {
             if (gate != null) return gate;
         }
         
-        Map gateMap = getGateInstanceMap();
-        gate = (TableGateway)gateMap.get(gateKey);
+        Map<String, TableGateway> gateMap = getGateInstanceMap();
+        gate = gateMap.get(gateKey);
         if (gate == null) {
             if (DEFAULT_RECORD_CLASS.equals(fullModelClassName)) {
                 throw new IllegalArgumentException("TableGateway instance for type " + fullModelClassName + " must be created first.");
@@ -458,7 +481,7 @@ public class ActiveRecordUtil {
                 return;
             }
             
-            Map gateMap = getGateInstanceMap();
+            Map<String, TableGateway> gateMap = getGateInstanceMap();
             gateMap.put(gateKey, gate);
         }
     }
@@ -466,11 +489,11 @@ public class ActiveRecordUtil {
     /**
      * Returns a Calculator instance for the model class.
      * 
-     * @param clz model class type
+     * @param modelClass model class type
      * @return a Calculator instance for the model class
      */
-    public static Calculator getCalculator(Class clz) {
-    	return getCalculator(clz.getName());
+    public static Calculator getCalculator(Class<? extends ActiveRecord> modelClass) {
+    	return getCalculator(modelClass.getName());
     }
     
     /**
@@ -487,8 +510,8 @@ public class ActiveRecordUtil {
             if (cal != null) return cal;
         }
         
-        Map calMap = getCalculatorInstanceMap();
-        cal = (Calculator)calMap.get(calKey);
+        Map<String, Calculator> calMap = getCalculatorInstanceMap();
+        cal = calMap.get(calKey);
         if (cal == null) {
             if (DEFAULT_RECORD_CLASS.equals(fullModelClassName)) {
                 throw new IllegalArgumentException("Calculator instance for type " + fullModelClassName + " must be created first.");
@@ -516,7 +539,7 @@ public class ActiveRecordUtil {
                 return;
             }
             
-            Map calMap = getCalculatorInstanceMap();
+            Map<String, Calculator> calMap = getCalculatorInstanceMap();
             calMap.put(calKey, cal);
         }
     }
@@ -528,7 +551,7 @@ public class ActiveRecordUtil {
      * @param clazz         the class type of an ActiveRecord record
      * @param fieldName     a field name
      */
-    public static void verifyExistenceOfColumn(Class clazz, String fieldName) {
+    public static void verifyExistenceOfColumn(Class<? extends ActiveRecord> clazz, String fieldName) {
         ActiveRecord record = getHomeInstance(clazz);
         if (!record.isColumnField(fieldName)) {
             throw new GenericException("Field [" + fieldName + "] is not a column of table " + record.getTableName() + ".");
@@ -539,20 +562,15 @@ public class ActiveRecordUtil {
         return "cal_" + modelClassName;
     }
     
-    private static Map getCalculatorInstanceMap() {
+    private static Map<String, Calculator> getCalculatorInstanceMap() {
         return calculatorInstanceMap;
     }
-    
-    private static String getHomeInstanceKey(ActiveRecord record) {
-        //String uniqueKey = record.getClass().getName() + "-" + record.getConnectionName() + "-" + record.getTableName();
-        return getHomeInstanceKeyForCurrentThreadCache(record.getClass().getName());
-    }
 
-    private static String getHomeInstanceKeyForCurrentThreadCache(String modelClassName) {
+    private static String getHomeInstanceKey(String modelClassName) {
         return "model_" + modelClassName;
     }
     
-    private static Map getHomeInstanceMap() {
+    private static Map<String, ActiveRecord> getHomeInstanceMap() {
         return homeInstanceMap;
     }
 
@@ -560,24 +578,24 @@ public class ActiveRecordUtil {
         return "gate_" + modelClassName;
     }
     
-    private static Map getGateInstanceMap() {
+    private static Map<String, TableGateway> getGateInstanceMap() {
         return gateInstanceMap;
     }
     
     /**
      * calculatorInstanceMap stores Calculator instances.
      */
-    private static Map calculatorInstanceMap = Collections.synchronizedMap(new HashMap());
+    private static Map<String, Calculator> calculatorInstanceMap = new ConcurrentHashMap<String, Calculator>();
     
     /**
      * gateInstanceMap stores TableGateway instances.
      */
-    private static Map gateInstanceMap = Collections.synchronizedMap(new HashMap());
+    private static Map<String, TableGateway> gateInstanceMap = new ConcurrentHashMap<String, TableGateway>();
     
     /**
      * homeInstanceMap stores ActiveRecord home instances.
      */
-    private static Map homeInstanceMap = Collections.synchronizedMap(new HashMap());
+    private static Map<String, ActiveRecord> homeInstanceMap = new ConcurrentHashMap<String, ActiveRecord>();
     
     public static final String DEFAULT_RECORD_CLASS = "com.scooterframework.orm.activerecord.ActiveRecord";
 }

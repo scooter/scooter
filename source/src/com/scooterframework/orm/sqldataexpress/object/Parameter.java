@@ -209,20 +209,20 @@ public class Parameter {
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder sb= new StringBuilder();
 
-        returnString.append("index = " + index).append(", ");
-        returnString.append("catalog = " + catalog).append(", ");
-        returnString.append("schema = " + schema).append(", ");
-        returnString.append("name = " + name).append(", ");
-        returnString.append("mode = " + mode).append(", ");
-        returnString.append("sqlDataType = " + sqlDataType).append(", ");
-        returnString.append("sqlDataTypeName = " + sqlDataTypeName).append(", ");
-        returnString.append("javaClassName = " + javaClassName).append(", ");
-        returnString.append("bIsCursorType = " + bIsCursorType).append(", ");
-        returnString.append("vendor = " + vendor);
+        sb.append("index = " + index).append(", ");
+        sb.append("catalog = " + catalog).append(", ");
+        sb.append("schema = " + schema).append(", ");
+        sb.append("name = " + name).append(", ");
+        sb.append("mode = " + mode).append(", ");
+        sb.append("sqlDataType = " + sqlDataType).append(", ");
+        sb.append("sqlDataTypeName = " + sqlDataTypeName).append(", ");
+        sb.append("javaClassName = " + javaClassName).append(", ");
+        sb.append("bIsCursorType = " + bIsCursorType).append(", ");
+        sb.append("vendor = " + vendor);
         
-        return returnString.toString();
+        return sb.toString();
     }
 
 

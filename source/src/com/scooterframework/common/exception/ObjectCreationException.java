@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 
 /**
  * class ObjectCreationException
- * 
+ *
  * @author (Fei) John Chen
  */
 public class ObjectCreationException extends GenericException {
@@ -22,28 +22,28 @@ public class ObjectCreationException extends GenericException {
 	private static final long serialVersionUID = -5756502673652111889L;
 
 	/**
-     * Constructs a new ObjectCreationException exception with the specified 
+     * Constructs a new ObjectCreationException exception with the specified
      * class name.
-     * 
+     *
      * @param className the class name of the object to bve created.
      */
     public ObjectCreationException(String className) {
         this.className = className;
     }
-    
+
     /**
-     * Constructs a new ObjectCreationException exception with the specified 
-     * class name and cause. 
-     * 
+     * Constructs a new ObjectCreationException exception with the specified
+     * class name and cause.
+     *
      * @param className the class name of the object to bve created.
-     * @param cause the cause. (A null value is permitted, and indicates 
+     * @param cause the cause. (A null value is permitted, and indicates
      *                          that the cause is nonexistent or unknown.)
      */
     public ObjectCreationException(String className, Throwable cause) {
         super(cause);
         this.className = className;
     }
-    
+
     /**
      * Returns the detail message string of this instance.
      *
@@ -51,20 +51,20 @@ public class ObjectCreationException extends GenericException {
      */
     public String getMessage() {
         String parentMessage = null;
-        if (super.getCause() != null && 
+        if (super.getCause() != null &&
             super.getCause() instanceof InvocationTargetException) {
             parentMessage = super.getCause().getCause().getMessage();
         }
         else {
             parentMessage = super.getMessage();
         }
-        
-        StringBuffer result = new StringBuffer();
+
+        StringBuilder result = new StringBuilder();
         result.append("Failed to instantiate class \"").append(className).append("\".");
         if (parentMessage != null) result.append(" Details: ").append(parentMessage).append(".");
         return result.toString();
     }
-    
+
     /**
      * The type of class for the object to be created.
      */

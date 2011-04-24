@@ -61,7 +61,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
     /**
      * execute with output filter
      */
-    public OmniDTO execute(UserDatabaseConnection udc, Map inputs, Map outputFilters) 
+    public OmniDTO execute(UserDatabaseConnection udc, Map<String, Object> inputs, Map<String, String> outputFilters) 
     throws BaseSQLException {
     	Connection connection = udc.getConnection();
     	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
@@ -73,13 +73,14 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         //log.debug("execute - inputs: " + inputs);
         //log.debug("execute - outputFilters: " + outputFilters);
         
+        if (outputFilters == null) outputFilters = new HashMap<String, String>();
+        
         try {
             String stName = st.getName();
             autoFill(udc, inputs);
             
             String originalSql = st.getOriginalJdbcStatementString();
             if(checkPagination(inputs)) {
-            	outputFilters = new HashMap();
                 String updatedOriginalSql = dba.preparePaginationSql(originalSql, inputs, outputFilters);
                 st = updateStatement(updatedOriginalSql);
             }
@@ -105,7 +106,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
                     //get parameter meta data if it has not been loaded
                     ParameterMetaData pmd = pstmt.getParameterMetaData();
                     ParameterMetaDataLoader pmdl = new ParameterMetaDataLoader(pmd, st);
-                    pmdl.loadParameterMetaData(pmd);
+                    pmdl.loadParameterMetaData();
                 }
             }
             else {
@@ -115,11 +116,11 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
                 }
             }
             
-            Collection parameters = st.getParameters();
+            Collection<Parameter> parameters = st.getParameters();
             log.debug("execute - parameters: " + parameters);
-            Iterator pit = parameters.iterator();
+            Iterator<Parameter> pit = parameters.iterator();
             while(pit.hasNext()) {
-                Parameter p = (Parameter) pit.next();
+                Parameter p = pit.next();
                 
                 String key = p.getName();
                 if (!inputs.containsKey(key)) {
@@ -159,7 +160,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
                 
                 // handle out cursors or other outputs if there is any
                 if (rs != null) {
-                    if (outputFilters == null) {
+                    if (outputFilters == null || outputFilters.size() == 0) {
                         handleResultSet(dba, stName, returnTO, rs, inputs);
                     }
                     else {
@@ -197,25 +198,23 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         return returnTO;
     }
 
-    protected boolean checkPagination(Map inputs) {
+    protected boolean checkPagination(Map<String, Object> inputs) {
         boolean usePagination = false;
         if(st.isSelectStatement()) {
             usePagination = Util.getBooleanValue(inputs, DataProcessor.input_key_use_pagination, false);
-            if (!usePagination) {
+            if (!usePagination && inputs != null && !inputs.containsKey(DataProcessor.input_key_use_pagination)) {
                 int limit = Util.getIntValue(inputs, DataProcessor.input_key_records_limit, DataProcessor.NO_ROW_LIMIT);
-                boolean requireFixed = Util.getBooleanValue(inputs, DataProcessor.input_key_records_fixed, false);
-                if (limit != DataProcessor.NO_ROW_LIMIT && limit > 0 && !requireFixed) {
+                if (limit != DataProcessor.NO_ROW_LIMIT && limit > 0) {
                     usePagination = true;
                 }
             }
         }
-        
         return usePagination;
     }
 
 
     //auto fill some values
-    private void autoFill(UserDatabaseConnection udc, Map inputs) {
+    private void autoFill(UserDatabaseConnection udc, Map<String, Object> inputs) {
         String jdbcStatementString = st.getOriginalJdbcStatementString();
         
         if (jdbcStatementString.indexOf("?@") == -1) return;//nothing to fill
@@ -225,7 +224,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         {
             String token = sti.nextToken();
             
-            //replace all occurances of token by '?'
+            //replace all occurrences of token by '?'
             if (token.length()>2 && token.startsWith("?@")) {
                 String key = token.substring(2);
                 
@@ -244,19 +243,19 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
     }
 
     /**
-     * Replaces some tokens in the sql string with data from input map. The 
-     * parts that need to be replaced are parts in the sql string that start 
+     * Replaces some tokens in the SQL string with data from input map. The 
+     * parts that need to be replaced are parts in the SQL string that start 
      * with SqlUtil.REPLACE_PART_START and end with SqlUtil.REPLACE_PART_END.
      * 
      * @param original
      * @param inputs
      * @return 
      */
-    private String autoReplace(String original, Map inputs) {
+    private String autoReplace(String original, Map<String, Object> inputs) {
         if (original.indexOf(SqlUtil.REPLACE_PART_START) == -1 &&
             original.indexOf(SqlUtil.REPLACE_PART_END) == -1) return original;
         String replaced = original;
-        List replaceKeys = new ArrayList();
+        List<String> replaceKeys = new ArrayList<String>();
         StringTokenizer st = new StringTokenizer(original, " ,");
         while(st.hasMoreTokens()) {
             String token = st.nextToken();
@@ -265,18 +264,18 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             }
         }
         
-        for(Iterator it = replaceKeys.iterator(); it.hasNext();) {
-            String token = (String)it.next();
+        for(String token : replaceKeys) {
             String key = token.substring(1, token.length()-1);
-            String replaceStr = (String)inputs.get(key);
+            Object replaceStr = inputs.get(key);
             if (replaceStr == null) throw new IllegalArgumentException("There is no input data to replace " + token + ".");
-            replaced = StringUtil.replace(replaced, token, replaceStr);
+            replaced = StringUtil.replace(replaced, token, replaceStr.toString());
         }
         
         return replaced;
     }
 
-    private void handleResultSet(DBAdapter dba, String stName, OmniDTO returnTO, ResultSet rs, Map inputs) 
+    private void handleResultSet(DBAdapter dba, String stName, 
+    		OmniDTO returnTO, ResultSet rs, Map<String, ?> inputs) 
     throws SQLException {
         Cursor cursor = st.getCursor(stName, rs);
         int cursorWidth = cursor.getDimension();
@@ -298,19 +297,21 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         rs.close();
     }
     
-    private void handleFilteredResultSet(DBAdapter dba, String stName, OmniDTO returnTO, ResultSet rs, Map inputs, Map outputs) 
+    private void handleFilteredResultSet(DBAdapter dba, String stName, 
+    		OmniDTO returnTO, ResultSet rs, Map<String, Object> inputs, 
+    		Map<String, String> outputs) 
     throws SQLException {
         Cursor cursor = st.getCursor(stName, rs);
         int cursorWidth = cursor.getDimension();
         
-        Set allowedColumns = getAllowedColumns(outputs, cursor);
+        Set<String> allowedColumns = getAllowedColumns(outputs, cursor);
         TableData rt = new TableData();
         RowInfo newHeader = getFilteredHeaderInfo(allowedColumns, cursor);
         rt.setHeader(newHeader);
         returnTO.addTableData(stName, rt);
         
         while(rs.next()) {
-            ArrayList cellValues = new ArrayList();
+            ArrayList<Object> cellValues = new ArrayList<Object>();
             for (int i = 0; i < cursorWidth; i++) {
                 if (allowedColumns.contains(cursor.getColumnName(i))) {
                     cellValues.add(dba.getObjectFromResultSetByType(rs, 

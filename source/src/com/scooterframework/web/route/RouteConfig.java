@@ -8,13 +8,11 @@
 package com.scooterframework.web.route;
 
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
-import java.util.Set;
 
 import com.scooterframework.admin.PropertyFileChangeMonitor;
 import com.scooterframework.admin.PropertyReader;
@@ -22,14 +20,6 @@ import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.PropertyFileUtil;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
-import com.scooterframework.web.route.DefaultRoute;
-import com.scooterframework.web.route.MatchMaker;
-import com.scooterframework.web.route.NamedRoute;
-import com.scooterframework.web.route.RegularRoute;
-import com.scooterframework.web.route.Resource;
-import com.scooterframework.web.route.RootRoute;
-import com.scooterframework.web.route.Route;
-import com.scooterframework.web.route.RouteConstants;
 
 
 /**
@@ -90,7 +80,7 @@ public class RouteConfig implements Observer {
         String nameValueSpliter = RouteConstants.PROPERTY_SYMBOL_NAMEVALUESPLITER;
         String propertyDelimiter = RouteConstants.PROPERTY_SYMBOL_PROPERTYDELIMITER;
         
-        Enumeration en = appProperties.keys();
+        Enumeration<?> en = appProperties.keys();
         while (en.hasMoreElements()) {
             String key = (String) en.nextElement();
             if (key.startsWith("routes.name")) {
@@ -181,10 +171,10 @@ public class RouteConfig implements Observer {
         
         //display routes
         if (log.isDebugEnabled()) {
-            List allRoutes = MatchMaker.getInstance().getAllRoutes();
-            Iterator it = allRoutes.iterator();
+            List<Route> allRoutes = MatchMaker.getInstance().getAllRoutes();
+            Iterator<Route> it = allRoutes.iterator();
             while(it.hasNext()) {
-                Route route = (Route)it.next();
+                Route route = it.next();
                 log.debug("========== route type: " + route.getRouteType() + ", name: " + route.getName());
                 log.debug("==> " + route);
                 log.debug("");

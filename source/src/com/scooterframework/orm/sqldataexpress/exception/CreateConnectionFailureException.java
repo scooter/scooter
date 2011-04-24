@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -9,7 +9,7 @@ package com.scooterframework.orm.sqldataexpress.exception;
 
 /**
  * class DatabaseConnectionFailureException
- * 
+ *
  * @author (Fei) John Chen
  */
 public class CreateConnectionFailureException extends BaseSQLException {
@@ -35,9 +35,9 @@ public class CreateConnectionFailureException extends BaseSQLException {
     }
 
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
 
-        returnString.append( super.toString() );         
+        returnString.append( super.toString() );
 
         returnString.append( "connName = " + connName );
 

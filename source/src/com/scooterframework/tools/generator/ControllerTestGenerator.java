@@ -30,7 +30,7 @@ public class ControllerTestGenerator extends AbstractGenerator {
 	private boolean noSuffix;
 	private String[] actions;
 
-	public ControllerTestGenerator(String templateFilePath, Map props, String controller, String[] actions) {
+	public ControllerTestGenerator(String templateFilePath, Map<String, String> props, String controller, String[] actions) {
 		super(templateFilePath, props);
 		
 		this.actions = actions;
@@ -54,8 +54,9 @@ public class ControllerTestGenerator extends AbstractGenerator {
 		}
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, Object> getTemplateProperties() {
+		Map<String, Object> templateProps = new HashMap<String, Object>();
 		templateProps.put("app_name", getProperty("app.name"));
 		templateProps.put("package_line", packageLine);
 		templateProps.put("package_name", packageName);
@@ -66,6 +67,7 @@ public class ControllerTestGenerator extends AbstractGenerator {
 		return templateProps;
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return (noPrefix)?(DIRECTORY_NAME_TEST + File.separatorChar + FUNCTIONAL_TEST):
 					(DIRECTORY_NAME_TEST + File.separatorChar + 
@@ -73,6 +75,7 @@ public class ControllerTestGenerator extends AbstractGenerator {
 							packageName.replace('.', File.separatorChar));
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return controllerClassName + "Test" + FILE_EXTENSION_JAVA;
 	}

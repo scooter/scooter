@@ -111,3 +111,21 @@ table.sTable tr.even { background-color: white; }
   background-color: #FFDAF3;
 }
 
+.compileErrorFile {
+  border: 3px solid red;
+  padding: 7px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  background-color: red;
+}
+
+.compileErrorMessage {
+  border: 3px solid red;
+  border-bottom: 0px;
+  background-color: #FFDAF3;
+}
+
+#compileErrors pre {
+  margin-top: 0px;
+  border: 3px solid red;
+}

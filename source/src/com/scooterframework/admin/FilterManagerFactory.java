@@ -7,9 +7,8 @@
  */
 package com.scooterframework.admin;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -18,9 +17,9 @@ import java.util.Map;
  * @author (Fei) John Chen
  */
 public class FilterManagerFactory {
-	private static FilterManagerFactory me;
-	private Map<Class, FilterManager> filterManagersMap = 
-		Collections.synchronizedMap(new HashMap<Class, FilterManager>());
+	private static FilterManagerFactory me = new FilterManagerFactory();
+	
+	private Map<Class<?>, FilterManager> filterManagersMap = new ConcurrentHashMap<Class<?>, FilterManager>();
 	
 	private FilterManagerFactory() {
 	}
@@ -31,7 +30,6 @@ public class FilterManagerFactory {
 	 * @return the singleton instance of the <tt>FilterManager</tt>.
 	 */
 	public static FilterManagerFactory getInstance() {
-		if (me == null) me = new FilterManagerFactory();
 		return me;
 	}
 	
@@ -41,7 +39,7 @@ public class FilterManagerFactory {
 	 * @param ownerClass
 	 * @return the FilterManager for the owner class type
 	 */
-	public FilterManager getFilterManager(Class ownerClass) {
+	public FilterManager getFilterManager(Class<?> ownerClass) {
 		FilterManager fm = filterManagersMap.get(ownerClass);
 		if (fm == null) {
 			fm = new FilterManager(ownerClass);
@@ -55,7 +53,7 @@ public class FilterManagerFactory {
 	 * 
 	 * @param ownerClass
 	 */
-	public void removeFilterManager(Class ownerClass) {
+	public void removeFilterManager(Class<?> ownerClass) {
 		filterManagersMap.remove(ownerClass);
 	}
 }

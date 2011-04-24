@@ -26,7 +26,7 @@ public class Event {
 	}
 	
 	public Date getTimestamp() {
-		return timestamp;
+		return (timestamp == null)?timestamp:(new Date(timestamp.getTime()));
 	}
 	
 	public String getEventType() {

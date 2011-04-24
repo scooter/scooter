@@ -20,7 +20,7 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  */
 public class Database {
 
-    public static List getConnectionNames() {
+    public static List<String> getConnectionNames() {
         return SqlExpressUtil.getConnectionNames();
     }
     

@@ -12,6 +12,8 @@ import java.io.FileFilter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Set;
 
@@ -27,7 +29,7 @@ public class DirObservable extends Observable {
     private long lastScannedTime = 0L;
     private String path;
     private File[] files;
-    private HashMap fileTimestampMap = new HashMap();
+    private Map<File, Long> fileTimestampMap = new HashMap<File, Long>();
     private FileFilter filter;
     
     public DirObservable(String path) {
@@ -52,14 +54,14 @@ public class DirObservable extends Observable {
         files = dir.listFiles(filter);
         
         for(int i = 0; i < files.length; i++) {
-           fileTimestampMap.put(files[i], new Long(files[i].lastModified()));
+           fileTimestampMap.put(files[i], Long.valueOf(files[i].lastModified()));
         }
         
         lastScannedTime = System.currentTimeMillis();
     }
     
     void checkChange() {
-        HashSet checkedFiles = new HashSet();
+        Set<File> checkedFiles = new HashSet<File>();
         files = new File(path).listFiles(filter);
         
         for(int i = 0; i < files.length; i++) {
@@ -69,24 +71,24 @@ public class DirObservable extends Observable {
             //skip copied file in windows XP and Vista
             if (file.getName().startsWith("Copy ") || file.getName().indexOf(" Copy") != -1) continue;
             
-            Long current = (Long)fileTimestampMap.get(file);
+            Long current = fileTimestampMap.get(file);
             if (current == null) {
-                fileTimestampMap.put(file, new Long(file.lastModified()));
+                fileTimestampMap.put(file, Long.valueOf(file.lastModified()));
                 onChange(file, FileChangeNotice.ADD_FILE);
             }
             else if (current.longValue() != file.lastModified()) {
-                fileTimestampMap.put(file, new Long(file.lastModified()));
+                fileTimestampMap.put(file, Long.valueOf(file.lastModified()));
                 onChange(file, FileChangeNotice.MODIFY_FILE);
             }
         }
         
-        Set ref = ((HashMap)fileTimestampMap.clone()).keySet();
-        ref.removeAll((Set)checkedFiles);
-        Iterator it = ref.iterator();
-        while (it.hasNext()) {
-            File deletedFile = (File)it.next();
-            fileTimestampMap.remove(deletedFile);
-            onChange(deletedFile, FileChangeNotice.DELETE_FILE);
+        Iterator<Entry<File, Long>> it = fileTimestampMap.entrySet().iterator();
+        while(it.hasNext()) {
+        	Entry<File, Long> entry = it.next();
+        	File file = entry.getKey();
+        	if (checkedFiles.contains(file)) continue;
+        	it.remove();
+            onChange(file, FileChangeNotice.DELETE_FILE);
         }
         
         lastScannedTime = System.currentTimeMillis();
@@ -99,7 +101,7 @@ public class DirObservable extends Observable {
     }
     
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
         sb.append("path=" + path).append(", ");
         sb.append("lastScannedTime=" + lastScannedTime);

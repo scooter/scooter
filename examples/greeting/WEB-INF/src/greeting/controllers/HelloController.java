@@ -1,5 +1,7 @@
 package greeting.controllers;
 
+import static com.scooterframework.web.controller.ActionControl.*;
+
 public class HelloController {
     public String index() {
         return "xml=><?xml version=\"1.0\" encoding=\"UTF-8\"?>" +

@@ -25,8 +25,8 @@ public class VisitsController extends ApplicationController {
      * <tt>add</tt> method prepares meta data for adding a new <tt>visit</tt> record.
      */
     public String add() {
-    	setViewData("pet", Pet.findFirst("pets.id=" + p("pet_id"), "include:owner, type"));
-        setViewData("visits", Visit.findAll("pet_id=" + p("pet_id")));
+    	setViewData("pet", Pet.where("pets.id=" + p("pet_id")).includes("owner, type").getRecord());
+        setViewData("visits", Visit.where("pet_id=" + p("pet_id")).getRecords());
         return null;
     }
 
@@ -34,7 +34,7 @@ public class VisitsController extends ApplicationController {
      * <tt>create</tt> method creates a new <tt>visit</tt> record.
      */
     public String create() {
-    	ActiveRecord owner = Owner.findFirst("id=" + p("owner_id"));
+    	ActiveRecord owner = Owner.where("id=" + p("owner_id")).getRecord();
         ActiveRecord newVisit = null;
         try {
             newVisit = Visit.newRecord();

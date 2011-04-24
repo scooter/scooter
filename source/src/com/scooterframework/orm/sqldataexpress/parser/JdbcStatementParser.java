@@ -8,16 +8,17 @@
 package com.scooterframework.orm.sqldataexpress.parser;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.sqldataexpress.connection.UserDatabaseConnection;
-import com.scooterframework.orm.sqldataexpress.exception.LookupFailureException;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatement;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatementParameter;
+import com.scooterframework.orm.sqldataexpress.object.Parameter;
+import com.scooterframework.orm.sqldataexpress.object.RowInfo;
 import com.scooterframework.orm.sqldataexpress.object.TableInfo;
-import com.scooterframework.orm.sqldataexpress.util.DBStore;
 import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 
 
@@ -28,6 +29,9 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  */
 public class JdbcStatementParser extends JdbcStatementHelper {
     public JdbcStatementParser(UserDatabaseConnection udc, JdbcStatement st) {
+        if (st == null) 
+            throw new IllegalArgumentException("JdbcStatement input is null.");
+        
         this.udc = udc;
         this.st = st;
         
@@ -37,7 +41,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
 
     public void parse() {
         //get parameter property data if it has not been loaded
-        st = SqlExpressUtil.furtherLookupJdbcStatement(udc, st);
+        st = furtherLookupJdbcStatement(udc, st);
         
         st.setLoadedParameterProperties(true);
         
@@ -45,6 +49,56 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         if (log.isDebugEnabled()) {
             log.debug(st);
         }
+    }
+    
+    // populate more parameter properties for the JdbcStatement
+    private JdbcStatement furtherLookupJdbcStatement(UserDatabaseConnection udc, JdbcStatement st) {
+        try {
+            Collection<Parameter> parameters = st.getParameters();
+            Iterator<Parameter> it = parameters.iterator();
+            while(it.hasNext()) {
+                JdbcStatementParameter jdbcParam = (JdbcStatementParameter)it.next();
+                if (jdbcParam.isUsedByCount()) continue;
+                if (jdbcParam.getSqlDataType() != Parameter.UNKNOWN_SQL_DATA_TYPE) {
+                    //do not furtherLookup if the sql data type is already known.
+                    continue;
+                }
+                
+                String tableName = jdbcParam.getTableName();
+                String columnName = jdbcParam.getColumnName();
+                
+                int sqlDataType = 0;
+                String sqlDataTypeName = null;
+                String javaClassName = null;
+                
+                if (tableName != null && columnName != null) {
+                    // find more properties of this column
+                    TableInfo ti = SqlExpressUtil.lookupTableInfo(udc, tableName);
+                    
+                    // add more properties for this column
+                    RowInfo header = ti.getHeader();
+                    int columnIndex = header.getColumnPositionIndex(columnName);
+                    
+                    sqlDataType = header.getColumnSqlDataType(columnIndex);
+                    sqlDataTypeName = header.getColmnDataTypeName(columnIndex);
+                    javaClassName = header.getColumnJavaClassName(columnIndex);
+                    
+                    jdbcParam.setSqlDataType(sqlDataType);
+                    jdbcParam.setSqlDataTypeName(sqlDataTypeName);
+                    jdbcParam.setJavaClassName(javaClassName);
+                }
+                else {
+                    log.error("Can not detecting parameter properties because " + 
+                              "either table name or column name is null for the " + 
+                              "parameter with index " + jdbcParam.getIndex());
+                }
+            }
+        }
+        catch(Exception ex) {
+            log.error("Error in furtherLookupJdbcStatement() because of " + ex.getMessage());
+        }
+        
+        return st;
     }
     
     
@@ -248,8 +302,8 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         
         // step 3: get the column name for each question mark
         int valuesIndex = 0;
-        List columns = new ArrayList();
-        List values = new ArrayList();
+        List<String> columns = new ArrayList<String>();
+        List<String> values = new ArrayList<String>();
         for (int j = 3; j < totalTokens; j++) {
             if (tokens[j].equals("VALUES")) {
                 valuesIndex = j;
@@ -270,8 +324,8 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         
         int qmarkIndex = 1;
         for (int l = 0; l < length; l++) {
-            String columnName = (String)columns.get(l);
-            String value = (String)values.get(l);
+            String columnName = columns.get(l);
+            String value = values.get(l);
             if (value.startsWith("?")) {
                 JdbcStatementParameter param = new JdbcStatementParameter();
                 param.setIndex(qmarkIndex);
@@ -390,19 +444,13 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         boolean bMatch = false;
         
         try {
-            TableInfo ti = DBStore.getInstance().getTableInfo(potentialTableName);
-            if (ti == null) {
-                // lookup 
-                ti = SqlExpressUtil.lookupTableInfo(udc, potentialTableName);
-            }
-            
+            TableInfo ti = SqlExpressUtil.lookupTableInfo(udc, potentialTableName);
             bMatch = ti.getHeader().isValidColumnName(columnName);
         }
-        catch(LookupFailureException lex) {
-            ;
-        }
         catch(Exception ex) {
-            ;
+            log.error("Failed in isColumnInTable method for column \"" + 
+            		columnName + "\" and table \"" + potentialTableName + 
+            		"\" because " + ex.getMessage());
         }
         
         return bMatch;
@@ -410,6 +458,4 @@ public class JdbcStatementParser extends JdbcStatementHelper {
 
     private UserDatabaseConnection udc;
     private JdbcStatement st;
-    
-    protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
 }

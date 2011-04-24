@@ -9,7 +9,6 @@ package com.scooterframework.builtin.databrowser;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +46,7 @@ public class Record {
 		RowInfo ri = getRowInfo(connName, table);
 
 		// prepare inputs map
-		Map inputs = new HashMap();
+		Map<String, Object> inputs = new HashMap<String, Object>();
 		String processorType = DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR;
 		String processorName = getFinderSql(connName, table);
 		if (whereClause != null) 
@@ -66,7 +65,7 @@ public class Record {
         RowInfo ri = getRowInfo(connName, table);
         
         //prepare inputs map
-        Map inputs = new HashMap();
+        Map<String, Object> inputs = new HashMap<String, Object>();
         inputs.put(DataProcessor.input_key_database_connection_name, connName);
         inputs.put("id", restfulId);
         
@@ -86,11 +85,11 @@ public class Record {
         return (td != null)?td.getFirstRow():null;
     }
     
-    public static RowData createRecord(Map inputs, String connName, String table) {
+    public static RowData createRecord(Map<String, Object> inputs, String connName, String table) {
         RowInfo ri = getRowInfo(connName, table);
         inputs = StringUtil.convertKeyToUpperCase(inputs);
         
-        StringBuffer insertSQL = new StringBuffer();
+        StringBuilder insertSQL = new StringBuilder();
         insertSQL.append("INSERT INTO ").append(SqlExpressUtil.getExpandedTableName(connName, table));
         insertSQL.append(" ").append(prepareInsertSQL(ri, inputs));
         
@@ -111,11 +110,11 @@ public class Record {
         return record;
     }
     
-    public static int updateRecord(Map inputs, String connName, String table, String restfulId) {
+    public static int updateRecord(Map<String, Object> inputs, String connName, String table, String restfulId) {
         RowInfo ri = getRowInfo(connName, table);
         inputs = StringUtil.convertKeyToUpperCase(inputs);
         
-        StringBuffer updateSQL = new StringBuffer();
+        StringBuilder updateSQL = new StringBuilder();
         updateSQL.append("UPDATE ").append(SqlExpressUtil.getExpandedTableName(connName, table));
         updateSQL.append(" SET ").append(prepareSetSQL(ri, inputs));
         
@@ -133,10 +132,10 @@ public class Record {
         return updateCount;
     }
     
-    public static int deleteRecord(Map inputs, String connName, String table, String restfulId) {
+    public static int deleteRecord(Map<String, Object> inputs, String connName, String table, String restfulId) {
         RowInfo ri = getRowInfo(connName, table);
         
-        StringBuffer deleteSQL = new StringBuffer();
+        StringBuilder deleteSQL = new StringBuilder();
         deleteSQL.append("DELETE FROM ").append(SqlExpressUtil.getExpandedTableName(connName, table));
         
         String condition = prepareDynamicWhereClauseForRestfulId(inputs, ri, restfulId);
@@ -155,7 +154,7 @@ public class Record {
     
     public static RowInfo getRowInfo(String connName, String table) {
         RowInfo ri = null;
-        TableInfo ti = SqlExpressUtil.lookupAndRegisterTable(connName, table);
+        TableInfo ti = SqlExpressUtil.lookupTableInfo(connName, table);
         if (ti != null) {
             ri = ti.getHeader();
         }
@@ -169,10 +168,10 @@ public class Record {
         return ri;
     }
     
-    public static String prepareInsertSQL(RowInfo ri, Map inputs) {
-        Set inputKeys = inputs.keySet();
-        StringBuffer names = new StringBuffer();
-        StringBuffer values = new StringBuffer();
+    public static String prepareInsertSQL(RowInfo ri, Map<String, Object> inputs) {
+        Set<String> inputKeys = inputs.keySet();
+        StringBuilder names = new StringBuilder();
+        StringBuilder values = new StringBuilder();
         int maxSize = ri.getDimension();
         ColumnInfo ci = null;
         for(int i = 0; i < maxSize; i++) {
@@ -194,15 +193,15 @@ public class Record {
             values.append("?").append(columnName).append(", ");
         }
         
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append("(").append(StringUtil.removeLastToken(names, ", "));
         result.append(") VALUES (").append(StringUtil.removeLastToken(values, ", ")).append(")");
         return result.toString();
     }
     
-    public static String prepareSetSQL(RowInfo ri, Map inputs) {
-        Set inputKeys = inputs.keySet();
-        StringBuffer sb = new StringBuffer();
+    public static String prepareSetSQL(RowInfo ri, Map<String, Object> inputs) {
+        Set<String> inputKeys = inputs.keySet();
+        StringBuilder sb = new StringBuilder();
         int maxSize = ri.getDimension();
         ColumnInfo ci = null;
         for(int i = 0; i < maxSize; i++) {
@@ -228,9 +227,9 @@ public class Record {
         return StringUtil.removeLastToken(sb, ", ").toString();
     }
     
-    public static String prepareDynamicWhereClauseForRestfulId(Map inputs, RowInfo ri, String restfulId) {
+    public static String prepareDynamicWhereClauseForRestfulId(Map<String, Object> inputs, RowInfo ri, String restfulId) {
         String condition = "";
-        Map map = SqlExpressUtil.getTableKeyMapForRestfulId(ri, restfulId);
+        Map<String, String> map = SqlExpressUtil.getTableKeyMapForRestfulId(ri, restfulId);
         if (map != null && map.size() > 0) {
             condition = getDynamicWhereClauseForTableKeyMap(ri.getTable(), map);
             inputs.putAll(map);
@@ -238,16 +237,15 @@ public class Record {
         return condition;
     }
     
-    private static String getDynamicWhereClauseForTableKeyMap(String table, Map tableKeyMap) {
-        Map map = new HashMap();
-        StringBuffer sb = new StringBuffer();
+    private static String getDynamicWhereClauseForTableKeyMap(String table, Map<String, String> tableKeyMap) {
+        Map<String, String> map = new HashMap<String, String>();
+        StringBuilder sb = new StringBuilder();
         if (tableKeyMap != null && tableKeyMap.size() > 0) {
-            Iterator it = tableKeyMap.keySet().iterator();
-            while(it.hasNext()) {
-                String column = (String)it.next();
+            for (Map.Entry<String, String> entry : tableKeyMap.entrySet()) {
+                String column = entry.getKey();
                 String token = table + "." + column;
                 sb.append(token).append("= ?").append(token).append(" AND ");
-                map.put(token, tableKeyMap.get(column));
+                map.put(token, entry.getValue());
             }
             tableKeyMap.putAll(map);
         }

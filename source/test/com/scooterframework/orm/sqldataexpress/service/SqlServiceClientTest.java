@@ -40,7 +40,7 @@ public class SqlServiceClientTest extends ScooterTestHelper {
 	@Test
 	public void test_retrieveTableDataBySQL_inputs() {
 		String sql = "SELECT * FROM pets WHERE name = ?name ORDER BY birth_date DESC";
-		Map inputs = new HashMap();
+		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs.put("name", "Max");
 		TableData td = SqlServiceClient.retrieveTableDataBySQL(sql, inputs);
 		assertEquals("total vets", 1, td.getTableSize());
@@ -62,7 +62,7 @@ public class SqlServiceClientTest extends ScooterTestHelper {
 	@Test
 	public void test_retrieveTableDataBySQLKey_inputs() {
 		String sql = "getPetByName";
-		Map inputs = new HashMap();
+		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs.put("name", "Max");
 		TableData td = SqlServiceClient.retrieveTableDataBySQLKey(sql, inputs);
 		assertEquals("total vets", 1, td.getTableSize());
@@ -74,7 +74,7 @@ public class SqlServiceClientTest extends ScooterTestHelper {
 	@Test
 	public void test_retrieveRowsBySQL() {
 		String sql = "SELECT * FROM pets ORDER BY birth_date DESC";
-		List rows = SqlServiceClient.retrieveRowsBySQL(sql);
+		List<RowData> rows = SqlServiceClient.retrieveRowsBySQL(sql);
 		assertEquals("total rows", 13, rows.size());
 		
 		RowData rd1 = (RowData)rows.get(0);
@@ -84,9 +84,9 @@ public class SqlServiceClientTest extends ScooterTestHelper {
 	@Test
 	public void test_retrieveRowsBySQL_inputs() {
 		String sql = "SELECT * FROM pets WHERE name = ?name ORDER BY birth_date DESC";
-		Map inputs = new HashMap();
+		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs.put("name", "Max");
-		List rows = SqlServiceClient.retrieveRowsBySQL(sql, inputs);
+		List<RowData> rows = SqlServiceClient.retrieveRowsBySQL(sql, inputs);
 		assertEquals("total rows", 1, rows.size());
 		
 		RowData rd1 = (RowData)rows.get(0);
@@ -103,7 +103,7 @@ public class SqlServiceClientTest extends ScooterTestHelper {
 	@Test
 	public void test_retrieveObjectBySQL_inputs() {
 		String sql = "SELECT name FROM pets WHERE id = ?1";
-		Map inputs = new HashMap();
+		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs.put("1", "12");
 		Object data = SqlServiceClient.retrieveObjectBySQL(sql, inputs);
 		assertEquals("name of pet with id 12", "Lucky", data);
@@ -131,7 +131,7 @@ public class SqlServiceClientTest extends ScooterTestHelper {
 		Object nextID = getNextPetID();
 		
 		String sql = "INSERT INTO pets (id, name, type_id, owner_id) VALUES (?id, ?name, 1, 10)";
-		Map inputs = new HashMap();
+		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs.put("id", nextID);
 		inputs.put("name", "Pingping");
 		int insertCount = SqlServiceClient.executeSQL(sql, inputs);

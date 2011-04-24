@@ -36,7 +36,7 @@ public class DateUtil {
      * for automatic form processing are listed in description of 
      * {@link #getDateTimePattern(java.lang.String)} method.</p>
      * 
-     * @param dateStr
+     * @param dateStr  date string
      * @return a date instance
      */
     public static Date parseDate(String dateStr) {
@@ -51,8 +51,8 @@ public class DateUtil {
      * for automatic form processing are listed in description of 
      * {@link #getDateTimePattern(java.lang.String)} method.</p>
      * 
-     * @param dateStr
-     * @param pattern
+     * @param dateStr  date string
+     * @param pattern  the pattern describing the date and time format
      * @return a date instance
      */
     public static Date parseDate(String dateStr, String pattern) {
@@ -69,8 +69,8 @@ public class DateUtil {
      * for automatic form processing are listed in description of 
      * {@link #getDateTimePattern(java.lang.String)} method.</p>
      * 
-     * @param dateStr
-     * @param locale
+     * @param dateStr  date string
+     * @param locale   locale for date
      * @return a date instance
      */
     public static Date parseDate(String dateStr, Locale locale) {
@@ -85,9 +85,9 @@ public class DateUtil {
      * for automatic form processing are listed in description of 
      * {@link #getDateTimePattern(java.lang.String)} method.</p>
      * 
-     * @param dateStr
-     * @param pattern
-     * @param locale
+     * @param dateStr  date string
+     * @param pattern  the pattern describing the date and time format
+     * @param locale   locale for date
      * @return a date instance
      */
     public static Date parseDate(String dateStr, String pattern, Locale locale) {

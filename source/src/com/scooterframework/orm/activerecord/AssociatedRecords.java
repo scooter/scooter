@@ -31,9 +31,9 @@ abstract public class AssociatedRecords {
         latestRecordsLoaded = false;
     }
     
-    public AssociatedRecords(RecordRelation recordRelation, List records) {
+    public AssociatedRecords(RecordRelation recordRelation, List<? extends ActiveRecord> records) {
         this(recordRelation);
-        this.associatedRecords = records;
+        this.associatedRecords.addAll(records);
         
         latestRecordsLoaded = true;
     }
@@ -45,16 +45,16 @@ abstract public class AssociatedRecords {
      * @return ActiveRecord at the index
      */
     public ActiveRecord getRecord(int index) {
-        List records = getRecords(!latestRecordsLoaded);//refresh the list if necessary
+        List<ActiveRecord> records = getRecords(!latestRecordsLoaded);//refresh the list if necessary
         ActiveRecord record = null;
-        if (records != null && index < records.size()) record = (ActiveRecord)records.get(index);
+        if (records != null && index < records.size()) record = records.get(index);
         return record;
     }
     
     /**
      * Returns the associated records.
      */
-    public List getRecords() {
+    public List<ActiveRecord> getRecords() {
         return getRecords(false);
     }
     
@@ -64,15 +64,17 @@ abstract public class AssociatedRecords {
      * <p>If <tt>refresh</tt> is <tt>true</tt>, a database retrieval will be 
      * tried for the owner object.</p>
      */
-    public List getRecords(boolean refresh) {
+    public List<ActiveRecord> getRecords(boolean refresh) {
         //retrieve current list
         if (refresh) {
+        	cleanCache();
+        	
             if (recordRelation instanceof HasManyRecordRelation) {
-                associatedRecords = ((HasManyRecordRelation)recordRelation).retrieveAssociatedDataList();
+                associatedRecords.addAll(((HasManyRecordRelation)recordRelation).retrieveAssociatedDataList());
             }
             else 
             if (recordRelation instanceof HasManyThroughRecordRelation) {
-                associatedRecords = ((HasManyThroughRecordRelation)recordRelation).retrieveAssociatedDataList();
+                associatedRecords.addAll(((HasManyThroughRecordRelation)recordRelation).retrieveAssociatedDataList());
             }
             
             latestRecordsLoaded = true;
@@ -105,7 +107,7 @@ abstract public class AssociatedRecords {
      * @return updated AssociatedRecords
      */
     public AssociatedRecords add(ActiveRecord record) {
-        List records = new ArrayList();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
         if (record != null) records.add(record);
         return add(records);
     }
@@ -119,7 +121,7 @@ abstract public class AssociatedRecords {
      * @param records a list of records to be added to the relation. 
      * @return updated AssociatedRecords.
      */
-    abstract public AssociatedRecords add(List records);
+    abstract public AssociatedRecords add(List<? extends ActiveRecord> records);
     
     /**
      * <p>Removes an object from the associated list. If the object is a 
@@ -133,7 +135,7 @@ abstract public class AssociatedRecords {
      * @return updated AssociatedRecords.
      */
     public AssociatedRecords detach(ActiveRecord record) {
-        List records = new ArrayList();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
         if (record != null) records.add(record);
         return detach(records);
     }
@@ -149,7 +151,7 @@ abstract public class AssociatedRecords {
      * @param records list of records to be detached.
      * @return updated AssociatedRecords.
      */
-    abstract public AssociatedRecords detach(List records);
+    abstract public AssociatedRecords detach(List<? extends ActiveRecord> records);
     
     /**
      * <p>Deletes an object from the associated list and delete the record in 
@@ -162,7 +164,7 @@ abstract public class AssociatedRecords {
      * @return updated AssociatedRecords.
      */
     public AssociatedRecords delete(ActiveRecord record) {
-        List records = new ArrayList();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
         if (record != null) records.add(record);
         return delete(records);
     }
@@ -177,7 +179,7 @@ abstract public class AssociatedRecords {
      * @param records a list of records to be deleted.
      * @return updated AssociatedRecords.
      */
-    abstract public AssociatedRecords delete(List records);
+    abstract public AssociatedRecords delete(List<? extends ActiveRecord> records);
     
     /**
      * Removes all associated objects from the associated list by setting 
@@ -201,7 +203,7 @@ abstract public class AssociatedRecords {
      * 
      * @return updated AssociatedRecords
      */
-    abstract public AssociatedRecords replace(List records);
+    abstract public AssociatedRecords replace(List<? extends ActiveRecord> records);
     
     /**
      * Return true if this list contains no elements.
@@ -250,7 +252,7 @@ abstract public class AssociatedRecords {
      * Cleans up cached data.
      */
     public void cleanCache() {
-        associatedRecords = null;
+        associatedRecords.clear();
         latestRecordsLoaded = false;
     }
     
@@ -268,8 +270,9 @@ abstract public class AssociatedRecords {
      * 
      * @param records   newly loaded database records from database.
      */
-    public void storeLoadedAssociatedRecords(List records) {
-        associatedRecords = records;
+    public void storeLoadedAssociatedRecords(List<? extends ActiveRecord> records) {
+    	associatedRecords.clear();
+        associatedRecords.addAll(records);
         latestRecordsLoaded = true;
     }
     
@@ -284,15 +287,15 @@ abstract public class AssociatedRecords {
     public boolean findBy(String field, Object value) {
         if (value == null) return false;
         
-        List records = getRecords();
+        List<ActiveRecord> records = getRecords();
         if (records == null) return false;
         
         boolean found = false;
         
         //loop thru roles to see if the role id is in the list
-        Iterator it = records.iterator();
+        Iterator<ActiveRecord> it = records.iterator();
         while(it.hasNext()) {
-            ActiveRecord record = (ActiveRecord)it.next();
+            ActiveRecord record = it.next();
             Object fvalue = record.getField(field);
             if (fvalue != null && fvalue.toString().equalsIgnoreCase(value.toString())) {
                 found = true;
@@ -333,12 +336,12 @@ abstract public class AssociatedRecords {
      * @param expected expected class type
      * @param records  list of records to be checked
      */
-    protected void validateRecordType(Class expected, List records) {
+    protected void validateRecordType(Class<? extends ActiveRecord> expected, List<? extends ActiveRecord> records) {
         if (expected == null || records == null) return;
         
         // make sure the record type is valid
-        for(Iterator it = records.iterator(); it.hasNext();) {
-            ActiveRecord testRecord = (ActiveRecord)it.next();
+        for(Iterator<? extends ActiveRecord> it = records.iterator(); it.hasNext();) {
+            ActiveRecord testRecord = it.next();
             ActiveRecordUtil.validateRecordType(expected, testRecord);
         }
     }
@@ -350,14 +353,14 @@ abstract public class AssociatedRecords {
      * @param record  the record to be removed
      * @return the remaining list
      */
-    protected List removeRecordFromList(List records, ActiveRecord record) {
-        if (records == null || record == null) return records;
+    protected List<ActiveRecord> removeRecordFromList(List<? extends ActiveRecord> records, ActiveRecord record) {
+        if (records == null) return null;
         
         int currentSize = records.size();
-        List newList = new ArrayList();
+        List<ActiveRecord> newList = new ArrayList<ActiveRecord>();
         for(int i=0; i<currentSize; i++) {
-            ActiveRecord tmp = (ActiveRecord)records.get(i);
-            if (!ActiveRecordUtil.isSameRecord(tmp, record)) {
+            ActiveRecord tmp = records.get(i);
+            if (record == null || !ActiveRecordUtil.isSameRecord(tmp, record)) {
                 newList.add(tmp);
             }
         }
@@ -373,7 +376,7 @@ abstract public class AssociatedRecords {
     /**
      * The list of associated records.
      */
-    protected List associatedRecords = new ArrayList();
+    protected List<ActiveRecord> associatedRecords = new ArrayList<ActiveRecord>();
     
     /**
      * Indicates if associated records have been retrieved or not

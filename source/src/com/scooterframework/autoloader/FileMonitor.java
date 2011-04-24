@@ -10,18 +10,14 @@ package com.scooterframework.autoloader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.scooterframework.admin.Constants;
-import com.scooterframework.admin.EventsManager;
 import com.scooterframework.common.logging.LogUtil;
 
 /**
@@ -48,8 +44,8 @@ public class FileMonitor {
     private long period = 0L;
     private String sourcePath = "";
     private long lastScanTime = 0L;
-    private static Map sourceMap = Collections.synchronizedMap(new HashMap());
-    private Map modifiedSources = new HashMap();
+    private static Map<String, SourceFile> sourceMap = new ConcurrentHashMap<String, SourceFile>();
+    private Map<String, SourceFile> modifiedSources = new ConcurrentHashMap<String, SourceFile>();
     private long latestChange = 0L;
     
     private static FileMonitor fm;
@@ -201,8 +197,9 @@ public class FileMonitor {
         }
         else {
         	SourceFile sf =  new SourceFile(file, sourceDirPath);
-        	modifiedSources.put(filePath, sf);
             sourceMap.put(className, sf);
+            
+            if (sf.availableForRecompile()) modifiedSources.put(filePath, sf);
         }
     }
     
@@ -210,13 +207,10 @@ public class FileMonitor {
     	if (modifiedSources.size() <= 0) return;
     	
         //1. check if there is any change in source files
-        int size = modifiedSources.size();
-        List files = new ArrayList(size);
-        Iterator it = modifiedSources.keySet().iterator();
+        List<File> files = new ArrayList<File>(modifiedSources.size());
         long sumTime = 0L;
-        while(it.hasNext()) {
-            Object fileName = it.next();
-            SourceFile sf = (SourceFile)modifiedSources.get(fileName);
+        for (Map.Entry<String, SourceFile> entry : modifiedSources.entrySet()) {
+            SourceFile sf = entry.getValue();
             
             if (sf.getSource().exists()) {
                 files.add(sf.getSource());
@@ -231,24 +225,12 @@ public class FileMonitor {
         latestChange = sumTime;
         
         String result = JavaCompiler.compile(files);
-        if (result != null) {
-            log.error("Failed to compile. Error details: \n\r" + result);
-            CompileEvent ce = new CompileEvent(false, Constants.EVENT_COMPILE, result, files);
-            EventsManager.getInstance().publishEvent(ce);
-        }
-        else {
-        	log.info("Compile success.");
-            CompileEvent ce = new CompileEvent(true, Constants.EVENT_COMPILE, result, files);
-            EventsManager.getInstance().publishEvent(ce);
-        }
         
         //3. transform
         if (result == null || "".equals(result)) {
-        	List classNames = new ArrayList();
-        	Iterator it2 = modifiedSources.keySet().iterator();
-            while(it2.hasNext()) {
-                Object fileName = it2.next();
-                SourceFile sf = (SourceFile)modifiedSources.get(fileName);
+        	List<String> classNames = new ArrayList<String>();
+            for (Map.Entry<String, SourceFile> entry : modifiedSources.entrySet()) {
+                SourceFile sf = entry.getValue();
                 if (sf.getClassFile().exists()) {
                 	String className = SourceFileHelper.getClassNameFromClassFile(sf.getClassFile());
                 	classNames.add(className);

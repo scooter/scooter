@@ -22,7 +22,7 @@ public class UndefinedRelationException extends RelationException  {
         super(message);
     }
     
-    public UndefinedRelationException(Class entity1, Class entity2) {
+    public UndefinedRelationException(Class<? extends ActiveRecord> entity1, Class<? extends ActiveRecord> entity2) {
         super("There is no defined relationship from " + 
                     ActiveRecordUtil.getModelName(entity1) + " to " + 
                     ActiveRecordUtil.getModelName(entity2) + ".");

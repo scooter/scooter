@@ -1,8 +1,12 @@
-﻿<%@ page import="
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
         java.util.Iterator,
         java.util.List,
         com.scooterframework.admin.Constants,
         com.scooterframework.orm.sqldataexpress.object.TableInfo,
+        com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil,
         com.scooterframework.web.util.O,
         com.scooterframework.web.util.R,
         com.scooterframework.web.util.W"
@@ -33,7 +37,7 @@ List tableInfos = (List)request.getAttribute("tables");
         TableInfo ti = (TableInfo)it.next();
 %>
     <tr class="<%=W.cycle("odd, even")%>">
-        <td><%=W.labelLink(ti.getName(), R.nestedResourceRecordPath("databases", database, "tables", ti.getName()))%></td>
+        <td><%=W.labelLink(ti.getName(), R.nestedResourceRecordPath("databases", database, "tables", SqlExpressUtil.getExtendedTableName(database, ti)))%></td>
         <td><%=ti.getCatalog()%></td>
         <td><%=ti.getSchema()%></td>
     </tr>

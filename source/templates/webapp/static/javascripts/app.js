@@ -1,20 +1,13 @@
 /*******************************************************************************
  * 
  * Application specific JavaScript.
+ *
+ * Note: 
+ * 1. This is a place to add your own AJAX handling code.
+ * 2. The AJAX scaffold code generator uses the following block of code.
  * 
  ******************************************************************************/
 
-/*
- * Note: 
- * 1. The AJAX scaffold code generator uses the following block of code. 
- * 2. The following code uses "*" as a selector. In a real application, 
- * if the target is not dynamic, you may prefer to use the specific target #id 
- * for the place to show ajax response content, for example:
- * $(#id).live('ajax:success', function(event, data) {
- *   $("#id").html(data);
- *   event.stopImmediatePropagation();
- * });
- */
 $(document).ready(function(){
 	//Handling ajax
 	$("*").live('ajax:success', function(event, data, status, xhr, source) {
@@ -35,7 +28,7 @@ $(document).ready(function(){
 		} else if (handler == "text") {
 			$(target).text(data);
 		} else {
-			$(target).text(data);
+			alert("Thre is no handler of this event type: " + event.type);
 		}
 		event.stopImmediatePropagation();
 	});

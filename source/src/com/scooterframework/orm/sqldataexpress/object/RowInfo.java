@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -13,7 +13,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,17 +21,16 @@ import com.scooterframework.common.util.Util;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.exception.FailureDetectingRowMetaDataException;
 import com.scooterframework.orm.sqldataexpress.exception.InvalidColumnNameException;
-import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 import com.scooterframework.orm.sqldataexpress.util.SqlUtil;
 
 /**
- * <p>RowInfo class holds config information about a row.</p>
- * 
- * <p>The table field applies only to the sql query for a single table. If a 
- * query is related to multiple tables (joins), This field records the last 
- * table in the join statement. To find the table for an individual column, you 
+ * <p>RowInfo class holds meta data information about a row.</p>
+ *
+ * <p>The table field applies only to the SQL query for a single table. If a
+ * query is related to multiple tables (joins), This field records the last
+ * table in the join statement. To find the table for an individual column, you
  * need to navigate to the ColumnInfo object. </p>
- * 
+ *
  * @author (Fei) John Chen
  */
 public class RowInfo implements Serializable {
@@ -40,38 +38,38 @@ public class RowInfo implements Serializable {
 	 * Generated serialVersionUID
 	 */
 	private static final long serialVersionUID = 7482394946164624011L;
-	
+
 	public RowInfo() {}
 
     public RowInfo(String name) {
         this.name = name;
     }
-    
+
     public RowInfo(String name, ResultSet rs) {
         this.name = name.toUpperCase();
         parseResultSet(rs);
     }
-    
+
     public RowInfo(String name, ResultSetMetaData rsmd) {
         this.name = name.toUpperCase();
         parseResultSetMetaData(rsmd);
     }
-    
-    
+
+
     /**
      * returns name
      */
     public String getName() {
         return name;
     }
-    
+
     /**
      * returns table name
      */
     public String getTable() {
         return table;
     }
-    
+
     /**
      * sets table name
      */
@@ -79,14 +77,14 @@ public class RowInfo implements Serializable {
     	if (isEmpty(table)) return;
         this.table = table;
     }
-    
+
     /**
      * returns catalog
      */
     public String getCatalog() {
         return catalog;
     }
-    
+
     /**
      * sets catalog
      */
@@ -94,14 +92,14 @@ public class RowInfo implements Serializable {
     	if (isEmpty(catalog)) return;
         this.catalog = catalog;
     }
-    
+
     /**
      * returns schema
      */
     public String getSchema() {
         return schema;
     }
-    
+
     /**
      * sets schema
      */
@@ -109,23 +107,23 @@ public class RowInfo implements Serializable {
     	if (isEmpty(schema)) return;
         this.schema = schema;
     }
-    
+
     /**
      * sets meta data for the row
      */
     public void setResultSetMetaDataForView(ResultSet rs) {
         parseResultSetForView(rs);
     }
-    
+
     /**
      * returns dimension
      */
     public int getDimension() {
         return dimension;
     }
-    
+
     /**
-     * returns columnName 
+     * returns columnName
      * index - the first column is 0, the second is 1, ...
      */
     public String getColumnName(int index) {
@@ -136,23 +134,23 @@ public class RowInfo implements Serializable {
      * returns columnNames
      */
     public String[] getColumnNames() {
-        return columnNames;
+        return Util.cloneArray(columnNames);
     }
 
     /**
      * returns primary key columnNames
      */
     public String[] getPrimaryKeyColumnNames() {
-        return primaryKeyColumnNames;
+        return Util.cloneArray(primaryKeyColumnNames);
     }
 
     /**
      * returns readonly columnNames
      */
-    public List getReadOnlyColumnNames() {
+    public List<String> getReadOnlyColumnNames() {
         return readOnlyColumnNames;
     }
-    
+
     /**
      * returns column data type
      * index - the first column is 0, the second is 1, ...
@@ -160,14 +158,14 @@ public class RowInfo implements Serializable {
     public int getColumnSqlDataType(int index) {
         return columnSqlDataTypes[index];
     }
-    
+
     /**
      * returns columnSqlDataTypes
      */
     public int[] getSqlDataType() {
-        return columnSqlDataTypes;
+        return Util.cloneArray(columnSqlDataTypes);
     }
-    
+
     /**
      * returns column data type name
      * index - the first column is 0, the second is 1, ...
@@ -175,14 +173,14 @@ public class RowInfo implements Serializable {
     public String getColmnDataTypeName(int index) {
         return columnSqlDataTypeNames[index];
     }
-    
+
     /**
      * returns columnSqlDataTypeNames
      */
     public String[] getColmnSqlDataTypeNames() {
-        return columnSqlDataTypeNames;
+        return Util.cloneArray(columnSqlDataTypeNames);
     }
-    
+
     /**
      * returns column java class name
      * index - the first column is 0, the second is 1, ...
@@ -195,65 +193,65 @@ public class RowInfo implements Serializable {
      * returns columnJavaClassNames
      */
     public String[] getColumnJavaClassNames() {
-        return columnJavaClassNames;
+        return Util.cloneArray(columnJavaClassNames);
     }
-    
+
     /**
      * returns column position index
-     * 
+     *
      * The index for the first column is 0, the second is 1, ...
      */
     public int getColumnPositionIndex(String colName) {
         Integer index = (Integer)nameIndexMap.get(colName.toUpperCase());
-        if (index == null) 
+        if (index == null)
             throw new InvalidColumnNameException("There is no column named " + colName + ".");
         return index.intValue();
     }
-    
+
     /**
      * returns columnInfo specified by column index.
-     * 
+     *
      * The index for the first column is 0, the second is 1, ...
      */
     public ColumnInfo getColumnInfo(int index) {
         return (ColumnInfo)columnInfos.get(index);
     }
-    
+
     /**
      * returns columnInfo specified by column name.
-     * 
+     *
      */
     public ColumnInfo getColumnInfo(String columnName) {
         return getColumnInfo(getColumnPositionIndex(columnName));
     }
-    
+
     /**
-     * returns a list of ColumnInfo instances. 
+     * returns a list of ColumnInfo instances.
      */
-    public List columns() {
+    public List<ColumnInfo> columns() {
         return columnInfos;
     }
-    
+
     /**
      * sets columnInfo list
      */
-    public void setColumnInfoList(List newColumnInfoList) {
+    public void setColumnInfoList(List<ColumnInfo> newColumnInfoList) {
         clearContent();
-        
+
         if (newColumnInfoList == null || newColumnInfoList.size() == 0) return;
-        
+
         dimension = newColumnInfoList.size();
-        
+
         columnNames = new String[dimension];
         columnSqlDataTypes = new int[dimension];
         columnSqlDataTypeNames = new String[dimension];
         columnJavaClassNames = new String[dimension];
-        List primaryKeyColumns = new ArrayList();
+        List<String> primaryKeyColumns = new ArrayList<String>();
         for (int i = 0; i < dimension; i++) {
             ColumnInfo ci = (ColumnInfo)newColumnInfoList.get(i);
-            
-            nameIndexMap.put(ci.getColumnName(), new Integer(i));
-            
+
+            nameIndexMap.put(ci.getColumnName(), Integer.valueOf(i));
+
             columnNames[i] = ci.getColumnName();
             columnSqlDataTypes[i] = ci.getSQLDataType();
             columnSqlDataTypeNames[i] = ci.getColumnTypeName();
@@ -263,51 +261,24 @@ public class RowInfo implements Serializable {
             setSchema(ci.getSchemaName());
             setTable(ci.getTableName());
             columnInfos.add(i, ci);
-            
+
             if (ci.isPrimaryKey()) primaryKeyColumns.add(ci.getColumnName());
             if (ci.isReadOnly()) readOnlyColumnNames.add(ci.getColumnName());
         }
-        
-        int pkSize = primaryKeyColumns.size();
-        if (pkSize > 0) {
-            primaryKeyColumnNames = new String[pkSize];
-            System.arraycopy(primaryKeyColumns.toArray(), 0, primaryKeyColumnNames, 0, pkSize);
-        }
-        
-        //if (!hasPrimaryKey()) {
-        //    detectPrimaryKey();
-        //}
-    }
-    
-    private void detectPrimaryKey() {
-        if (table == null || "".equals(table)) return;
-        PrimaryKey pk = SqlExpressUtil.lookupAndRegisterPrimaryKeyForDefaultConnection(catalog, schema, table);
-        if (pk == null) return;
-        
-        List primaryKeyColumns = new ArrayList();
-        
-        for (int i = 0; i < dimension; i++) {
-            ColumnInfo ci = (ColumnInfo)columnInfos.get(i);
-            String column = ci.getColumnName();
-            if (pk.hasColumn(column)) {
-                ci.setPrimaryKey(true);
-                primaryKeyColumns.add(column);
-            }
-        }
-        
+
         int pkSize = primaryKeyColumns.size();
         if (pkSize > 0) {
             primaryKeyColumnNames = new String[pkSize];
             System.arraycopy(primaryKeyColumns.toArray(), 0, primaryKeyColumnNames, 0, pkSize);
         }
     }
-    
+
     /**
      * sets primary key columns for the row
      */
     public void setPrimaryKeyColumns(String[] primaryKeyNames) {
         if (primaryKeyNames != null && primaryKeyNames.length > 0) {
-            List pkNameSet = new ArrayList();
+            List<String> pkNameSet = new ArrayList<String>();
             int size = primaryKeyNames.length;
             for (int i=0; i<size; i++) {
                 pkNameSet.add(primaryKeyNames[i]);
@@ -315,20 +286,20 @@ public class RowInfo implements Serializable {
             setPrimaryKeyColumns(pkNameSet);
         }
     }
-    
+
     /**
      * sets primary key columns for the row
      */
-    public void setPrimaryKeyColumns(List primaryKeyNames) {
+    public void setPrimaryKeyColumns(List<String> primaryKeyNames) {
         if (primaryKeyNames == null || primaryKeyNames.size() == 0) return;
-        
-        if (columnInfos == null || columnInfos.size() == 0) 
+
+        if (columnInfos == null || columnInfos.size() == 0)
             throw new IllegalStateException("Columns must be populated first before adding primary keys.");
-        
-        List tmp = convertToUpperCase(primaryKeyNames);
-        
+
+        List<String> tmp = convertToUpperCase(primaryKeyNames);
+
         ColumnInfo ci = null;
-        List acceptedPrimaryKeyNames = new ArrayList();
+        List<String> acceptedPrimaryKeyNames = new ArrayList<String>();
         for (int i = 0; i < dimension; i++) {
             ci = (ColumnInfo)columnInfos.get(i);
             if ( tmp.contains(ci.getColumnName()) ) {
@@ -339,14 +310,14 @@ public class RowInfo implements Serializable {
                 ci.setPrimaryKey(false);
             }
         }
-        
+
         int pkSize = acceptedPrimaryKeyNames.size();
         if (pkSize != tmp.size()) {
-            throw new IllegalArgumentException("Failed in setting primary key for the record - " + 
-                  "expected pk names: " + primaryKeyNames + "; " + 
+            throw new IllegalArgumentException("Failed in setting primary key for the record - " +
+                  "expected pk names: " + primaryKeyNames + "; " +
                   "record allowed pk names: " + acceptedPrimaryKeyNames);
         }
-        
+
         if (pkSize > 0) {
             primaryKeyColumnNames = new String[pkSize];
             System.arraycopy(acceptedPrimaryKeyNames.toArray(), 0, primaryKeyColumnNames, 0, pkSize);
@@ -355,49 +326,47 @@ public class RowInfo implements Serializable {
             primaryKeyColumnNames = null;
         }
     }
-    
+
     /**
      * sets primary key columns for the row
      */
-    public void setPrimaryKeyColumns(Set primaryKeyNames) {
+    public void setPrimaryKeyColumns(Set<String> primaryKeyNames) {
         setPrimaryKeyColumns(convertToUpperCase(primaryKeyNames));
     }
-    
+
     /**
      * sets read-only columns for the row
-     * 
-     * If the input column name is not a valid column name, this operation is 
-     * ignored. 
+     *
+     * If the input column name is not a valid column name, this operation is
+     * ignored.
      */
     public void setReadOnlyColumn(String columnName) {
         if (columnName == null) return;
-        
-        if (columnInfos == null || columnInfos.size() == 0) 
+
+        if (columnInfos == null || columnInfos.size() == 0)
             throw new IllegalStateException("Columns must be populated first before setting readonly columns.");
-        
+
         ColumnInfo ci = getColumnInfo(columnName);
         if (ci != null) {
             ci.setReadOnly(true);
             readOnlyColumnNames.add(columnName.toUpperCase());
         }
     }
-    
+
     /**
      * sets read-only columns for the row
-     * 
-     * Any column names in the input that are not true column names will be 
-     * discarded. 
+     *
+     * Any column names in the input that are not true column names will be
+     * discarded.
      */
-    public void setReadOnlyColumns(Set readOnlyNames) {
+    public void setReadOnlyColumns(Set<String> readOnlyNames) {
         if (readOnlyNames == null || readOnlyNames.size() == 0) return;
-        
-        if (columnInfos == null || columnInfos.size() == 0) 
+
+        if (columnInfos == null || columnInfos.size() == 0)
             throw new IllegalStateException("Columns must be populated first before setting readonly columns.");
-        
-        List tmp = convertToUpperCase(readOnlyNames);
-        Iterator it = tmp.iterator();
-        while(it.hasNext()) {
-            String columnName = (String)it.next();
+
+        List<String> tmp = convertToUpperCase(readOnlyNames);
+        for (String columnName : tmp) {
             ColumnInfo ci = getColumnInfo(columnName);
             if (ci != null) {
                 ci.setReadOnly(true);
@@ -405,7 +374,7 @@ public class RowInfo implements Serializable {
             }
         }
     }
-    
+
     /**
      * Indicates if there is primary key defined.
      */
@@ -413,7 +382,7 @@ public class RowInfo implements Serializable {
         if (primaryKeyColumnNames != null && primaryKeyColumnNames.length > 0) return true;
         return false;
     }
-    
+
     /**
      * Checks if a column is set to be audited for create operation.
      * @param colName the column name to be checked.
@@ -421,15 +390,15 @@ public class RowInfo implements Serializable {
      */
     public boolean isAuditedForCreate(String colName) {
     	boolean status = false;
-    	
-    	if (DatabaseConfig.getInstance().allowAutoAuditCreate() && 
+
+    	if (DatabaseConfig.getInstance().allowAutoAuditCreate() &&
     		DatabaseConfig.getInstance().isAutoAuditCreate(colName)) {
     		status = true;
     	}
-    	
+
     	return status;
     }
-    
+
     /**
      * Checks if a column is set to be audited for update operation.
      * @param colName the column name to be checked.
@@ -437,15 +406,15 @@ public class RowInfo implements Serializable {
      */
     public boolean isAuditedForUpdate(String colName) {
     	boolean status = false;
-    	
-    	if (DatabaseConfig.getInstance().allowAutoAuditUpdate() && 
+
+    	if (DatabaseConfig.getInstance().allowAutoAuditUpdate() &&
     		DatabaseConfig.getInstance().isAutoAuditUpdate(colName)) {
     		status = true;
     	}
-    	
+
     	return status;
     }
-    
+
     /**
      * Checks if a column is set to be audited for create or update operation.
      * @param colName the column name to be checked.
@@ -453,26 +422,24 @@ public class RowInfo implements Serializable {
      */
     public boolean isAuditedForCreateOrUpdate(String colName) {
     	boolean status = false;
-    	
+
     	if (isAuditedForCreate(colName) || isAuditedForUpdate(colName)) {
     		status = true;
     	}
-    	
+
     	return status;
     }
-    
+
     /**
      * checks whether a column is a date type column.
-     * 
+     *
      * @param colName the column name to be checked.
      * @return true if the column is of date type.
      */
     public boolean isDateColumn(String colName) {
         boolean status = false;
-        
-        Iterator it = columnInfos.iterator();
-        while (it.hasNext()) {
-            ColumnInfo ci = (ColumnInfo) it.next();
+
+        for (ColumnInfo ci : columnInfos) {
             if (colName.equalsIgnoreCase(ci.getColumnName())) {
             	if (ci.isDate()) {
             		status = true;
@@ -480,22 +447,20 @@ public class RowInfo implements Serializable {
             	break;
             }
         }
-        
+
         return status;
     }
-    
+
     /**
      * checks whether a column is a timestamp type column.
-     * 
+     *
      * @param colName the column name to be checked.
      * @return true if the column is of date type.
      */
     public boolean isTimestampColumn(String colName) {
         boolean status = false;
-        
-        Iterator it = columnInfos.iterator();
-        while (it.hasNext()) {
-            ColumnInfo ci = (ColumnInfo) it.next();
+
+        for (ColumnInfo ci : columnInfos) {
             if (colName.equalsIgnoreCase(ci.getColumnName())) {
             	if (ci.isTimestamp()) {
             		status = true;
@@ -503,22 +468,20 @@ public class RowInfo implements Serializable {
             	break;
             }
         }
-        
+
         return status;
     }
-    
+
     /**
      * checks whether a column is a numeric type column.
-     * 
+     *
      * @param colName the column name to be checked.
      * @return true if the column is of numeric type.
      */
     public boolean isNumericColumn(String colName) {
         boolean status = false;
-        
-        Iterator it = columnInfos.iterator();
-        while (it.hasNext()) {
-            ColumnInfo ci = (ColumnInfo) it.next();
+
+        for (ColumnInfo ci : columnInfos) {
             if (colName.equalsIgnoreCase(ci.getColumnName())) {
             	if (ci.isNumeric()) {
             		status = true;
@@ -526,13 +489,13 @@ public class RowInfo implements Serializable {
             	break;
             }
         }
-        
+
         return status;
     }
-    
+
     /**
      * checks whether a column is primary key column.
-     * 
+     *
      * @param colName the column name to be checked.
      * @return true if the column is primary key column.
      */
@@ -548,13 +511,13 @@ public class RowInfo implements Serializable {
                 }
             }
         }
-        
+
         return found;
     }
-    
+
     /**
      * Checks whether a column is a readonly column.
-     * 
+     *
      * @param colName the column name to be checked.
      * @return true if the column is readonly
      */
@@ -563,10 +526,10 @@ public class RowInfo implements Serializable {
         if (readOnlyColumnNames.contains(colName.toUpperCase())) return true;
         return false;
     }
-    
+
     /**
      * checks whether a column name exists
-     * 
+     *
      * @param testName the column name to be checked.
      * @return true if the column is valid.
      */
@@ -582,36 +545,34 @@ public class RowInfo implements Serializable {
                 }
             }
         }
-        
+
         return found;
     }
-    
+
     /**
-     * checks whether a column is a required column. Data for a required 
+     * checks whether a column is a required column. Data for a required
      * column cannot be set to null.
-     * 
+     *
      * @param colName the column name to be checked.
      * @return true if the column is required.
      */
     public boolean isRequiredColumn(String colName) {
         boolean status = false;
-        
-        Iterator it = columnInfos.iterator();
-        while (it.hasNext()) {
-            ColumnInfo ci = (ColumnInfo) it.next();
+
+        for (ColumnInfo ci : columnInfos) {
             if (colName.equalsIgnoreCase(ci.getColumnName()) &&
                 (!ci.isNull() || ci.isNotNull() || ci.isPrimaryKey())) {
                 status = true;
                 break;
             }
         }
-        
+
         return status;
     }
-    
+
     /**
      * checks whether a column's length is longer than a specific length.
-     * 
+     *
      * @param colName the column name to be checked.
      * @param length the specific length.
      * @return true if the column's length is longer than the specific length.
@@ -623,71 +584,69 @@ public class RowInfo implements Serializable {
         }
         return false;
     }
-    
+
     /**
      * returns delete sql of jdbc style
      */
     public String getDeleteSqlInJDBCStyle() {
         if (deleteSQL_jdbc == null) {
-            StringBuffer sb = new StringBuffer("DELETE FROM " + table);
-            StringBuffer wheres = new StringBuffer();
-    
+            StringBuilder sb = new StringBuilder("DELETE FROM " + table);
+            StringBuilder wheres = new StringBuilder();
+
             // organize where name/value pairs
             String[] pkNames = primaryKeyColumnNames;
-            if (pkNames == null || pkNames.length == 0) 
+            if (pkNames == null || pkNames.length == 0)
                 throw new IllegalArgumentException("There is no primary keys identified for table " + table);
-            
+
             int whereTotalSize = pkNames.length;
-            
+
             if (whereTotalSize > 0) {
                 int i = 0;
-    
+
                 // first to next to the last
                 for (i = 0; i < (whereTotalSize - 1); i++) {
                     String pkColumnName = pkNames[i];
                     wheres.append(pkColumnName + " = ? AND ");
                 }
-    
+
                 // the last
                 if (i == whereTotalSize -1) {
                     String pkColumnName = pkNames[i];
                     wheres.append(pkColumnName + " = ?");
                 }
             }
-            
+
             sb.append(" WHERE " + wheres.toString());
-            
+
             deleteSQL_jdbc = sb.toString();
         }
-        
+
         return deleteSQL_jdbc;
     }
-       
+
     /**
      * Returns a string representation of the object.
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         String LINE_BREAK = "\r\n";
-        
+
         returnString.append("name = " + name).append(LINE_BREAK);
         returnString.append("schema = " + schema).append(LINE_BREAK);
         returnString.append("catalog = " + catalog).append(LINE_BREAK);
         returnString.append("table = " + table).append(LINE_BREAK);
         returnString.append("dimension = " + dimension).append(LINE_BREAK);
-        
+
         if (columnInfos != null) {
-            Iterator it = columnInfos.iterator();
-            while (it.hasNext()) {
-                ColumnInfo ci = (ColumnInfo) it.next();
+            for (ColumnInfo ci : columnInfos) {
                 returnString.append(ci.toString()).append( LINE_BREAK );
             }
         }
-        
+
         return returnString.toString();
     }
-    
+
 
     private void clearContent() {
         schema = null;
@@ -695,10 +654,10 @@ public class RowInfo implements Serializable {
         table = null;
         dimension = 0;
         columnInfos.clear();
-        
+
         //some convenience fields:
         deleteSQL_jdbc = null;
-        
+
         //some convenience arraies:
         columnNames = null;
         primaryKeyColumnNames = null;
@@ -708,19 +667,19 @@ public class RowInfo implements Serializable {
         columnJavaClassNames = null;
         nameIndexMap.clear();
     }
-    
+
     private void parseResultSetMetaData(ResultSetMetaData rsmd) {
         if (rsmd == null) return;
-        
+
         try {
-            List columns = new ArrayList();
-            
+            List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
+
             dimension = rsmd.getColumnCount();
             if (dimension <= 0) {
                 String errorMessage = "ResultSet for " + name + " has zero dimension.";
                 throw new FailureDetectingRowMetaDataException(errorMessage);
             }
-            
+
             for (int i = 1; i <= dimension; i++) {
                 ColumnInfo ci = new ColumnInfo();
                 ci.setSchemaName(rsmd.getSchemaName(i));
@@ -744,7 +703,7 @@ public class RowInfo implements Serializable {
                 ci.setWritable(rsmd.isWritable(i));
                 columns.add(i-1, ci);
             }
-            
+
             //set properties
             setColumnInfoList(columns);
         }
@@ -752,10 +711,10 @@ public class RowInfo implements Serializable {
             throw new FailureDetectingRowMetaDataException(ex);
         }
     }
-    
+
     private void parseResultSet(ResultSet rs) {
         if (rs == null) return;
-        
+
         try {
             parseResultSetMetaData(rs.getMetaData());
         }
@@ -763,13 +722,13 @@ public class RowInfo implements Serializable {
             throw new FailureDetectingRowMetaDataException(ex);
         }
     }
-    
+
     private void parseResultSetForView(ResultSet rs) {
         if (rs == null) return;
-        
+
         try {
-            List columns = new ArrayList();
-            
+            List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
+
             int index = 0;
             while (rs.next()) {
                 ++index;
@@ -795,13 +754,13 @@ public class RowInfo implements Serializable {
                 //ci.setWritable(rsmd.isWritable(i));
                 columns.add(index-1, ci);
             }
-            
+
             dimension = index;
             if (dimension <= 0) {
                 String errorMessage = "ResultSet for " + name + " has zero dimension.";
                 throw new FailureDetectingRowMetaDataException(errorMessage);
             }
-            
+
             //set properties
             setColumnInfoList(columns);
         }
@@ -809,31 +768,31 @@ public class RowInfo implements Serializable {
             throw new FailureDetectingRowMetaDataException(ex);
         }
     }
-    
-    private List convertToUpperCase(List list) {
+
+    private List<String> convertToUpperCase(List<String> list) {
         if (list == null) return null;
-        
-        List newList = new ArrayList();
-        for(Iterator it=list.iterator(); it.hasNext();) {
-            newList.add(((String)it.next()).toUpperCase());
+
+        List<String> newList = new ArrayList<String>();
+        for(String s : list) {
+            newList.add((s != null)?s.toUpperCase():null);
         }
         return newList;
     }
-    
-    private List convertToUpperCase(Set stringSet) {
+
+    private List<String> convertToUpperCase(Set<String> stringSet) {
         if (stringSet == null) return null;
-        
-        List newList = new ArrayList();
-        for(Iterator it=stringSet.iterator(); it.hasNext();) {
-            newList.add(((String)it.next()).toUpperCase());
+
+        List<String> newList = new ArrayList<String>();
+        for(String s : stringSet) {
+            newList.add((s != null)?s.toUpperCase():null);
         }
         return newList;
     }
-    
+
     private String convertToUpperCase(String word) {
         return (word == null)?null:word.toUpperCase();
     }
-    
+
     private static boolean isEmpty(String s) {
     	return (s == null || "".equals(s))?true:false;
     }
@@ -845,17 +804,17 @@ public class RowInfo implements Serializable {
     private String table = null;
     private String name = "";
     private int dimension = 0;
-    private List columnInfos = new ArrayList();
-    
+    private List<ColumnInfo> columnInfos = new ArrayList<ColumnInfo>();
+
     //some convenience fields:
     private String deleteSQL_jdbc = null;
-    
+
     //some convenience arraies:
     private String[] columnNames = null;
     private String[] primaryKeyColumnNames = null;
-    private List readOnlyColumnNames = new ArrayList();
+    private List<String> readOnlyColumnNames = new ArrayList<String>();
     private int[] columnSqlDataTypes = null;
     private String[] columnSqlDataTypeNames = null;
     private String[] columnJavaClassNames = null;
-    private Map nameIndexMap = new HashMap();
+    private Map<String, Integer> nameIndexMap = new HashMap<String, Integer>();
 }

@@ -38,7 +38,7 @@ public interface OmniDTOStoredProcedure extends OmniDTOBasic
      * 
      * returns resultObjectMap
      */
-    public Map getResultObjectMap();
+    public Map<String, Object> getResultObjectMap();
     
     /**
      * adds a (name,value) pair to resultMap

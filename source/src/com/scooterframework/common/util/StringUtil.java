@@ -59,23 +59,23 @@ public class StringUtil {
     }
     
     /**
-     * Returns a string with all alphabetic characters converted to lowercase.
+     * Returns a string with all alphabetic characters converted to lower case.
      * 
-     * @param data input string
-     * @return a string in lowercse.
+     * @param s input string
+     * @return a string in lower case.
      */
-    public static String strToLower(String data) {
-        return (data == null)?"":data.toLowerCase();
+    public static String toLowerCase(String s) {
+    	return (s != null)?s.toLowerCase():s;
     }
     
     /**
-     * Returns a string with all alphabetic characters converted to uppercse.
+     * Returns a string with all alphabetic characters converted to upper case.
      * 
-     * @param data input string
-     * @return a string in uppercase.
+     * @param s input string
+     * @return a string in upper case.
      */
-    public static String strToUpper(String data) {
-        return (data == null)?"":data.toUpperCase();
+    public static String toUpperCase(String s) {
+    	return (s != null)?s.toUpperCase():s;
     }
     
     /**
@@ -122,17 +122,17 @@ public class StringUtil {
         if (s == null || s.indexOf(oldSymbol) == -1) return s;
         
         int oldLength = oldSymbol.length();
-        String result = "";
+        StringBuilder sb = new StringBuilder("");
         int i = s.indexOf(oldSymbol,0);
         int lastIndex = 0;
         while (i != -1) {
-            result += s.substring(lastIndex,i) + newSymbol;
+            sb.append(s.substring(lastIndex,i)).append(newSymbol);
             lastIndex = i + oldLength;
             i = s.indexOf(oldSymbol, lastIndex);
         }
-        result += s.substring(lastIndex);
+        sb.append(s.substring(lastIndex));
         
-        return result;
+        return sb.toString();
     }
     
     /**
@@ -205,22 +205,22 @@ public class StringUtil {
         if (!useEmpty && (replacementChars.length() != charsToBeReplaced.length())) 
             throw new IllegalArgumentException("The replacement characters are not of the same length of the replaced characters.");
         
-        String result = "";
+        StringBuilder sb = new StringBuilder("");
         int length = message.length();
         for (int i=0; i<length; i++) {
             char c = message.charAt(i);
             int index = charsToBeReplaced.indexOf(c);
             if (index != -1) {
                 if (!useEmpty) {
-                    result = result + replacementChars.charAt(index);
+                    sb.append(replacementChars.charAt(index));
                 }
             }
             else {
-                result = result + c;
+                sb.append(c);
             }
         }
         
-        return result;
+        return sb.toString();
     }
     
     /**
@@ -246,9 +246,9 @@ public class StringUtil {
      * 
      * @param data
      * @param separator
-     * @return Map
+     * @return Map<String, Object>
      */
-    public Map explode(String data, String separator) {
+    public Map<String, String> explode(String data, String separator) {
         return Converters.convertStringToMap(data, separator);
     }
     
@@ -262,7 +262,7 @@ public class StringUtil {
     public static String implode(String[] data, String glue) {
         if (data == null || data.length ==0) return "";
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int total = data.length;
         for (int i = 0; i < total; i++) {
             String item = data[i];
@@ -281,13 +281,13 @@ public class StringUtil {
      * @param glue
      * @return String
      */
-    public static String implode(List data, String glue) {
+    public static String implode(List<String> data, String glue) {
         if (data == null || data.size() ==0) return "";
         
-        StringBuffer sb = new StringBuffer();
-        Iterator it = data.iterator();
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> it = data.iterator();
         while(it.hasNext()) {
-            String item = (String)it.next();
+            String item = it.next();
             sb.append(item).append(glue);
         }
         
@@ -303,15 +303,12 @@ public class StringUtil {
      * @param glue
      * @return String
      */
-    public static String implode(Map data, String glue) {
+    public static String implode(Map<String, ?> data, String glue) {
         if (data == null || data.size() ==0) return "";
         
-        StringBuffer sb = new StringBuffer();
-        Iterator it = data.keySet().iterator();
-        while(it.hasNext()) {
-            String name = (String)it.next();
-            String value = (String)data.get(name);
-            sb.append(name).append("=").append(value).append(glue);
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, ?> entry : data.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(glue);
         }
         
         String result = sb.toString();
@@ -323,71 +320,68 @@ public class StringUtil {
      * Converts object array to a big string separated by comma.
      * 
      * @param words
-     * @return a flatened string
+     * @return a flattened string
      */
-    public static String flatenArray(Object[] words) {
-        return flatenArray(words, ",");
+    public static String flattenArray(Object[] words) {
+        return flattenArray(words, ",");
     }
     
     
     /**
-     * Converts object array to a big string separated by spliter.
+     * Converts object array to a big string separated by splitter.
      * 
      * @param words
-     * @param spliter
-     * @return a flatened string
+     * @param splitter
+     * @return a flattened string
      */
-    public static String flatenArray(Object[] words, String spliter) {
-        return flatenArray("", words, spliter);
+    public static String flattenArray(Object[] words, String splitter) {
+        return flattenArray("", words, splitter);
     }
     
     /**
-     * Converts object array to a big string separated by spliter.
+     * Converts object array to a big string separated by splitter.
      * 
      * @param prefix prefix before each element
      * @param words an array of elements
-     * @param spliter a string which separates each element
-     * @return a flatened string
+     * @param splitter a string which separates each element
+     * @return a flattened string
      */
-    public static String flatenArray(String prefix, Object[] words, String spliter) {
+    public static String flattenArray(String prefix, Object[] words, String splitter) {
         if (words == null) return null;
         
-        String bigString = "";
+        StringBuilder sb = new StringBuilder("");
         int length = words.length;
         for (int i=0; i<length; i++) {
-            bigString += prefix + words[i] + spliter;
+            sb.append(prefix).append(words[i]).append(splitter);
         }
-        
-        bigString = removeLastToken(bigString, spliter);
-        
-        return bigString;
+        return removeLastToken(sb.toString(), splitter);
     }
     
     /**
-     * Split a string into a list of substrings separated by spliter.
+     * Split a string into a list of substrings separated by splitter.
      * 
      * @param bigString  The string to be split
-     * @param spliter    The spliter
+     * @param splitter    The splitter
      * @return a list of strings
      */
-    public static List splitString(String bigString, String spliter) {
-        if (bigString == null || "".equals(bigString.trim())) return new ArrayList();
+    public static List<String> splitString(String bigString, String splitter) {
+        if (bigString == null || "".equals(bigString.trim())) return new ArrayList<String>();
         
-        List dataList = new ArrayList();
-        int spliterLen = spliter.length();
-        int index = bigString.indexOf(spliter);
+        List<String> dataList = new ArrayList<String>();
+        int spliterLen = splitter.length();
+        int index = bigString.indexOf(splitter);
         
         while(index != -1) {
             String frontString = bigString.substring(0, index);
             dataList.add(frontString);
             
             bigString = bigString.substring(index+spliterLen);
-            index = bigString.indexOf(spliter);
+            index = bigString.indexOf(splitter);
         }
         
         if (!bigString.equals("")) dataList.add(bigString);
         
-        //add the original string to the return list if nothing is splited. 
+        //add the original string to the return list if nothing is split. 
         if (dataList.size() == 0) dataList.add(bigString);
         
         return dataList;
@@ -453,6 +447,13 @@ public class StringUtil {
         return new StringBuffer(newWord);
     }
     
+    public static StringBuilder removeLastToken(StringBuilder word, String token) {
+        if (word == null) return word;
+        
+        String newWord = removeLastToken(word.toString(), token);
+        return new StringBuilder(newWord);
+    }
+    
     public static String removeLastToken(String word, String token) {
         if (word == null || token == null || "".equals(token)) return word;
         
@@ -467,77 +468,74 @@ public class StringUtil {
     public static String reverseMapping(String mapping) {
         if (mapping == null) return null;
         
-        Map m = Converters.convertStringToMap(mapping);
-        StringBuffer sb = new StringBuffer();
-        Iterator it = m.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            sb.append(m.get(key)).append("=").append(key).append(",");
+        Map<String, String> m = Converters.convertStringToMap(mapping);
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : m.entrySet()) {
+            sb.append(entry.getValue()).append("=").append(entry.getKey()).append(",");
         }
         return removeLastToken(sb.toString(), ",");
     }
 
-    public static String getValuesAsSQLNumber(Collection values) {
+    public static String getValuesAsSQLNumber(Collection<String> values) {
         if (values == null) return null;
 
-        String listStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         int i = 0;
         Object[] data = values.toArray();
         for (i = 0; i < (values.size() - 1); i++) {
-            listStr += data[i] + ", ";
+            sb.append(data[i]).append(", ");
         }
 
-        if (values.size() >= 1) listStr += data[i];
+        if (values.size() >= 1) sb.append(data[i]);
         
-        return listStr;
+        return sb.toString();
     }
 
-    public static String getValuesAsSQLString(Collection values) {
+    public static String getValuesAsSQLString(Collection<String> values) {
         if (values == null) return null;
 
-        String listStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         int i = 0;
         Object[] data = values.toArray();
         for (i = 0; i < (values.size() - 1); i++) {
-            listStr += "'" + doubleSingleQuoteInString((String) data[i]) + "'"+ ", ";
+            sb.append("'").append(doubleSingleQuoteInString((String) data[i])).append("', ");
         }
 
-        listStr += "'" + doubleSingleQuoteInString((String) data[i]) + "'";
+        sb.append("'").append(doubleSingleQuoteInString((String) data[i])).append("'");
         
-        return listStr;
+        return sb.toString();
     }
 
     public static String getValuesAsSQLString(String value) {
         if (value == null || value.equals("")) return value;
 
         StringTokenizer st = new StringTokenizer(value, ", ");
-        String listStr = "";
+        StringBuilder listStr = new StringBuilder("");
         while (st.hasMoreTokens()) {
             String tmp = st.nextToken();
-            listStr += "'" + doubleSingleQuoteInString(tmp) + "'"+ ",";
+            listStr.append("'").append(doubleSingleQuoteInString(tmp)).append("',");
         }
-
-        // remove the last comma
-        if (listStr.length() > 0) listStr = listStr.substring(0, listStr.length()-1);
         
-        return listStr;
+        return removeLastToken(listStr.toString(), ",");
     }
 
-    public static String getValuesAsSQLLikeString(String field, List values, String type) {
+    public static String getValuesAsSQLLikeString(String field, List<String> values, String type) {
         if (field == null || values == null || values.size() < 1 || type == null) return null;
 
-        String listStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         int i = 0;
-        listStr += " UPPER(" + field + ") LIKE '%" + doubleSingleQuoteInString((String) values.get(i)).toUpperCase() + "%' ";
+        sb.append(" UPPER(").append(field).append(") LIKE '%");
+        sb.append(toUpperCase(doubleSingleQuoteInString(values.get(i)))).append("%' ");
         
         for (i = 1; i < values.size(); i++) {
-            listStr += type + " UPPER(" + field + ") LIKE '%" + doubleSingleQuoteInString((String) values.get(i)).toUpperCase() + "%' ";
+            sb.append(type).append(" UPPER(").append(field).append(") LIKE '%");
+            sb.append(toUpperCase(doubleSingleQuoteInString(values.get(i)))).append("%' ");
         }
         
-        return listStr;
+        return sb.toString();
     }
     
     /**
@@ -546,30 +544,30 @@ public class StringUtil {
     public static String doubleSingleQuoteInString(String input) {
         if (input == null || input.equals("")) return input;
         
-        String result = "";
+        StringBuilder result = new StringBuilder("");
         while(input.indexOf("'") != -1) {
             int iQ = input.indexOf("'");
-            result += input.substring(0, iQ+1) + "'";
+            result.append(input.substring(0, iQ+1)).append("'");
             if ((iQ + 1) <= input.length()) input = input.substring(iQ+1);
         }
         
-        result += input;
-        return result;
+        result.append(input);
+        return result.toString();
     }
 
     // add a back slash in front of "
     public static String parseStringForDoubleQuote(String input) {
         if (input == null || input.equals("")) return input;
 
-        String result = "";
+        StringBuilder result = new StringBuilder("");
         while(input.indexOf("\"") != -1) {
             int iQ = input.indexOf("\"");
-            result += input.substring(0, iQ) + "\\\"";
+            result.append(input.substring(0, iQ)).append("\\\"");
             if ((iQ + 1) <= input.length()) input = input.substring(iQ + 1);
         }
-
-        result += input;
-        return result;
+        
+        result.append(input);
+        return result.toString();
     }
     
     /**
@@ -578,13 +576,12 @@ public class StringUtil {
      * @param inputs the original map
      * @return a new map with keys in upper case.
      */
-    public static Map convertKeyToUpperCase(Map inputs) {
+    public static Map<String, Object> convertKeyToUpperCase(Map<String, ?> inputs) {
         if (inputs == null) return null;
-        Map tmp = new HashMap(inputs.size());
-        Iterator it = inputs.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            tmp.put(key.toString().toUpperCase(), inputs.get(key));
+        Map<String, Object> tmp = new HashMap<String, Object>(inputs.size());
+        for(Map.Entry<String, ?> entry : inputs.entrySet()) {
+            String key = entry.getKey();
+            tmp.put(toUpperCase(key), entry.getValue());
         }
         return tmp;
     }

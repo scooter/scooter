@@ -23,12 +23,13 @@ import com.scooterframework.tools.common.GeneratorHelper;
 public class ResourceGenerator extends AbstractGenerator {
 	private String resource;
 
-	public ResourceGenerator(Map props, String resource) {
+	public ResourceGenerator(Map<String, String> props, String resource) {
 		super(props);
-		
-		this.resource = resource;
+
+		this.resource = resource.toLowerCase();
 	}
 
+	@Override
 	protected String getTemplateContent() {
 		String fileName = getOutputFileName();
 		String fullFileName = getRootPath() + File.separatorChar
@@ -37,7 +38,7 @@ public class ResourceGenerator extends AbstractGenerator {
 		// add resource to "resources.list" property
 		String marker = "@resources.list@";
 		String property = "resources.list";
-		List contentLines = null;
+		List<String> contentLines = null;
 		try {
 			contentLines = GeneratorHelper
 					.loadToStringListFromFile(fullFileName);
@@ -54,7 +55,7 @@ public class ResourceGenerator extends AbstractGenerator {
 				contentLines.add(nextLine);
 			} else {
 				int nextLineIndex = markerLineIndex + 1;
-				nextLine = (String) contentLines.get(nextLineIndex);
+				nextLine = contentLines.get(nextLineIndex);
 				nextLine = nextLine.trim();
 				int propertyIndex = nextLine.indexOf(property);
 				if (propertyIndex == -1) {
@@ -93,20 +94,18 @@ public class ResourceGenerator extends AbstractGenerator {
 		if (contentLines == null || contentLines.size() == 0)
 			return "";
 
-		StringBuffer tpl = new StringBuffer();
-		Iterator it = contentLines.iterator();
+		StringBuilder tpl = new StringBuilder();
+		Iterator<String> it = contentLines.iterator();
 		while (it.hasNext()) {
 			tpl.append(it.next()).append(linebreak);
 		}
 		return tpl.toString();
 	}
 
-	private int getMarkerLineIndex(List lines, String marker) {
+	private int getMarkerLineIndex(List<String> lines, String marker) {
 		int markerLineIndex = -1;
 		int index = 0;
-		Iterator it = lines.iterator();
-		while (it.hasNext()) {
-			String line = (String) it.next();
+		for (String line : lines) {
 			if (line.indexOf(marker) != -1) {
 				markerLineIndex = index;
 				break;
@@ -116,14 +115,17 @@ public class ResourceGenerator extends AbstractGenerator {
 		return markerLineIndex;
 	}
 
-	protected Map getTemplateProperties() {
+	@Override
+	protected Map<String, ?> getTemplateProperties() {
 		return null;
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return "config";
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return "routes.properties";
 	}

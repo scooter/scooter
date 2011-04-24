@@ -10,7 +10,9 @@ package com.scooterframework.web.route;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.common.util.Util;
 
 
 /**
@@ -86,7 +88,7 @@ public class RequestInfo {
 	}
 	
 	public String[] getPathSegments() {
-		return pathSegments;
+		return Util.cloneArray(pathSegments);
 	}
 	
 	public int segmentCount() {
@@ -110,7 +112,7 @@ public class RequestInfo {
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         String SEPARATOR = ", ";
         
         returnString.append("requestPath = " + requestPath).append(SEPARATOR);
@@ -134,8 +136,13 @@ public class RequestInfo {
 						.lastIndexOf(RouteConstants.PRIMARY_KEY_SEPARATOR);
 				if (lastDot > lastPKSeparator) {
 					format = path.substring(lastDot + 1);
-					s = s.substring(0, lastDot);
-					requestPath = s;
+		            if (!EnvConfig.getInstance().hasMimeTypeFor(format)) {
+		            	format = null;
+		            }
+		            else {
+						s = s.substring(0, lastDot);
+						requestPath = s;
+		            }
 				}
 			}
 			

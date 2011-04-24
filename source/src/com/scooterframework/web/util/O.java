@@ -8,6 +8,7 @@
 package com.scooterframework.web.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -15,8 +16,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.common.util.Message;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ReferenceData;
+import com.scooterframework.orm.sqldataexpress.object.ColumnInfo;
 import com.scooterframework.orm.sqldataexpress.object.RESTified;
 import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
@@ -91,7 +94,7 @@ public class O {
      * @param keyDotModel type of associated model.
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(String keyDotModel) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(String keyDotModel) {
         return allAssociatedRecordsOf(keyDotModel, false);
     }
     
@@ -106,7 +109,7 @@ public class O {
      * @param refresh true if reload database data
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(String keyDotModel, boolean refresh) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(String keyDotModel, boolean refresh) {
         if (keyDotModel == null || keyDotModel.indexOf('.') == -1) {
             throw new IllegalArgumentException("There must be a dot in input string keyDotModel.");
         }
@@ -128,7 +131,7 @@ public class O {
      * @param associatedModel type of associated model.
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(String key, String associatedModel) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(String key, String associatedModel) {
         return allAssociatedRecordsOf(key, associatedModel, false);
     }
     
@@ -144,11 +147,11 @@ public class O {
      * @param refresh true if reload database data
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(String key, String associatedModel, boolean refresh) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(String key, String associatedModel, boolean refresh) {
         Object o = getObjectForKey(key);
         if (o == null) return null;
         
-        List records = null;
+        List<ActiveRecord> records = null;
         if (o instanceof ActiveRecord) {
             records = allAssociatedRecordsOf((ActiveRecord)o, associatedModel, refresh);
         }
@@ -188,7 +191,7 @@ public class O {
      * @param associatedModel type of associated model.
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(ActiveRecord record, String associatedModel) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(ActiveRecord record, String associatedModel) {
         return allAssociatedRecordsOf(record, associatedModel, false);
     }
     
@@ -203,7 +206,7 @@ public class O {
      * @param refresh true if reload database data
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(ActiveRecord record, String associatedModel, boolean refresh) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(ActiveRecord record, String associatedModel, boolean refresh) {
         return DataAccessUtil.allAssociatedRecordsOf(record, associatedModel, refresh);
     }
     
@@ -508,7 +511,7 @@ public class O {
      * @param model   model name
      * @return List of error messages.
      */
-    public static List getErrorMessages(String model) {
+    public static List<Message> getErrorMessages(String model) {
         Object data = getObjectForKey(model);
         if (data != null && data instanceof ActiveRecord) {
         	return getErrorMessages((ActiveRecord)data);
@@ -522,7 +525,7 @@ public class O {
      * @param record an ActiveRecord instance
      * @return List of error messages.
      */
-    public static List getErrorMessages(ActiveRecord record) {
+    public static List<Message> getErrorMessages(ActiveRecord record) {
         return DataAccessUtil.getErrorMessages(record);
     }
     
@@ -531,7 +534,7 @@ public class O {
      * 
      * @return List
      */
-    public static List getReferenceDataList(String type) {
+    public static List<ReferenceData> getReferenceDataList(String type) {
         return DataAccessUtil.getReferenceDataList(type);
     }
     
@@ -572,7 +575,7 @@ public class O {
      * @param model model name
      * @return iterator
      */
-    public static Iterator columnNames(String model) {
+    public static Iterator<String> columnNames(String model) {
         return columnNames(homeInstance(model));
     }
     
@@ -585,7 +588,7 @@ public class O {
      * @param record an active record instance or home instance
      * @return iterator
      */
-    public static Iterator columnNames(ActiveRecord record) {
+    public static Iterator<String> columnNames(ActiveRecord record) {
         return DataAccessUtil.columnNames(record);
     }
     
@@ -598,7 +601,7 @@ public class O {
      * @param rowInfo a RowInfo instance
      * @return iterator
      */
-    public static Iterator columnNames(RowInfo rowInfo) {
+    public static Iterator<String> columnNames(RowInfo rowInfo) {
         return DataAccessUtil.columnNames(rowInfo);
     }
     
@@ -611,7 +614,7 @@ public class O {
      * @param td a TableData instance
      * @return iterator
      */
-    public static Iterator columnNames(TableData td) {
+    public static Iterator<String> columnNames(TableData td) {
         return DataAccessUtil.columnNames(td);
     }
     
@@ -624,7 +627,7 @@ public class O {
      * @param rd a RowData instance
      * @return iterator
      */
-    public static Iterator columnNames(RowData rd) {
+    public static Iterator<String> columnNames(RowData rd) {
         return DataAccessUtil.columnNames(rd);
     }
     
@@ -637,7 +640,7 @@ public class O {
      * @param record    a restified record
      * @return iterator
      */
-    public static Iterator columnNames(RESTified record) {
+    public static Iterator<String> columnNames(RESTified record) {
         return DataAccessUtil.columnNames(record);
     }
     
@@ -651,7 +654,7 @@ public class O {
      * @param records a collection of records
      * @return iterator
      */
-    public static Iterator columnNames(Collection records) {
+    public static Iterator<String> columnNames(Collection<?> records) {
         return DataAccessUtil.columnNames(records);
     }
     
@@ -664,7 +667,7 @@ public class O {
      * @param model model name
      * @return iterator
      */
-    public static Iterator columns(String model) {
+    public static Iterator<ColumnInfo> columns(String model) {
         return DataAccessUtil.columns(model);
     }
     
@@ -677,7 +680,7 @@ public class O {
      * @param record an ActiveRecord record instance or home instance
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(ActiveRecord record) {
+    public static Iterator<ColumnInfo> columns(ActiveRecord record) {
         return DataAccessUtil.columns(record);
     }
     
@@ -690,7 +693,7 @@ public class O {
      * @param rowInfo a RowInfo instance
      * @return iterator
      */
-    public static Iterator columns(RowInfo rowInfo) {
+    public static Iterator<ColumnInfo> columns(RowInfo rowInfo) {
         return DataAccessUtil.columns(rowInfo);
     }
     
@@ -703,7 +706,7 @@ public class O {
      * @param record    a restified record
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(RESTified record) {
+    public static Iterator<ColumnInfo> columns(RESTified record) {
         return DataAccessUtil.columns(record);
     }
     
@@ -716,7 +719,7 @@ public class O {
      * @param rd a RowData record instance
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(RowData rd) {
+    public static Iterator<ColumnInfo> columns(RowData rd) {
         return DataAccessUtil.columns(rd);
     }
     
@@ -730,7 +733,7 @@ public class O {
      * @param records a collection of records
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(Collection records) {
+    public static Iterator<ColumnInfo> columns(Collection<?> records) {
         return DataAccessUtil.columns(records);
     }
     
@@ -744,9 +747,28 @@ public class O {
      * @param key   key of a collection saved in request
      * @return an iterator of the collection
      */
-    public static Iterator iteratorOf(String key) {
-        Collection items = (Collection)getObjectForKey(key);
-        return (items != null)?items.iterator():(new ArrayList()).iterator();
+    public static Iterator<?> iteratorOf(String key) {
+        Object items = getObjectForKey(key);
+        
+        if (items != null) {
+            if (items instanceof Collection) {
+                return iteratorOf((Collection<?>)items);
+            }
+            else if (items instanceof Map) {
+            	return iteratorOf((Map<?, ?>)items); 
+            }
+            else if (items instanceof Object[]) {
+                return Arrays.asList(((Object[])items)).iterator(); 
+            }
+            else {
+                throw new IllegalArgumentException("Error in iteratorOf(String): " + 
+                    "The object associated with key \"" + key + "\" must be of " + 
+                    "type Collection or Map or Object[], not of type \"" + 
+                    items.getClass().getName() + "\".");
+            }
+        }
+        
+        return (new ArrayList<Object>()).iterator();
     }
     
     /**
@@ -758,8 +780,8 @@ public class O {
      * @param items a collection of items
      * @return an iterator of the collection
      */
-    public static Iterator iteratorOf(Collection items) {
-        return (items != null)?items.iterator():(new ArrayList()).iterator();
+    public static Iterator<?> iteratorOf(Collection<?> items) {
+        return DataAccessUtil.iteratorOf(items);
     }
     
     /**
@@ -771,8 +793,8 @@ public class O {
      * @param map a map
      * @return an iterator of the collection
      */
-    public static Iterator iteratorOf(Map map) {
-        return (map != null)?map.keySet().iterator():(new ArrayList()).iterator();
+    public static <K, V> Iterator<K> iteratorOf(Map<K, V> map) {
+    	return DataAccessUtil.iteratorOf(map);
     }
     
     /**
@@ -804,7 +826,7 @@ public class O {
      * @param items collection of items
      * @return total number of items
      */
-    public static int count(Collection items) {
+    public static int count(Collection<?> items) {
         return (items != null)?items.size():0;
     }
     
@@ -814,7 +836,7 @@ public class O {
      * @param items map of items
      * @return total number of items
      */
-    public static int count(Map items) {
+    public static <K, V> int count(Map<K, V> items) {
         return (items != null)?items.size():0;
     }
     
@@ -828,16 +850,16 @@ public class O {
      * @param key   key of a collection saved in request
      * @return an iterator of the collection
      */
-    public static int count(String key) {
+    public static <K, V> int count(String key) {
         int result = -1;
         Object items = getObjectForKey(key);
         if (items == null) return 0;
         
         if (items instanceof Collection) {
-            result = count((Collection)items); 
+            result = count((Collection<?>)items); 
         }
         else if (items instanceof Map) {
-            result = count((Map)items); 
+            result = count((Map<?, ?>)items); 
         }
         else if (items instanceof Object[]) {
             result = count((Object[])items); 

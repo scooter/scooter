@@ -21,7 +21,7 @@ public class VetsController extends ApplicationController {
      * If the value of <tt>paged</tt> parameter is <tt>true</tt>, a paginated list is returned.
      */
     public String index() {
-        setViewData("vets", Vet.findAll("", "include:specialties; order_by: vets.last_name"));
+        setViewData("vets", Vet.includes("specialties").orderBy("vets.last_name").getRecords());
         return null;
     }
 }

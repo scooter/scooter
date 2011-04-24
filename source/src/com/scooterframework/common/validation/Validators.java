@@ -7,7 +7,6 @@
  */
 package com.scooterframework.common.validation;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.scooterframework.common.exception.InvalidOperationException;
@@ -95,11 +94,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesPresenceOf(String columnNames, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData == null || "".equals(colData.toString().trim())) {
                 getValidationResults().recordValidationException(colName, messageKey, colName);
@@ -152,16 +150,16 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesConfirmationOf(String columnNames, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             Object confirmationdata = getData(colName + "_confirmation");
             if ((colData == null && confirmationdata != null) ||
                 (colData != null && confirmationdata == null) ||
-                (!colData.toString().equals(confirmationdata.toString()))
+                (colData != null && confirmationdata != null && 
+                		!colData.toString().equals(confirmationdata.toString()))
             ) {
                 getValidationResults().recordValidationException(colName, messageKey, colName);
             }
@@ -218,11 +216,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesAcceptanceOf(String columnNames, String accept, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 if (!colData.toString().equals(accept)) {
@@ -283,12 +280,11 @@ abstract public class Validators {
      * @param messageKey        key to a message in message resource files or a message
      */
     public void validatesInclusionOf(String columnNames, boolean skipNull, String inclusionValues, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        List values = Converters.convertStringToList(inclusionValues);
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        List<String> values = Converters.convertStringToList(inclusionValues);
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 if (!values.contains(colData)) {
@@ -354,12 +350,11 @@ abstract public class Validators {
      * @param messageKey        key to a message in message resource files or a message
      */
     public void validatesExclusionOf(String columnNames, boolean skipNull, String exclusionValues, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        List values = Converters.convertStringToList(exclusionValues);
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        List<String> values = Converters.convertStringToList(exclusionValues);
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 if (values.contains(colData)) {
@@ -390,11 +385,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNotNull(String columnNames, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData == null) {
                 getValidationResults().recordValidationException(colName, messageKey, colName);
@@ -418,11 +412,10 @@ abstract public class Validators {
      * @param messageKey        key to a message in message resource files or a message
      */
     public void validatesIsEmail(String columnNames, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 if (!colData.toString().matches(EMAIL_PATTERN)) {
@@ -448,11 +441,10 @@ abstract public class Validators {
      * @param messageKey        key to a message in message resource files or a message
      */
     public void validatesIsNumber(String columnNames, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -483,11 +475,10 @@ abstract public class Validators {
      * @param messageKey        key to a message in message resource files or a message
      */
     public void validatesNumberMaximum(String columnNames, Number max, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || max == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -541,11 +532,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNumberIsLowerThan(String columnNames, Number number, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || number == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -578,11 +568,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNumberIsLargerThanOrEqualTo(String columnNames, Number number, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || number == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -615,11 +604,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNumberIsLargerThan(String columnNames, Number number, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || number == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -652,11 +640,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNumberIsEqualTo(String columnNames, Number number, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || number == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -691,11 +678,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNumberIsWithinRangeOf(String columnNames, Number number1, Number number2, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || number1 == null || number2 == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -731,11 +717,10 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesNumberIsInsideRangeOf(String columnNames, Number number1, Number number2, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null || number1 == null || number2 == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 try{
@@ -769,15 +754,14 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesLengthMaximum(String columnNames, int maximum, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 int len = colData.toString().length();
-                if (len > maximum) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, new Integer(maximum)});
+                if (len > maximum) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, Integer.valueOf(maximum)});
             }
         }
     }
@@ -800,15 +784,14 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesLengthMinimum(String columnNames, int minimum, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 int len = colData.toString().length();
-                if (len < minimum) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, new Integer(minimum)});
+                if (len < minimum) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, Integer.valueOf(minimum)});
             }
         }
     }
@@ -833,21 +816,20 @@ abstract public class Validators {
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesLengthInRangeOf(String columnNames, int length1, int length2, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 int len = colData.toString().length();
-                if (len < length1 || len > length2) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, new Integer(length1), new Integer(length2)});
+                if (len < length1 || len > length2) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, Integer.valueOf(length1), Integer.valueOf(length2)});
             }
         }
     }
     
     /**
-     * Validates the field length is as specfied.
+     * Validates the field length is as specified.
      * 
      * @param columnNames   a string of column names separated by comma or blank
      * @param length        the correct length
@@ -857,22 +839,21 @@ abstract public class Validators {
     }
     
     /**
-     * Validates the field length is as specfied.
+     * Validates the field length is as specified.
      * 
      * @param columnNames   a string of column names separated by comma or blank
      * @param length        the correct length
      * @param messageKey    key to a message in message resource files or a message
      */
     public void validatesLengthOf(String columnNames, int length, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 int len = colData.toString().length();
-                if (len != length) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, new Integer(length)});
+                if (len != length) getValidationResults().recordValidationException(colName, messageKey, new Object[]{colName, Integer.valueOf(length)});
             }
         }
     }

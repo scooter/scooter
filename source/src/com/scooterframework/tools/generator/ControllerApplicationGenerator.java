@@ -24,7 +24,7 @@ public class ControllerApplicationGenerator extends AbstractGenerator {
 	private String controllerClassName;
 	private boolean noPrefix;
 
-	public ControllerApplicationGenerator(String templateFilePath, Map props) {
+	public ControllerApplicationGenerator(String templateFilePath, Map<String, String> props) {
 		super(templateFilePath, props);
 		
 		String controllerNameCamel = "Application";
@@ -41,8 +41,9 @@ public class ControllerApplicationGenerator extends AbstractGenerator {
 		}
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, String> getTemplateProperties() {
+		Map<String, String> templateProps = new HashMap<String, String>();
 		templateProps.put("package_line", packageLine);
 		templateProps.put("package_name", packageName);
 		templateProps.put("controller_class_name", controllerClassName);
@@ -50,12 +51,14 @@ public class ControllerApplicationGenerator extends AbstractGenerator {
 		return templateProps;
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return (noPrefix)?DIRECTORY_NAME_SRC:
 					(DIRECTORY_NAME_SRC + File.separatorChar +
 					packageName.replace('.', File.separatorChar));
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return controllerClassName + FILE_EXTENSION_JAVA;
 	}

@@ -152,7 +152,7 @@ public class ActionResult {
      * @param nameValuePairs a map of name and value pairs as HTTP query string
      * @return a formatted forward-tagged URI string
      */
-    public static String forwardTo(String uri, Map nameValuePairs) {
+    public static String forwardTo(String uri, Map<String, Object> nameValuePairs) {
         return forwardTo(uri, Converters.convertMapToUrlString(nameValuePairs));
     }
     
@@ -199,7 +199,7 @@ public class ActionResult {
      * @param nameValuePairs a map of name and value pairs as HTTP query string
      * @return a formatted redirect-tagged URI string
      */
-    public static String redirectTo(String uri, Map nameValuePairs) {
+    public static String redirectTo(String uri, Map<String, Object> nameValuePairs) {
         return redirectTo(uri, Converters.convertMapToUrlString(nameValuePairs));
     }
     

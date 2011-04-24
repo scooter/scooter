@@ -23,20 +23,20 @@ public class AppActionContext extends ActionContext {
     public AppActionContext() {
         super();
         resetFlashMessage();
-        cycleData.set(new HashMap());
+        cycleData.set(new HashMap<String, Object>());
     }
     
     /**
      * Gets data in parameter scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getParameterDataAsMap() {
-        Map m = (Map)parameterLocal.get();
+    public Map<String, Object> getParameterDataAsMap() {
+        Map<String, Object> m = (Map<String, Object>)parameterLocal.get();
         if (m == null) {
-            m = new HashMap();
+            m = new HashMap<String, Object>();
             parameterLocal.set(m);
         }
         return m;
@@ -46,21 +46,21 @@ public class AppActionContext extends ActionContext {
      * Sets data in parameter scope.
      * 
      */
-    public void setParameterData(Map data) {
+    public void setParameterData(Map<String, Object> data) {
         parameterLocal.set(data);
     }
     
     /**
      * Gets data in request scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getRequestDataAsMap() {
-        Map m = (Map)requestLocal.get();
+    public Map<String, Object> getRequestDataAsMap() {
+        Map<String, Object> m = (Map<String, Object>)requestLocal.get();
         if (m == null) {
-            m = new HashMap();
+            m = new HashMap<String, Object>();
             requestLocal.set(m);
         }
         return m;
@@ -70,18 +70,18 @@ public class AppActionContext extends ActionContext {
      * Sets data in request scope.
      * 
      */
-    public void setRequestData(Map data) {
+    public void setRequestData(Map<String, Object> data) {
         requestLocal.set(data);
     }
     
     /**
      * Gets data in session scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getSessionDataAsMap() {
+    public Map<String, Object> getSessionDataAsMap() {
         return sessionData;
     }
     
@@ -89,7 +89,7 @@ public class AppActionContext extends ActionContext {
      * Sets data in session scope.
      * 
      */
-    public void setSessionData(Map data) {
+    public void setSessionData(Map<String, Object> data) {
         if (data == null) sessionData.clear();
         else sessionData = data;
     }
@@ -97,11 +97,11 @@ public class AppActionContext extends ActionContext {
     /**
      * Gets data in context scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getContextDataAsMap() {
+    public Map<String, Object> getContextDataAsMap() {
         return getGlobalDataAsMap();
     }
     
@@ -260,7 +260,7 @@ public class AppActionContext extends ActionContext {
      * Starts session.
      */
     public void startSession() {
-        if (sessionData == null) sessionData = new HashMap();
+        if (sessionData == null) sessionData = new HashMap<String, Object>();
         else sessionData.clear();
     }
     
@@ -302,16 +302,16 @@ public class AppActionContext extends ActionContext {
         getCycleMap().put(name, cycle);
     }
     
-    private Map getCycleMap() {
-        return (Map)cycleData.get();
+    private Map<String, Object> getCycleMap() {
+        return (Map<String, Object>)cycleData.get();
     }
     
     /**
      * Session data map.
      */
-    protected Map sessionData = new HashMap();
+    protected Map<String, Object> sessionData = new HashMap<String, Object>();
     
-    private static final ThreadLocal parameterLocal = new ThreadLocal();
-    private static final ThreadLocal requestLocal = new ThreadLocal();
-    private static final ThreadLocal cycleData = new ThreadLocal();
+    private static final ThreadLocal<Map<String, Object>> parameterLocal = new ThreadLocal<Map<String, Object>>();
+    private static final ThreadLocal<Map<String, Object>> requestLocal = new ThreadLocal<Map<String, Object>>();
+    private static final ThreadLocal<Map<String, Object>> cycleData = new ThreadLocal<Map<String, Object>>();
 }

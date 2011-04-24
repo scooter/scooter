@@ -7,14 +7,12 @@
  */
 package com.scooterframework.web.controller;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
-import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.web.route.MatchMaker;
 import com.scooterframework.web.route.RequestInfo;
@@ -32,7 +30,6 @@ import com.scooterframework.web.route.RouteInfo;
  * @author (Fei) John Chen
  */
 public class RestfulRequestProcessor extends BaseRequestProcessor {
-    protected LogUtil log = LogUtil.getLogger(getClass().getName());
     
     public static final String DEFAULT_CONTROLLER_CLASS = "com.scooterframework.builtin.RestfulCRUDController";
     
@@ -64,15 +61,12 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
         CurrentThreadCache.set(CACHE_KEY_ROUTE_TYPE, routeInfo.getRouteType());
         
         //setup field values
-        Map requiredFieldValues = routeInfo.getRequiredFieldValues();
+        Map<String, String> requiredFieldValues = routeInfo.getRequiredFieldValues();
         if (requiredFieldValues != null) {
             request.setAttribute(RouteConstants.FIELD_VALUES, requiredFieldValues);
             
-            Iterator it = requiredFieldValues.keySet().iterator();
-            while(it.hasNext()) {
-                String field = (String)it.next();
-                String value = (String)requiredFieldValues.get(field);
-                request.setAttribute(field, value);
+            for(Map.Entry<String, String> entry : requiredFieldValues.entrySet()) {
+                request.setAttribute(entry.getKey(), entry.getValue());
             }
         }
         

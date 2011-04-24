@@ -7,7 +7,7 @@
  */
 package com.scooterframework.orm.sqldataexpress.config;
 
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
@@ -22,7 +22,7 @@ import com.scooterframework.common.logging.LogUtil;
  * @author (Fei) John Chen
  */
 public class SqlConfig implements Observer {
-    private LogUtil log = LogUtil.getLogger(this.getClass().getName());
+    private static LogUtil log = LogUtil.getLogger(SqlConfig.class.getName());
     
     private static SqlConfig me;
     private Properties appProperties = null;
@@ -50,14 +50,14 @@ public class SqlConfig implements Observer {
     }
     
     /**
-     * Returns the sql statement string associated with the key.
+     * Returns the SQL statement string associated with the key.
      * 
-     * @param key   the key to the sql string
-     * @return a sql string
+     * @param key   the key to the SQL string
+     * @return a SQL string
      */
     public String getSql(String key) {
         if (key == null) return null;
-        String query = (String)sqlProperties.get(key.toUpperCase());
+        String query = sqlProperties.getProperty(key.toUpperCase());
         return (query != null)?query:null;
     }
     
@@ -70,14 +70,16 @@ public class SqlConfig implements Observer {
         
         sqlProperties.clear();
         
-        Properties p = appProperties;
-        
-        //conver all keys to upper case
-        for(Iterator it=p.keySet().iterator(); it.hasNext();) {
-            String key = (String)it.next();
-            Object value = p.get(key);
-            sqlProperties.put(key.toUpperCase(), value);
+        //convert all keys to upper case
+        Enumeration<?> en = appProperties.propertyNames();
+        while(en.hasMoreElements()) {
+        	Object key = en.nextElement();
+        	if (key == null) continue;
+            Object value = appProperties.get(key);
+            sqlProperties.put(key.toString().toUpperCase(), value);
         }
+        
+        log.debug("Loaded sql properties: " + sqlProperties);
     }
     
     private void loadProperties() {

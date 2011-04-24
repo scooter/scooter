@@ -22,6 +22,7 @@ import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.admin.FilterManager;
 import com.scooterframework.admin.FilterManagerFactory;
+import com.scooterframework.autoloader.JavaCompiler;
 import com.scooterframework.common.exception.ExecutionException;
 import com.scooterframework.common.exception.MethodCreationException;
 import com.scooterframework.common.logging.LogUtil;
@@ -72,6 +73,12 @@ public class BaseRequestProcessor {
             processLocale(request, response);
             
             String requestPath = getRequestPath(request);
+            
+            if (!isAdminRequest(requestPath) && JavaCompiler.hasCompileErrors()) {
+            	processCompileError(request, response);
+            	return;
+            }
+            
             if (isRootAccess(requestPath)) {
             	processRootAccess(request, response);
             }
@@ -95,6 +102,10 @@ public class BaseRequestProcessor {
         catch(Exception ex) {
             processException(request, response, ex);
         }
+    }
+    
+    private boolean isAdminRequest(String requestPath) {
+    	return (requestPath != null && requestPath.toLowerCase().startsWith("/admin"));
     }
 
     /**
@@ -158,7 +169,12 @@ public class BaseRequestProcessor {
         
         if (lastDot != -1 && lastDot > lastSlash) {
             format = path.substring(lastDot + 1);
-            path = path.substring(0, lastDot);
+            if (EnvConfig.getInstance().hasMimeTypeFor(format)) {
+                path = path.substring(0, lastDot);
+            }
+            else {
+            	format = null;
+            }
         }
         
         if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
@@ -235,7 +251,7 @@ public class BaseRequestProcessor {
      */
     protected String getRequestPath(HttpServletRequest request) {
         String contextPath = request.getContextPath();
-        String requestURI = request.getRequestURI();
+        String requestURI = cleanJsessionid(request.getRequestURI());
         String requestPath = requestURI.substring(contextPath.length());
         if (requestPath.length() > 1 && 
         		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
@@ -243,6 +259,14 @@ public class BaseRequestProcessor {
         }
         return requestPath;
     }
+	
+	private static String cleanJsessionid(String requestPath) {
+		String s = requestPath;
+		if (s.indexOf(";jsessionid") != -1) {
+			s = s.substring(0, s.indexOf(";jsessionid"));
+		}
+		return s;
+	}
     
     protected void processLocale(HttpServletRequest request,
             HttpServletResponse response) {
@@ -313,7 +337,7 @@ public class BaseRequestProcessor {
      * @param actionName name of the action method
      * @return the method instance
      */
-    protected Method getActionMethod(Class controllerClass, String actionName) {
+    protected Method getActionMethod(Class<?> controllerClass, String actionName) {
         if (controllerClass == null || actionName == null) return null;
         
         Method method = null;
@@ -558,6 +582,19 @@ public class BaseRequestProcessor {
     }
     
     /**
+     * Processes a compile error message.
+     * 
+     * @param request HTTP servlet request
+     * @param response HTTP servlet response
+     * @throws java.io.IOException
+     * @throws javax.servlet.ServletException
+     */
+    protected void processCompileError(HttpServletRequest request, HttpServletResponse response) 
+    throws IOException, ServletException {
+        doForwardToCompileErrorPage(request, response);
+    }
+    
+    /**
      * Processes an exception.
      * 
      * @param request HTTP servlet request
@@ -654,6 +691,13 @@ public class BaseRequestProcessor {
         doForward(EnvConfig.getInstance().getErrorPageURI(), request, response);
     }
     
+    protected void doForwardToCompileErrorPage(
+        HttpServletRequest request,
+        HttpServletResponse response)
+        throws IOException, ServletException {
+        doForward(EnvConfig.getInstance().getCompileErrorPageURI(), request, response);
+    }
+    
     /**
      * <p>Do a forward to specified URI using a <tt>RequestDispatcher</tt>.
      * This method is used by all internal method needing to do a forward.</p>
@@ -679,9 +723,10 @@ public class BaseRequestProcessor {
      */
     public void displayHttpRequest(HttpServletRequest request) {
         if (request != null) {
-            Enumeration en = request.getParameterNames();
+            @SuppressWarnings("unchecked")
+			Enumeration<String> en = request.getParameterNames();
             while(en.hasMoreElements()) {
-                String key = (String) en.nextElement();
+                String key = en.nextElement();
                 String[] values = request.getParameterValues(key);
                 if (values != null) {
                     String tmp = "";

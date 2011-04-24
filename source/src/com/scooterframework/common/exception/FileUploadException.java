@@ -26,7 +26,7 @@ public class FileUploadException extends GenericException {
      * happens when <tt>maximum.total.bytes.per.upload.request</tt> limit is violated.
      */
     public boolean causedByFileSizeLimitExceeded() {
-    	String exClassName = (getCause() != null)?getCause().getClass().getName():null;
+    	String exClassName = (getCause() != null)?getCause().getClass().getName():"";
     	return exClassName.equals("org.apache.commons.fileupload.FileUploadBase$FileSizeLimitExceededException");
     }
     
@@ -34,11 +34,11 @@ public class FileUploadException extends GenericException {
      * happens when <tt>maximum.bytes.per.uploaded.file</tt> limit is violated.
      */
     public boolean causedByRequestSizeLimitExceeded() {
-    	String exClassName = (getCause() != null)?getCause().getClass().getName():null;
+    	String exClassName = (getCause() != null)?getCause().getClass().getName():"";
     	return exClassName.equals("org.apache.commons.fileupload.FileUploadBase$SizeLimitExceededException");
     }
     
     public String getMessage() {
-    	return (getCause() != null)?getCause().getMessage():null;
+    	return (getCause() != null)?getCause().getMessage():"";
     }
 }

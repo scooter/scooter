@@ -29,12 +29,12 @@ public abstract class AbstractGenerator extends GeneratorImpl {
 	protected EnvConfig wc;
 	public static boolean frameworkInitiated = false;
 
-	public AbstractGenerator(Map props) {
+	public AbstractGenerator(Map<String, String> props) {
 		super(props);
 		initApp();
 	}
 
-	public AbstractGenerator(String templateFilePath, Map props) {
+	public AbstractGenerator(String templateFilePath, Map<String, String> props) {
 		super(templateFilePath, props);
 		initApp();
 	}
@@ -56,6 +56,7 @@ public abstract class AbstractGenerator extends GeneratorImpl {
 		//ac.endApplication();
 	}
 	
+	@Override
 	protected String getRootPath() {
 		return getProperty("app.path") + File.separator + "WEB-INF";
 	}
@@ -63,13 +64,14 @@ public abstract class AbstractGenerator extends GeneratorImpl {
     /**
      * Generates an ActiveRecord home instance of a model model
      *
-     * @param model model model
+     * @param connName   db connection name
+     * @param model      model name of the ActiveRecord class
      * @return an ActiveRecord home instance of the model model
      */
-    protected ActiveRecord generateActiveRecordHomeInstance(String model) {
+    protected ActiveRecord generateActiveRecordHomeInstance(String connName, String model) {
         ActiveRecord record = (ActiveRecord)modelHomes.get(model);
         if (record == null) {
-	        record = ActiveRecordUtil.generateActiveRecordInstance(CRUDController.DEFAULT_RECORD_CLASS, model);
+	        record = ActiveRecordUtil.generateActiveRecordInstance(CRUDController.DEFAULT_RECORD_CLASS, connName, model);
 	        if (record != null) record.freeze();
 	        ActiveRecordUtil.setHomeInstance(record);
 	        modelHomes.put(model, record);
@@ -77,5 +79,5 @@ public abstract class AbstractGenerator extends GeneratorImpl {
         return record;
     }
 
-    private static Map modelHomes = new HashMap();
+    private static Map<String, ActiveRecord> modelHomes = new HashMap<String, ActiveRecord>();
 }

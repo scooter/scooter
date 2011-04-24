@@ -11,10 +11,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -100,7 +98,7 @@ public class SqlServiceImpl implements SqlService {
     /**
      * execute without output filter
      */
-    public OmniDTO execute(Map inputs, String processorType, String processorName) 
+    public OmniDTO execute(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException {
         return execute(inputs, processorType, processorName, null);
     }
@@ -108,12 +106,12 @@ public class SqlServiceImpl implements SqlService {
     /**
      * execute with output filter
      */
-    public OmniDTO execute(Map inputs, String processorType, String processorName, Map outputFilters) 
+    public OmniDTO execute(Map<String, Object> inputs, String processorType, String processorName, Map<String, String> outputFilters) 
     throws BaseSQLException {
         if (processorType == null || processorName == null) 
             throw new IllegalArgumentException("processorType or processorName is null.");
         
-        if (inputs == null) inputs = new HashMap();
+        if (inputs == null) inputs = new HashMap<String, Object>();
         
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         OmniDTO returnTO = null;
@@ -169,29 +167,25 @@ public class SqlServiceImpl implements SqlService {
     /**
      * execute a collection of InputInfo objects in one transaction
      */
-    public Collection execute(Collection inputInfoList) 
+    public Collection<OmniDTO> execute(Collection<InputInfo> inputInfoList) 
     throws BaseSQLException {
         if (inputInfoList == null) 
             throw new IllegalArgumentException("inputs list is null.");
         
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
-        Collection returnTOList = new ArrayList();
+        Collection<OmniDTO> returnTOList = new ArrayList<OmniDTO>();
         
         try {
             tm.beginTransactionImplicit();
             
-            Iterator it = inputInfoList.iterator();
-            while(it.hasNext()) {
-                InputInfo ip = (InputInfo)it.next();
+            for (InputInfo ip : inputInfoList) {
                 UserDatabaseConnection connection = findOrCreateConnection(ip);
                 OmniDTO returnTO = executeKeepConnection(connection, ip.getInputs(), ip.getProcessorType(), ip.getProcessorName(), ip.getOutputFilters());
                 returnTOList.add(returnTO);
                 
                 //now execute child InputInfo
-                Collection childList = ip.getChildInputInfoObjects();
-                Iterator childIt = childList.iterator();
-                while(childIt.hasNext()) {
-                    InputInfo childIp = (InputInfo)childIt.next();
+                Collection<InputInfo> childList = ip.getChildInputInfoObjects();
+                for (InputInfo childIp : childList) {
                     OmniDTO returnTO2 = executeKeepConnection(connection, childIp.getInputs(), childIp.getProcessorType(), childIp.getProcessorName(), childIp.getOutputFilters());
                     returnTO.addChildrenOmniDTOToList(returnTO2);
                 }
@@ -232,20 +226,16 @@ public class SqlServiceImpl implements SqlService {
             log.debug("parent: " + returnTO);
             
             //now execute child InputInfo
-            Collection childList = ip.getChildInputInfoObjects();
-            Iterator childIt = childList.iterator();
-            while(childIt.hasNext()) {
-                InputInfo childIp = (InputInfo)childIt.next();
-                
+            Collection<InputInfo> childList = ip.getChildInputInfoObjects();
+            for (InputInfo childIp : childList) {
                 // find all input parameters in childIp that need data from parent
-                List connectorList = new ArrayList();
-                Map childInputs = childIp.getInputs();
+                List<String> connectorList = new ArrayList<String>();
+                Map<String, Object> childInputs = childIp.getInputs();
                 childInputs = convertKeyCase(childInputs);
-                Iterator it = childInputs.keySet().iterator();
-                while(it.hasNext()) {
-                    String key = (String)it.next();
+                for (Map.Entry<String, Object> entry : childInputs.entrySet()) {
+                    String key = entry.getKey();
                     String value = (String)childInputs.get(key);
-                    if (key.startsWith("&")) connectorList.add(value);
+                    if (key != null && key.startsWith("&")) connectorList.add(value);
                 }
                 
                 // create a select union query
@@ -320,7 +310,7 @@ public class SqlServiceImpl implements SqlService {
     /**
      * execute
      */
-    public OmniDTO execute(Collection inputParameters, String processorType, String processorName) 
+    public OmniDTO execute(Collection<InputParameter> inputParameters, String processorType, String processorName) 
     throws BaseSQLException {
         return execute(inputParameters, processorType, processorName, null);
     }
@@ -328,15 +318,13 @@ public class SqlServiceImpl implements SqlService {
     /**
      * execute of InputInfo with output filter
      */
-    public OmniDTO execute(Collection inputParameters, String processorType, String processorName, Map outputFilters) 
+    public OmniDTO execute(Collection<InputParameter> inputParameters, String processorType, String processorName, Map<String, String> outputFilters) 
     throws BaseSQLException {
         if (inputParameters == null) throw new IllegalArgumentException("inputs is null.");
         
-        Map inputsMap = new HashMap();
+        Map<String, Object> inputsMap = new HashMap<String, Object>();
         
-        Iterator it = inputParameters.iterator();
-        while (it.hasNext()) {
-            InputParameter ip = (InputParameter) it.next();
+        for (InputParameter ip : inputParameters) {
             inputsMap.put(ip.getName(), ip.getValue());
         }
         
@@ -348,17 +336,13 @@ public class SqlServiceImpl implements SqlService {
      * Retrieve a single row data from database. If more than one records is
      * returned, an UnexpectedDataException will be thrown. 
      * 
-     * If DataProcessor.input_key_records_fixed key has value "true" in inputs, 
-     * absolute fixed number of records is required. An UnexpectedDataException 
-     * will be thrown if the number of retrieved records is not equal to one.
-     * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return TableData        The row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRow(Map inputs, String processorType, String processorName) 
+    public TableData retrieveRow(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException {
         return retrieveRows(inputs, processorType, processorName, 1);
     }
@@ -367,63 +351,69 @@ public class SqlServiceImpl implements SqlService {
      * Retrieve a list of rows from database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return TableData        The list of row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRows(Map inputs, String processorType, String processorName) 
+    public TableData retrieveRows(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException {
         return retrieveRows(inputs, processorType, processorName, DataProcessor.NO_ROW_LIMIT);
     }
     
     /**
+     * <p>
      * Retrieve a list of rows from database with a certain limit range. If the 
      * number of returned records is more than the preset limit range, an
      * UnexpectedDataException will be thrown. 
      * 
+     * <p>
      * If DataProcessor.input_key_records_fixed key has value "true" in inputs, 
      * absolute fixed number of records is required. An UnexpectedDataException 
      * will be thrown if the number of retrieved records is not equal to 
      * limitOrFixed.
      * 
+     * <p>
      * If the limitOrFixed = -1, all records are retrieved. 
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @param limitOrFixed      Number of desired (limit) or fixed records to retrieve
      * @return TableData        The row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRows(Map inputs, String processorType, String processorName, int limitOrFixed) 
+    public TableData retrieveRows(Map<String, Object> inputs, String processorType, String processorName, int limitOrFixed) 
     throws BaseSQLException {
         return retrieveRows(inputs, processorType, processorName, limitOrFixed, 0);
     }
     
     /**
+     * <p>
      * Retrieve a list of rows from database with a certain limit range. If the 
      * number of returned records is more than the preset limit range, an
      * UnexpectedDataException will be thrown. 
      * 
+     * <p>
      * If DataProcessor.input_key_records_fixed key has value "true" in inputs, 
      * absolute fixed number of records is required. An UnexpectedDataException 
      * will be thrown if the number of retrieved records is not equal to 
      * limitOrFixed.
      * 
+     * <p>
      * If the limitOrFixed = -1, all records are retrieved. 
      * 
      * offset defaults to 0. 
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @param limitOrFixed      Number of desired (limit) or fixed records to retrieve
      * @param offset            int for offset
      * @return TableData        The row data
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public TableData retrieveRows(Map inputs, 
+    public TableData retrieveRows(Map<String, Object> inputs, 
                                   String processorType, 
                                   String processorName, 
                                   int limitOrFixed,
@@ -432,26 +422,28 @@ public class SqlServiceImpl implements SqlService {
         if (processorType == null || processorName == null) 
             throw new IllegalArgumentException("processorType or processorName is null.");
         
-        if (inputs == null) inputs = new HashMap();
+        if (inputs == null) inputs = new HashMap<String, Object>();
         
-        inputs.put(DataProcessor.input_key_records_offset, new Integer(offset));
-        inputs.put(DataProcessor.input_key_records_limit, new Integer(limitOrFixed));
+        inputs.put(DataProcessor.input_key_records_offset, Integer.valueOf(offset));
+        inputs.put(DataProcessor.input_key_records_limit, Integer.valueOf(limitOrFixed));
         
         OmniDTO dto = execute(inputs, processorType, processorName);
         TableData td = dto.getTableData(processorName);
         
         if (limitOrFixed != DataProcessor.NO_ROW_LIMIT) {
-            if (td.getTableSize() > limitOrFixed) {
-                throw new UnexpectedDataException("Failed to retrieveRows: required " + 
-                    limitOrFixed + " but retrieved " + td.getTableSize() + ".");
+            boolean requireFixed = Util.getBooleanValue(inputs, DataProcessor.input_key_records_fixed, false);
+            if (requireFixed) {
+                if (td.getTableSize() != limitOrFixed) {
+                    throw new UnexpectedDataException("Failed to retrieveRows for '" + 
+                    	processorName + "': required only " + 
+                        limitOrFixed + " but retrieved " + td.getTableSize() + ".");
+                }
             }
             else {
-                boolean requireFixed = Util.getBooleanValue(inputs, DataProcessor.input_key_records_fixed, false);
-                if (requireFixed) {
-                    if (td.getTableSize() != limitOrFixed) {
-                        throw new UnexpectedDataException("Failed to retrieveRows: required only " + 
-                            limitOrFixed + " but retrieved " + td.getTableSize() + ".");
-                    }
+                if (td.getTableSize() > limitOrFixed) {
+                    throw new UnexpectedDataException("Failed to retrieveRows for '" + 
+                    	processorName + "': required limit at most " + 
+                        limitOrFixed + " but retrieved " + td.getTableSize() + ".");
                 }
             }
         }
@@ -463,11 +455,11 @@ public class SqlServiceImpl implements SqlService {
      * Insert data to database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public void insert(Map inputs, String processorType, String processorName) 
+    public void insert(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException {
         execute(inputs, processorType, processorName);
     }
@@ -476,12 +468,12 @@ public class SqlServiceImpl implements SqlService {
      * Delete data from database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return int              number of rows deleted
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public int delete(Map inputs, String processorType, String processorName) 
+    public int delete(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException {
         OmniDTO dto = execute(inputs, processorType, processorName);
         return dto.getUpdatedRowCount();
@@ -491,12 +483,12 @@ public class SqlServiceImpl implements SqlService {
      * Update data in database.
      * 
      * @param inputs            Map of input data
-     * @param processorType     A named sql or direct sql or stored procedure
-     * @param processorName     Sql name or sql itself or stored procedure name
+     * @param processorType     A named SQL or direct SQL or stored procedure
+     * @param processorName     SQL name or SQL itself or stored procedure name
      * @return int              number of rows updated
      * @throws com.scooterframework.orm.sqldataexpress.exception.BaseSQLException
      */
-    public int update(Map inputs, String processorType, String processorName) 
+    public int update(Map<String, Object> inputs, String processorType, String processorName) 
     throws BaseSQLException {
         OmniDTO dto = execute(inputs, processorType, processorName);
         return dto.getUpdatedRowCount();
@@ -513,7 +505,7 @@ public class SqlServiceImpl implements SqlService {
      * @param inputs    Map of inputs
      * @return UserDatabaseConnection object
      */
-    private UserDatabaseConnection findOrCreateConnection(Map inputs) {
+    private UserDatabaseConnection findOrCreateConnection(Map<String, Object> inputs) {
     	UserDatabaseConnection udc = null;
         DatabaseConnectionContext dcc = 
             (DatabaseConnectionContext)inputs.get(DataProcessor.input_key_database_connection_context);
@@ -668,7 +660,7 @@ public class SqlServiceImpl implements SqlService {
      * execute with output filter
      */
     private OmniDTO executeKeepConnection(UserDatabaseConnection udc, 
-    		Map inputs, String processorType, String processorName, Map outputFilters) 
+    		Map<String, Object> inputs, String processorType, String processorName, Map<String, String> outputFilters) 
     throws BaseSQLException {
         if (udc == null) 
             throw new IllegalArgumentException("UserDatabaseConnection object is null.");
@@ -677,7 +669,7 @@ public class SqlServiceImpl implements SqlService {
             throw new IllegalArgumentException("processorType or processorName is null.");
         
         cleanUpInputs(inputs);
-        if (inputs == null) inputs = new HashMap();
+        if (inputs == null) inputs = new HashMap<String, Object>();
         
         OmniDTO returnTO = null;
         
@@ -702,7 +694,7 @@ public class SqlServiceImpl implements SqlService {
         return returnTO;
     }
     
-    private void cleanUpInputs(Map inputs) {
+    private void cleanUpInputs(Map<String, Object> inputs) {
     	if (inputs == null) return;
     	inputs.remove("__sitemesh__filterapplied");
     	inputs.remove("_method");
@@ -713,28 +705,26 @@ public class SqlServiceImpl implements SqlService {
     	inputs.remove("scooter.key.controller.path");
     }
     
-    private Map convertKeyCase(Map oldMap) {
-        Map newMap = new HashMap();
-        Set keys = oldMap.keySet();
-        Iterator it = keys.iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            newMap.put(key.toUpperCase(), oldMap.get(key));
+    private Map<String, Object> convertKeyCase(Map<String, Object> map) {
+    	Map<String, Object> newMap = new HashMap<String, Object>();
+    	newMap.putAll(map);
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            newMap.put(key.toUpperCase(), entry.getValue());
         }
         return newMap;
     }
     
-    private String populateChildInputs(int rowIndex, Map childInputs, RowData parent, String childQuery) {
+    private String populateChildInputs(int rowIndex, Map<String, Object> childInputs, RowData parent, String childQuery) {
         String newQuery = childQuery;
         
-        Map newInputs = new HashMap();
+        Map<String, Object> newInputs = new HashMap<String, Object>();
         
-        Iterator it = childInputs.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String)it.next();
+        for (Map.Entry<String, Object> entry :childInputs.entrySet()) {
+            String key = entry.getKey();
             if (key.startsWith("&")) {
                 String fkName = key.substring(1);
-                String parentKeyName = (String)childInputs.get(key);
+                String parentKeyName = (String)entry.getValue();
                 if (parentKeyName != null) {
                     parentKeyName = parentKeyName.toUpperCase();
                     String keyInQuery = "?" + fkName;
@@ -753,16 +743,14 @@ public class SqlServiceImpl implements SqlService {
         return newQuery;
     }
     
-    //return a string liek this: (?fkName1_rowIndex1, ?fkName2_rowIndex2, ...)
+    //return a string like this: (?fkName1_rowIndex1, ?fkName2_rowIndex2, ...)
     private String populateConditionPart2(int rowIndex, InputInfo childIp,  RowData parent) {
         String part = "(";
-        List fkNames = childIp.getFKs();
+        List<String> fkNames = childIp.getFKs();
         if (fkNames != null && fkNames.size() > 0) {
-            Map newInputs = new HashMap();
-            Map childInputs = childIp.getInputs();
-            Iterator it = fkNames.iterator();
-            while(it.hasNext()) {
-                String fkName = (String)it.next();
+            Map<String, Object> newInputs = new HashMap<String, Object>();
+            Map<String, Object> childInputs = childIp.getInputs();
+            for (String fkName : fkNames) {
                 String parentKeyName = (String)childInputs.get("&"+fkName);
                 Object parentData = parent.getField(parentKeyName);
                 String newKeyName = fkName + "_" + rowIndex;
@@ -792,11 +780,11 @@ public class SqlServiceImpl implements SqlService {
         return sqlDataTypeName;
     }
     
-    private void linkParentWithChild(TableData parentRt, TableData childRt, String processorName, List connectorList) {
+    private void linkParentWithChild(TableData parentRt, TableData childRt, String processorName, List<String> connectorList) {
         if(parentRt == null || childRt == null || childRt.getTableSize() == 0) return;
         
         int size = parentRt.getAllRows().size();
-        Map connectorMap = new HashMap();
+        Map<String, Object> connectorMap = new HashMap<String, Object>();
         for (int i = 0; i < size; i++) {
             RowData parentRow = parentRt.getRow(i);
             populateConnectorMap(connectorMap, parentRow, connectorList);
@@ -807,23 +795,22 @@ public class SqlServiceImpl implements SqlService {
         }
     }
     
-    private void populateConnectorMap(Map connectorMap, RowData parentRow, List connectorList) {
-        for (Iterator it = connectorList.iterator();it.hasNext();) {
-            String key = (String)it.next();
+    private void populateConnectorMap(Map<String, Object> connectorMap, RowData parentRow, List<String> connectorList) {
+        for (String key : connectorList) {
             connectorMap.put(key, parentRow.getField(key));
         }
     }
     
-    private List getMatchingRowDataList(Map connectorMap, TableData childRt) {
-        List filteredList = new ArrayList();
+    private List<RowData> getMatchingRowDataList(Map<String, Object> connectorMap, TableData childRt) {
+        List<RowData> filteredList = new ArrayList<RowData>();
         boolean allPassed = true;
         int size = childRt.getTableSize();
         for (int i=0; i<size; i++) {
             RowData child = childRt.getRow(i);
             
-            for (Iterator it = connectorMap.keySet().iterator();it.hasNext();) {
-                String key = (String)it.next();
-                Object keyData = connectorMap.get(key);
+            for (Map.Entry<String, Object> entry :connectorMap.entrySet()) {
+                String key = entry.getKey();
+                Object keyData = entry.getValue();
                 Object rowData = child.getField(key);
                 if (rowData == null || !rowData.toString().equalsIgnoreCase(keyData.toString())) {
                     allPassed = false;
@@ -841,7 +828,7 @@ public class SqlServiceImpl implements SqlService {
         return filteredList;
     }
     
-    private String getNewChildQuery(String query, InputInfo childIp, List parentRows) {
+    private String getNewChildQuery(String query, InputInfo childIp, List<RowData> parentRows) {
         if (query == null || childIp == null || 
             parentRows == null || parentRows.size() == 0) 
             return query;//nothing need to be changed.
@@ -856,7 +843,7 @@ public class SqlServiceImpl implements SqlService {
                 int rowIndex = 0;
                 for (int i = 0; i < size -1; i++) {
                     rowIndex = i;
-                    RowData parentRow = (RowData)parentRows.get(i);
+                    RowData parentRow = parentRows.get(i);
                     childQuery += populateChildInputs(rowIndex, childIp.getInputs(), parentRow, query) + " UNION ";
                 }
                 
@@ -875,13 +862,13 @@ public class SqlServiceImpl implements SqlService {
                 int rowIndex = 0;
                 for (int i = 0; i < size -1; i++) {
                     rowIndex = i;
-                    RowData parentRow = (RowData)parentRows.get(i);
+                    RowData parentRow = parentRows.get(i);
                     conditionPart2 += populateConditionPart2(rowIndex, childIp, parentRow) + ", ";
                 }
                 
                 //last row
                 rowIndex = size -1;
-                RowData parentRow = (RowData)parentRows.get(rowIndex);
+                RowData parentRow = parentRows.get(rowIndex);
                 conditionPart2 += populateConditionPart2(rowIndex, childIp, parentRow);
                 childQuery += " WHERE " + conditionPart1 + "(" + conditionPart2 + ")";
             }

@@ -119,7 +119,7 @@ public class JdbcStatement {
     /**
      * returns parameters
      */
-    public List getParameters() {
+    public List<Parameter> getParameters() {
         return parameters;
     }
     
@@ -166,32 +166,31 @@ public class JdbcStatement {
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String LINE_BREAK = "\r\n";
         
-        returnString.append("name = " + name).append(LINE_BREAK);
+        sb.append("name = " + name).append(LINE_BREAK);
         
         if (parameters != null) {
             int psize = parameters.size();
-            returnString.append("parameters size = " + psize).append(LINE_BREAK);
-            Iterator it = parameters.iterator();
+            sb.append("parameters size = " + psize).append(LINE_BREAK);
+            Iterator<Parameter> it = parameters.iterator();
             while (it.hasNext()) {
-                Parameter p = (Parameter) it.next();
-                returnString.append(p.toString()).append(LINE_BREAK);
+                Parameter p = it.next();
+                if (p == null) continue;
+                sb.append(p.toString()).append(LINE_BREAK);
             }
         }
         
         if (coursors != null) {
             int csize = coursors.size();
-            returnString.append("coursors size = " + csize).append(LINE_BREAK);
-            Iterator it = coursors.keySet().iterator();
-            while (it.hasNext()) {
-                Object key = it.next();
-                returnString.append(key).append(LINE_BREAK);
+            sb.append("coursors size = " + csize).append(LINE_BREAK);
+            for (Map.Entry<String, Cursor> entry : coursors.entrySet()) {
+                sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(LINE_BREAK);
             }
         }
         
-        return returnString.toString();
+        return sb.toString();
     }
     
     
@@ -245,8 +244,8 @@ public class JdbcStatement {
     private boolean loadedParameterProperties = false;
     private String name = null;
     private String jdbcStatementString = null;
-    private List parameters = new ArrayList();
-    private Map coursors = new HashMap();
+    private List<Parameter> parameters = new ArrayList<Parameter>();
+    private Map<String, Cursor> coursors = new HashMap<String, Cursor>();
     private boolean loadedParameterMetaData = false;
     
     protected LogUtil log = LogUtil.getLogger(this.getClass().getName());

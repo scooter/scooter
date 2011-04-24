@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
 
@@ -36,11 +37,11 @@ import com.scooterframework.orm.sqldataexpress.object.RESTified;
 import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
 import com.scooterframework.orm.sqldataexpress.object.TableInfo;
+import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessorTypes;
 import com.scooterframework.orm.sqldataexpress.service.SqlService;
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceConfig;
-import com.scooterframework.orm.sqldataexpress.util.DBStore;
 import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 import com.scooterframework.transaction.ImplicitTransactionManager;
 import com.scooterframework.transaction.TransactionManagerUtil;
@@ -64,9 +65,29 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * </p>
  *
  * <p>
- * To establish relations with other ActiveRecords, all subclasses must
- * implement registerRelations() method by calling proper relationship setup
- * methods: hasOne, belongsTo, hasMany, hasManyThrough, etc. For example:
+ * Subclass should override the <tt>getTableName()</tt> method or
+ * the <tt>getConnectionName()</tt> method if non-default behavior is required.
+ * For example, the follow code defines a Post class that links with 
+ * <tt>all_posts</tt> table in the <tt>blog_test</tt> database.
+ * </p>
+ *
+ * <blockquote><pre>
+ * public class Post extends ActiveRecord {
+ *     public String getTableName() {
+ *         return "all_posts";
+ *     }
+ *     
+ *     public String getConnectionName() {
+ *         return "blog_test";
+ *     }
+ * }
+ * </pre></blockquote>
+ *
+ * <p>
+ * To establish relations with other models, all subclasses must implement the 
+ * <tt>registerRelations()</tt> method by calling proper relationship setup
+ * methods: <tt>hasOne</tt>, <tt>belongsTo</tt>, <tt>hasMany</tt>, 
+ * <tt>hasManyThrough</tt>, etc. For example:
  * </p>
  *
  * <blockquote><pre>
@@ -88,38 +109,92 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * They help to construct <tt>WHERE</tt> clause of a SQL statement. Conditions
  * can be provided in three ways:</p>
  * <ol>
- *   <li><tt>conditions</tt> map</li>
  *   <li><tt>conditionsSQL</tt> String</li>
- *   <li><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> map</li>
+ *   <li><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> Array</li>
+ *   <li><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> Map</li>
  * </ol>
  *
- * <p><tt>conditions</tt> is a map of column name and value pairs.
- * The key of <tt>conditions</tt> map is corresponding to a
- * column name in the RowInfo object. If the key is not a column name, its
- * value is ignored. This will generate a SQL where clause fragment based
- * on equality with the SQL AND operator. For example:</p>
- * <blockquote><pre>
- * conditions map: {firstName=John, lastName=Doe}
- * translate to SQL: firstName=?firstName AND lastName=?lastName
- * </pre></blockquote>
- *
- * <p>The key of <tt>conditions</tt> map is corresponding to a
- * column name in the RowInfo object. If the key is not a column name, its
- * value is ignored.</p>
- *
- * <p><tt>conditionsSQL</tt> String specifies a SQL fragment. For example:</p>
+ * <p><tt>conditionsSQL</tt> String specifies a SQL fragment which is used in
+ * where clause. For example:</p>
  * <blockquote><pre>
  * conditionsSQL: "id in (1, 3, 5, 7) and content like '%Java%'"
  * </pre></blockquote>
  *
- * <p><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> map allows
+ * <p><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> Array allows
+ * dynamic data in a SQL fragment. Each element in the array is corresponding 
+ * to the value to be set to the <tt>conditionsSQL</tt>. Internally, the array 
+ * is converted to a map with key starting from 1 for each element in the 
+ * array. For example:</p>
+ * <blockquote><pre>
+ * conditionsSQL: "first_name=? OR last_name=?"
+ * conditionsSQLData array: {"John", "Doe"}
+ * </pre></blockquote>
+ *
+ * <p><tt>conditionsSQL</tt> String and <tt>conditionsSQLData</tt> Map allows
  * dynamic data in a SQL fragment. For example:</p>
  * <blockquote><pre>
  * conditionsSQL: "first_name=?1 OR last_name=?2"
- * conditionsSQLData: 1=John, 2=Doe
+ * conditionsSQLData map: 1=John, 2=Doe
  * </pre></blockquote>
  *
- *<h3>Specifying options</h3>
+ *<h3>Querying APIs</h3>
+ *
+ * <p>The following chainable methods are introduced for retrieving
+ * data from the database. </p>
+ *<ul>
+ *  <li><tt>where</tt>: specifies where clause in the SQL query</li>
+ *  <li><tt>groupBy</tt>: specifies group-by clause in the SQL query</li>
+ *  <li><tt>having</tt>: specifies having clause in the SQL query</li>
+ *  <li><tt>orderBy</tt>: specifies order-by clause in the SQL query</li>
+ *  <li><tt>limit</tt>: specifies number of records for each retrieval</li>
+ *  <li><tt>offset</tt>: specifies number of records to skip in a retrieval</li>
+ *  <li><tt>page</tt>: specifies the starting page in a pagination</li>
+ *  <li><tt>includes</tt>: specifies models to eager loaded. See below for more details.</li>
+ *</ul>
+ *
+ * <p>Each method above allows us to retrieve data in a chainable way.
+ * For example, in a PetClinic application: </p>
+ * <blockquote><pre>
+ * To retrieve a pet named Leo:
+ * ActiveRecord Leo = Pet.where("name='Leo'").getRecord();
+ *
+ * The SQL equivalent of the above is:
+ * SELECT * FROM pets WHERE name = 'Leo'
+ *
+ * To retrieve all pets owned by owners with id 6 and 10, order by latest birth date:
+ * List pets = Pet.where("owner_id IN (6, 10)").orderBy("birth_date DESC").getRecords();
+ *
+ * The SQL equivalent of the above is:
+ * SELECT * FROM pets WHERE owner_id IN (6, 10) ORDER BY birth_date DESC
+ *
+ * To retrieve a pet owner along with all the pets he/she has and each pet's type in one query (eager loading):
+ * ActiveRecord owner6 = Owner.where("owners.id=6").includes("pets=>visits, pets=>type").getRecord();
+ *
+ * The SQL equivalent of the above is:
+ * SELECT OWNERS.ID AS OWNERS_ID, OWNERS.FIRST_NAME AS OWNERS_FIRST_NAME,
+ * OWNERS.LAST_NAME AS OWNERS_LAST_NAME, OWNERS.ADDRESS AS OWNERS_ADDRESS,
+ * OWNERS.CITY AS OWNERS_CITY, OWNERS.TELEPHONE AS OWNERS_TELEPHONE,
+ * PETS.ID AS PETS_ID, PETS.NAME AS PETS_NAME, PETS.BIRTH_DATE AS PETS_BIRTH_DATE,
+ * PETS.TYPE_ID AS PETS_TYPE_ID, PETS.OWNER_ID AS PETS_OWNER_ID,
+ * VISITS.ID AS VISITS_ID, VISITS.PET_ID AS VISITS_PET_ID,
+ * VISITS.VISIT_DATE AS VISITS_VISIT_DATE, VISITS.DESCRIPTION AS VISITS_DESCRIPTION,
+ * OWNERS_PETS.ID AS OWNERS_PETS_ID, OWNERS_PETS.NAME AS OWNERS_PETS_NAME,
+ * OWNERS_PETS.BIRTH_DATE AS OWNERS_PETS_BIRTH_DATE,
+ * OWNERS_PETS.TYPE_ID AS OWNERS_PETS_TYPE_ID,
+ * OWNERS_PETS.OWNER_ID AS OWNERS_PETS_OWNER_ID,
+ * TYPES.ID AS TYPES_ID, TYPES.NAME AS TYPES_NAME
+ * FROM OWNERS LEFT OUTER JOIN PETS ON OWNERS.ID=PETS.OWNER_ID
+ *             LEFT OUTER JOIN VISITS ON PETS.ID=VISITS.PET_ID
+ *             LEFT OUTER JOIN PETS OWNERS_PETS ON OWNERS.ID=OWNERS_PETS.OWNER_ID
+ *             LEFT OUTER JOIN TYPES ON OWNERS_PETS.TYPE_ID=TYPES.ID
+ * WHERE OWNERS.ID = 6
+ * </pre></blockquote>
+ *
+ *<h3>Specifying <tt>options</tt> (<tt>properties</tt>)</h3>
+ *
+ * <p>Please notice that in all finder methods, <tt>options</tt> are 
+ * replaced by chainable querying methods described above. <tt>options</tt> 
+ * are used in specifying relations.</p>
  *
  * <p><tt>options</tt> can be either a string or a map.</p>
  *
@@ -141,32 +216,21 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  * order_by        =>  first_name, salary desc
  * cascade         =>  delete
  * </pre></blockquote>
- * 
- * <p><tt>include</tt> option is used for eager loading. For example, </p>
- * <blockquote><pre>
- * ActiveRecord owner = Owner.findFirst("owners.id=" + p("id"), "include:pets=>visits, pets=>type");
- * </pre></blockquote>
- * 
- * <p>The above line of code will retrieve an owner record of a specific id 
- * value along with the owner's visits of his/her pets and types of pets in 
- * one single SQL query statement.</p>
  *
- * <p>
- * Options string or map are used in finder methods such as find and findAll
- * related methods. Options string or map are also used in association
+ * <p>Options string or map are used in association
  * methods such as <tt>hasMany</tt> and <tt>hasManyThrough</tt>. The
  * following is a list of allowed properties:
- * <tt>model</tt>, <tt>mapping</tt>, <tt>finder_sql</tt>, 
+ * <tt>model</tt>, <tt>mapping</tt>, <tt>finder_sql</tt>,
  * <tt>conditions_sql</tt>, <tt>include</tt>, <tt>join_type</tt>,
- * <tt>order_by</tt>, <tt>sort</tt>, <tt>order</tt>, <tt>unique</tt>, 
+ * <tt>order_by</tt>, <tt>unique</tt>,
  * <tt>cascade</tt>. Please note that <tt>model</tt>
  * property is only used in setting up relations.
  * </p>
  *
  *<h3>Dynamic finders</h3>
  *
- * <p>Dynamic finders simulate Rails's finder methods. These methods are
- * <tt>findAllBy</tt>, <tt>findFirstBy</tt>, and <tt>findLastBy</tt>. The
+ * <p>Dynamic finders simulate Ruby-on-Rails's finder methods. These methods 
+ * are <tt>findAllBy</tt>, <tt>findFirstBy</tt>, and <tt>findLastBy</tt>. The
  * first input parameter of these methods is <tt>columns</tt> which is a string
  * of column names linked by <tt>_and_</tt>, such as:
  * <blockquote><pre>
@@ -175,7 +239,7 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  *
  * <p>A client can call this method as follows:</p>
  * <blockquote><pre>
- *     Employee.findAllBy("firstName_and_lastName_and_age", {"John", "Doe", new Integer(29)});
+ *     Employee.findAllBy("firstName_and_lastName_and_age", {"John", "Doe", Integer.valueOf(29)});
  *     Employee.findAllBy("city", {"LA"});
  * </pre></blockquote>
  *
@@ -185,11 +249,15 @@ import com.scooterframework.transaction.TransactionManagerUtil;
  *
  * @author (Fei) John Chen
  */
-public class ActiveRecord extends ActiveRecordClass 
+public class ActiveRecord extends ActiveRecordClass
 implements RESTified, Serializable {
 
     /**
-     * <p>Constructs an instance of ActiveRecord.</p>
+     * <p>Constructs an instance of <tt>ActiveRecord</tt>.</p>
+     *
+     * <p>The created instance is based on meta info for table as returned
+     * by <tt>getTableName()</tt> and database connection name as returned
+     * by <tt>getConnectionName()</tt>.</p>
      *
      * <p>This constructor will populate the meta info of the record and its
      * table. The table name defaults to short class name. For example, if
@@ -197,15 +265,20 @@ implements RESTified, Serializable {
      * table name for this class is <tt>posts</tt> or <tt>CRM_users_US</tt>
      * if there are prefix <tt>CRM_</tt> and suffix <tt>_US</tt> for all
      * tables as specified in configuration file.</p>
+     *
+     * See description of {@link #ActiveRecord(String connectionName, String tableName)} constructor.
      */
     public ActiveRecord() {
-        connectionName = getDefaultConnectionName();
+        connectionName = getConnectionName();
         tableName = getTableName();
         initialize(connectionName, tableName);
     }
 
 	/**
      * <p>Constructs an instance of ActiveRecord.</p>
+     *
+     * <p>The created instance is based on meta info for <tt>tableName</tt> and
+     * database connection name as returned by <tt>getConnectionName()</tt>.</p>
      *
      * <p>
      * This constructor will populate the meta info of the record and its
@@ -218,12 +291,14 @@ implements RESTified, Serializable {
      * <tt>CRM_</tt> and a suffix <tt>_US</tt>, the slim table name
      * used here can just be <tt>users</tt>. </p>
      *
+     * See description of {@link #ActiveRecord(String connectionName, String tableName)} constructor.
+     *
      * @param tableName table name of the record.
      */
     public ActiveRecord(String tableName) {
         if (tableName == null)
             throw new IllegalArgumentException("Table name cannot be null in ActiveRecord().");
-        this.connectionName = getDefaultConnectionName();
+        this.connectionName = getConnectionName();
         setTableName(tableName);
         initialize(connectionName, tableName);
     }
@@ -268,12 +343,29 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns the database connection name associated with this record instance.
+     * Returns the database connection name associated with this record.
+     *
+     * By default, this method returns the default database
+     * connection name as defined in <tt>database.properties</tt> file.
+     * Subclass can override this method to link this ActiveRecord class to
+     * other database connection names defined in the
+     * <tt>database.properties</tt> file.
      *
      * @return database connection name
      */
     public String getConnectionName() {
-        return connectionName;
+        return (connectionName == null || "".equals(connectionName))?
+        		getDefaultConnectionName():connectionName;
+    }
+
+    /**
+     * Returns the primary key string the record. This method is the same as 
+     * the {@link #getRestfulId getRestfulId} method.
+     *
+     * @return primary key String
+     */
+    public String getPK() {
+        return getRestfulId();
     }
 
     /**
@@ -323,8 +415,8 @@ implements RESTified, Serializable {
      *
      * @return map of restified id data
      */
-    public Map getRestfulIdMap() {
-        return (rowData != null)?rowData.getRestfulIdMap():(new HashMap());
+    public Map<String, Object> getRestfulIdMap() {
+        return (rowData != null)?rowData.getRestfulIdMap():(new HashMap<String, Object>());
     }
 
     /**
@@ -412,11 +504,11 @@ implements RESTified, Serializable {
      * @param   columnNames names of a database table column
      * @return  a map of column name and value pairs
      */
-    public Map getFields(List columnNames) {
-        Map edMap = getExtraFieldData(columnNames);
-        Map rdMap = rowData.getDataMap(columnNames);
+    public Map<String, Object> getFields(List<String> columnNames) {
+        Map<String, Object> edMap = getExtraFieldData(columnNames);
+        Map<String, Object> rdMap = rowData.getDataMap(columnNames);
 
-        Map dMap = new HashMap();
+        Map<String, Object> dMap = new HashMap<String, Object>();
         if (edMap != null && edMap.size() > 0) dMap.putAll(edMap);
         if (rdMap != null && rdMap.size() > 0) dMap.putAll(rdMap);
         return dMap;
@@ -429,7 +521,7 @@ implements RESTified, Serializable {
      * @see     com.scooterframework.orm.sqldataexpress.object.TableInfo
      */
     public TableInfo getTableInfo() {
-        return lookupAndRegister(connectionName, getTableName());
+        return lookupAndRegister(getConnectionName(), getTableName());
     }
 
     /**
@@ -467,7 +559,7 @@ implements RESTified, Serializable {
     /**
      * Sets primary key columns for the record
      */
-    public void setPrimaryKey(Set primaryKeyNames) {
+    public void setPrimaryKey(Set<String> primaryKeyNames) {
         if (isFreezed()) throw new InvalidOperationException(this, "setPrimaryKey", "freezed");
 
         TableInfo ti = getTableInfo();
@@ -494,7 +586,7 @@ implements RESTified, Serializable {
      * Sometimes columns like "entry_user, entry_dt, update_user, update_dt"
      * are readonly. They will be updated by other database mechanisms.
      */
-    public void setReadOnlyColumns(Set readOnlyColumnNames) {
+    public void setReadOnlyColumns(Set<String> readOnlyColumnNames) {
         TableInfo ti = getTableInfo();
         if (ti == null || readOnlyColumnNames == null ||
             readOnlyColumnNames.size() == 0) return;
@@ -619,18 +711,16 @@ implements RESTified, Serializable {
         if (pkNames == null || pkNames.length == 0) pkNames = ri.getColumnNames();
 
         int size = pkNames.length;
-        Map inputs = new HashMap();
+        Map<String, Object> inputs = new HashMap<String, Object>();
         for (int i=0; i< size; i++) {
             String columnName = pkNames[i];
             Object columnData = rowData.getField(columnName);
             inputs.put(columnName, columnData);
         }
 
-        List list = ActiveRecordUtil.getGateway(getClass()).findAll(inputs);
+        ActiveRecord refreshedRecord = ActiveRecordUtil.getGateway(getClass()).findFirst(inputs);
 
-        if (list != null && list.size()>0) {
-            if (list.size() > 1) throw new UnexpectedDataException("retrieved " + list.size() + " records.");
-            ActiveRecord refreshedRecord = (ActiveRecord)list.get(0);
+        if (refreshedRecord != null) {
             this.rowData = refreshedRecord.rowData;
         }
     }
@@ -654,7 +744,7 @@ implements RESTified, Serializable {
 
             beforeUpdate();
 
-            Map conditions = null;
+            Map<String, Object> conditions = null;
             String[] pkNames = rowInfo.getPrimaryKeyColumnNames();
             if (pkNames == null || pkNames.length == 0) {
                 conditions = rowData.getDataMap();
@@ -688,30 +778,32 @@ implements RESTified, Serializable {
      *
      * @return count of records updated.
      */
-    private int internal_update(Map conditions) {
+    private int internal_update(Map<String, Object> conditions) {
         int count = 0;
         String updateSQL = "UPDATE " + getTableName();
 
         before_internal_update();
 
         try {
-            Map inputs = new HashMap();
+            Map<String, Object> inputs = new HashMap<String, Object>();
 
             int position = 1;
 
             //construct sets
-            StringBuffer sets = new StringBuffer();
+            StringBuilder sets = new StringBuilder();
             position = prepareSetSQL(position, rowData, inputs, sets);
             updateSQL += " SET " + sets.toString();
 
             //construct where clause
             if (conditions != null && conditions.size() > 0) {
-                StringBuffer wheres = new StringBuffer();
+                StringBuilder wheres = new StringBuilder();
                 position = prepareWhereClause(position, conditions, inputs, wheres);
                 updateSQL += " WHERE " + wheres.toString();
             }
 
             log.debug("updates sql = " + updateSQL);
+            
+            inputs = addMoreProperties(inputs, null);
 
             OmniDTO returnTO =
                 getSqlService().execute(inputs, DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, updateSQL);
@@ -736,7 +828,7 @@ implements RESTified, Serializable {
     public void updateField(String field, Object value) {
         if (isFreezed()) throw new InvalidOperationException(this, "updateField", "freezed");
 
-        Map m = new HashMap();
+        Map<String, Object> m = new HashMap<String, Object>();
         m.put(field, value);
         updateFields(m);
     }
@@ -746,7 +838,7 @@ implements RESTified, Serializable {
      *
      * @param fieldData a map of field and its data pairs
      */
-    public void updateFields(Map fieldData) {
+    public void updateFields(Map<String, ?> fieldData) {
         if (isFreezed()) throw new InvalidOperationException(this, "updateFields", "freezed");
 
         setData(fieldData);
@@ -761,7 +853,7 @@ implements RESTified, Serializable {
      *
      * @param counters
      */
-    public void updateCounters(Map counters) {
+    public void updateCounters(Map<String, ? extends Number> counters) {
         updateFields(counters);
     }
 
@@ -802,8 +894,8 @@ implements RESTified, Serializable {
     public void incrementCounter(String counterFieldName, int amount) {
         Object oldCount = getField(counterFieldName);
         int oldIntValue = Util.getSafeIntValue(oldCount);
-        Map counters = new HashMap();
-        counters.put(counterFieldName, new Integer(oldIntValue + amount));
+        Map<String, Number> counters = new HashMap<String, Number>();
+        counters.put(counterFieldName, Integer.valueOf(oldIntValue + amount));
         updateCounters(counters);
     }
 
@@ -844,8 +936,8 @@ implements RESTified, Serializable {
     public void decrementCounter(String counterFieldName, int amount) {
         Object oldCount = getField(counterFieldName);
         int oldIntValue = Util.getSafeIntValue(oldCount);
-        Map counters = new HashMap();
-        counters.put(counterFieldName, new Integer(oldIntValue - amount));
+        Map<String, Number> counters = new HashMap<String, Number>();
+        counters.put(counterFieldName, Integer.valueOf(oldIntValue - amount));
         updateCounters(counters);
     }
 
@@ -909,7 +1001,7 @@ implements RESTified, Serializable {
             if (pkNames == null || pkNames.length == 0) pkNames = ri.getColumnNames();
 
             int size = pkNames.length;
-            Map inputs = new HashMap();
+            Map<String, Object> inputs = new HashMap<String, Object>();
             for (int i=0; i< size; i++) {
                 String columnName = pkNames[i];
                 Object columnData = rowData.getField(columnName);
@@ -1013,7 +1105,7 @@ implements RESTified, Serializable {
      * If a column name is protected, its data is unaffected. Use setData
      * method to set its data.
      */
-    public void clearAndSetData(Map inputDataMap) {
+    public void clearAndSetData(Map<String, ?> inputDataMap) {
         if (isFreezed()) throw new InvalidOperationException(this, "clearAndSetData", "freezed");
 
         //filter out protected fields before setting data
@@ -1021,14 +1113,14 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns the record data as map. The keys in the map are field names 
+     * Returns the record data as map. The keys in the map are field names
      * in upper case. An empty map is returned if the underline
      * data is not retrieved or the record is new.
      *
      * @return map of record data
      */
-    public Map data() {
-    	Map dataMap = new HashMap();
+    public Map<String, Object> data() {
+    	Map<String, Object> dataMap = new HashMap<String, Object>();
     	dataMap.putAll(extraFieldsMap);
     	if (rowData != null) {
     		dataMap.putAll(rowData.getDataMap());
@@ -1084,27 +1176,26 @@ implements RESTified, Serializable {
      *
      * If a column name is protected, its data is unaffected.
      */
-    public void setData(Map inputDataMap) {
+    public void setData(Map<String, ?> inputDataMap) {
         if (isFreezed()) throw new InvalidOperationException(this, "setData", "freezed");
 
         if (inputDataMap == null || inputDataMap.size() == 0) return;
 
         beforeSetData();
 
-        Map data = new HashMap(inputDataMap.size());
-        Iterator it = inputDataMap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
+        Map<String, Object> data = new HashMap<String, Object>(inputDataMap.size());
+        for (Map.Entry<String, ?> entry : inputDataMap.entrySet()) {
+            String key = entry.getKey();
             if (rowInfo.isPrimaryKeyColumn(key) && existInDatabase) continue;
-            data.put(key, inputDataMap.get(key));
+            data.put(key, entry.getValue());
         }
 
-        List modifiedFieldNames = setExtraFieldData(data);
+        List<String> modifiedFieldNames = setExtraFieldData(data);
 
         //filter out protected fields before setting data
-        List modifiedColumnNames = rowData.setData(filterProtectedFields(data));
+        List<String> modifiedColumnNames = rowData.setData(filterProtectedFields(data));
 
-        List modifiedNames = new ArrayList();
+        List<String> modifiedNames = new ArrayList<String>();
         if (modifiedFieldNames != null && modifiedFieldNames.size() > 0)
             modifiedNames.addAll(modifiedFieldNames);
         if (modifiedColumnNames != null && modifiedColumnNames.size() > 0)
@@ -1152,39 +1243,15 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns all database column names of the record
-     *
-     * @return String all fields as a comma delimited string
-     */
-    public String getAllFieldNames() {
-        String[] allColumnNames = rowInfo.getColumnNames();
-        StringBuffer sb = new StringBuffer();
-        for (int i=0; i<allColumnNames.length; i++) {
-            sb.append(allColumnNames[i]).append(", ");
-        }
-
-        String allnames = allColumnNames.toString();
-
-        //remove the last ", "
-        if (allnames.endsWith(", ")) {
-            allnames = allnames.substring(0, allnames.lastIndexOf(','));
-        }
-
-        return allnames;
-    }
-
-    /**
      * Checks if a data map contains primary key
      *
      * @param data Map of input data
      * @return boolean state indicates if the data map contains primary field(s)
      */
-    public boolean containsPrimaryKey(Map data) {
+    public boolean containsPrimaryKey(Map<String, Object> data) {
         boolean state = false;
         if (data != null && data.size() > 0) {
-            Iterator it = data.keySet().iterator();
-            while(it.hasNext()) {
-                String key = (String)it.next();
+            for (String key : data.keySet()) {
                 if (rowInfo.isPrimaryKeyColumn(key)) {
                     state = true;
                     break;
@@ -1193,6 +1260,13 @@ implements RESTified, Serializable {
         }
 
         return state;
+    }
+
+    /**
+     * Returns true if the record has primary key.
+     */
+    public boolean hasPrimaryKey() {
+        return rowInfo.hasPrimaryKey();
     }
 
     /**
@@ -1211,8 +1285,8 @@ implements RESTified, Serializable {
      *
      * @return map of primary key data
      */
-    public Map getPrimaryKeyDataMap() {
-        return (rowData != null)?rowData.getPrimaryKeyDataMap():new HashMap();
+    public Map<String, Object> getPrimaryKeyDataMap() {
+        return (rowData != null)?rowData.getPrimaryKeyDataMap():new HashMap<String, Object>();
     }
 
     /**
@@ -1221,7 +1295,7 @@ implements RESTified, Serializable {
      * @param target class of the associated record
      * @return the AssociatedRecord instance
      */
-    public AssociatedRecord associated(Class target) {
+    public AssociatedRecord associated(Class<? extends ActiveRecord> target) {
         return associated(target, false);
     }
 
@@ -1232,7 +1306,7 @@ implements RESTified, Serializable {
      * @param refresh true if reload database data
      * @return the AssociatedRecord instance
      */
-    public AssociatedRecord associated(Class target, boolean refresh) {
+    public AssociatedRecord associated(Class<? extends ActiveRecord> target, boolean refresh) {
         return associated(target, null, refresh);
     }
 
@@ -1245,7 +1319,7 @@ implements RESTified, Serializable {
      * @param options A string of options.
      * @return the AssociatedRecord instance
      */
-    public AssociatedRecord associated(Class target, String options) {
+    public AssociatedRecord associated(Class<? extends ActiveRecord> target, String options) {
         return associated(target, options, false);
     }
 
@@ -1259,7 +1333,7 @@ implements RESTified, Serializable {
      * @param refresh true if reload database data
      * @return the AssociatedRecord instance
      */
-    public AssociatedRecord associated(Class target, String options, boolean refresh) {
+    public AssociatedRecord associated(Class<? extends ActiveRecord> target, String options, boolean refresh) {
         return associated(ActiveRecordUtil.getModelName(target), options, refresh);
     }
 
@@ -1329,7 +1403,7 @@ implements RESTified, Serializable {
      * @param target class of the associated records
      * @return the AssociatedRecords instance
      */
-    public AssociatedRecords allAssociated(Class target) {
+    public AssociatedRecords allAssociated(Class<? extends ActiveRecord> target) {
         return allAssociated(target, false);
     }
 
@@ -1340,7 +1414,7 @@ implements RESTified, Serializable {
      * @param refresh true if reload database data
      * @return the AssociatedRecords instance
      */
-    public AssociatedRecords allAssociated(Class target, boolean refresh) {
+    public AssociatedRecords allAssociated(Class<? extends ActiveRecord> target, boolean refresh) {
         return allAssociated(target, null, refresh);
     }
 
@@ -1353,7 +1427,7 @@ implements RESTified, Serializable {
      * @param options A string of options.
      * @return the AssociatedRecords instance
      */
-    public AssociatedRecords allAssociated(Class target, String options) {
+    public AssociatedRecords allAssociated(Class<? extends ActiveRecord> target, String options) {
         return allAssociated(target, null, false);
     }
 
@@ -1365,7 +1439,7 @@ implements RESTified, Serializable {
      * @param refresh true if reload database data
      * @return the AssociatedRecords instance
      */
-    public AssociatedRecords allAssociated(Class target, String options, boolean refresh) {
+    public AssociatedRecords allAssociated(Class<? extends ActiveRecord> target, String options, boolean refresh) {
         String model = ActiveRecordUtil.getModelName(target);
         return allAssociated(WordUtil.pluralize(model), options, refresh);
     }
@@ -1519,7 +1593,7 @@ implements RESTified, Serializable {
      * @param parentClz A potential parent model type
      * @return true if it is a true parent.
      */
-    public boolean isPKDependentOf(Class parentClz) {
+    public boolean isPKDependentOf(Class<? extends ActiveRecord> parentClz) {
         //condition #1
         Relation r = RelationManager.getInstance().getBelongsToRelationBetween(this.getClass(), parentClz);
         if (r == null) {
@@ -1530,9 +1604,9 @@ implements RESTified, Serializable {
         String[] cpk = getPrimaryKeyNames();
         if (cpk == null) return false;
 
-        Object[] left = r.getLeftSideMappingItems();
-        for (int i=0; i<left.length; i++) {
-            String leftKey = (String)left[i];
+        String[] left = r.getLeftSideMappingItems();
+		for (int i = 0; i < left.length; i++) {
+            String leftKey = left[i];
             if (!StringUtil.isStringInArray(leftKey, cpk, true)) return false;
         }
 
@@ -1585,21 +1659,21 @@ implements RESTified, Serializable {
         String[] cpk = getPrimaryKeyNames();
         if (cpk == null) return false;
 
-        Object[] left = r.getLeftSideMappingItems();
-        for (int i=0; i<left.length; i++) {
-            String leftKey = (String)left[i];
+        String[] left = r.getLeftSideMappingItems();
+		for (int i = 0; i < left.length; i++) {
+            String leftKey = left[i];
             if (!StringUtil.isStringInArray(leftKey, cpk, true)) return false;
         }
 
         //condition #4
         if (status) {
-            Object[] fkColumns = r.getLeftSideMappingItems();
-            Object[] parentPKColumns = r.getRightSideMappingItems();
+        	String[] fkColumns = r.getLeftSideMappingItems();
+        	String[] parentPKColumns = r.getRightSideMappingItems();
             if (fkColumns.length == parentPKColumns.length) {
                 int size = fkColumns.length;
-                for (int i=0; i<size; i++) {
-                    Object fkData = getField((String)fkColumns[i]);
-                    Object pkData = parent.getField((String)parentPKColumns[i]);
+				for (int i = 0; i < size; i++) {
+                    Object fkData = getField(fkColumns[i]);
+                    Object pkData = parent.getField(parentPKColumns[i]);
                     if (!(fkData != null && pkData != null && fkData.toString().equalsIgnoreCase(pkData.toString()))) {
                         status = false;
                         break;
@@ -1614,7 +1688,7 @@ implements RESTified, Serializable {
     /**
      * Checks if an instance belongs to another record.
      *
-     * To belong to a record, the following conditions must be satisified:
+     * To belong to a record, the following conditions must be satisfied:
      * <ol>
      * <li>There must be a belongsTo relation between this record and the potential parent record.</li>
      * <li>The record's foreign key must hold parent record's primary key value.</li>
@@ -1635,13 +1709,13 @@ implements RESTified, Serializable {
         //condition #2
         boolean status = true;
         if (status) {
-            Object[] fkColumns = r.getLeftSideMappingItems();
-            Object[] parentPKColumns = r.getRightSideMappingItems();
+        	String[] fkColumns = r.getLeftSideMappingItems();
+        	String[] parentPKColumns = r.getRightSideMappingItems();
             if (fkColumns.length == parentPKColumns.length) {
                 int size = fkColumns.length;
                 for (int i=0; i<size; i++) {
-                    Object fkData = getField((String)fkColumns[i]);
-                    Object pkData = parent.getField((String)parentPKColumns[i]);
+                    Object fkData = getField(fkColumns[i]);
+                    Object pkData = parent.getField(parentPKColumns[i]);
                     if (!(fkData != null && pkData != null && fkData.toString().equalsIgnoreCase(pkData.toString()))) {
                         status = false;
                         break;
@@ -1667,7 +1741,7 @@ implements RESTified, Serializable {
      *
      * @param target the class that is associated with.
      */
-    public void belongsTo(Class target) {
+    public void belongsTo(Class<? extends ActiveRecord> target) {
         String model = ActiveRecordUtil.getModelName(target);
         belongsTo(target, ActiveRecordConstants.key_model + ":" + model);
     }
@@ -1680,7 +1754,7 @@ implements RESTified, Serializable {
      * @param target the class that is associated with.
      * @param properties string of association properties.
      */
-    public void belongsTo(Class target, String properties) {
+    public void belongsTo(Class<? extends ActiveRecord> target, String properties) {
         String model = ActiveRecordUtil.getModelName(target);
         RelationManager.getInstance().setupRelation(getClass(), Relation.BELONGS_TO_TYPE, model, target, properties);
     }
@@ -1702,7 +1776,7 @@ implements RESTified, Serializable {
      * model name of the target or a descriptive string of the target. In
      * the latter case, the <tt>properties</tt> parameter must contain key
      * <tt>model</tt> to indicate the model name of the target unless it can be
-     * derieved from the target name.
+     * derived from the target name.
      *
      * <pre>
      * Example:
@@ -1775,7 +1849,7 @@ implements RESTified, Serializable {
      *
      * @param target the class that is associated with.
      */
-    public void hasOne(Class target) {
+    public void hasOne(Class<? extends ActiveRecord> target) {
         String model = ActiveRecordUtil.getModelName(target);
         hasOne(target, ActiveRecordConstants.key_model + ":" + model);
     }
@@ -1788,7 +1862,7 @@ implements RESTified, Serializable {
      * @param target the class that is associated with.
      * @param properties string of association properties.
      */
-    public void hasOne(Class target, String properties) {
+    public void hasOne(Class<? extends ActiveRecord> target, String properties) {
         String model = ActiveRecordUtil.getModelName(target);
         RelationManager.getInstance().setupRelation(getClass(), Relation.HAS_ONE_TYPE, model, target, properties);
     }
@@ -1820,7 +1894,7 @@ implements RESTified, Serializable {
      * </p>
      *
      * <p>
-     * Example propertie string:
+     * Example property string:
      * In a property string, each name-value pair is separated by ';'
      * character, while within each name-value pair, name and value strings
      * are separated by ':' character.
@@ -1857,7 +1931,7 @@ implements RESTified, Serializable {
      *
      * @param target the class that is associated with.
      */
-    public void hasMany(Class target) {
+    public void hasMany(Class<? extends ActiveRecord> target) {
         String model = ActiveRecordUtil.getModelName(target);
         hasMany(target, ActiveRecordConstants.key_model + ":" + model);
     }
@@ -1870,7 +1944,7 @@ implements RESTified, Serializable {
      * @param target the class that is associated with.
      * @param properties string of association properties.
      */
-    public void hasMany(Class target, String properties) {
+    public void hasMany(Class<? extends ActiveRecord> target, String properties) {
         String model = ActiveRecordUtil.getModelName(target);
         RelationManager.getInstance().setupRelation(getClass(), Relation.HAS_MANY_TYPE, WordUtil.pluralize(model), target, properties);
     }
@@ -1903,7 +1977,7 @@ implements RESTified, Serializable {
      * </p>
      *
      * <p>
-     * Example propertie string:
+     * Example property string:
      * In a property string, each name-value pair is separated by ';'
      * character, while within each name-value pair, name and value strings
      * are separated by ':' character.
@@ -1939,14 +2013,14 @@ implements RESTified, Serializable {
      * Sets has-many-through relation.
      *
      * <p>
-     * This is equvilent to {@link #hasManyThrough(java.lang.String, java.lang.String)}
+     * This is equivalent to {@link #hasManyThrough(java.lang.String, java.lang.String)}
      * method with the plural form of the model name as the association name.
      * </p>
      *
      * @param target  target class.
      * @param through middleC classs.
      */
-    public void hasManyThrough(Class target, Class through) {
+    public void hasManyThrough(Class<? extends ActiveRecord> target, Class<? extends ActiveRecord> through) {
         hasManyThrough(target, through, null);
     }
 
@@ -1954,7 +2028,7 @@ implements RESTified, Serializable {
      * Sets has-many-through relation.
      *
      * <p>
-     * This is equvilent to {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String)}
+     * This is equivalent to {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String)}
      * method with the plural form of the model name as the association name.
      * </p>
      *
@@ -1962,7 +2036,7 @@ implements RESTified, Serializable {
      * @param through     middleC classs.
      * @param properties  properties string.
      */
-    public void hasManyThrough(Class target, Class through, String properties) {
+    public void hasManyThrough(Class<? extends ActiveRecord> target, Class<? extends ActiveRecord> through, String properties) {
         hasManyThrough(target, through, properties, null);
     }
 
@@ -1970,7 +2044,7 @@ implements RESTified, Serializable {
      * Sets has-many-through relation.
      *
      * <p>
-     * This is equvilent to {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String, java.util.Map)}
+     * This is equivalent to {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String, java.util.Map)}
      * method with the plural form of the model name as the association name.
      * </p>
      *
@@ -1979,7 +2053,7 @@ implements RESTified, Serializable {
      * @param properties  properties string.
      * @param joinInputs data map for the join table.
      */
-    public void hasManyThrough(Class target, Class through, String properties, Map joinInputs) {
+    public void hasManyThrough(Class<? extends ActiveRecord> target, Class <? extends ActiveRecord>through, String properties, Map<String, Object> joinInputs) {
         String targetModel = ActiveRecordUtil.getModelName(target);
         String targets = WordUtil.pluralize(targetModel);
         String throughModel = ActiveRecordUtil.getModelName(through);
@@ -2020,7 +2094,7 @@ implements RESTified, Serializable {
      * </ul>
      * </p>
      *
-     * Example propertie string:
+     * Example property string:
      * In a property string, each name-value pair is separated by ';'
      * character, while within each name-value pair, name and value strings
      * are separated by ':' character.
@@ -2070,9 +2144,9 @@ implements RESTified, Serializable {
      * @param targets              plural form of target name of the associated class.
      * @param throughAssociationId the name of the association that is in the middle.
      * @param properties           properties string.
-     * @param joinInputs          data map for the join table.
+     * @param joinInputs           data map for the join table.
      */
-    public void hasManyThrough(String targets, String throughAssociationId, String properties, Map joinInputs) {
+    public void hasManyThrough(String targets, String throughAssociationId, String properties, Map<String, Object> joinInputs) {
         RelationManager.getInstance().setupHasManyThroughRelation(getClass(), targets, throughAssociationId, properties, joinInputs);
     }
 
@@ -2159,8 +2233,8 @@ implements RESTified, Serializable {
      * @param category      the category which the targets act as
      * @param through       the middle join class between owner and targets
      */
-    public void hasManyInCategoryThrough(Class[] targets,
-                                         String category, Class through) {
+    public void hasManyInCategoryThrough(Class<? extends ActiveRecord>[] targets,
+                                         String category, Class<? extends ActiveRecord> through) {
         if (targets == null || targets.length == 0) {
             throw new IllegalArgumentException("Target array cannot be empty.");
         }
@@ -2181,7 +2255,8 @@ implements RESTified, Serializable {
         String[] types = new String[targetTotal];
         String relationType = Relation.HAS_MANY_TYPE;
         String[] bcProperties = new String[targetTotal];
-        Map[] joinInputs = new HashMap[targetTotal];
+        @SuppressWarnings("unchecked")
+		Map<String, Object>[] joinInputs = new HashMap[targetTotal];
         String[] cbProperties = new String[targetTotal];
         String cbMapping = ActiveRecordConstants.key_mapping + ": " + idField + "=id; ";
 
@@ -2191,7 +2266,7 @@ implements RESTified, Serializable {
             abProperties[i] = throughTypeCondition;
             bcProperties[i] = ActiveRecordConstants.key_mapping + ": id=" + idField + "; " +
                               throughTypeCondition + "; " + ActiveRecordConstants.key_cascade + ": delete";
-            Map inputs = new HashMap();
+            Map<String, Object> inputs = new HashMap<String, Object>();
             inputs.put(typeField, types[i]);
             joinInputs[i] = inputs;
             cbProperties[i] = cbMapping;
@@ -2223,19 +2298,19 @@ implements RESTified, Serializable {
      * @param targets       array of target classes
      * @param category      the category which the targets act as
      * @param through       the middle join class between owner and targets
-     * @param acJoinInputs array of data map for the join through table.
+     * @param acJoinInputs  array of data map for the join through table.
      * @param abProperties  properties from owner to target class
      * @param types         array of join types in the category, default to model name
      * @param relationType  either has-many or has-one
      * @param bcProperties  array of properties from each target to through class
-     * @param bcJoinInputs array of data map for the join through table.
+     * @param bcJoinInputs  array of data map for the join through table.
      * @param cbProperties  array of properties from through to each target class
      * @param baProperties  array of properties from each target to owner class
      */
-    public void hasManyInCategoryThrough(Class[] targets,
-                 String category, Class through, Map[] acJoinInputs,
+    public void hasManyInCategoryThrough(Class<? extends ActiveRecord>[] targets,
+                 String category, Class<? extends ActiveRecord> through, Map<String, Object>[] acJoinInputs,
                  String[] abProperties, String[] types, String relationType,
-                 String[] bcProperties, Map[] bcJoinInputs, String[] cbProperties,
+                 String[] bcProperties, Map<String, Object>[] bcJoinInputs, String[] cbProperties,
                  String[] baProperties) {
         if (targets == null || targets.length == 0) {
             throw new IllegalArgumentException("Target array cannot be empty.");
@@ -2263,7 +2338,7 @@ implements RESTified, Serializable {
 
         //#1, #2, #4, #3
         for (int i=0; i<targetTotal; i++) {
-            Class target = targets[i];
+            Class<? extends ActiveRecord> target = targets[i];
             String targetEntityName = ActiveRecordUtil.getModelName(targets[i]);
 
             String type = "";
@@ -2300,9 +2375,9 @@ implements RESTified, Serializable {
                 }
             }
 
-            Map acJoinInputsMap = acJoinInputs[i];
+            Map<String, Object> acJoinInputsMap = acJoinInputs[i];
             if (acJoinInputsMap == null) {
-                acJoinInputsMap = new HashMap();
+                acJoinInputsMap = new HashMap<String, Object>();
             }
             if (acJoinInputsMap.size() == 0) {
                 acJoinInputsMap.put(typeField, type);
@@ -2332,9 +2407,9 @@ implements RESTified, Serializable {
             }
             hasManyThrough(target, through, abProperty, acJoinInputsMap);
 
-            Map bcJoinInputsMap = bcJoinInputs[i];
+            Map<String, Object> bcJoinInputsMap = bcJoinInputs[i];
             if (bcJoinInputsMap == null) {
-                bcJoinInputsMap = new HashMap();
+                bcJoinInputsMap = new HashMap<String, Object>();
             }
             if (bcJoinInputsMap.size() == 0) {
                 bcJoinInputsMap.put(typeField, type);
@@ -2384,7 +2459,7 @@ implements RESTified, Serializable {
      *
      * @return list of modified field names
      */
-    public List getModifiedFields() {
+    public List<String> getModifiedFields() {
         return modifiedColumns;
     }
 
@@ -2434,7 +2509,7 @@ implements RESTified, Serializable {
      *
      * @return default database connection name
      */
-    public static String getDefaultConnectionName() {
+    private static String getDefaultConnectionName() {
         return DatabaseConfig.getInstance().getDefaultDatabaseConnectionName();
     }
 
@@ -2489,22 +2564,23 @@ implements RESTified, Serializable {
 
 
     /**
-     * Sets populating rules for primary keys.
+     * <p>Sets populating rules for primary keys.
      *
-     * Subclass may override this method to use one of the four following ways
+     * <p>Subclass may override this method to use one of the four following ways
      * to provide primary key values.
      *
-     * There are four ways to set up the name-rule pair for primary key:
+     * <p>There are four ways to set up the name-rule pair for primary key:
+     * <pre>
      * 1. Do nothing. This is the default. that means the database will
      *    autogenerate a primary key. This feature is available on MySQL, but
      *    not on Oracle yet. If you use this feature, that means the primary
      *    key can not be a composite field.
      *
-     * 2. If the primary key value is a result of sql query,
+     * 2. If the primary key value is a result of SQL query,
      *    the entry may look like this:
      *            ("id", "sql=SELECT max(id)+1 FROM employee");
      *
-     * 3. If the primary key value is a result of a named sql query,
+     * 3. If the primary key value is a result of a named SQL query,
      *    the entry may look like this:
      *            ("id", "sqlkey=employee_id_query");
      *    where the value "employee_id_query" is a named query in
@@ -2512,10 +2588,11 @@ implements RESTified, Serializable {
      *
      * 4. Use a fixed value:
      *            Map("id", "1000");
+     * </pre>
      *
      * @return a data map for primary keys
      */
-    protected Map getPrimaryKeyRules() {
+    protected Map<String, Object> getPrimaryKeyRules() {
         return null;
     }
 
@@ -2535,10 +2612,10 @@ implements RESTified, Serializable {
      * initial values for non-null fields, or use the setData methods
      * before calling create();
      */
-    protected Map getInitializedValues() {
-        Map initMap = new HashMap();
+    protected Map<String, Object> getInitializedValues() {
+        Map<String, Object> initMap = new HashMap<String, Object>();
         int dimension = rowInfo.getDimension();
-        for(int colIndex=0; colIndex<dimension; colIndex++) {
+		for (int colIndex = 0; colIndex < dimension; colIndex++) {
             ColumnInfo ci = rowInfo.getColumnInfo(colIndex);
             if (!ci.isPrimaryKey() &&
                 ci.isNotNull() &&
@@ -2585,36 +2662,35 @@ implements RESTified, Serializable {
      */
     protected Object getDefaultDataByClassType(String classTypeName) {
         if (classTypeName == null)
-            throw new IllegalArgumentException("Invalid class type name: " +
-                                                classTypeName);
+            throw new IllegalArgumentException("Invalid class type name is null.");
 
         Object value = null;
         if("java.math.BigInteger".equals(classTypeName)) {
-            value = new java.math.BigInteger("0");
+            value = java.math.BigInteger.valueOf(0L);
         }
         else if("java.math.BigDecimal".equals(classTypeName)) {
-            value = new java.math.BigDecimal(0);
+            value = java.math.BigDecimal.valueOf(0.0d);
         }
         else if("java.lang.Integer".equals(classTypeName)) {
-            value = new Integer(0);
+            value = Integer.valueOf(0);
         }
         else if("java.lang.Long".equals(classTypeName)) {
-            value = new Long(0);
+            value = Long.valueOf(0);
         }
         else if("java.lang.Short".equals(classTypeName)) {
-            value = new Short("0");
+            value = Short.valueOf("0");
         }
         else if("java.lang.Double".equals(classTypeName)) {
-            value = new Double(0.0);
+            value = Double.valueOf(0.0);
         }
         else if("java.lang.Float".equals(classTypeName)) {
-            value = new Float(0.0);
+            value = Float.valueOf(0.0f);
         }
         else if("java.lang.Byte".equals(classTypeName)) {
-            value = new Byte("0");
+            value = Byte.valueOf("0");
         }
         else if("java.lang.Character".equals(classTypeName)) {
-            value = new Character(' ');
+            value = Character.valueOf(' ');
         }
         else if("java.util.Date".equals(classTypeName)) {
             value = new java.util.Date();
@@ -2631,7 +2707,7 @@ implements RESTified, Serializable {
         return value;
     }
 
-    private static SqlService getSqlService() {
+    private SqlService getSqlService() {
         return SqlServiceConfig.getSqlService();
     }
 
@@ -2684,7 +2760,7 @@ implements RESTified, Serializable {
      * the default value.
      */
     private void initializeFields() {
-        Map dataMap = getInitializedValues();
+        Map<String, Object> dataMap = getInitializedValues();
 
         if(dataMap.size() > 0) {
             setData(dataMap);
@@ -2738,7 +2814,7 @@ implements RESTified, Serializable {
         else {
             rowData = rd;
 
-            Map pkDataMap = rowData.getPrimaryKeyDataMap();
+            Map<String, Object> pkDataMap = rowData.getPrimaryKeyDataMap();
             if (pkDataMap == null || pkDataMap.size() == 0) {
                 String[] pkNames = getPrimaryKeyNames();
                 rowData.getRowInfo().setPrimaryKeyColumns(pkNames);
@@ -2753,32 +2829,31 @@ implements RESTified, Serializable {
     /**
      * Returns table meta data. <tt>table</tt> is a full table name.
      */
-    private TableInfo lookupAndRegister(String connectionName, String table) {
-        TableInfo ti = SqlExpressUtil.lookupAndRegisterTable(connectionName, table);
+    private TableInfo lookupAndRegister(String connName, String table) {
+        TableInfo ti = SqlExpressUtil.lookupTableInfo(connName, table);
         if (ti == null) {
-        	throw new IllegalArgumentException("Failed to look up table \"" +
-        			table + "\" for connection named " + connectionName);
+        	throw new IllegalArgumentException("Failed to look up table '" +
+        			table + "' for connection '" + connName + "'.");
         }
         rowInfo = ti.getHeader();
-        DBStore.getInstance().addClassTableMapping(ActiveRecordUtil.getFullClassName(this.getClass()), table);
         return ti;
     }
 
     /**
      * prepareInsertSQL
      */
-    private int prepareInsertSQL(RowData rd, Map outs, StringBuffer strBuffer, boolean autoPopulatePrimaryKey) {
+    private int prepareInsertSQL(RowData rd, Map<String, Object> outs, StringBuilder strBuffer, boolean autoPopulatePrimaryKey) {
         RowInfo ri = rd.getRowInfo();
         if (ri == null)
             throw new IllegalArgumentException("Error in prepareInsertSQL: no RowInfo.");
 
-        StringBuffer names = new StringBuffer();
-        StringBuffer values = new StringBuffer();
+        StringBuilder names = new StringBuilder();
+        StringBuilder values = new StringBuilder();
         int maxSize = rd.getSize();
         int positionIndex = 0;
         ColumnInfo ci = null;
         int i = 0;
-        for(i=0; i<maxSize-1; i++) {
+		for (i = 0; i < maxSize - 1; i++) {
             ci = ri.getColumnInfo(i);
             if (ci.isPrimaryKey() && autoPopulatePrimaryKey) continue;
             if (ci.isReadOnly() || !ci.isWritable()) continue;
@@ -2814,12 +2889,12 @@ implements RESTified, Serializable {
     /**
      * prepareWhereClause
      */
-    private int prepareWhereClause(int startPosition, Map ins, Map outs, StringBuffer strBuffer) {
+    private int prepareWhereClause(int startPosition, Map<String, Object> ins, Map<String, Object> outs, StringBuilder strBuffer) {
         int maxSize = ins.size();
         int count = 0;
-        for(Iterator it = ins.keySet().iterator(); it.hasNext();) {
-            String keyName = (String) it.next();
-            Object valueData = ins.get(keyName);
+        for (Map.Entry<String, Object> entry : ins.entrySet()) {
+            String keyName = entry.getKey();
+            Object valueData = entry.getValue();
 
             count = count + 1;
             if (maxSize != count)
@@ -2837,7 +2912,7 @@ implements RESTified, Serializable {
     /**
      * prepareSetSQL
      */
-    private int prepareSetSQL(int startPosition, RowData rd, Map outs, StringBuffer strBuffer) {
+    private int prepareSetSQL(int startPosition, RowData rd, Map<String, Object> outs, StringBuilder strBuffer) {
         RowInfo ri = rd.getRowInfo();
         if (ri == null)
             throw new IllegalArgumentException("Error in prepareSetSQL: no RowInfo.");
@@ -2869,7 +2944,7 @@ implements RESTified, Serializable {
     /**
      * prepareSetSQL
      */
-    private int prepareSetSQL(int startPosition, Map fieldData, Map outs, StringBuffer strBuffer) {
+    private int prepareSetSQL(int startPosition, Map<String, Object> fieldData, Map<String, Object> outs, StringBuilder strBuffer) {
         RowInfo ri = rowInfo;
         if (ri == null)
             throw new IllegalArgumentException("Error in prepareSetSQL: no RowInfo.");
@@ -2877,13 +2952,13 @@ implements RESTified, Serializable {
         if (fieldData == null || fieldData.size() == 0) return startPosition;
 
         ColumnInfo ci = null;
-        for(Iterator it = fieldData.keySet().iterator(); it.hasNext();) {
-            String field = (String)it.next();
+        for (Map.Entry<String, Object> entry : fieldData.entrySet()) {
+            String field = entry.getKey();
             ci = ri.getColumnInfo(field);
             if (ci.isReadOnly() || !ci.isWritable() || ci.isPrimaryKey()) continue;
 
             strBuffer.append(ci.getColumnName()).append(" = ?, ");
-            outs.put(startPosition+"", fieldData.get(field));
+            outs.put(startPosition+"", entry.getValue());
             startPosition = startPosition + 1;
         }
 
@@ -2897,16 +2972,16 @@ implements RESTified, Serializable {
      *
      * @return Map representing name and value pairs of primary keys
      */
-    private Map populatePrimaryKeyValuesBeforeInsert() {
-        Map primaryKeyRules = getPrimaryKeyRules();
+    private Map<String, Object> populatePrimaryKeyValuesBeforeInsert() {
+        Map<String, Object> primaryKeyRules = getPrimaryKeyRules();
         if (primaryKeyRules == null || primaryKeyRules.size() == 0) {
             return null;//choose to let database auto generate pk
         }
 
-        Map pkValues = new HashMap();
-        for(Iterator it = primaryKeyRules.keySet().iterator(); it.hasNext();) {
-            Object pkName = it.next();
-            Object pkValue = primaryKeyRules.get(pkName);
+        Map<String, Object> pkValues = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : primaryKeyRules.entrySet()) {
+            String pkName = entry.getKey();
+            Object pkValue = entry.getValue();
             if (pkValue instanceof String) {
                 String pkRule = (String)pkValue;
                 if (pkRule.toUpperCase().startsWith("SQLKEY")) {
@@ -2935,15 +3010,13 @@ implements RESTified, Serializable {
     }
 
     private boolean isPrimaryKeyDataEmpty() {
-        Map pkMap = getPrimaryKeyDataMap();
+        Map<String, Object> pkMap = getPrimaryKeyDataMap();
         if (pkMap == null || pkMap.size() == 0) return true;
 
         //make sure every pk column has data
         boolean check = false;
-        Iterator it = pkMap.keySet().iterator();
-        while (it.hasNext()) {
-            String keyName = (String)it.next();
-            Object keyValue = pkMap.get(keyName);
+        for (Map.Entry<String, Object> entry : pkMap.entrySet()) {
+            Object keyValue = entry.getValue();
             if (keyValue == null) {
                 check = true;
                 break;
@@ -2980,7 +3053,7 @@ implements RESTified, Serializable {
      *
      * @param modifiedColumnNames
      */
-    protected void afterSetData(List modifiedColumnNames) {
+    protected void afterSetData(List<String> modifiedColumnNames) {
         if (modifiedColumnNames == null || modifiedColumnNames.size() == 0) return;
         addToModifiedColumnNames(modifiedColumnNames);
         dirty = true;
@@ -3040,7 +3113,7 @@ implements RESTified, Serializable {
     protected ActiveRecord internal_create() {
         String createSQL = "INSERT INTO " + getTableName();
 
-        Map pkValues = null;
+        Map<String, Object> pkValues = null;
         try {
             before_internal_create();
 
@@ -3057,13 +3130,15 @@ implements RESTified, Serializable {
                 }
             }
 
-            StringBuffer strBuffer = new StringBuffer();
-            Map inputs = new HashMap();
+            StringBuilder strBuffer = new StringBuilder();
+            Map<String, Object> inputs = new HashMap<String, Object>();
 
-            int columns = prepareInsertSQL(rowData, inputs, strBuffer, autoPopulatePrimaryKey);
+            prepareInsertSQL(rowData, inputs, strBuffer, autoPopulatePrimaryKey);
 
             createSQL += " " + strBuffer.toString();
             log.debug("create sql = " + createSQL);
+            
+            inputs = addMoreProperties(inputs, null);
 
             OmniDTO returnTO =
                 getSqlService().execute(inputs, DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, createSQL);
@@ -3079,10 +3154,10 @@ implements RESTified, Serializable {
             if (autoPopulatePrimaryKey) {
                 long gpk = returnTO.getGeneratedKey();
                 if (gpk != -1) {
-                    Map pkMap = getPrimaryKeyDataMap();
-                    Iterator it = pkMap.keySet().iterator();
-                    if(it.hasNext()) { //only one column is allowed to be auto-generated pk
-                        setData((String)it.next(), new Long(gpk));
+                    Map<String, Object> pkMap = getPrimaryKeyDataMap();
+                    Iterator<String> it = pkMap.keySet().iterator();
+                    if(it.hasNext()) { //only one column is allowed to be auto-generated primary key
+                        setData((String)it.next(), Long.valueOf(gpk));
                     }
                 }
             }
@@ -3130,18 +3205,17 @@ implements RESTified, Serializable {
     /**
      * Do something before the internal_delete()
      *
-     * For a has-one or has-many relatiosn, either the foreign key in its
+     * For a has-one or has-many relation, either the foreign key in its
      * associated records should be set to null, or the associated records
      * should be removed if it is a dependent relation.
      *
      */
     private void before_internal_delete() {
-        List relations = RelationManager.getInstance().getOwnedRelations(getClass());
+        List<Relation> relations = RelationManager.getInstance().getOwnedRelations(getClass());
         if (relations == null) return;
 
-        Iterator it = relations.iterator();
-        while (it.hasNext()) {
-            Relation rel = (Relation)it.next();
+        for (Relation rel : relations) {
+            if (rel == null) continue;
             String type = rel.getRelationType();
             if (Relation.HAS_MANY_TYPE.equals(type)) {
                 if (rel.allowCascadeNullify()) {
@@ -3177,12 +3251,10 @@ implements RESTified, Serializable {
      * if there is a counter field.
      */
     private void after_internal_delete() {
-        List relations = RelationManager.getInstance().getOwnedRelations(getClass());
+        List<Relation> relations = RelationManager.getInstance().getOwnedRelations(getClass());
         if (relations == null) return;
 
-        Iterator it = relations.iterator();
-        while (it.hasNext()) {
-            Relation rel = (Relation)it.next();
+        for (Relation rel : relations) {
             String type = rel.getRelationType();
             if (Relation.BELONGS_TO_TYPE.equals(type)) {
                 decrementCounterInParent((BelongsToRelation)rel);
@@ -3243,9 +3315,8 @@ implements RESTified, Serializable {
         before_internal_update();
 
         //prepare modified data map
-        Map modifiedData = new HashMap();
-        for (Iterator it = modifiedColumns.iterator(); it.hasNext();) {
-            String field = (String)it.next();
+        Map<String, Object> modifiedData = new HashMap<String, Object>();
+        for (String field : modifiedColumns) {
             if (!isColumnField(field)) continue;
             Object value = rowData.getField(field);
             modifiedData.put(field, value);
@@ -3255,33 +3326,35 @@ implements RESTified, Serializable {
         String updateSQL = "UPDATE " + getTableName();
 
         try {
-            Map inputs = new HashMap();
+            Map<String, Object> inputs = new HashMap<String, Object>();
 
             int position = 1;
 
             //construct sets
-            StringBuffer sets = new StringBuffer();
+            StringBuilder sets = new StringBuilder();
             position = prepareSetSQL(position, modifiedData, inputs, sets);
 
             sets = StringUtil.removeLastToken(sets, ", ");
             updateSQL += " SET " + sets.toString();
 
             //construct where clause
-            Map conditions = rowData.getPrimaryKeyDataMap();
+            Map<String, Object> conditions = rowData.getPrimaryKeyDataMap();
             if (conditions != null && conditions.size() > 0) {
-                StringBuffer wheres = new StringBuffer();
+                StringBuilder wheres = new StringBuilder();
                 position = prepareWhereClause(position, conditions, inputs, wheres);
                 updateSQL += " WHERE " + wheres.toString();
             }
 
             log.debug("updates sql = " + updateSQL);
+            
+            inputs = addMoreProperties(inputs, null);
 
             OmniDTO returnTO =
                 getSqlService().execute(inputs, DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, updateSQL);
 
             count = returnTO.getUpdatedRowCount();
 
-            //do some maintanance works
+            //do some maintenance works
             updateClean();
 
             after_internal_update();
@@ -3316,12 +3389,10 @@ implements RESTified, Serializable {
     private void before_internal_create() {
         processAutoAuditCreate();
 
-        Iterator keys = recordRelations.keySet().iterator();
-        while (keys.hasNext()) {
-            String key = (String)keys.next();
-            RecordRelation rr = (RecordRelation)recordRelations.get(key);
+        for (Map.Entry<String, RecordRelation> entry : recordRelations.entrySet()) {
+            RecordRelation rr = recordRelations.get(entry.getKey());
             if (rr == null) continue;
-
+            
             String type = rr.getRelation().getRelationType();
             if (Relation.BELONGS_TO_TYPE.equals(type)) {
             	AssociatedRecord assR = (AssociatedRecord)rr.getAssociatedData();
@@ -3390,7 +3461,7 @@ implements RESTified, Serializable {
     /**
      * Do something after the internal_create()
      *
-     * For a has-one and has-many relatiosn, sets foreign-key of associated
+     * For a has-one and has-many relation, sets foreign-key of associated
      * objects. This is because when the owner object is newly created,
      * the associated objects may not have the foreign-key column filled.
      *
@@ -3398,12 +3469,12 @@ implements RESTified, Serializable {
      * if there is a counter field.
      */
     private void after_internal_create() {
-        List relations = RelationManager.getInstance().getOwnedRelations(getClass());
+        List<Relation> relations = RelationManager.getInstance().getOwnedRelations(getClass());
         if (relations == null) return;
 
-        Iterator it = relations.iterator();
-        while (it.hasNext()) {
-            Relation rel = (Relation)it.next();
+        for (Relation rel : relations) {
+            if (rel == null) continue;
+            
             String type = rel.getRelationType();
             if (Relation.HAS_MANY_TYPE.equals(type)) {
                 hookupHasMany(rel);
@@ -3418,7 +3489,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets up foreign-key link in child record. This is equvilent to execute
+     * Sets up foreign-key link in child record. This is equivalent to execute
      * this sql statement:
      *
      * <blockquote>update items set order_id = 1 where id = 10</blockquote>
@@ -3434,7 +3505,7 @@ implements RESTified, Serializable {
         if (assR != null) {
         	ActiveRecord target = assR.getRecord();
             if (target != null) {
-            	Map fkData = rr.getFKDataMapForOther();
+            	Map<String, Object> fkData = rr.getFKDataMapForOther();
                 if (fkData == null) return;
                 if (target.isNewRecord() || fkChangable(target, fkData)) {
                     target.setData(fkData);
@@ -3448,7 +3519,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets up foreign-key link in child records. This is equvilent to execute
+     * Sets up foreign-key link in child records. This is equivalent to execute
      * this sql statement for each child record:
      *
      * <blockquote>update items set order_id = 1 where id = 10</blockquote>
@@ -3461,12 +3532,12 @@ implements RESTified, Serializable {
         RecordRelation rr = getRecordRelation(rel.getAssociation());
         AssociatedRecords assRs = (AssociatedRecords)rr.getAssociatedData();
         if (assRs != null) {
-        	List list = assRs.getRecords();
+        	List<ActiveRecord> list = assRs.getRecords();
             if (list != null) {
-            	Map fkData = rr.getFKDataMapForOther();
+            	Map<String, Object> fkData = rr.getFKDataMapForOther();
                 if (fkData == null) return;
                 for (int i=0; i<list.size(); i++) {
-                    ActiveRecord target = (ActiveRecord)list.get(i);
+                    ActiveRecord target = list.get(i);
                     if (target != null) {
                         if (target.isNewRecord() || fkChangable(target, fkData)) {
                             target.setData(fkData);
@@ -3502,10 +3573,10 @@ implements RESTified, Serializable {
         AssociatedRecords ars = allAssociated(rel.getAssociation(), true);
         //forced refresh is required otherwise it returns ars.size = 0;
         if (ars != null) {
-            List list = ars.getRecords();
+            List<ActiveRecord> list = ars.getRecords();
             if (list != null) {
                 for (int i=0; i<list.size(); i++) {
-                    ActiveRecord target = (ActiveRecord)list.get(i);
+                    ActiveRecord target = list.get(i);
                     if (target != null) {
                         target.delete();
                     }
@@ -3540,18 +3611,18 @@ implements RESTified, Serializable {
         ActiveRecord childHome = ActiveRecordUtil.getHomeInstance(rel.getTargetClass());
         String childTable = childHome.getTableName();
 
-        Object[] lhsFlds = rel.getLeftSideMappingItems();
-        Object[] rhsFlds = rel.getRightSideMappingItems();
+        String[] lhsFlds = rel.getLeftSideMappingItems();
+        String[] rhsFlds = rel.getRightSideMappingItems();
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM ").append(childTable);
 
-        StringBuffer whereSB = new StringBuffer();
-        Map inputs = new HashMap();
+        StringBuilder whereSB = new StringBuilder();
+        Map<String, Object> inputs = new HashMap<String, Object>();
         int size = lhsFlds.length;
         for (int i=0; i<size; i++) {
-            String fkFld = (String)rhsFlds[i];
-            String pkFld = (String)lhsFlds[i];
+            String fkFld = rhsFlds[i];
+            String pkFld = lhsFlds[i];
             Object fkData = getField(pkFld);
             whereSB.append(fkFld).append(" = ").append("? AND ");
             inputs.put((i+1)+"", fkData);
@@ -3561,7 +3632,8 @@ implements RESTified, Serializable {
 
         String deleteSQL = sb.append(" WHERE ").append(whereStr).toString();
         log.debug("deleteHasManySimply deleteSQL: " + deleteSQL);
-
+        
+        inputs = addMoreProperties(inputs, null);
         TableGateway.deleteBySQL(deleteSQL, inputs);
     }
 
@@ -3597,23 +3669,23 @@ implements RESTified, Serializable {
         ActiveRecord childHome = ActiveRecordUtil.getHomeInstance(rel.getTargetClass());
         String childTable = childHome.getTableName();
 
-        Object[] lhsFlds = rel.getLeftSideMappingItems();
-        Object[] rhsFlds = rel.getRightSideMappingItems();
+        String[] lhsFlds = rel.getLeftSideMappingItems();
+        String[] rhsFlds = rel.getRightSideMappingItems();
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(childTable).append(" SET ");
 
-        StringBuffer setSB = new StringBuffer();
-        StringBuffer whereSB = new StringBuffer();
+        StringBuilder setSB = new StringBuilder();
+        StringBuilder whereSB = new StringBuilder();
 
-        Map inputs = new HashMap();
+        Map<String, Object> inputs = new HashMap<String, Object>();
         int size = lhsFlds.length;
-        for (int i=0; i<size; i++) {
-            String fkFld = (String)rhsFlds[i];
+		for (int i = 0; i < size; i++) {
+            String fkFld = rhsFlds[i];
             if (childHome.isRequiredColumn(fkFld)) {
                 throw new GenericException("Column " + fkFld + " in table " + childTable + " cannot be nullified.");
             }
-            String pkFld = (String)lhsFlds[i];
+            String pkFld = lhsFlds[i];
             Object fkData = getField(pkFld);
             setSB.append(fkFld).append(" = NULL, ");
             whereSB.append(fkFld).append(" = ").append("? AND ");
@@ -3624,7 +3696,8 @@ implements RESTified, Serializable {
         String whereStr = StringUtil.removeLastToken(whereSB.toString(), "AND ");
 
         String updateSQL = sb.append(setStr).append(" WHERE ").append(whereStr).toString();
-
+        
+        inputs = addMoreProperties(inputs, null);
         TableGateway.updateBySQL(updateSQL, inputs);
     }
 
@@ -3660,10 +3733,8 @@ implements RESTified, Serializable {
     private void before_internal_update() {
         processAutoAuditUpdate();
 
-        Iterator keys = recordRelations.keySet().iterator();
-        while (keys.hasNext()) {
-            String key = (String)keys.next();
-            RecordRelation rr = (RecordRelation)recordRelations.get(key);
+        for (Map.Entry<String, RecordRelation> entry : recordRelations.entrySet()) {
+            RecordRelation rr = (RecordRelation)recordRelations.get(entry.getKey());
             if (rr == null) continue;
 
             String type = rr.getRelation().getRelationType();
@@ -3685,7 +3756,7 @@ implements RESTified, Serializable {
     /**
      * Do something after the internal_update()
      *
-     * For a has-one and has-many relatiosn, sets foreign-key of associated
+     * For a has-one and has-many relation, sets foreign-key of associated
      * objects. This is because the associated objects may not have the
      * foreign-key column filled or the associated objects may be dirty.
      */
@@ -3694,10 +3765,8 @@ implements RESTified, Serializable {
         //do some maintanance works
         updateClean();
 
-        Iterator keys = recordRelations.keySet().iterator();
-        while (keys.hasNext()) {
-            String key = (String)keys.next();
-            RecordRelation rr = (RecordRelation)recordRelations.get(key);
+        for (Map.Entry<String, RecordRelation> entry : recordRelations.entrySet()) {
+            RecordRelation rr = (RecordRelation)recordRelations.get(entry.getKey());
             if (rr == null) continue;
 
             String type = rr.getRelation().getRelationType();
@@ -3722,7 +3791,7 @@ implements RESTified, Serializable {
         if (assR != null) {
             ActiveRecord target = assR.getRecord();
             if (target != null) {
-                Map fkData = rr.getFKDataMapForOther();
+                Map<String, Object> fkData = rr.getFKDataMapForOther();
                 if (target.isNewRecord() || fkChangable(target, fkData)) {
                     target.setData(fkData);
                 }
@@ -3745,9 +3814,9 @@ implements RESTified, Serializable {
 
         AssociatedRecords assRs = (AssociatedRecords)rr.getAssociatedData();
         if (assRs != null) {
-            List list = assRs.getRecords();
+            List<ActiveRecord> list = assRs.getRecords();
             if (list != null) {
-                Map fkData = rr.getFKDataMapForOther();
+                Map<String, Object> fkData = rr.getFKDataMapForOther();
                 for (int i=0; i<list.size(); i++) {
                     ActiveRecord target = (ActiveRecord)list.get(i);
                     if (target != null) {
@@ -3764,24 +3833,17 @@ implements RESTified, Serializable {
         }
     }
 
-    private boolean fkChangable(ActiveRecord target, Map fkData) {
+    private boolean fkChangable(ActiveRecord target, Map<String, Object> fkData) {
 		boolean status = false;
-    	Iterator it = fkData.keySet().iterator();
-    	while(it.hasNext()) {
-    		String keyColumn = (String)it.next();
-    		Object value = fkData.get(keyColumn);
+		for (Map.Entry<String, Object> entry : fkData.entrySet()) {
+    		String keyColumn = entry.getKey();
+    		Object value = entry.getValue();
     		Object targetValue = target.getField(keyColumn);
     		if (value != null) {
-    			if (target != null) {
-	    			if (!value.toString().equals(targetValue.toString())) {
-	    				status = true;
-	    				break;
-					}
-    			}
-    			else {
+    			if (!value.toString().equals(targetValue.toString())) {
     				status = true;
     				break;
-    			}
+				}
     		}
     		else {
     			if (targetValue != null) {
@@ -3799,11 +3861,9 @@ implements RESTified, Serializable {
         if (!modifiedColumns.contains(name)) modifiedColumns.add(name);
     }
 
-    private void addToModifiedColumnNames(List names) {
+    private void addToModifiedColumnNames(List<String> names) {
         if (names == null) return;
-        Iterator it = names.iterator();
-        while(it.hasNext()) {
-            String name = (String)it.next();
+        for (String name : names) {
             addToModifiedColumnNames(name);
         }
     }
@@ -3826,7 +3886,7 @@ implements RESTified, Serializable {
      * @param category the category this model performs
      * @param target the associated class
      */
-    public void actAsInCategory(String category, Class target) {
+    public void actAsInCategory(String category, Class<? extends ActiveRecord> target) {
         String type = ActiveRecordUtil.getModelName(getClass());
         actAsInCategory(type, category, target);
     }
@@ -3851,7 +3911,7 @@ implements RESTified, Serializable {
      * @param category the category this entity performs
      * @param target the associated class
      */
-    public void actAsInCategory(String type, String category, Class target) {
+    public void actAsInCategory(String type, String category, Class<? extends ActiveRecord> target) {
         //make sure category center is loaded first
         RelationManager.getInstance().registerRelations(target);
 
@@ -3897,7 +3957,7 @@ implements RESTified, Serializable {
      * @param cbProperties properties of the belongs-to association from target to owner
      */
     public void actAsInCategory(String type, String category, String relationType,
-                Class target, String bcProperties, String cbProperties) {
+                Class<? extends ActiveRecord> target, String bcProperties, String cbProperties) {
         //make sure category center is loaded first
         RelationManager.getInstance().registerRelations(target);
 
@@ -4015,15 +4075,14 @@ implements RESTified, Serializable {
         return pted;
     }
 
-    private Map filterProtectedFields(Map dataMap) {
+    private Map<String, ?> filterProtectedFields(Map<String, ?> dataMap) {
         if (dataMap == null) return dataMap;
 
-        Map newDataMap = new HashMap();
-        Iterator it = dataMap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
+        Map<String, Object> newDataMap = new HashMap<String, Object>();
+        for (Map.Entry<String, ?> entry : dataMap.entrySet()) {
+            String key = entry.getKey();
             if (isProtectedField(key)) continue;
-            newDataMap.put(key, dataMap.get(key));
+            newDataMap.put(key, entry.getValue());
         }
         return newDataMap;
     }
@@ -4049,12 +4108,10 @@ implements RESTified, Serializable {
         extraFieldsMap.put(fieldName.toUpperCase(), data);
     }
 
-    private Map getExtraFieldData(List fieldNames) {
+    private Map<String, Object> getExtraFieldData(List<String> fieldNames) {
         if (fieldNames == null) return null;
-        Map fieldData = new HashMap();
-        Iterator it = fieldNames.iterator();
-        while(it.hasNext()) {
-            String field = (String)it.next();
+        Map<String, Object> fieldData = new HashMap<String, Object>();
+        for (String field : fieldNames) {
             if (isExtraField(field)) {
                 fieldData.put(field, getExtraFieldData(field));
             }
@@ -4062,122 +4119,37 @@ implements RESTified, Serializable {
         return fieldData;
     }
 
-    private List setExtraFieldData(Map data) {
+    private List<String> setExtraFieldData(Map<String, Object> data) {
         if (data == null) return null;
-        List changedFields = new ArrayList();
-        Iterator it = data.keySet().iterator();
-        while(it.hasNext()) {
-            String field = (String)it.next();
+        List<String> changedFields = new ArrayList<String>();
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            String field = entry.getKey();
             if (isExtraField(field)) {
-                setExtraFieldData(field, data.get(field));
+                setExtraFieldData(field, entry.getValue());
                 changedFields.add(field.toUpperCase());
             }
         }
         return changedFields;
     }
 
-    /**
-     *
-     * DELETE related
-     *
-     */
 
-    /**
-     * Deletes all the records that satisfy the sql.
-     *
-     * @param sql    a key to a sql string
-     * @return int number of records deleted
-     */
-    public static int deleteBySQL(String sql) {
-        return TableGateway.deleteBySQL(sql);
+    Map<String, Object> addMoreProperties(Map<String, Object> inputs, Map<String, String> options) {
+    	if (inputs == null) inputs = new HashMap<String, Object>();
+    	
+    	String connName = null;
+    	if (options != null) {
+    		connName = options.get(DataProcessor.input_key_database_connection_name);
+    	}
+    	
+		if (connName != null) {
+			inputs.put(DataProcessor.input_key_database_connection_name, connName);
+		}
+		else {
+	    	inputs.put(DataProcessor.input_key_database_connection_name, getConnectionName());
+		}
+		
+    	return inputs;
     }
-
-    /**
-     * Deletes all the records that satisfy the sql.
-     *
-     * The inputs is a map of name and value pairs related to the sql.
-     *
-     * @param sql    a key to a sql string
-     * @param inputs a map of name and value pairs
-     * @return int number of records deleted
-     */
-    public static int deleteBySQL(String sql, Map inputs) {
-        return TableGateway.deleteBySQL(sql, inputs);
-    }
-
-    /**
-     * Deletes all the records that satisfy the sql specified by the <tt>sqlKey</tt>.
-     *
-     * @param sqlKey a key to a sql string
-     * @return int number of records deleted
-     */
-    public static int deleteBySQLKey(String sqlKey) {
-        return TableGateway.deleteBySQLKey(sqlKey);
-    }
-
-    /**
-     * Deletes all the records that satisfy the sql specified by the <tt>sqlKey</tt>.
-     *
-     * The inputs is a map of name and value pairs related to the sql.
-     *
-     * @param sqlKey a key to a sql string
-     * @param inputs a map of name and value pairs
-     * @return int number of records deleted
-     */
-    public static int deleteBySQLKey(String sqlKey, Map inputs) {
-        return TableGateway.deleteBySQLKey(sqlKey, inputs);
-    }
-
-
-    /**
-     *
-     * UPDATE related
-     *
-     */
-
-    /**
-     * Updates all the records that satisfy the sql.
-     *
-     * @param sql A valid sql string
-     * @return int number of records updated
-     */
-    public static int updateBySQL(String sql) {
-        return TableGateway.updateBySQL(sql);
-    }
-
-    /**
-     * Updates all the records that satisfy the sql.
-     *
-     * @param sql A valid sql string
-     * @param inputs a map of name and value pairs
-     * @return int number of records updated
-     */
-    public static int updateBySQL(String sql, Map inputs) {
-        return TableGateway.updateBySQL(sql, inputs);
-    }
-
-    /**
-     * Updates all the records that satisfy the sql specified by <tt>sqlKey</tt>.
-     *
-     * @param sqlKey a key to a sql string.
-     * @return int number of records updated
-     */
-    public static int updateBySQLKey(String sqlKey) {
-        return TableGateway.updateBySQLKey(sqlKey);
-    }
-
-    /**
-     * Updates all the records that satisfy the sql specified by <tt>sqlKey</tt>.
-     *
-     * @param sqlKey a key to a sql string
-     * @param inputs a map of name and value pairs
-     * @return int number of records updated
-     */
-    public static int updateBySQLKey(String sqlKey, Map inputs) {
-        return TableGateway.updateBySQLKey(sqlKey, inputs);
-    }
-
-
 
     /**
      * Returns the <tt>ValidationResults</tt> instance of this record.
@@ -4305,14 +4277,14 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Shows details of the record. This method returns much more information 
-     * than the <tt>toString()</tt> method, such as table name, dirty, existed 
+     * Shows details of the record. This method returns much more information
+     * than the <tt>toString()</tt> method, such as table name, dirty, existed
      * in database, etc.
-     * 
+     *
      * @return String
      */
     public String details() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         String separator = "\r\n";
         returnString.append("tableName = " + tableName).append(separator);
         returnString.append("existInDatabase = " + existInDatabase).append(separator);
@@ -4335,43 +4307,39 @@ implements RESTified, Serializable {
      * @return String
      */
     public String toString() {
-    	StringBuffer sb = new StringBuffer();
+    	StringBuilder sb = new StringBuilder();
     	String separator = ", ";
 
         String[] colNames = rowInfo.getColumnNames();
         int colNamesLength = colNames.length;
         for (int i = 0; i < colNamesLength; i++) {
             String colName = colNames[i];
-            String colNameInLowerCase = colName.toLowerCase();
             sb.append(colName.toLowerCase()).append("=");
             sb.append(getField(colName)).append(separator);
         }
         sb = StringUtil.removeLastToken(sb, ", ");
 
         synchronized(extraFields) {
-        	if (extraFields != null && extraFields.size() > 0) {
-                Iterator it = extraFields.iterator();
-                while(it.hasNext()) {
-                    String colName = (String)it.next();
-                    String colNameInLowerCase = colName.toLowerCase();
+        	if (extraFields.size() > 0) {
+                for (String colName : extraFields) {
                     sb.append(colName.toLowerCase()).append("=");
                     sb.append(getField(colName)).append(separator);
                 }
                 sb = StringUtil.removeLastToken(sb, ", ");
         	}
         }
-        
+
         return sb.toString();
     }
 
     /**
-     * Returns a Map representation of the record. The keys in the map are 
-     * column names in lowercase. 
-     * 
+     * Returns a Map representation of the record. The keys in the map are
+     * column names in lowercase.
+     *
      * @return Map
      */
-    public Map toMap() {
-    	Map map = new HashMap();
+    public Map<String, Object> toMap() {
+    	Map<String, Object> map = new HashMap<String, Object>();
 
         String[] colNames = rowInfo.getColumnNames();
         int colNamesLength = colNames.length;
@@ -4381,13 +4349,11 @@ implements RESTified, Serializable {
         }
 
         synchronized(extraFields) {
-            Iterator it = extraFields.iterator();
-            while(it.hasNext()) {
-                String colName = (String)it.next();
+            for (String colName : extraFields) {
                 map.put(colName.toLowerCase(), getField(colName));
             }
         }
-        
+
         return map;
     }
 
@@ -4405,14 +4371,12 @@ implements RESTified, Serializable {
      * @return xml string
      */
     public String toXML() {
-        StringBuffer xmlSB = new StringBuffer();
+        StringBuilder xmlSB = new StringBuilder();
         String classNameInLowerCase = Util.getShortClassName(this.getClass()).toLowerCase();
         xmlSB.append("<").append(classNameInLowerCase).append(">");
 
         String[] colNames = rowInfo.getColumnNames();
-        int colNamesLength = colNames.length;
-        for (int i = 0; i < colNamesLength; i++) {
-            String colName = colNames[i];
+        for (String colName : colNames) {
             String colNameInLowerCase = colName.toLowerCase();
             xmlSB.append("<").append(colNameInLowerCase).append(">");
             xmlSB.append(getField(colName));
@@ -4420,9 +4384,7 @@ implements RESTified, Serializable {
         }
 
         synchronized(extraFields) {
-            Iterator it = extraFields.iterator();
-            while(it.hasNext()) {
-                String extraFldName = (String)it.next();
+            for (String extraFldName : extraFields) {
                 String extraFldNameInLowerCase = extraFldName.toLowerCase();
                 xmlSB.append("<").append(extraFldNameInLowerCase).append(">");
                 xmlSB.append(getField(extraFldName));
@@ -4433,10 +4395,10 @@ implements RESTified, Serializable {
         xmlSB.append("</").append(classNameInLowerCase).append(">");
         return xmlSB.toString();
     }
-    
+
     /**
      * Returns a JSON representation of the object.
-     * 
+     *
      * @return a json string
      */
     public String toJSON() {
@@ -4473,7 +4435,7 @@ implements RESTified, Serializable {
      * list to record which columns are modified.
      * All names are in upper case.
      */
-    private List modifiedColumns = new ArrayList();
+    private List<String> modifiedColumns = new ArrayList<String>();
 
     //current database record meta info
     private RowInfo rowInfo;
@@ -4494,7 +4456,7 @@ implements RESTified, Serializable {
      * fields have to be set directly by using setData(String) or
      * setData(String, Object).
      */
-    private List protectedColumns = Collections.synchronizedList(new ArrayList());
+    private List<String> protectedColumns = Collections.synchronizedList(new ArrayList<String>());
 
     /**
      * list of extra fields
@@ -4504,23 +4466,23 @@ implements RESTified, Serializable {
      *
      * For example, password_confirmation.
      */
-    private List extraFields = Collections.synchronizedList(new ArrayList());
+    private List<String> extraFields = Collections.synchronizedList(new ArrayList<String>());
 
     /**
      * map to store values of extra fields.
      *
      * All keys are in upper case.
      */
-    private Map extraFieldsMap = Collections.synchronizedMap(new HashMap());
+    private Map<String, Object> extraFieldsMap = new ConcurrentHashMap<String, Object>();
 
     /**
      * contains relation with target entities.
      *
      * Key is model name in lower case. Value is a specific RecordRelation object.
      */
-    private Map recordRelations = Collections.synchronizedMap(new HashMap());
+    private Map<String, RecordRelation> recordRelations = new ConcurrentHashMap<String, RecordRelation>();
 
-    private ModelValidators validators = null;
+    private transient ModelValidators validators = null;
 
-    private LogUtil log = LogUtil.getLogger(this.getClass().getName());
+    private transient LogUtil log = LogUtil.getLogger(this.getClass().getName());
 }

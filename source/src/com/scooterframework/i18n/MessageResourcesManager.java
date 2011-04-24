@@ -10,14 +10,12 @@ package com.scooterframework.i18n;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.PropertyReader;
 import com.scooterframework.common.logging.LogUtil;
@@ -69,32 +67,32 @@ public class MessageResourcesManager {
 	/*
 	 * map of all loaded locales and keys
 	 */
-	private static Map loadedLocalesKeyMap = Collections.synchronizedMap(new HashMap());
+	private static Map<String, Locale> loadedLocalesKeyMap = new ConcurrentHashMap<String, Locale>();
 	
 	/*
 	 * map of all message files.
 	 */
-	private static Map allMessageFiles = Collections.synchronizedMap(new HashMap());
+	private static Map<String, File> allMessageFiles = new ConcurrentHashMap<String, File>();
 	
 	/*
 	 * map of message file and its messages.
 	 */
-	private static Map fileMessagesMap = Collections.synchronizedMap(new HashMap());
+	private static Map<String, Properties> fileMessagesMap = new ConcurrentHashMap<String, Properties>();
 	
 	/*
 	 * map of locale files map in theory.
 	 */
-	private static Map localeFilesInTheoryMap = Collections.synchronizedMap(new HashMap());
+	private static Map<String, List<String>> localeFilesInTheoryMap = new ConcurrentHashMap<String, List<String>>();
 	
 	/*
 	 * map of locale files map in reality.
 	 */
-	private static Map localeFilesInRealityMap = Collections.synchronizedMap(new HashMap());
+	private static Map<String, List<String>> localeFilesInRealityMap = new ConcurrentHashMap<String, List<String>>();
 	
 	/*
 	 * map of locale message map.
 	 */
-	private static Map localeMsgMap = Collections.synchronizedMap(new HashMap());
+	private static Map<String, Properties> localeMsgMap = new ConcurrentHashMap<String, Properties>();
 	
 	public MessageResourcesManager(String configPath, String baseName) {
 		this.configPath = configPath;
@@ -107,17 +105,24 @@ public class MessageResourcesManager {
 		}
 	}
 	
+	/**
+	 * Returns path to the directory where all message files are stored. 
+	 */
+	public String getConfigPath() {
+		return configPath;
+	}
+	
     /**
      * Returns all message properties files as a map with file name as key and 
      * file object as value.
      * 
      * @return map of files
      */
-	public Map getAllFiles() {
+	public Map<String, File> getAllFiles() {
 		return allMessageFiles;
 	}
 	
-	public Set getAllLoadedLocalesSet() {
+	public Set<Map.Entry<String, Locale>> getAllLoadedLocalesSet() {
 		return loadedLocalesKeyMap.entrySet();
 	}
 	
@@ -136,7 +141,9 @@ public class MessageResourcesManager {
 		if (!hasLoaded(locale)) {
 			loadLocale(locale);
 		}
-		return ((Properties)localeMsgMap.get(getLocaleKey(locale))).getProperty(key);
+		
+		Properties prop = localeMsgMap.get(getLocaleKey(locale));
+		return (prop != null)?prop.getProperty(key):null;
 	}
 	
 	public void loadLocale(Locale locale) {
@@ -160,8 +167,7 @@ public class MessageResourcesManager {
 	}
 	
 	private String getLocaleKey(Locale locale) {
-		String key = locale.toString();
-		return key;
+		return (locale != null)?locale.toString():null;
 	}
 	
 	private void loadAllFiles(String configPath, String baseName) {
@@ -188,8 +194,8 @@ public class MessageResourcesManager {
 		}
 	}
 	
-	private List getFilesInTheory(Locale locale) {
-		List list = new ArrayList();
+	private List<String> getFilesInTheory(Locale locale) {
+		List<String> list = new ArrayList<String>();
 		
 		String base = baseName;
 		list.add(getFileName(base));
@@ -204,7 +210,7 @@ public class MessageResourcesManager {
 		return list;
 	}
 	
-	private void populateList(List list, String base, Locale locale) {
+	private void populateList(List<String> list, String base, Locale locale) {
 		String language = locale.getLanguage();
 		String country = locale.getCountry();
 		String variant = locale.getVariant();
@@ -232,13 +238,11 @@ public class MessageResourcesManager {
 		return name + resourceFileExtension;
 	}
 	
-	private List getFilesInReality(Locale locale) {
-		List list = new ArrayList();
-		List tFiles = (List)localeFilesInTheoryMap.get(getLocaleKey(locale));
+	private List<String> getFilesInReality(Locale locale) {
+		List<String> list = new ArrayList<String>();
+		List<String> tFiles = localeFilesInTheoryMap.get(getLocaleKey(locale));
 		if (tFiles != null) {
-			Iterator it = tFiles.iterator();
-			while(it.hasNext()) {
-				String file = (String)it.next();
+			for (String file : tFiles) {
 				if (allMessageFiles.containsKey(file)) {
 					list.add(file);
 				}
@@ -250,16 +254,13 @@ public class MessageResourcesManager {
 	
 	private Properties getMessages(Locale locale) {
 		String key = getLocaleKey(locale);
-		Properties messages = (Properties)localeMsgMap.get(key);
+		Properties messages = localeMsgMap.get(key);
 		if (messages != null) return messages;
 		
 		messages = new Properties();
-		List files = (List)localeFilesInRealityMap.get(key);
-		
+		List<String> files = (List<String>)localeFilesInRealityMap.get(key);
 		if (files != null) {
-			int length = files.size();
-			for (int i = 0; i < length; i++) {
-				String fileName = (String)files.get(i);
+			for (String fileName : files) {
 				Properties props = loadPropertiesFromFile(fileName);
 				messages.putAll(props);
 			}
@@ -294,20 +295,17 @@ public class MessageResourcesManager {
 		fileMessagesMap.remove(file.getName());
 		
 		//find all locales that use the file
-		List affectedLocales = new ArrayList();
-		Iterator it = localeFilesInRealityMap.keySet().iterator();
-		while(it.hasNext()) {
-			String localeKey = (String)it.next();
-			List files = (List)localeFilesInRealityMap.get(localeKey);
+		List<Locale> affectedLocales = new ArrayList<Locale>();
+		for (Map.Entry<String, List<String>> entry : localeFilesInRealityMap.entrySet()) {
+			String localeKey = entry.getKey();
+			List<String> files = localeFilesInRealityMap.get(localeKey);
 			if (files.contains(file.getName())) {
 				affectedLocales.add(loadedLocalesKeyMap.get(localeKey));
 			}
 		}
 		
 		//reload for each affected locale
-		Iterator it2 = affectedLocales.iterator();
-		while(it2.hasNext()) {
-			Locale locale = (Locale)it2.next();
+		for (Locale locale : affectedLocales) {
 			String key = getLocaleKey(locale);
 			localeMsgMap.remove(key);
 			localeMsgMap.put(key, getMessages(locale));
@@ -323,10 +321,9 @@ public class MessageResourcesManager {
         allMessageFiles.put(file.getName(), file);
         
         //reload all loaded locales
-        Iterator it = loadedLocalesKeyMap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            Locale locale = (Locale)loadedLocalesKeyMap.get(key);
+        for (Map.Entry<String, Locale> entry : loadedLocalesKeyMap.entrySet()) {
+            String key = entry.getKey();
+            Locale locale = entry.getValue();
             localeFilesInRealityMap.put(key, getFilesInReality(locale));
             localeMsgMap.remove(key);
             localeMsgMap.put(key, getMessages(locale));
@@ -343,10 +340,9 @@ public class MessageResourcesManager {
         fileMessagesMap.remove(file.getName());
         
         //reload all loaded locales
-        Iterator it = loadedLocalesKeyMap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            Locale locale = (Locale)loadedLocalesKeyMap.get(key);
+        for (Map.Entry<String, Locale> entry : loadedLocalesKeyMap.entrySet()) {
+            String key = entry.getKey();
+            Locale locale = entry.getValue();
             localeFilesInRealityMap.put(key, getFilesInReality(locale));
             localeMsgMap.remove(key);
             localeMsgMap.put(key, getMessages(locale));

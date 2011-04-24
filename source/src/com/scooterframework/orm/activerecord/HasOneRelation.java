@@ -18,7 +18,7 @@ package com.scooterframework.orm.activerecord;
  * @author (Fei) John Chen
  */
 public class HasOneRelation extends Relation {
-    public HasOneRelation(Class endA, String associationId, String targetModel) {
+    public HasOneRelation(Class<? extends ActiveRecord> endA, String associationId, String targetModel) {
         super(endA, HAS_ONE_TYPE, associationId, targetModel);
     }
 }

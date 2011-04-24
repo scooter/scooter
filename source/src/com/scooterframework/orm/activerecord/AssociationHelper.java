@@ -8,7 +8,6 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.scooterframework.common.util.Converters;
@@ -103,8 +102,8 @@ public class AssociationHelper {
      * @param category      the category which the targets act as
      * @param through       the middle join class between owner and targets
      */
-    public static void hasManyInCategoryThrough(Class owner, Class[] targets, 
-                                            String category, Class through) {
+    public static void hasManyInCategoryThrough(Class<? extends ActiveRecord> owner, Class<? extends ActiveRecord>[] targets, 
+                                            String category, Class<? extends ActiveRecord> through) {
         if (targets == null || targets.length == 0) {
             throw new IllegalArgumentException("Target array cannot be empty.");
         }
@@ -125,7 +124,8 @@ public class AssociationHelper {
         String[] types = new String[targetTotal];
         String relationType = Relation.HAS_MANY_TYPE;
         String[] bcProperties = new String[targetTotal];
-        Map[] joinInputs = new HashMap[targetTotal];
+        @SuppressWarnings("unchecked")
+		Map<String, Object>[] joinInputs = new HashMap[targetTotal];
         String[] cbProperties = new String[targetTotal];
         String cbMapping = ActiveRecordConstants.key_mapping + ": " + idField + "=id; ";
         
@@ -135,7 +135,7 @@ public class AssociationHelper {
             abProperties[i] = throughTypeCondition;
             bcProperties[i] = ActiveRecordConstants.key_mapping + ": id=" + idField + "; " + 
                               throughTypeCondition + "; " + ActiveRecordConstants.key_cascade + ": delete";
-            Map inputs = new HashMap();
+            Map<String, Object> inputs = new HashMap<String, Object>();
             inputs.put(typeField, types[i]);
             joinInputs[i] = inputs;
             cbProperties[i] = cbMapping;
@@ -177,10 +177,10 @@ public class AssociationHelper {
      * @param cbProperties  array of properties from through to each target class
      * @param baProperties  array of properties from each target to owner class
      */
-    public static void hasManyInCategoryThrough(Class owner, Class[] targets, 
-                 String category, Class through, Map[] acJoinInputs, 
+    public static void hasManyInCategoryThrough(Class<? extends ActiveRecord> owner, Class<? extends ActiveRecord>[] targets, 
+                 String category, Class<? extends ActiveRecord> through, Map<String, Object>[] acJoinInputs, 
                  String[] abProperties, String[] types, String relationType, 
-                 String[] bcProperties, Map[] bcJoinInputs, String[] cbProperties, 
+                 String[] bcProperties, Map<String, Object>[] bcJoinInputs, String[] cbProperties, 
                  String[] baProperties) {
         if (targets == null || targets.length == 0) {
             throw new IllegalArgumentException("Target array cannot be empty.");
@@ -210,7 +210,7 @@ public class AssociationHelper {
         
         //#1, #2, #4, #3
         for (int i=0; i<targetTotal; i++) {
-            Class target = targets[i];
+            Class<? extends ActiveRecord> target = targets[i];
             String targetEntityName = ActiveRecordUtil.getModelName(targets[i]);
             
             String type = "";
@@ -247,9 +247,9 @@ public class AssociationHelper {
                 }
             }
             
-            Map acJoinInputsMap = acJoinInputs[i];
+            Map<String, Object> acJoinInputsMap = acJoinInputs[i];
             if (acJoinInputsMap == null) {
-                acJoinInputsMap = new HashMap();
+                acJoinInputsMap = new HashMap<String, Object>();
             }
             if (acJoinInputsMap.size() == 0) {
                 acJoinInputsMap.put(typeField, type);
@@ -279,9 +279,9 @@ public class AssociationHelper {
             }
             ownerHome.hasManyThrough(target, through, abProperty, acJoinInputsMap);
             
-            Map bcJoinInputsMap = bcJoinInputs[i];
+            Map<String, Object> bcJoinInputsMap = bcJoinInputs[i];
             if (bcJoinInputsMap == null) { 
-                bcJoinInputsMap = new HashMap();
+                bcJoinInputsMap = new HashMap<String, Object>();
             }
             if (bcJoinInputsMap.size() == 0) {
                 bcJoinInputsMap.put(typeField, type);
@@ -309,14 +309,11 @@ public class AssociationHelper {
      * @param mappingMap  relation mapping from owner to target
      * @param target      the target record in the relation
      */
-    public static void populateFKInBelongsTo(ActiveRecord owner, Map mappingMap, ActiveRecord target) {
+    public static void populateFKInBelongsTo(ActiveRecord owner, Map<String, String> mappingMap, ActiveRecord target) {
         if (owner == null || target == null) return;
         
-        Iterator it = mappingMap.keySet().iterator();
-        while(it.hasNext()) {
-            String leftKey = (String)it.next();
-            String rightValue = (String)mappingMap.get(leftKey);
-            owner.setData(leftKey, target.getField(rightValue));
+        for (Map.Entry<String, String> entry : mappingMap.entrySet()) {
+            owner.setData(entry.getKey(), target.getField(entry.getValue()));
         }
     }
     
@@ -331,7 +328,7 @@ public class AssociationHelper {
      * @param mappingMap  relation mapping from owner to target
      * @param target      the target record in the relation
      */
-    public static void populateFKInHasMany(ActiveRecord owner, Map mappingMap, ActiveRecord target) {
+    public static void populateFKInHasMany(ActiveRecord owner, Map<String, String> mappingMap, ActiveRecord target) {
         populateFKInBelongsTo(target, Converters.reverseMap(mappingMap), owner);
     }
     
@@ -346,7 +343,7 @@ public class AssociationHelper {
      * @param mappingMap  relation mapping from owner to target
      * @param target      the target record in the relation
      */
-    public static void populateFKInHasOne(ActiveRecord owner, Map mappingMap, ActiveRecord target) {
+    public static void populateFKInHasOne(ActiveRecord owner, Map<String, String> mappingMap, ActiveRecord target) {
         populateFKInBelongsTo(target, Converters.reverseMap(mappingMap), owner);
     }
 }

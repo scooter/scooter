@@ -90,7 +90,7 @@ import com.scooterframework.web.route.RouteConfig;
  * @author (Fei) John Chen
  */
 public class ApplicationConfig {
-    protected static LogUtil log = null;
+    private static LogUtil log = null;
     public static boolean noConsoleDisplay = false;
     public static final String SYSTEM_KEY_CLASSFILE = "class.file.location";
     public static final String SYSTEM_KEY_PROPERTYFILE = "property.file.location";
@@ -147,8 +147,8 @@ public class ApplicationConfig {
      * This method should be called the first time the application is 
      * accessed or by a start-up method of a web application. 
      */
-    public static ApplicationConfig configInstanceForWeb(String webappPath, 
-    		String contextName) {
+    public static synchronized ApplicationConfig configInstanceForWeb(
+    		String webappPath, String contextName) {
         if (me == null) {
             me = new ApplicationConfig(Constants.CONFIGURED_MODE_SCOOTER_WEB, 
             		webappPath, contextName);
@@ -168,7 +168,7 @@ public class ApplicationConfig {
      * directory. 
      * </p>
      */
-    public static ApplicationConfig configInstanceForApp() {
+    public static synchronized ApplicationConfig configInstanceForApp() {
         if (me == null) {
             String path = detectRootPath();
             me = new ApplicationConfig(Constants.CONFIGURED_MODE_SCOOTER_APP, 
@@ -189,7 +189,7 @@ public class ApplicationConfig {
      * the calling application.
      * </p>
      */
-    public static ApplicationConfig configInstanceForOrmAlone() {
+    public static synchronized ApplicationConfig configInstanceForOrmAlone() {
         if (me == null) {
             String path = detectRootPath();
             me = new ApplicationConfig(Constants.CONFIGURED_MODE_SCOOTER_ORM, 
@@ -221,18 +221,17 @@ public class ApplicationConfig {
 		applicationStartTime = System.currentTimeMillis();
         
 		LogUtil.enableLogger();
-		EnvConfig wc = EnvConfig.getInstance();
+		EnvConfig.getInstance();
 		DatabaseConfig dbc = DatabaseConfig.getInstance();
         SqlConfig.getInstance();
         
         //
         //store some important information about the server
         //
-        Map props = new HashMap();
+        Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.APP_KEY_JAVA_VERSION, System.getProperty("java.version"));
         
         props.put(Constants.APP_KEY_SCOOTER_VERSION, Version.CURRENT_VERSION);
-        Constants.SCOOTER_VERSION = Version.CURRENT_VERSION;
         
         props.put(Constants.APP_KEY_RUNNING_ENVIRONMENT, runningEnvironment);
         props.put(Constants.APP_KEY_APPLICATION_START_TIME, new Date(applicationStartTime));
@@ -257,7 +256,7 @@ public class ApplicationConfig {
         //need to do the following:
         logConfig.enableMonitoring();
         
-        EnvConfig wc = EnvConfig.getInstance();
+        EnvConfig.getInstance();
         
         AutoLoaderConfig.getInstance();
         
@@ -281,11 +280,10 @@ public class ApplicationConfig {
         //
         //store some important information about the server
         //
-        Map props = new HashMap();
+        Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.APP_KEY_JAVA_VERSION, System.getProperty("java.version"));
         
         props.put(Constants.APP_KEY_SCOOTER_VERSION, Version.CURRENT_VERSION);
-        Constants.SCOOTER_VERSION = Version.CURRENT_VERSION;
         
         props.put(Constants.APP_KEY_RUNNING_ENVIRONMENT, runningEnvironment);
         props.put(Constants.APP_KEY_APPLICATION_START_TIME, new Date(applicationStartTime));
@@ -491,7 +489,10 @@ public class ApplicationConfig {
         
         String pgl = System.getProperty(SYSTEM_KEY_PLUGINFILE, "");
         if ("".equals(pgl)) {
-        	pgl = System.getProperty("scooter.home") + File.separatorChar + "plugins";
+        	String sh = System.getProperty("scooter.home");
+        	if (sh != null) {
+            	pgl = sh + File.separatorChar + "plugins";
+        	}
         }
         pluginsPath = pgl;
         
@@ -509,8 +510,14 @@ public class ApplicationConfig {
         log("    " + SYSTEM_KEY_CLASSFILE + ": " + classFileLocationPath);
         log(" " + SYSTEM_KEY_PROPERTYFILE + ": " + propertyFileLocationPath);
         log("   " + SYSTEM_KEY_SOURCEFILE + ": " + sourceFileLocationPath);
-        log("   " + SYSTEM_KEY_PLUGINFILE + ": " + pluginsPath);
         log("" + SYSTEM_KEY_REFERENCEFILE + ": " + referencesLibPath);
+        
+        if (pluginsPath != null  && !"".equals(pluginsPath)) {
+            log("   " + SYSTEM_KEY_PLUGINFILE + ": " + pluginsPath);
+        }
+        else {
+        	log("INFO: If jars under scooter/plugins are needed, use -Dscooter.home=... to setup path to the plugin directory.");
+        }
         
         //make sure there are files in the property file location
         String[] fileNames = (new File(propertyFileLocationPath)).list();
@@ -522,6 +529,8 @@ public class ApplicationConfig {
         //initialized other stuff if not started
         logConfig = LogConfig.getInstance(propertyFileLocationPath);
         log = LogUtil.getLogger(ApplicationConfig.class.getName());
+        
+        
     }
     
     private void initializeApp() {

@@ -66,15 +66,13 @@ public class ConnectionCheck {
     	String scooterHome = ToolsUtil.setSystemProperty("scooter.home", ToolsUtil.detectRootPath());
     	String defaultWebappsName = ToolsUtil.setSystemProperty("webapps.name", "webapps");
     	
-    	boolean useImplicitAppName = false;
     	String appName = "";
 		String webappsPath = "";
 		String webappPath = "";
-		if (args.length == 0) {
+		if (args.length == 0) {//use implicit app name
 	        webappsPath = scooterHome + File.separator + defaultWebappsName;
 			appName = ToolsUtil.detectImplicitAppName(webappsPath);
 	        webappPath = webappsPath + File.separator + appName;
-	        useImplicitAppName = true;
 		}
 		else if (args.length > 0) {
 			String firstArg = args[0];
@@ -126,7 +124,7 @@ public class ConnectionCheck {
         System.setProperty(ApplicationConfig.SYSTEM_KEY_PLUGINFILE, pluginFiles);
         ToolsUtil.validatePathExistence(pluginFiles);
     	
-    	new ConnectionGenerator(connectionName, new HashMap());
+    	new ConnectionGenerator(connectionName, new HashMap<String, String>());
     }
 
     private static void log(Object o) {

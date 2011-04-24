@@ -37,18 +37,18 @@ public class ActiveRecordConstants {
      * <p>Key <tt>finder_sql</tt> represents select query to be used with other 
      * conditions and options in find related methods. </p>
      * 
-     * <p>By using <tt>finder_sql</tt>, customerized sql queries can be used. 
+     * <p>By using <tt>finder_sql</tt>, customerized SQL queries can be used. 
      * For example, <tt>hint</tt>.</p>
      */
     public static final String key_finder_sql = "finder_sql";
     
     /**
-     * <tt>custom_sql</tt> represents customerized sql query.
+     * <tt>custom_sql</tt> represents customerized SQL query.
      */
     public static final String key_custom_sql = "custom_sql";
     
     /**
-     * Key <tt>custom_sql_key</tt> represents customized sql query.
+     * Key <tt>custom_sql_key</tt> represents customized SQL query.
      */
     public static final String key_custom_sql_key = "custom_sql_key";
     
@@ -83,7 +83,7 @@ public class ActiveRecordConstants {
     public static final String key_join_type = "join_type";
     
     /**
-     * <p>Key <tt>conditions_sql</tt> represents extra conditional sql string 
+     * <p>Key <tt>conditions_sql</tt> represents extra conditional SQL string 
      * to be appended to a query.</p>
      * 
      * <p>For example, "<tt>conditions_sql: name='John'</tt>" will be appended to 
@@ -98,54 +98,11 @@ public class ActiveRecordConstants {
     public static final String key_conditions_sql = "conditions_sql";
     
     /**
-     * <p>Key <tt>group_by</tt> represents <tt>GROUP BY</tt> clause in sql. </p>
-     * 
-     * <p>For example, "<tt>group_by=id, name</tt>" will be translated to sql 
-     * query as "GROUP BY id, name".</p>
-     */
-    public static final String key_group_by = "group_by";
-    
-    /**
-     * <p>Key <tt>having</tt> represents <tt>HAVING</tt> clause in sql. This is 
-     * usually used with <tt>group_by</tt> together.</p>
-     * 
-     * <p>The <tt>HAVING</tt> clause was added to SQL because the 
-     * <tt>WHERE</tt> keyword could not be used with aggregate functions.</p>
-     * 
-     * <p>For example, "<tt>having=sum(price)<100</tt>" will be translated to 
-     * sql query as "HAVING sum(price)<100".</p>
-     */
-    public static final String key_having = "having";
-    
-    /**
-     * <p>Key <tt>order_by</tt> represents <tt>ORDER BY</tt> clause in sql. </p>
-     * 
-     * <p>For example, "<tt>order_by=age desc</tt>" will be translated to sql 
-     * query as "ORDER BY age desc".</p>
-     */
-    public static final String key_order_by = "order_by";
-    
-    /**
-     * <p>Key <tt>sort</tt> indicates column names to sort. </p>
-     * 
-     * <p>For example, "<tt>sort=first_name</tt>" will be translated to sql 
-     * query as "<tt>order by first_name</tt>".</p>
-     */
-    public static final String key_sort = "sort";
-    
-    /**
-     * <p>Key <tt>order</tt> represents direction of sort. If the query 
-     * result set is in descending order, use value "<tt>Down</tt>". Otherwise 
-     * by default the query results are in ascending order.</p>
-     */
-    public static final String key_order = "order";
-    
-    /**
      * <p>Key <tt>unique</tt> indicates if query results should be unique. 
-     * This will add "<tt>distinct</tt>" in sql query. </p>
+     * This will add "<tt>distinct</tt>" in SQL query. </p>
      * 
      * <p>For example, "<tt>unique=true</tt>" will be translated to 
-     * "<tt>SELECT DISTINCT</tt>" in a sql query. </p>
+     * "<tt>SELECT DISTINCT</tt>" in a SQL query. </p>
      */
     public static final String key_unique = "unique";
     
@@ -171,4 +128,19 @@ public class ActiveRecordConstants {
      * a count of child model records.
      */
     public static final String key_counter_cache = "counter_cache";
+    
+    /**
+     * Key <tt>limit</tt> indicates the number of records for a query.
+     */
+    public static final String key_limit = "limit";
+    
+    /**
+     * Key <tt>offset</tt> indicates the number of records to skip for a query.
+     */
+    public static final String key_offset = "offset";
+    
+    /**
+     * Key <tt>page</tt> indicates current page number in a pagination.
+     */
+    public static final String key_page = "page";
 }

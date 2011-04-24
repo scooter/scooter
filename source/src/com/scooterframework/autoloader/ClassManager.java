@@ -36,7 +36,7 @@ public class ClassManager {
     public Object newInstance(String className) {
         Object o = null;
         try {
-            Class c = loadMyClass(className);
+            Class<?> c = loadMyClass(className);
             o = c.newInstance();
         } catch (Exception ex) {
             throw new ObjectCreationException(className, ex);
@@ -44,7 +44,7 @@ public class ClassManager {
         return o;
     }
     
-    public Class loadMyClass(String className) 
+    public Class<?> loadMyClass(String className) 
     throws ClassNotFoundException {
         return getMyClassLoader().loadMyClass(className);
     }
@@ -53,7 +53,7 @@ public class ClassManager {
         return xcl;
     }
     
-    public void createNewClassLoader(String className) {
+    void createNewClassLoader(String className) {
         xcl = new MyClassLoader(this);
     }
 }

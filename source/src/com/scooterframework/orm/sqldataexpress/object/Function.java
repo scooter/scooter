@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -8,13 +8,12 @@
 package com.scooterframework.orm.sqldataexpress.object;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Function class.
- * 
+ *
  * A function is essentially a stored procedure that returns a result.
- * 
+ *
  * @author (Fei) John Chen
  */
 public class Function extends StoredProcedure {
@@ -29,21 +28,19 @@ public class Function extends StoredProcedure {
         }
         return returnTypeName;
     }
-    
+
     public int getReturnType() {
        if (!processedReturn) {
            findReturnType();
        }
        return returnType;
     }
-    
+
 
     private void findReturnType() {
         processedReturn = true;
-        Collection c = getParameters();
-        Iterator it = c.iterator();
-        while(it.hasNext()) {
-            Parameter p = (Parameter)it.next();
+        Collection<Parameter> c = getParameters();
+        for (Parameter p : c) {
             if (p.getMode() == Parameter.MODE_RETURN) {
                 returnTypeName = p.getSqlDataTypeName();
                 returnType = p.getSqlDataType();
@@ -54,30 +51,30 @@ public class Function extends StoredProcedure {
     }
 
     /*
-     * Display something like the following: 
+     * Display something like the following:
      * {? = call add_month(?,?)} // note: there is no package name.
      */
-    protected String formatJavaAPIString() 
+    protected String formatJavaAPIString()
     {
-        StringBuffer buf = new StringBuffer();
-        
+        StringBuilder buf = new StringBuilder();
+
         String questionMarkString = "";
         int colCount = parameters.size();
-        for ( int i = 0; i < colCount-1; i++ ) 
+        for ( int i = 0; i < colCount-1; i++ )
         {
             questionMarkString = questionMarkString + "?,";
         }
         if (questionMarkString.endsWith(",")) questionMarkString = questionMarkString.substring(0, questionMarkString.length()-1);
-        
+
         buf.append("{? = call ");
         if ( schema != null ) buf.append(schema).append(".");
         if ( catalog != null ) buf.append(catalog).append(".");
         buf.append(api);
         buf.append("(").append(questionMarkString).append(")}");
-        
+
         return buf.toString();
     }
-    
+
     private boolean processedReturn = false;
     private String returnTypeName;
     private int returnType;

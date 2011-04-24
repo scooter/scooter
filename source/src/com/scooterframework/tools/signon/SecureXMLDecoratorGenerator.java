@@ -18,22 +18,25 @@ import com.scooterframework.tools.common.AbstractGenerator;
  */
 public class SecureXMLDecoratorGenerator extends AbstractGenerator {
 	
-	public SecureXMLDecoratorGenerator(String templateFilePath, Map props) {
+	public SecureXMLDecoratorGenerator(String templateFilePath, Map<String, String> props) {
 		super(templateFilePath, props);
 	}
 
-	protected Map getTemplateProperties() {
+	protected Map<String, String> getTemplateProperties() {
 		return null;
 	}
 	
+	@Override
 	protected String getRootPath() {
-		return getProperty("app.path").toString();
+		return getProperty("app.path");
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return "/WEB-INF";
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return "decorators.xml";
 	}

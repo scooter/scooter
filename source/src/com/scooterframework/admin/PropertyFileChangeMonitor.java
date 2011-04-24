@@ -10,7 +10,6 @@ package com.scooterframework.admin;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -40,7 +39,7 @@ import com.scooterframework.common.logging.LogUtil;
 public class PropertyFileChangeMonitor {
     private LogUtil log = LogUtil.getLogger(this.getClass().getName());
     
-    private Map observables = new HashMap();
+    private Map<File, Observable> observables = new HashMap<File, Observable>();
     
     private static long oneHundredDays = 8640000;
     private boolean periodicReading = false;
@@ -129,7 +128,7 @@ public class PropertyFileChangeMonitor {
 
         log.debug("monitoring file: " + file.getName());
         
-        Observable observable = (Observable)observables.get(file);
+        Observable observable = observables.get(file);
         if (observable == null) {
             observable = new FileObservable(file);
             observables.put(file, observable);
@@ -164,9 +163,8 @@ public class PropertyFileChangeMonitor {
         }
         
         public void run() {
-            Iterator it = observables.keySet().iterator();
-            while(it.hasNext()) {
-                FileObservable observable = (FileObservable)observables.get(it.next());
+            for (Map.Entry<File, Observable> entry : observables.entrySet()) {
+                FileObservable observable = (FileObservable)observables.get(entry.getKey());
                 observable.checkChange();
             }
         }

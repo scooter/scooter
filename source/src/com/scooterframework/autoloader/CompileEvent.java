@@ -7,7 +7,6 @@
  */
 package com.scooterframework.autoloader;
 
-import java.io.File;
 import java.util.List;
 
 import com.scooterframework.admin.Constants;
@@ -20,9 +19,9 @@ import com.scooterframework.admin.Event;
  */
 public class CompileEvent extends Event {
 	private boolean success;
-	private List<File> files;
+	private List<String> filePaths;
 	
-	public CompileEvent(boolean success, String eventType, String message, List<File> files) {
+	public CompileEvent(boolean success, String eventType, String message, List<String> filePaths) {
 		super(eventType, message);
 		
 		if (!Constants.EVENT_COMPILE.equals(eventType)) {
@@ -30,7 +29,7 @@ public class CompileEvent extends Event {
 		}
 		
 		this.success = success;
-		this.files = files;
+		this.filePaths = filePaths;
 	}
 	
 	/**
@@ -43,8 +42,8 @@ public class CompileEvent extends Event {
 	/**
 	 * Returns the files that are compiled.
 	 */
-	public List<File> getCompileFiles() {
-		return files;
+	public List<String> getCompileFiles() {
+		return filePaths;
 	}
 	
 	/**
@@ -54,7 +53,7 @@ public class CompileEvent extends Event {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString()).append(", ");
 		sb.append("success=").append(success).append(", ");
-		sb.append("files=").append(files);
+		sb.append("filePaths=").append(filePaths);
 		return sb.toString();
 	}
 }

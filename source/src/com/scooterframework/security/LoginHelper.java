@@ -37,6 +37,7 @@ public class LoginHelper {
             }
         }
         catch(Exception ex) {
+        	userId = null;
         }
         
         return (userId != null)?userId.toString():null;
@@ -61,6 +62,7 @@ public class LoginHelper {
             }
         }
         catch(Exception ex) {
+        	userPwd = null;
         }
         
         return (userPwd != null)?userPwd.toString():null;

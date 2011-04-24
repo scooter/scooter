@@ -7,12 +7,10 @@
  */
 package com.scooterframework.admin;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.ObjectFactory;
@@ -30,8 +28,8 @@ public class PluginManager {
 		pm = new PluginManager();
 	}
 
-    private Map pluginConfigMap = Collections.synchronizedMap(new HashMap());
-    private Map pluginMap = Collections.synchronizedMap(new HashMap());
+    private Map<String, Properties> pluginConfigMap = new ConcurrentHashMap<String, Properties>();
+    private Map<String, Plugin> pluginMap = new ConcurrentHashMap<String, Plugin> ();
     private LogUtil log = LogUtil.getLogger(getClass().getName());
 	
 	private PluginManager() {
@@ -61,7 +59,7 @@ public class PluginManager {
     /**
      * Returns plugin names
      */
-    public Iterator getPluginNames() {
+    public Iterator<String> getPluginNames() {
         return pluginConfigMap.keySet().iterator();
     }
 	
@@ -72,7 +70,7 @@ public class PluginManager {
 	 * @return Properties
 	 */
 	public Properties getPluginProperties(String pluginName) {
-		Properties p = (Properties)pluginConfigMap.get(pluginName);
+		Properties p = pluginConfigMap.get(pluginName);
 		return (p != null)?p:(new Properties());
 	}
 	
@@ -83,28 +81,23 @@ public class PluginManager {
 	 * @return an instance of plugin
 	 */
 	public Plugin getPlugin(String pluginName) {
-		return (Plugin)pluginMap.get(pluginName);
+		return pluginMap.get(pluginName);
 	}
 	
 	/**
 	 * Starts all plugins.
 	 */
 	public void startPlugins() {
-		Set set = pluginConfigMap.keySet();
-		synchronized (pluginConfigMap) {
-			Iterator it = set.iterator();
-			while (it.hasNext()) {
-				String pluginName = (String)it.next();
-				Properties p = (Properties)pluginConfigMap.get(pluginName);
-				try {
-					Plugin plugin = createPlugin(pluginName, p);
-					pluginMap.put(pluginName, plugin);
-					plugin.start();
-				}
-				catch(Exception ex) {
-					ex.printStackTrace();
-					log.error(ex);
-				}
+		for (Map.Entry<String, Properties> entry : pluginConfigMap.entrySet()) {
+			String pluginName = entry.getKey();
+			Properties p = entry.getValue();
+			try {
+				Plugin plugin = createPlugin(pluginName, p);
+				pluginMap.put(pluginName, plugin);
+				plugin.start();
+			}
+			catch(Exception ex) {
+				log.error(ex);
 			}
 		}
 	}
@@ -113,12 +106,8 @@ public class PluginManager {
 	 * Stops all plugins.
 	 */
 	public void stopPlugins() {
-		synchronized (pluginMap) {
-			Iterator it = pluginMap.keySet().iterator();
-			while (it.hasNext()) {
-				Plugin plugin = (Plugin) pluginMap.get(it.next());
-				plugin.stop();
-			}
+		for (Plugin plugin : pluginMap.values()) {
+			plugin.stop();
 		}
 	}
 	
@@ -140,7 +129,7 @@ public class PluginManager {
 			throw new IllegalArgumentException(
 					"There must be a plugin class name defined for plugin \"" + name + "\".");
 
-        Class[] parameterTypes = {Properties.class};
+        Class<?>[] parameterTypes = {Properties.class};
         Object[] initargs = {p};
 		Plugin plugin = (Plugin)ObjectFactory.getFactory().newInstance(pluginClassName, parameterTypes, initargs);
 		return plugin;

@@ -16,7 +16,7 @@ import java.util.Map;
  * @author (Fei) John Chen
  */
 public class HasManyThroughRelation extends Relation {
-    public HasManyThroughRelation(Class ownerClass, String associationId, String throughAssociation,
+    public HasManyThroughRelation(Class<? extends ActiveRecord> ownerClass, String associationId, String throughAssociation,
     		Relation acRelation, Relation cbRelation) {
         super(ownerClass, HAS_MANY_THROUGH_TYPE, associationId, cbRelation.getTargetModel());
         this.throughAssociation = throughAssociation;
@@ -39,7 +39,7 @@ public class HasManyThroughRelation extends Relation {
      * 
      * @return joinInputs data map for the middleC join table
      */
-    public Map getJoinInputs() {
+    public Map<String, Object> getJoinInputs() {
         return joinInputs;
     }
     
@@ -48,7 +48,7 @@ public class HasManyThroughRelation extends Relation {
      * 
      * @param joinInputs data map for the middleC join table
      */
-    public void setJoinInputs(Map joinInputs) {
+    public void setJoinInputs(Map<String, Object> joinInputs) {
         this.joinInputs = joinInputs;
     }
     
@@ -71,7 +71,7 @@ public class HasManyThroughRelation extends Relation {
      * 
      * @return the middle C class
      */
-    public Class getMiddleC() {
+    public Class<? extends ActiveRecord> getMiddleC() {
         return cbRelation.getOwnerClass();
     }
     
@@ -95,5 +95,5 @@ public class HasManyThroughRelation extends Relation {
     protected Relation acRelation;
     protected Relation cbRelation;
     
-    protected Map joinInputs;
+    protected Map<String, Object> joinInputs;
 }

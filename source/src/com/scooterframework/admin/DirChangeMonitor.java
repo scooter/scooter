@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -36,7 +35,7 @@ import com.scooterframework.common.logging.LogUtil;
 public class DirChangeMonitor {
     private LogUtil log = LogUtil.getLogger(this.getClass().getName());
     
-    private Map observables = new HashMap();
+    private Map<String, Observable> observables = new HashMap<String, Observable>();
     
     private static long oneHundredDays = 8640000;
     private boolean periodicReading = false;
@@ -48,13 +47,9 @@ public class DirChangeMonitor {
      */
     private long loadInterval = 2000L;
     
-    private static DirChangeMonitor fcm;
+    private static final DirChangeMonitor fcm = new DirChangeMonitor();
     
     public static final String DEFAULT_RUNNING_ENVIRONMENT = "DEVELOPMENT";
-    
-    static {
-        fcm = new DirChangeMonitor();
-    }
     
     private DirChangeMonitor() {
         String runningEnvironment = System.getProperty("running.environment", DEFAULT_RUNNING_ENVIRONMENT);
@@ -84,7 +79,7 @@ public class DirChangeMonitor {
         }
     }
     
-    public static synchronized DirChangeMonitor getInstance() {
+    public static DirChangeMonitor getInstance() {
         return fcm;
     }
     
@@ -158,7 +153,7 @@ public class DirChangeMonitor {
         if (!ApplicationConfig.getInstance().isWebApp()) return;
         
         if (path == null) {
-            log.error("Can not watch the directory " + path + ", because the input path is null.");
+            log.error("Can not watch the directory, because the input path is null.");
             return;
         }
         
@@ -177,7 +172,7 @@ public class DirChangeMonitor {
         }
         
         String observableKey = getObservableKey(path, filter);
-        Observable observable = (Observable)observables.get(observableKey);
+        Observable observable = observables.get(observableKey);
         if (observable == null) {
             observable = new DirObservable(path, filter);
             observables.put(observableKey, observable);
@@ -207,9 +202,8 @@ public class DirChangeMonitor {
         }
         
         public void run() {
-            Iterator it = observables.keySet().iterator();
-            while(it.hasNext()) {
-                DirObservable observable = (DirObservable)observables.get(it.next());
+            for (Map.Entry<String, Observable> entry : observables.entrySet()) {
+                DirObservable observable = (DirObservable)observables.get(entry.getKey());
                 observable.checkChange();
             }
         }

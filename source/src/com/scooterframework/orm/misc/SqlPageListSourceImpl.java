@@ -7,17 +7,19 @@
  */
 package com.scooterframework.orm.misc;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.scooterframework.common.util.Util;
 import com.scooterframework.orm.sqldataexpress.exception.BaseSQLException;
+import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
 
 /**
  * <p>SqlPageListSourceImpl class retrieves paged record list by using 
- * a predefined finder sql query.</p>
+ * a predefined finder SQL query.</p>
  * 
  * <p>Finder SQL query example: </p>
  * <pre>
@@ -53,10 +55,10 @@ public class SqlPageListSourceImpl extends PageListSource {
      * properties file is used.
      * 
      * @param connName database connection name. 
-     * @param finderSql the sql query for finding records. 
+     * @param finderSql the SQL query for finding records. 
      * @param inputOptions Map of control information.
      */
-    public SqlPageListSourceImpl(String connName, String finderSql, Map inputOptions) {
+    public SqlPageListSourceImpl(String connName, String finderSql, Map<String, String> inputOptions) {
          this(connName, finderSql, inputOptions, true);
     }
     
@@ -66,12 +68,12 @@ public class SqlPageListSourceImpl extends PageListSource {
      * properties file is used.
      * 
      * @param connName database connection name. 
-     * @param finderSql the sql query for finding records. 
+     * @param finderSql the SQL query for finding records. 
      * @param inputOptions Map of control information.
      * @param recount <tt>true</tt> if recount of total records is allowed;
      *		    <tt>false</tt> otherwise.
      */
-    public SqlPageListSourceImpl(String connName, String finderSql, Map inputOptions, boolean recount) {
+    public SqlPageListSourceImpl(String connName, String finderSql, Map<String, String> inputOptions, boolean recount) {
     	super(inputOptions, recount);
     	
     	this.connName = connName;
@@ -82,7 +84,8 @@ public class SqlPageListSourceImpl extends PageListSource {
         int totalRecords = 0;
         
         try {
-        	Map inputs = inputOptions;
+        	Map<String, Object> inputs = new HashMap<String, Object>();
+        	inputs.putAll(inputOptions);
         	inputs.put(DataProcessor.input_key_database_connection_name, connName);
         	
             String selectCountSQL = "SELECT count(*) FROM (" + finderSql + ") xxx";
@@ -96,8 +99,9 @@ public class SqlPageListSourceImpl extends PageListSource {
         return totalRecords;
     }
     
-    protected List retrieveList() {
-    	Map inputs = inputOptions;
+    protected List<RowData> retrieveList() {
+    	Map<String, Object> inputs = new HashMap<String, Object>();
+    	inputs.putAll(inputOptions);
     	inputs.put(DataProcessor.input_key_database_connection_name, connName);
         return SqlServiceClient.retrieveRowsBySQL(finderSql, inputs);
     }

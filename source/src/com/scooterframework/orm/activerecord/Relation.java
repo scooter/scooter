@@ -31,7 +31,7 @@ import com.scooterframework.common.util.WordUtil;
  * @author (Fei) John Chen
  */
 abstract public class Relation {
-    public Relation(Class ownerClass, String type, String associationId, String targetModel) {
+    public Relation(Class<? extends ActiveRecord> ownerClass, String type, String associationId, String targetModel) {
         this.ownerClass = ownerClass;
         this.type = type;
         this.associationId = associationId;
@@ -88,7 +88,7 @@ abstract public class Relation {
      */
     public Relation getReverseRelation() {
         Relation reverseRelation = null;
-        String reverseAssociationId = (String)properties.get(REVERSE_RELATION);
+        String reverseAssociationId = properties.get(REVERSE_RELATION);
         if (reverseAssociationId != null) {
             reverseRelation = RelationManager.getInstance().getRelation(getTargetClass(), reverseAssociationId);
         }
@@ -106,7 +106,7 @@ abstract public class Relation {
             }
             else 
             if (BELONGS_TO_TYPE.equals(getRelationType())) {
-                //the reverse reltion must be of has-many or has-one type
+                //the reverse relation must be of has-many or has-one type
                 reverseRelation = RelationManager.getInstance().getRelation(getTargetClass(), WordUtil.pluralize(getOwnerModel()));
                 if (reverseRelation == null) {
                     reverseRelation = RelationManager.getInstance().getRelation(getTargetClass(), getOwnerModel());
@@ -143,14 +143,14 @@ abstract public class Relation {
     /**
      * Returns owner class.
      */
-    public Class getOwnerClass() {
+    public Class<? extends ActiveRecord> getOwnerClass() {
         return ownerClass;
     }
     
     /**
      * Returns target class.
      */
-    public Class getTargetClass() {
+    public Class<? extends ActiveRecord> getTargetClass() {
     	if (targetClass == null) {
     	    targetClass = ActiveRecordUtil.getHomeInstance(EnvConfig.getInstance().getModelClassName(getTargetModel())).getClass();
     	}
@@ -162,7 +162,7 @@ abstract public class Relation {
      * 
      * @param targetClass target class
      */
-    public void setTargetClass(Class targetClass) {
+    public void setTargetClass(Class<? extends ActiveRecord> targetClass) {
         this.targetClass = targetClass;
     }
     
@@ -213,9 +213,14 @@ abstract public class Relation {
      * 
      * @return an array of all strings on the left-side of the mapping.
      */
-    public Object[] getLeftSideMappingItems() {
-        Map mappingMap = Converters.convertStringToMap(getMapping());
-        return mappingMap.keySet().toArray();
+    public String[] getLeftSideMappingItems() {
+        Map<String, String> mappingMap = Converters.convertStringToMap(getMapping());
+        String[] sa = new String[mappingMap.size()];
+        int i = 0;
+        for (String s : mappingMap.keySet()) {
+        	sa[i++] = s;
+        }
+        return sa;
     }
     
     /**
@@ -223,9 +228,14 @@ abstract public class Relation {
      * 
      * @return an array of all strings on the right-side of the mapping.
      */
-    public Object[] getRightSideMappingItems() {
-        Map mappingMap = Converters.convertStringToMap(getMapping());
-        return mappingMap.values().toArray();
+    public String[] getRightSideMappingItems() {
+        Map<String, String> mappingMap = Converters.convertStringToMap(getMapping());
+        String[] sa = new String[mappingMap.size()];
+        int i = 0;
+        for (String s : mappingMap.values()) {
+        	sa[i++] = s;
+        }
+        return sa;
     }
     
     /**
@@ -240,18 +250,18 @@ abstract public class Relation {
      * 
      * @return a Map of mapping string
      */
-    public Map getMappingMap() {
+    public Map<String, String> getMappingMap() {
         return Converters.convertStringToMap(getMapping());
     }
     
-    public Map getReverseMappingMap() {
+    public Map<String, String> getReverseMappingMap() {
         return Converters.convertStringToMap(getReverseMapping());
     }
     
     /**
      * Returns the property map.
      */
-    public Map getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
     
@@ -259,7 +269,7 @@ abstract public class Relation {
      * Returns the conditions_sql in the property map.
      */
     public String getConditionsString() {
-        return (String)properties.get(ActiveRecordConstants.key_conditions_sql);
+        return properties.get(ActiveRecordConstants.key_conditions_sql);
     }
     
     /**
@@ -267,7 +277,7 @@ abstract public class Relation {
      * with mapping alias table name.
      */
     public String getConditionsString(String tableName, String aliasTableName) {
-        String condition = (String)properties.get(ActiveRecordConstants.key_conditions_sql);
+        String condition = properties.get(ActiveRecordConstants.key_conditions_sql);
         if (condition != null) {
             if (condition.toLowerCase().indexOf((tableName+".").toLowerCase()) != -1 &&
                 !tableName.equalsIgnoreCase(aliasTableName)) {
@@ -280,11 +290,11 @@ abstract public class Relation {
     /**
      * Sets the property map.
      */
-    public void setProperties(Map properties) {
+    public void setProperties(Map<String, String> properties) {
         if (properties == null || properties.size() == 0) return;
         this.properties = properties;
-        mapping = (String)properties.get(ActiveRecordConstants.key_mapping);
-        targetModel = (String)properties.get(ActiveRecordConstants.key_model);
+        mapping = properties.get(ActiveRecordConstants.key_mapping);
+        targetModel = properties.get(ActiveRecordConstants.key_model);
     }
     
     /**
@@ -344,14 +354,14 @@ abstract public class Relation {
      * @return true if the cascade type is allowed.
      */
     public boolean allowCascade(String cascadeType) {
-        String cascade = (String)properties.get(ActiveRecordConstants.key_cascade);
+        String cascade = properties.get(ActiveRecordConstants.key_cascade);
         if (cascade == null) cascade = CASCADE_NONE;
-        return (cascadeType.equals(cascade.toString()))?true:false;
+        return (cascadeType.equalsIgnoreCase(cascade))?true:false;
     }
     
     public String toString() {
         String separator = "; ";
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("ownerClass: " + ownerClass.getName()).append(separator);
         sb.append("relation type: " + type).append(separator);
         sb.append("associationId: " + associationId).append(separator);
@@ -397,13 +407,13 @@ abstract public class Relation {
      */
     public static final String REVERSE_RELATION = "reverse";
 
-    protected Class ownerClass;
+    protected Class<? extends ActiveRecord> ownerClass;
     protected String type;
     protected String associationId;
-    protected Class targetClass;
+    protected Class<? extends ActiveRecord> targetClass;
     protected String ownerModel;
     protected String targetModel;
     protected String mapping;
-    protected Map properties = new HashMap();
+    protected Map<String, String> properties = new HashMap<String, String>();
     protected String key;
 }

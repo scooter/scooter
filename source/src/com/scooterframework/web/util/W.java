@@ -31,6 +31,7 @@ import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.ExpandedMessage;
+import com.scooterframework.common.util.Message;
 import com.scooterframework.common.util.StringUtil;
 import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.i18n.Messages;
@@ -87,14 +88,14 @@ import com.scooterframework.web.controller.ActionContext;
  */
 public class W {
 
-    protected static LogUtil log = LogUtil.getLogger(W.class.getName());
-    public static MarkdownProcessor mp = new MarkdownProcessor();
-    public static List<String> html5Keys = new ArrayList<String>();
-    public static List<String> buttonKeys = new ArrayList<String>();
-    public static List<String> imageKeys = new ArrayList<String>();
-    public static List<String> inputKeys = new ArrayList<String>();
-    public static List<String> linkKeys = new ArrayList<String>();
-    public static List<String> styleKeys = new ArrayList<String>();
+    private static final LogUtil log = LogUtil.getLogger(W.class.getName());
+    public static final MarkdownProcessor mp = new MarkdownProcessor();
+    public static final List<String> html5Keys = new ArrayList<String>();
+    public static final List<String> buttonKeys = new ArrayList<String>();
+    public static final List<String> imageKeys = new ArrayList<String>();
+    public static final List<String> inputKeys = new ArrayList<String>();
+    public static final List<String> linkKeys = new ArrayList<String>();
+    public static final List<String> styleKeys = new ArrayList<String>();
     
     private static final String DELETE_ADDON = 
                     "f.style.display = 'none'; " + 
@@ -408,7 +409,7 @@ public class W {
     public static String value(String key, HttpServletRequest request, ActiveRecord record) {
         String result = request.getParameter(key);
         if (result == null) {
-            result = (String)request.getAttribute(key);
+            result = (String) request.getAttribute(key);
             if (result == null && record != null) {
                 Object o = record.getField(key);
                 if (o != null) {
@@ -425,7 +426,7 @@ public class W {
      * @return true if local request
      */
     public static boolean isLocalRequest() {
-        String s = (String)CurrentThreadCache.get(Constants.LOCAL_REQUEST);
+        String s = (String) CurrentThreadCache.get(Constants.LOCAL_REQUEST);
         if ((Constants.VALUE_FOR_LOCAL_REQUEST).equals(s)) {
             return true;
         }
@@ -785,17 +786,17 @@ public class W {
      * @param options configuration options of the select
      * @return html select string
      */
-    public static String displayHtmlSelect(String name, List dataList, String options) {
-        Map optionsMap = Converters.convertStringToMap(options, ":", ";");
-        String id = (String)optionsMap.get("id");
-        String cssClass = (String)optionsMap.get("class");
-        String javascript = (String)optionsMap.get("javascript");
-        String optionId = (String)optionsMap.get("optionId");
-        String optionValue = (String)optionsMap.get("optionValue");
-        String selectedId = (String)optionsMap.get("selectedId");
-        String useBlank = (String)optionsMap.get("useBlank");
+    public static String displayHtmlSelect(String name, List<Object> dataList, String options) {
+        Map<String, String> optionsMap = Converters.convertStringToMap(options, ":", ";");
+        String id = optionsMap.get("id");
+        String cssClass = optionsMap.get("class");
+        String javascript = optionsMap.get("javascript");
+        String optionId = optionsMap.get("optionId");
+        String optionValue = optionsMap.get("optionValue");
+        String selectedId = optionsMap.get("selectedId");
+        String useBlank = optionsMap.get("useBlank");
         if (useBlank == null) useBlank = "false";
-        String prompt = (String)optionsMap.get("prompt");
+        String prompt = optionsMap.get("prompt");
         
         StringBuilder selectSB = new StringBuilder();
         selectSB.append("<select ");
@@ -823,7 +824,7 @@ public class W {
         }
         
         if (dataList != null) {
-            Iterator it = dataList.iterator();
+            Iterator<Object> it = dataList.iterator();
             while (it.hasNext()) {
                 Object o = it.next();
                 String oid = "";
@@ -854,8 +855,9 @@ public class W {
         return selectSB.toString();
     }
     
-    public static String displayHtmlSelect(String name, String dataListKey, String options) {
-        return displayHtmlSelect(name, (List)get(dataListKey), options);
+    @SuppressWarnings("unchecked")
+	public static String displayHtmlSelect(String name, String dataListKey, String options) {
+        return displayHtmlSelect(name, (List<Object>)get(dataListKey), options);
     }
     
     /**
@@ -1428,7 +1430,7 @@ public class W {
         }
         
         if (actionPath.indexOf('.') == -1) {
-            String extension = (String)options.get("extension");
+            String extension = options.get("extension");
             if (extension != null) {
                 actionPath = actionPath + "." + extension;
             }
@@ -1443,23 +1445,23 @@ public class W {
             url = contextPath + url;
         }
         
-        String fullurl = (String)options.get("fullurl");
+        String fullurl = options.get("fullurl");
         if ("true".equals(fullurl)) {
-            String protocol = (String)options.get("protocol");
+            String protocol = options.get("protocol");
             if (protocol == null) protocol = "http";
             
             HttpServletRequest request = getHttpRequest();
-            String host = (String)options.get("host");
+            String host = options.get("host");
             if (host == null) host = request.getServerName();
             
-            String port = (String)options.get("port");
+            String port = options.get("port");
             if (port == null) port = "" + request.getServerPort();
             port = ("80".equals(port))?"":(":" + port);
             
             url = protocol + "://" + host + port + url;
         }
         
-        String encode = (String)options.get("encode");
+        String encode = options.get("encode");
         if ("true".equals(encode)) {
             String pureURL = "";
             String queryString = null;
@@ -1749,11 +1751,9 @@ public class W {
     private static StringBuilder convertQueryStringToHiddenFields(String queryString) {
         StringBuilder sb = new StringBuilder();
         Map<String, String> m = Converters.convertStringToMap(queryString, "=", "&");
-        Iterator it = m.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            Object value = m.get(key);
-            sb.append("<input type=\"hidden\" name=\"").append(key).append("\" value=\"").append(value).append("\"/>");
+        for (Map.Entry<String, String> entry : m.entrySet()) {
+            sb.append("<input type=\"hidden\" name=\"").append(entry.getKey());
+            sb.append("\" value=\"").append(entry.getValue()).append("\"/>");
         }
         return sb;
     }
@@ -2234,7 +2234,7 @@ public class W {
     
     private static String getMapProperty(Map<String, String> options, String key, String def) {
         if (options == null) return def;
-        String value = (String)options.get(key);
+        String value = options.get(key);
         return (value == null)?def:value;
     }
     
@@ -2271,10 +2271,10 @@ public class W {
      */
     public static String errorMessage(String model, Properties options) {
         String result = "";
-        List errors = O.getErrorMessages(model);
+        List<Message> errors = O.getErrorMessages(model);
         if (errors != null && errors.size() > 0) {
-            String headerTag = (String) options.getProperty("headerTag", "h2");
-            String header = (String) options.getProperty("header", "error(s) happened:");
+            String headerTag =  options.getProperty("headerTag", "h2");
+            String header =  options.getProperty("header", "error(s) happened:");
             String name = options.getProperty("name", "errorDetails");
             String id = options.getProperty("id", "errorDetails");
             String css = options.getProperty("class", "errorDetails");
@@ -2288,12 +2288,12 @@ public class W {
         return result;
     }
     
-    private static String parseErrorMessages(List<String> errors) {
+    private static String parseErrorMessages(List<Message> errors) {
         StringBuilder sb = new StringBuilder();
         if (errors != null && errors.size() > 0) {
-            Iterator it = errors.iterator();
+            Iterator<Message> it = errors.iterator();
             while(it.hasNext()) {
-                ExpandedMessage vm = (ExpandedMessage)it.next();
+            	Message vm = (ExpandedMessage)it.next();
                 String key = vm.getId();
                 String content = vm.getContent();
                 String error = "";
@@ -2349,11 +2349,8 @@ public class W {
      */
     public static String taggedContent(String tag, String content, Map<String, String> properties) {
         StringBuilder sb = new StringBuilder();
-        Iterator<String> it = properties.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            Object value = properties.get(key);
-            sb.append(key).append("=\"").append(value).append("\" ");
+        for(Map.Entry<String, String> entry : properties.entrySet()) {
+            sb.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\" ");
         }
         return taggedContent(tag, content, sb.toString());
     }

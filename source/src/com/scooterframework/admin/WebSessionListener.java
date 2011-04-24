@@ -57,6 +57,6 @@ public class WebSessionListener implements HttpSessionListener {
 	 * Returns the date of the maximum number of current sessions.
 	 */
 	public static Date getSessionCountMaxDate() {
-		return sessionCountMaxDate;
+		return (sessionCountMaxDate == null)?sessionCountMaxDate:(new Date(sessionCountMaxDate.getTime()));
 	}
 }

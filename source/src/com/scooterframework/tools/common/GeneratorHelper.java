@@ -12,7 +12,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -24,14 +23,14 @@ import java.util.StringTokenizer;
 
 /**
  * This class contains helper methods for generators.
- * 
+ *
  * @author (Fei) John Chen
  */
 public class GeneratorHelper {
-	public static int NOCHANGE_EXISTING_FILE = -1;
-	public static int CREATE_NEW_FILE = 0;
-	public static int UPDATE_EXISTING_FILE = 1;
-	public static int UNDETERMINED = 999;
+	public static final int NOCHANGE_EXISTING_FILE = -1;
+	public static final int CREATE_NEW_FILE = 0;
+	public static final int UPDATE_EXISTING_FILE = 1;
+	public static final int UNDETERMINED = 999;
 
 	public static List<String> loadToStringListFromResource(String resourceFileName)
 			throws Exception {
@@ -78,7 +77,7 @@ public class GeneratorHelper {
 		if (lines == null)
 			return (String) null;
 		String linebreak = System.getProperty("line.separator", "\r\n");
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<String> it = lines.iterator();
 		while (it.hasNext()) {
 			sb.append(it.next()).append(linebreak);
@@ -117,7 +116,7 @@ public class GeneratorHelper {
 		if (lines == null)
 			return (String) null;
 		String linebreak = System.getProperty("line.separator", "\r\n");
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<String> it = lines.iterator();
 		while (it.hasNext()) {
 			sb.append(it.next()).append(linebreak);

@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -15,34 +15,34 @@ import com.scooterframework.security.LoginHelper;
  * LogUtil class. This class uses Apache's Log4J as logger. Configuration
  * information can be found in log4j.properties. You may also create your own
  * log4j properties file.
- * 
+ *
  * If your application shares the same container with other applications, be
  * careful on the log file name you choose.
- * 
+ *
  * <PRE>
  * Usage:
  *    1. In your application class, declare the following
  *        LogUtil log = LogUtil.getLogger(this.getClass().getName());
- *    
+ *
  *    2. Then you can log message with this code:
  *        log.debug(message);
- *        
+ *
  *        or better with these codes:
  *        if (log.isDebugEnabled()) {
  *            log.debug(message);
  *        }
- *        
- *     3. Modify log4j.properties file according to your own application: 
+ *
+ *     3. Modify log4j.properties file according to your own application:
  *        This may be necessary if you want log file names do not conflict with
- *        other application's log file names in the same container. 
- *     
- *     4. Use your own myApp_log4j.properties file: This is optional. 
+ *        other application's log file names in the same container.
+ *
+ *     4. Use your own myApp_log4j.properties file: This is optional.
  *        4.1 Create a file named myApp_log4j.properties
- *        4.2 Make sure this file is on your classpath. 
- *        4.3 Add this system property on your container start line: 
+ *        4.2 Make sure this file is on your classpath.
+ *        4.3 Add this system property on your container start line:
  *            -Dlog4j.configuration=myApp_log4j.properties
  * </PRE>
- * 
+ *
  * @author (Fei) John Chen
  */
 public class LogUtil {
@@ -72,14 +72,14 @@ public class LogUtil {
 	}
     /**
      * Starts a <tt>Logger</tt> for a specific instance.
-     * 
+     *
      * @param instanceName      The instance to log
      * @return this instance
      */
 	public static synchronized LogUtil getLogger(String instanceName) {
 		return new LogUtil(instanceName);
 	}
-    
+
     /**
      * Enables the logger.
      */
@@ -87,7 +87,7 @@ public class LogUtil {
         if (manualStop) return;
 		loggerEnabled = true;
 	}
-    
+
     /**
      * Disables the logger.
      */
@@ -95,18 +95,18 @@ public class LogUtil {
         if (manualStop) return;
 		loggerEnabled = false;
 	}
-    
+
     /**
-     * Puts a stop on the logger. Sometimes logger is enabled by other program. 
-     * Use this method if you want to nullify any calls to the 
+     * Puts a stop on the logger. Sometimes logger is enabled by other program.
+     * Use this method if you want to nullify any calls to the
      * {@link #enableLogger()} method.
      */
     public static void manualStopOn() {
         manualStop = true;
     }
-    
+
     /**
-     * Removes a stop on the logger. See description of {@link #manualStopOn()} 
+     * Removes a stop on the logger. See description of {@link #manualStopOn()}
      * method for more details.
      */
     public static void manualStopOff() {
@@ -123,7 +123,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a trace message
-	 * 
+	 *
 	 */
 	public void trace(String message) {
 		log(message, TRACE);
@@ -131,7 +131,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a trace message
-	 * 
+	 *
 	 */
 	public void trace(Object message) {
 		log(message, TRACE);
@@ -139,7 +139,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a debug message
-	 * 
+	 *
 	 */
 	public void debug(String message) {
 		log(message, DEBUG);
@@ -147,7 +147,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a debug message
-	 * 
+	 *
 	 */
 	public void debug(Object message) {
 		log(message, DEBUG);
@@ -155,7 +155,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log an info message
-	 * 
+	 *
 	 */
 	public void info(String message) {
 		log(message, INFO);
@@ -163,7 +163,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log an info message
-	 * 
+	 *
 	 */
 	public void info(Object message) {
 		log(message, INFO);
@@ -171,7 +171,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a warning message
-	 * 
+	 *
 	 */
 	public void warn(String message) {
 		log(message, WARN);
@@ -179,7 +179,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a warning message
-	 * 
+	 *
 	 */
 	public void warn(Object message) {
 		log(message, WARN);
@@ -187,7 +187,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log an error message
-	 * 
+	 *
 	 */
 	public void error(String message) {
 		log(message, ERROR);
@@ -195,7 +195,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log an error message
-	 * 
+	 *
 	 */
 	public void error(Object message) {
 		log(message, ERROR);
@@ -203,7 +203,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a fatal message
-	 * 
+	 *
 	 */
 	public void fatal(String message) {
 		log(message, FATAL);
@@ -211,7 +211,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a fatal message
-	 * 
+	 *
 	 */
 	public void fatal(Object message) {
 		log(message, FATAL);
@@ -219,7 +219,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log an info message
-	 * 
+	 *
 	 */
 	public void info(int id, String message) {
 		log(message, INFO);
@@ -227,7 +227,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a warning message
-	 * 
+	 *
 	 */
 	public void warn(int id, String message) {
 		log(message, WARN);
@@ -235,7 +235,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log an error message
-	 * 
+	 *
 	 */
 	public void error(int id, String message) {
 		log(message, ERROR);
@@ -243,7 +243,7 @@ public class LogUtil {
 
 	/**
 	 * Method to log a fatal message
-	 * 
+	 *
 	 */
 	public void fatal(int id, String message) {
 		log(message, FATAL);
@@ -251,7 +251,7 @@ public class LogUtil {
 
 	/**
 	 * Check whether this category is enabled for the TRACE Level.
-	 * 
+	 *
 	 * @return boolean - <tt>true</tt> if this category is enabled for
 	 *         level TRACE, <tt>false</tt> otherwise.
 	 */
@@ -261,7 +261,7 @@ public class LogUtil {
 
 	/**
 	 * Check whether this category is enabled for the DEBUG Level.
-	 * 
+	 *
 	 * @return boolean - <tt>true</tt> if this category is enabled for
 	 *         level DEBUG, <tt>false</tt> otherwise.
 	 */
@@ -272,7 +272,7 @@ public class LogUtil {
 
 	/**
 	 * Check whether this category is enabled for the INFO Level.
-	 * 
+	 *
 	 * @return boolean - <tt>true</tt> if this category is enabled for
 	 *         level INFO, <tt>false</tt> otherwise.
 	 */
@@ -280,7 +280,7 @@ public class LogUtil {
 		return (logger != null) ? logger.isInfoEnabled() : false;
 	}
 
-	
+
 	private void log(Object object, int iLogLevel) {
 		String message = (object == null) ? "null" : object.toString();
 		log(message, iLogLevel);
@@ -320,7 +320,7 @@ public class LogUtil {
 			}
 		} else {
 			String logLevelDesc = getLogLevelDesc(iLogLevel);
-			StringBuffer logMessage = new StringBuffer();
+			StringBuilder logMessage = new StringBuilder();
 			String messageText = (message == null) ? "null" : message;
 
 			// Build the log message.

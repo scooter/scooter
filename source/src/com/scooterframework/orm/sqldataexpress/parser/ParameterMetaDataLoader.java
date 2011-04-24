@@ -12,7 +12,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.sqldataexpress.exception.BaseSQLException;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatement;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatementParameter;
@@ -35,20 +34,18 @@ public class ParameterMetaDataLoader extends JdbcStatementHelper {
      * load some parameter properties from ParameterMetaData. 
      * 
      * Do not use this method if the underline database driver does not support 
-     * ParameterMetaData feature, like Oracle. 
-     * 
-     * @param pmd   ParameterMetaData
+     * ParameterMetaData feature, such as Oracle.
      */
-    public void loadParameterMetaData(ParameterMetaData pmd) {
+    public void loadParameterMetaData() {
         try {
             int pcount = pmd.getParameterCount();
-            List parameters = st.getParameters();
+            List<Parameter> parameters = st.getParameters();
             if (pcount != parameters.size()) 
                 throw new BaseSQLException("ParameterMetaData size is " + pcount + 
                 " while statement parameters size is " + parameters.size() + ".");
             
-            for(int i=1; i<=pcount; i++) {
-                Parameter p = (Parameter)parameters.get(i-1);
+			for (int i = 1; i <= pcount; i++) {
+                Parameter p = parameters.get(i-1);
                 
                 log.debug("i=" + i);
                 log.debug("getParameterClassName : " + pmd.getParameterClassName(i));
@@ -137,6 +134,4 @@ public class ParameterMetaDataLoader extends JdbcStatementHelper {
     
     private ParameterMetaData pmd;
     private JdbcStatement st;
-    
-    protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
 }

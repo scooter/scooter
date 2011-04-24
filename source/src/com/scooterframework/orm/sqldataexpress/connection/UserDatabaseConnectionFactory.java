@@ -7,7 +7,6 @@
  */
 package com.scooterframework.orm.sqldataexpress.connection;
 
-import java.util.Enumeration;
 import java.util.Properties;
 
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
@@ -42,24 +41,24 @@ public class UserDatabaseConnectionFactory {
      */
     public UserDatabaseConnection createUserDatabaseConnection() {
         //check if there is any default connection name specified in property file
-        String connectionName = DatabaseConfig.getInstance().getDefaultDatabaseConnectionName();
-        return createUserDatabaseConnection(connectionName);
+        String connName = DatabaseConfig.getInstance().getDefaultDatabaseConnectionName();
+        return createUserDatabaseConnection(connName);
     }
     
     /**
      * Create a UserDatabaseConnection instance based on connection name. The 
      * properties related to the name must be in the properties file. 
      * 
-     * @param connectionName  a connection name
+     * @param connName  database connection name
      * @return UserDatabaseConnection
      */
-    public UserDatabaseConnection createUserDatabaseConnection(String connectionName) {
-        if (connectionName == null || connectionName.equals("")) 
+    public UserDatabaseConnection createUserDatabaseConnection(String connName) {
+        if (connName == null || connName.equals("")) 
             throw new CreateConnectionFailureException("Failed to create a database connection: connection name is null.");
         
-        Properties prop = DatabaseConfig.getInstance().getPredefinedDatabaseConnectionProperties(connectionName);
+        Properties prop = DatabaseConfig.getInstance().getPredefinedDatabaseConnectionProperties(connName);
         
-        return buildUserDatabaseConnection(connectionName, prop);
+        return buildUserDatabaseConnection(connName, prop);
     }
     
     /**
@@ -160,17 +159,5 @@ public class UserDatabaseConnectionFactory {
         }
         
         return isDataSource;
-    }
-    
-    private Properties updateProperties(Properties oldProp, Properties newProp) {
-        if (oldProp == null || oldProp.size() == 0) return newProp;
-        if (newProp == null || newProp.size() == 0) return oldProp;
-        
-        Enumeration en = newProp.propertyNames();
-        while(en.hasMoreElements()) {
-            String key = (String)en.nextElement();
-            oldProp.setProperty(key, newProp.getProperty(key));
-        }
-        return oldProp;
     }
 }

@@ -17,10 +17,12 @@ import java.util.Map;
  */
 public class ModelTestGenerator extends ModelGenerator {
 
-	public ModelTestGenerator(String templateFilePath, Map props, String model) {
-		super(templateFilePath, props, model);
+	public ModelTestGenerator(String templateFilePath,
+			Map<String, String> props, String connName, String model) {
+		super(templateFilePath, props, connName, model);
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return (noPrefix)?(DIRECTORY_NAME_TEST + File.separatorChar + UNIT_TEST):
 					(DIRECTORY_NAME_TEST + File.separatorChar + 
@@ -28,6 +30,7 @@ public class ModelTestGenerator extends ModelGenerator {
 							packageName.replace('.', File.separatorChar));
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return modelClassName + "Test" + FILE_EXTENSION_JAVA;
 	}

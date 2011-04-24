@@ -97,7 +97,7 @@ public class UnitTestHelper {
 		//LogUtil.manualStopOn();
 		
 		ac = ApplicationConfig.configInstanceForApp();
-		ac.getInstance().startApplication();
+		ApplicationConfig.getInstance().startApplication();
 		
 		contextName = ac.getContextName().toLowerCase();
 		

@@ -1,4 +1,7 @@
-﻿<h2>Site Administration</h2>
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<h2>Site Administration</h2>
 
 <form id="siteloginform" name="siteloginform" action="<%=request.getContextPath()%>/admin/signon/authenticate" method="POST">
     <p>Please enter site admin username and password.</p>

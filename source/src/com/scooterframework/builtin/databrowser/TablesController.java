@@ -18,7 +18,7 @@ import com.scooterframework.common.logging.LogUtil;
  * @author (Fei) John Chen
  */
 public class TablesController extends ApplicationController {
-	protected static LogUtil log = LogUtil.getLogger(TablesController.class.getName());
+	private static final LogUtil log = LogUtil.getLogger(TablesController.class.getName());
 
 	static {
 		filterManagerFor(TablesController.class).declareBeforeFilter(
@@ -51,7 +51,6 @@ public class TablesController extends ApplicationController {
         try {
         	setViewData("records_count", Table.countRecords(connectionName, table));
         } catch(Exception ex) {
-        	ex.printStackTrace();
         	String error = ex.getMessage();
         	String errorNotice = "Failed to browse table " + table + ".";
         	if (error.indexOf("table or view does not exist") != -1) {

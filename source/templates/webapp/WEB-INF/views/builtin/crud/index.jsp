@@ -1,4 +1,7 @@
-﻿<%@ page import="
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
         java.util.List,
         com.scooterframework.admin.Constants,
         com.scooterframework.web.util.O,

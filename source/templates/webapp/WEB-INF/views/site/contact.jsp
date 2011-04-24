@@ -1,4 +1,7 @@
-﻿<div id="contact">
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<div id="contact">
 
 <h2>Contact</h2>
 

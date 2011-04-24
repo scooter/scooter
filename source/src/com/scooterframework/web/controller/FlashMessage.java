@@ -10,7 +10,6 @@ package com.scooterframework.web.controller;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +32,9 @@ public class FlashMessage implements Serializable {
     }
     
     public void addMessage(String type, Message message) {
-        List messages = (List)typedMessages.get(type);
+        List<Message> messages = (List<Message>)typedMessages.get(type);
         if (messages == null) {
-            messages = new ArrayList();
+            messages = new ArrayList<Message>();
             typedMessages.put(type, messages);
         }
         messages.add(message);
@@ -47,9 +46,9 @@ public class FlashMessage implements Serializable {
      * @param type
      * @return list of messages associated with the type
      */
-    public List getAll(String type) {
+    public List<Message> getAll(String type) {
         if (type == null || "".equals(type)) return null;
-        return (List)typedMessages.get(type);
+        return (List<Message>)typedMessages.get(type);
     }
     
     /**
@@ -59,7 +58,7 @@ public class FlashMessage implements Serializable {
      * @return message associated with the type
      */
     public String getFirst(String type) {
-        List messages = getAll(type);
+        List<Message> messages = getAll(type);
         if (messages == null || messages.size() == 0) return null;
         
         Message message = (Message) messages.get(0);
@@ -73,7 +72,7 @@ public class FlashMessage implements Serializable {
      * @return message associated with the type
      */
     public String getLast(String type) {
-        List messages = getAll(type);
+        List<Message> messages = getAll(type);
         if (messages == null || messages.size() == 0) return null;
         
         Message message = (Message) messages.get(messages.size()-1);
@@ -87,13 +86,13 @@ public class FlashMessage implements Serializable {
      */
     public int count() {
         int total = 0;
-        Iterator it = typedMessages.keySet().iterator();
-        while(it.hasNext()) {
-            List list = (List)it.next();
+        for (Map.Entry<String, List<Message>> entry : typedMessages.entrySet()) {
+            List<Message> list = entry.getValue();
+            if (list == null) continue;
             total += list.size();
         }
         return total;
     }
 
-    private Map typedMessages = new HashMap();
+    private Map<String, List<Message>> typedMessages = new HashMap<String, List<Message>>();
 }

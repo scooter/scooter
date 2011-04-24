@@ -9,7 +9,6 @@ package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         super(recordRelation);
     }
     
-    public AssociatedRecordsHM(RecordRelation recordRelation, List records) {
+    public AssociatedRecordsHM(RecordRelation recordRelation, List<? extends ActiveRecord> records) {
         super(recordRelation, records);
     }
     
@@ -44,7 +43,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
      * @param records a list of records to be added to the relation. 
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords add(List records) {
+    public AssociatedRecords add(List<? extends ActiveRecord> records) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -64,7 +63,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords internal_add(List records) {
+    private AssociatedRecords internal_add(List<? extends ActiveRecord> records) {
         if (records == null || records.size() == 0) return this;
         
         //retrieve current list
@@ -74,13 +73,13 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         validateRecordType(getRelation().getTargetClass(), records);
         
         // now add the records to db and memory 
-        if (associatedRecords == null) associatedRecords = new ArrayList();
+        if (associatedRecords == null) associatedRecords = new ArrayList<ActiveRecord>();
         
         ActiveRecord owner = getOwner();
         if (!owner.isNewRecord()) {
             int inputSize = records.size();
-            for(int i=0; i<inputSize; i++) {
-                ActiveRecord record = (ActiveRecord)records.get(i);
+			for (int i = 0; i < inputSize; i++) {
+                ActiveRecord record = records.get(i);
                 if (record == null) continue;
                 
                 //chenfei: Don't do this here: AssociationHelper.populateFKInHasMany(owner, getRelation().getMappingMap(), record);
@@ -106,7 +105,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
      * @param records list of records to be detached.
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords detach(List records) {
+    public AssociatedRecords detach(List<? extends ActiveRecord> records) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -126,7 +125,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords internal_detach(List records) {
+    private AssociatedRecords internal_detach(List<? extends ActiveRecord> records) {
         if (records == null || records.size() == 0) return this;
         
         //retrieve current list
@@ -177,7 +176,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
      * @param records a list of records to be deleted.
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords delete(List records) {
+    public AssociatedRecords delete(List<? extends ActiveRecord> records) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -197,7 +196,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords intenal_delete(List records) {
+    private AssociatedRecords intenal_delete(List<? extends ActiveRecord> records) {
         if (records == null || records.size() == 0) return this;
         
         //retrieve current list
@@ -234,7 +233,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
     }
     
     /**
-     * This is equivelent to clear() and add(records).
+     * This is equivalent to clear() and add(records).
      * 
      * Removes all existing associated objects from the associated list by 
      * setting their foreign keys to NULL. The records are not deleted 
@@ -244,7 +243,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
      * 
      * @return updated AssociatedRecords
      */
-    public AssociatedRecords replace(List records) {
+    public AssociatedRecords replace(List<? extends ActiveRecord> records) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -264,7 +263,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords internal_replace(List records) {
+    private AssociatedRecords internal_replace(List<? extends ActiveRecord> records) {
         if (records == null || records.size() == 0) return this;
         
         AssociatedRecords assr = null;
@@ -290,7 +289,7 @@ public class AssociatedRecordsHM extends AssociatedRecords {
         
         try {
             Relation rel = recordRelation.getRelation();
-            Map properties = rel.getProperties();
+            Map<String, String> properties = rel.getProperties();
             
             String conditionSql = rel.getConditionsString();
             
@@ -300,21 +299,19 @@ public class AssociatedRecordsHM extends AssociatedRecords {
             String whereClause = "";
             
             //set target's FK with owner's PK data
-            Map fkData = recordRelation.getFKDataMapForOther();
+            Map<String, Object> fkData = recordRelation.getFKDataMapForOther();
             if (fkData == null) return 0;
             
             //construct where clause and data
             boolean hasWhere = false;
-            Map inputs = new HashMap();
+            Map<String, Object> inputs = new HashMap<String, Object>();
             if (fkData.size() > 0) {
                 hasWhere = true;
                 int position = 1;
-                for(Iterator it = fkData.keySet().iterator(); it.hasNext();) {
-                    String columnName = (String) it.next();
-                    Object conditionData = fkData.get(columnName);
-                    whereClause += columnName + " = ? AND ";
+                for(Map.Entry<String, Object> entry : fkData.entrySet()) {
+                    whereClause += entry.getKey() + " = ? AND ";
                     //inputs.put(columnName, conditionData);
-                    inputs.put(position+"", conditionData);
+					inputs.put(position + "", entry.getValue());
                     
                     position = position + 1;
                 }

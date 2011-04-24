@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -11,7 +11,7 @@ import com.scooterframework.orm.sqldataexpress.object.RowData;
 
 /**
  * ReferenceDataRecord class
- * 
+ *
  * @author (Fei) John Chen
  *
  */
@@ -21,7 +21,7 @@ public class ReferenceDataRecord implements ReferenceData {
 	 * Generated serialVersionUID
 	 */
 	private static final long serialVersionUID = 1538141352929735938L;
-	
+
 	public ReferenceDataRecord(String entity, String keyFieldName, String valueFieldName, ActiveRecord record) {
         if (record == null) throw new IllegalArgumentException("record input cannot be null.");
         this.keyFieldName = keyFieldName;
@@ -39,10 +39,10 @@ public class ReferenceDataRecord implements ReferenceData {
         valueFieldData = row.getField(valueFieldName);
         this.row = row;
     }
-    
+
     /**
      * Returns data for a field
-     * 
+     *
      * @param fieldName field name
      * @return Object data for the field
      */
@@ -56,19 +56,19 @@ public class ReferenceDataRecord implements ReferenceData {
         }
         return data;
     }
-    
+
     /**
      * Returns key field name
-     * 
+     *
      * @return String key field name
      */
     public String getKeyName() {
         return keyFieldName;
     }
-    
+
     /**
      * Returns key field data
-     * 
+     *
      * @return Object key field data
      */
     public Object getKeyData() {
@@ -77,7 +77,7 @@ public class ReferenceDataRecord implements ReferenceData {
 
     /**
      * Returns value field name
-     * 
+     *
      * @return String value field name
      */
     public String getValueName() {
@@ -86,16 +86,16 @@ public class ReferenceDataRecord implements ReferenceData {
 
     /**
      * Returns value field data
-     * 
+     *
      * @return Object value field data
      */
     public Object getValueData() {
         return valueFieldData;
     }
-    
+
     public String toString() {
         String separator = "; ";
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("keyFieldName: " + keyFieldName).append(separator);
         sb.append("keyFieldData: " + keyFieldData).append(separator);
         sb.append("valueFieldName: " + valueFieldName).append(separator);
@@ -104,7 +104,7 @@ public class ReferenceDataRecord implements ReferenceData {
         if (row != null) sb.append("row: " + row);
         return sb.toString();
     }
-    
+
     private String keyFieldName = "";
     private Object keyFieldData = null;
     private String valueFieldName = "";

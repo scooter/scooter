@@ -25,9 +25,9 @@ import com.scooterframework.orm.sqldataexpress.processor.DataProcessorTypes;
 public class SqlServiceClient {
     
     /**
-     * Retrieves TableData from database based on the sql input.
+     * Retrieves TableData from database based on the SQL input.
      * 
-     * @param sql a valid sql statement string
+     * @param sql a valid SQL statement string
      * @return a TableData instance returned from the database.
      */
     public static TableData retrieveTableDataBySQL(String sql) {
@@ -35,13 +35,13 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves TableData from database based on the sql input.
+     * Retrieves TableData from database based on the SQL input.
      * 
-     * @param sql a valid sql statement string
+     * @param sql a valid SQL statement string
      * @param inputs a map of name and value pairs
      * @return a TableData instance returned from the database.
      */
-    public static TableData retrieveTableDataBySQL(String sql, Map inputs) {
+    public static TableData retrieveTableDataBySQL(String sql, Map<String, Object> inputs) {
         TableData td = null;
         
         try {
@@ -60,10 +60,10 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves TableData from database based on the sql query related to 
-     * the sql key.
+     * Retrieves TableData from database based on the SQL query related to 
+     * the SQL key.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @return a TableData instance returned from the database.
      */
     public static TableData retrieveTableDataBySQLKey(String sqlKey) {
@@ -71,14 +71,14 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves TableData from database based on the sql query related to 
-     * the sql key.
+     * Retrieves TableData from database based on the SQL query related to 
+     * the SQL key.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @param inputs a map of name and value pairs
      * @return a TableData instance returned from the database.
      */
-    public static TableData retrieveTableDataBySQLKey(String sqlKey, Map inputs) {
+    public static TableData retrieveTableDataBySQLKey(String sqlKey, Map<String, Object> inputs) {
         TableData td = null;
         
         try {
@@ -97,48 +97,48 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves RowData list from database based on the sql query related to 
-     * the sql key.
+     * Retrieves RowData list from database based on the SQL query related to 
+     * the SQL key.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @return a list of RowData objects returned from the database.
      */
-    public static List retrieveRowsBySQLKey(String sqlKey) {
+    public static List<RowData> retrieveRowsBySQLKey(String sqlKey) {
         return retrieveRowsBySQLKey(sqlKey, null);
     }
     
     /**
-     * Retrieves RowData list from database based on the sql query related to 
-     * the sql key.
+     * Retrieves RowData list from database based on the SQL query related to 
+     * the SQL key.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @param inputs    a map of name and value pairs
      * @return a lList of RowData objects returned from the database.
      */
-    public static List retrieveRowsBySQLKey(String sqlKey, Map inputs) {
+    public static List<RowData> retrieveRowsBySQLKey(String sqlKey, Map<String, Object> inputs) {
         TableData td = retrieveTableDataBySQLKey(sqlKey, inputs);
         if (td != null) return td.getAllRows();
         return null;
     }
     
     /**
-     * Retrieves RowData list from database based on the sql input.
+     * Retrieves RowData list from database based on the SQL input.
      * 
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @return a list of RowData objects returned from the database.
      */
-    public static List retrieveRowsBySQL(String sql) {
+    public static List<RowData> retrieveRowsBySQL(String sql) {
         return retrieveRowsBySQL(sql, null);
     }
     
     /**
-     * Retrieves RowData list from database based on the sql input.
+     * Retrieves RowData list from database based on the SQL input.
      * 
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @param inputs    a map of name and value pairs
      * @return a list of RowData objects returned from the database.
      */
-    public static List retrieveRowsBySQL(String sql, Map inputs) {
+    public static List<RowData> retrieveRowsBySQL(String sql, Map<String, Object> inputs) {
         TableData td = retrieveTableDataBySQL(sql, inputs);
         if (td != null) return td.getAllRows();
         return null;
@@ -147,10 +147,10 @@ public class SqlServiceClient {
     
     
     /**
-     * Retrieves one RowData from database based on the sql query related to 
-     * the sql key. The first row of the query result is returned.
+     * Retrieves one RowData from database based on the SQL query related to 
+     * the SQL key. The first row of the query result is returned.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @return a RowData object returned from the database.
      */
     public static RowData retrieveOneRowsBySQLKey(String sqlKey) {
@@ -158,24 +158,24 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves one RowData from database based on the sql query related to 
-     * the sql key. The first row of the query result is returned.
+     * Retrieves one RowData from database based on the SQL query related to 
+     * the SQL key. The first row of the query result is returned.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @param inputs    a map of name and value pairs
      * @return a RowData object returned from the database.
      */
-    public static RowData retrieveOneRowBySQLKey(String sqlKey, Map inputs) {
+    public static RowData retrieveOneRowBySQLKey(String sqlKey, Map<String, Object> inputs) {
         TableData td = retrieveTableDataBySQLKey(sqlKey, inputs);
         if (td != null) return td.getFirstRow();
         return null;
     }
     
     /**
-     * Retrieves one RowData from database based on the sql input. 
+     * Retrieves one RowData from database based on the SQL input. 
      * The first row of the query result is returned.
      * 
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @return a RowData object returned from the database.
      */
     public static RowData retrieveOneRowBySQL(String sql) {
@@ -183,14 +183,14 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves one RowData from database based on the sql input. 
+     * Retrieves one RowData from database based on the SQL input. 
      * The first row of the query result is returned.
      * 
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @param inputs    a map of name and value pairs
      * @return a RowData object returned from the database.
      */
-    public static RowData retrieveOneRowBySQL(String sql, Map inputs) {
+    public static RowData retrieveOneRowBySQL(String sql, Map<String, Object> inputs) {
         TableData td = retrieveTableDataBySQL(sql, inputs);
         if (td != null) return td.getFirstRow();
         return null;
@@ -198,10 +198,10 @@ public class SqlServiceClient {
     
     
     /**
-     * Retrieves one object from database based on the sql input. The object 
+     * Retrieves one object from database based on the SQL input. The object 
      * of the first column of the first row is returned.
      * 
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @return an Object value returned from the database.
      */
     public static Object retrieveObjectBySQL(String sql) {
@@ -209,14 +209,14 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves one object from database based on the sql input. The object 
+     * Retrieves one object from database based on the SQL input. The object 
      * of the first column of the first row is returned.
      * 
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @param inputs    a map of name and value pairs
      * @return an Object value returned from the database.
      */
-    public static Object retrieveObjectBySQL(String sql, Map inputs) {
+    public static Object retrieveObjectBySQL(String sql, Map<String, Object> inputs) {
         Object returnObj = null;
         
         try {
@@ -232,10 +232,10 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves an object from database based on the sql query related to 
-     * the sql key. The object of the first column of the first row is returned.
+     * Retrieves an object from database based on the SQL query related to 
+     * the SQL key. The object of the first column of the first row is returned.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @return an Object value returned from the database.
      */
     public static Object retrieveObjectBySQLKey(String sqlKey) {
@@ -243,14 +243,14 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves an object from database based on the sql query related to 
+     * Retrieves an object from database based on the SQL query related to 
      * the sql key. The object of the first column of the first row is returned.
      * 
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @param inputs    a map of name and value pairs
      * @return an Object value returned from the database.
      */
-    public static Object retrieveObjectBySQLKey(String sqlKey, Map inputs) {
+    public static Object retrieveObjectBySQLKey(String sqlKey, Map<String, Object> inputs) {
         Object returnObj = null;
         
         try {
@@ -267,23 +267,23 @@ public class SqlServiceClient {
     }
     
     /**
-     * Executes a non-select sql statement and returns count of updated rows.
+     * Executes a non-select SQL statement and returns count of updated rows.
      * 
-     * @param sql       a sql statement
-     * @return int updated row count
+     * @param sql       a SQL statement
+     * @return updated row count
      */
     public static int executeSQL(String sql) {
         return executeSQL(sql, null);
     }
     
     /**
-     * Executes a non-select sql statement and returns count of updated rows.
+     * Executes a non-select SQL statement and returns count of updated rows.
      *
-     * @param sql       a sql statement
+     * @param sql       a SQL statement
      * @param inputs    a map of name and value pairs
-     * @return int updated row count
+     * @return updated row count
      */
-    public static int executeSQL(String sql, Map inputs) {
+    public static int executeSQL(String sql, Map<String, Object> inputs) {
         int rowCount = -1;
         
         try {
@@ -299,25 +299,25 @@ public class SqlServiceClient {
     }
     
     /**
-     * Retrieves an object from database based on the sql query related to 
-     * the sql key. 
+     * Retrieves an object from database based on the SQL query related to 
+     * the SQL key. 
      * 
-     * @param sqlKey    key to a sql statement
-     * @return int updated row count
+     * @param sqlKey    key to a SQL statement
+     * @return updated row count
      */
     public static int executeSQLByKey(String sqlKey) {
         return executeSQLByKey(sqlKey, null);
     }
     
     /**
-     * Executes a non-select sql statement corresponding to a name key and 
+     * Executes a non-select SQL statement corresponding to a name key and 
      * returns count of updated rows. 
      *
-     * @param sqlKey    key to a sql statement
+     * @param sqlKey    key to a SQL statement
      * @param inputs    a map of name and value pairs
-     * @return int updated row count
+     * @return updated row count
      */
-    public static int executeSQLByKey(String sqlKey, Map inputs) {
+    public static int executeSQLByKey(String sqlKey, Map<String, Object> inputs) {
         int rowCount = -1;
         
         try {

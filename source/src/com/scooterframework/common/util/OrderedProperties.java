@@ -41,13 +41,21 @@ public class OrderedProperties extends Properties {
 	/**
 	 * Holder of keys.
 	 */
-	protected List keys;
+	protected List<Object> keys;
 
     /**
      * Creates an empty property list with no default values.
      */
     public OrderedProperties() {
     	this(null);
+    }
+    
+    public int hashCode() {
+    	return super.hashCode();
+    }
+    
+    public boolean equals(Object obj) {
+    	return super.equals(obj);
     }
 
     /**
@@ -57,9 +65,9 @@ public class OrderedProperties extends Properties {
      */
     public OrderedProperties(Properties defaults) {
     	super(defaults);
-    	keys = new ArrayList();
+    	keys = new ArrayList<Object>();
     	if (defaults != null) {
-    		Iterator it = defaults.keySet().iterator();
+    		Iterator<Object> it = defaults.keySet().iterator();
     		while(it.hasNext()) {
     			keys.add(it.next());
     		}
@@ -71,8 +79,8 @@ public class OrderedProperties extends Properties {
      * 
      * @return an enumeration of keys.
      */
-    public Enumeration keys() {
-    	Vector v = new Vector(keys);
+    public Enumeration<Object> keys() {
+    	Vector<Object> v = new Vector<Object>(keys);
     	return v.elements();
     }
     
@@ -81,7 +89,7 @@ public class OrderedProperties extends Properties {
      * 
      * @return an iterator of keys.
      */
-    public Iterator keyIterator() {
+    public Iterator<Object> keyIterator() {
     	return keys.iterator();
     }
     
@@ -90,7 +98,7 @@ public class OrderedProperties extends Properties {
      * 
      * @return a list of keys.
      */
-    public List keyList() {
+    public List<Object> keyList() {
     	return keys;
     }
     
@@ -220,10 +228,10 @@ public class OrderedProperties extends Properties {
         	bw.write("#" + header);
         	bw.newLine();
         }
-        for (Enumeration e = keys(); e.hasMoreElements();) {
-            String key = (String)e.nextElement();
-            String val = (String)get(key);
-            bw.write(key + "=" + storeConvert(val));
+        for (Enumeration<Object> e = keys(); e.hasMoreElements();) {
+            Object key = e.nextElement();
+            Object val = get(key);
+            bw.write(key + "=" + ((val != null)?storeConvert(val.toString()):null));
         	bw.newLine();
         }
         bw.flush();
@@ -237,7 +245,7 @@ public class OrderedProperties extends Properties {
      *
      * @return  an enumeration of all the keys in this property list.
      */
-    public Enumeration propertyNames() {
+    public Enumeration<Object> propertyNames() {
     	return keys();
     }
 
@@ -285,14 +293,14 @@ public class OrderedProperties extends Properties {
     
     private String loadConvert(String s) {
     	if (s != null) {
-    		s = StringUtil.replace(s.toString(), "\\\\", "\\");
+    		s = StringUtil.replace(s, "\\\\", "\\");
     	}
     	return s;
     }
     
     private String storeConvert(String s) {
     	if (s != null) {
-    		s = StringUtil.replace(s.toString(), "\\", "\\\\");
+    		s = StringUtil.replace(s, "\\", "\\\\");
     	}
     	return s;
     }
@@ -304,6 +312,4 @@ public class OrderedProperties extends Properties {
     	keys.clear();
     	super.clear();
     }
-    
-    
 }

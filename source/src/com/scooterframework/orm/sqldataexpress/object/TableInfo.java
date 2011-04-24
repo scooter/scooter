@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * TabelInfo class holds configure information about a specific table or view.
- * 
+ *
  * @author (Fei) John Chen
  */
 public class TableInfo implements Serializable{
@@ -19,7 +19,7 @@ public class TableInfo implements Serializable{
 	 * Generated serialVersionUID
 	 */
 	private static final long serialVersionUID = 2483266866559566937L;
-	
+
 	public TableInfo() {
     }
 
@@ -29,7 +29,7 @@ public class TableInfo implements Serializable{
     public String getName() {
         return name;
     }
-    
+
     /**
      * Sets table name
      */
@@ -37,14 +37,14 @@ public class TableInfo implements Serializable{
     	if (isEmpty(name)) return;
         this.name = name;
     }
-    
+
     /**
      * Returns catalog
      */
     public String getCatalog() {
         return catalog;
     }
-    
+
     /**
      * Sets catalog
      */
@@ -52,14 +52,14 @@ public class TableInfo implements Serializable{
         if (isEmpty(catalog)) return;
         this.catalog = catalog;
     }
-    
+
     /**
      * Returns schema
      */
     public String getSchema() {
         return schema;
     }
-    
+
     /**
      * Sets schema
      */
@@ -67,28 +67,28 @@ public class TableInfo implements Serializable{
         if (isEmpty(schema)) return;
         this.schema = schema;
     }
-    
+
     /**
      * Returns table type
      */
     public String getType() {
         return type;
     }
-    
+
     /**
      * Sets table type
      */
     public void setType(String type) {
         this.type = type;
     }
-    
+
     /**
      * Returns table remarks
      */
     public String getRemarks() {
         return remarks;
     }
-    
+
     /**
      * Sets table remarks
      */
@@ -96,21 +96,21 @@ public class TableInfo implements Serializable{
         if (remarks == null) return;
         this.remarks = remarks;
     }
-    
+
     /**
      * Returns RowInfo as table header
      */
     public RowInfo getHeader() {
         return header;
     }
-    
+
     /**
      * Sets RowInfo
      */
     public void setHeader(RowInfo header) {
         if (header != null) this.header = header;
     }
-    
+
     /**
      * Returns table width
      */
@@ -119,13 +119,24 @@ public class TableInfo implements Serializable{
     }
     
     /**
+     * Returns supported types.
+     */
+    public static String[] getSupportedTypes() {
+    	String[] s = new String[SUPPORTED_TYPES.length];
+    	for (int i = 0; i < SUPPORTED_TYPES.length; i++) {
+    		s[i] = SUPPORTED_TYPES[i];
+    	}
+    	return s;
+    }
+
+    /**
      * Returns a string representation of the object.
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         String LINE_BREAK = "\r\n";
-        
+
         returnString.append("Table name = " + name);
         returnString.append(LINE_BREAK);
         returnString.append("catalog = " + catalog);
@@ -136,15 +147,15 @@ public class TableInfo implements Serializable{
         returnString.append(LINE_BREAK);
         returnString.append("remarks = " + remarks);
         returnString.append(LINE_BREAK);
-        
+
         if (header != null) {
             returnString.append(header.toString());
             returnString.append(LINE_BREAK);
         }
-        
+
         return returnString.toString();
     }
-    
+
     private static boolean isEmpty(String s) {
     	return (s == null || "".equals(s))?true:false;
     }
@@ -152,7 +163,7 @@ public class TableInfo implements Serializable{
     public static final String TYPE_SYNONYM = "SYNONYM";
     public static final String TYPE_TABLE = "TABLE";
     public static final String TYPE_VIEW = "VIEW";
-    public static final String[] SUPPORTED_TYPES = {TYPE_TABLE, TYPE_VIEW};
+    private static final String[] SUPPORTED_TYPES = {TYPE_TABLE, TYPE_VIEW};
 
     protected String schema = "";
     protected String catalog = "";

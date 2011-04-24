@@ -25,7 +25,7 @@ public interface TemplateHandler {
 	 * @param dataMap  data (name/value pairs) to be used to process the content
 	 * @return processed content as string
      */
-    public String handle(String content, Map dataMap);
+    public String handle(String content, Map<String, Object> dataMap);
     
     /**
      * Handles processing the <tt>viewTemplate</tt> with <tt>dataMap</tt>.
@@ -34,5 +34,5 @@ public interface TemplateHandler {
      * @param dataMap
      * @return processed content as string
      */
-    public String handle(File viewTemplate, Map dataMap);
+    public String handle(File viewTemplate, Map<String, Object> dataMap);
 }

@@ -28,7 +28,7 @@ public class PetsController extends ApplicationController {
 	}
 
 	public void loadOwner() {
-		setViewData("owner", Owner.findFirst("id=" + p("owner_id")));
+		setViewData("owner", Owner.where("id=" + p("owner_id")));
 	}
 
 	public void loadTypes() {
@@ -53,7 +53,7 @@ public class PetsController extends ApplicationController {
      * <tt>show</tt> method returns a <tt>pet</tt> record.
      */
     public String show() {
-        ActiveRecord pet = Pet.findFirst("id=" + p("id"), "include:owner");
+        ActiveRecord pet = Pet.where("id=" + p("id")).includes("owner").getRecord();
         if (pet == null) {
             flash("notice", "There is no pet record with primary key as " + p("id"));
         }
@@ -107,7 +107,7 @@ public class PetsController extends ApplicationController {
     public String update() {
         ActiveRecord pet = null;
         try {
-            pet = Pet.findFirst("id=" + p("id"), "include:owner");
+            pet = Pet.where("id=" + p("id")).includes("owner").getRecord();
             if (pet != null) {
                 pet.setData(params());
                 pet.update();

@@ -9,7 +9,6 @@ package com.scooterframework.orm.activerecord.tag;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -31,15 +30,16 @@ public class TagHelper {
      * 
      * @return a set of tag names
      */
-    public static Set allTags() {
-        List tags = ActiveRecordUtil.getGateway(Tag.class).findAll();
+    public static Set<String> allTags() {
+        List<ActiveRecord> tags = ActiveRecordUtil.getGateway(Tag.class).findAll();
         if (tags == null) return null;
         
-        Set tagSet = new HashSet();
-        Iterator it = tags.iterator();
-        while(it.hasNext()) {
-            ActiveRecord tag = (ActiveRecord)it.next();
-            tagSet.add(tag.getField("name"));
+        Set<String> tagSet = new HashSet<String>();
+        for (ActiveRecord tag : tags) {
+        	Object tg = tag.getField("name");
+        	if (tg != null) {
+                tagSet.add(tg.toString());
+        	}
         }
         return tagSet;
     }
@@ -54,15 +54,13 @@ public class TagHelper {
         if (tags == null || "".equals(tags)) return;
         tags = tags.toLowerCase();
         
-        List tagList = Converters.convertStringToList(tags);
+        List<String> tagList = Converters.convertStringToList(tags);
         if (tagList == null) return;
         
         //get all current tags of the record
-        Set currentTags = allTags();
+        Set<String> currentTags = allTags();
         
-        Iterator it = tagList.iterator();
-        while(it.hasNext()) {
-            String tagName = (String)it.next();
+        for (String tagName : tagList) {
             if (currentTags != null && currentTags.contains(tagName)) continue;
             currentTags.add(tagName);
             
@@ -79,7 +77,7 @@ public class TagHelper {
      * 
      * @param targets specific types that act as taggable.
      */
-    public static void registerTaggables(Class[] targets) {
+    public static void registerTaggables(Class<? extends ActiveRecord>[] targets) {
         AssociationHelper.hasManyInCategoryThrough(Tag.class, targets, "taggable", Tagging.class);
     }
     
@@ -89,15 +87,16 @@ public class TagHelper {
      * @param record
      * @return a set of tag names
      */
-    public static Set allTags(ActiveRecord record) {
-        List tags = record.allAssociated(Tag.class).getRecords();
+    public static Set<String> allTags(ActiveRecord record) {
+        List<ActiveRecord> tags = record.allAssociated(Tag.class).getRecords();
         if (tags == null) return null;
         
-        Set tagSet = new HashSet();
-        Iterator it = tags.iterator();
-        while(it.hasNext()) {
-            ActiveRecord tag = (ActiveRecord)it.next();
-            tagSet.add(tag.getField("name"));
+        Set<String> tagSet = new HashSet<String>();
+        for (ActiveRecord tag : tags) {
+        	Object tg = tag.getField("name");
+        	if (tg != null) {
+                tagSet.add(tg.toString());
+        	}
         }
         return tagSet;
     }
@@ -109,7 +108,7 @@ public class TagHelper {
      * @return number of tags associated with the record
      */
     public static int tagsCount(ActiveRecord record) {
-        List tags = record.allAssociated(Tag.class).getRecords();
+        List<ActiveRecord> tags = record.allAssociated(Tag.class).getRecords();
         return (tags != null)?tags.size():0;
     }
     
@@ -136,17 +135,16 @@ public class TagHelper {
         if (tags == null || "".equals(tags)) return null;
         tags = tags.toLowerCase();
         
-        List tagList = Converters.convertStringToList(tags);
+        List<String> tagList = Converters.convertStringToList(tags);
         if (tagList == null) return null;
         
         //get all current tags of the record
-        Set currentTags = allTags(record);
+        Set<String> currentTags = allTags(record);
+        if (currentTags == null) currentTags = new HashSet<String>();
 
-        List tagRecords = new ArrayList();
-        Iterator it = tagList.iterator();
-        while(it.hasNext()) {
-            String tagName = (String)it.next();
-            if (currentTags != null && currentTags.contains(tagName)) continue;
+        List<ActiveRecord> tagRecords = new ArrayList<ActiveRecord>();
+        for (String tagName : tagList) {
+            if (currentTags.contains(tagName)) continue;
             currentTags.add(tagName);
             
             ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
@@ -168,17 +166,15 @@ public class TagHelper {
      * @param tags the tags string
      * @return list of tag records
      */
-    public static List findTagRecords(String tags) {
+    public static List<ActiveRecord> findTagRecords(String tags) {
         if (tags == null || "".equals(tags)) return null;
         tags = tags.toLowerCase();
         
-        List tagList = Converters.convertStringToList(tags);
+        List<String> tagList = Converters.convertStringToList(tags);
         if (tagList == null) return null;
 
-        List tagRecords = new ArrayList();
-        Iterator it = tagList.iterator();
-        while(it.hasNext()) {
-            String tagName = (String)it.next();
+        List<ActiveRecord> tagRecords = new ArrayList<ActiveRecord>();
+        for (String tagName : tagList) {
             ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag != null) {
                 tagRecords.add(atag);
@@ -195,17 +191,15 @@ public class TagHelper {
      * @param tags the tags string
      * @return list of tag records
      */
-    public static List findOrCreateTagRecords(String tags) {
+    public static List<ActiveRecord> findOrCreateTagRecords(String tags) {
         if (tags == null || "".equals(tags)) return null;
         tags = tags.toLowerCase();
         
-        List tagList = Converters.convertStringToList(tags);
+        List<String> tagList = Converters.convertStringToList(tags);
         if (tagList == null) return null;
 
-        List tagRecords = new ArrayList();
-        Iterator it = tagList.iterator();
-        while(it.hasNext()) {
-            String tagName = (String)it.next();
+        List<ActiveRecord> tagRecords = new ArrayList<ActiveRecord>();
+        for (String tagName : tagList) {
             ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag == null) {
                 atag = new Tag();
@@ -224,15 +218,13 @@ public class TagHelper {
      * @param tags the tags condition
      * @return records tagged with the tags.
      */
-    public static List findRecordsTaggedWith(String tags) {
-        List tagRecords = findTagRecords(tags);
+    public static List<ActiveRecord> findRecordsTaggedWith(String tags) {
+        List<ActiveRecord> tagRecords = findTagRecords(tags);
         if (tagRecords == null) return null;
         
-        List records = new ArrayList();
-        Iterator it = tagRecords.iterator();
-        while(it.hasNext()) {
-            Tag tag = (Tag)it.next();
-            List list = tag.allAssociatedInCategory("taggable").getRecords();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
+        for (ActiveRecord tag : tagRecords) {
+            List<ActiveRecord> list = tag.allAssociatedInCategory("taggable").getRecords();
             if (list != null) records.addAll(list);
         }
         
@@ -246,15 +238,13 @@ public class TagHelper {
      * @param tags the tags condition
      * @return records tagged with the tags.
      */
-    public static List findRecordsTaggedWith(String type, String tags) {
-        List tagRecords = findTagRecords(tags);
+    public static List<ActiveRecord> findRecordsTaggedWith(String type, String tags) {
+        List<ActiveRecord> tagRecords = findTagRecords(tags);
         if (tagRecords == null) return null;
         
-        List records = new ArrayList();
-        Iterator it = tagRecords.iterator();
-        while(it.hasNext()) {
-            Tag tag = (Tag)it.next();
-            List list = tag.allAssociatedInCategory("taggable", type).getRecords();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
+        for (ActiveRecord tag : tagRecords) {
+            List<ActiveRecord> list = tag.allAssociatedInCategory("taggable", type).getRecords();
             if (list != null) records.addAll(list);
         }
         
@@ -270,12 +260,10 @@ public class TagHelper {
         if (tags == null || "".equals(tags)) return;
         tags = tags.toLowerCase();
         
-        List tagList = Converters.convertStringToList(tags);
+        List<String> tagList = Converters.convertStringToList(tags);
         if (tagList == null) return;
         
-        Iterator it = tagList.iterator();
-        while(it.hasNext()) {
-            String tagName = (String)it.next();
+        for (String tagName : tagList) {
             ActiveRecord atag = ActiveRecordUtil.getGateway(Tag.class).findFirst("name='" + tagName + "'");
             if (atag != null) {
                 atag.delete();
@@ -292,15 +280,13 @@ public class TagHelper {
         if (tags == null || "".equals(tags)) return;
         tags = tags.toLowerCase();
         
-        List tagNames = Converters.convertStringToList(tags);
+        List<String> tagNames = Converters.convertStringToList(tags);
         if (tagNames == null) return;
         
-        List tagRecords = record.allAssociated(Tag.class).getRecords();
+        List<ActiveRecord> tagRecords = record.allAssociated(Tag.class).getRecords();
         if (tagRecords == null) return;
         
-        Iterator it = tagRecords.iterator();
-        while(it.hasNext()) {
-            ActiveRecord tag = (ActiveRecord)it.next();
+        for (ActiveRecord tag : tagRecords) {
             String tagName = (String)tag.getField("name");
             if (tagNames.contains(tagName)) tag.delete();
         }

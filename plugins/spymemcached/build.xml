@@ -10,7 +10,7 @@
     <property name="jar.outdir"             value="."/>
     <property name="lib.dir"                value="lib"/>
     <property name="scooterlib.dir"         value="../../lib"/>
-	<property name="jar.name"               value="plugin-scooter-spymemcached.jar"/>
+    <property name="jar.name"               value="plugin-scooter-spymemcached.jar"/>
 
     <!--Set the classpath-->
     <path id="classpath">
@@ -78,7 +78,7 @@
     <target name="clean">
         <delete dir="${compile.outdir}"/>
         <delete dir="${build.outdir}"/>
-        <delete file="${jar.name}"/>
+        <delete file="${jar.outdir}/${jar.name}"/>
     </target>
 
 </project>

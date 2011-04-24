@@ -164,9 +164,12 @@ public class FilesController {
 
 			try {
 				List<String> contentLines = FileUtil.readContent(requestFile);
-				for (String line : contentLines) {
+				int i = 0;
+				for (; i < contentLines.size() - 1; i++) {
+					String line = contentLines.get(i);
 					sb.append(line).append(lineBreak);
 				}
+				sb.append(contentLines.get(i));
 			} catch (Exception ex) {
 				log.error("Failed to read file " + path);
 				flash("error", "Failed to read file " + path);

@@ -17,7 +17,6 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -152,8 +151,8 @@ public class Util {
      * @param defaultValue default value if a search returns no match.
      * @return result of decode
      */
-    public static Object decode(int expression, Map searchResults, Object defaultValue) {
-        return decode(new Integer(expression), searchResults, defaultValue);
+    public static Object decode(int expression, Map<String, Object> searchResults, Object defaultValue) {
+        return decode(Integer.valueOf(expression), searchResults, defaultValue);
     }
     
     /**
@@ -178,8 +177,8 @@ public class Util {
      * @param defaultValue default value if a search returns no match.
      * @return result of decode
      */
-    public static Object decode(long expression, Map searchResults, Object defaultValue) {
-        return decode(new Long(expression), searchResults, defaultValue);
+    public static Object decode(long expression, Map<String, Object> searchResults, Object defaultValue) {
+        return decode(Long.valueOf(expression), searchResults, defaultValue);
     }
     
     /**
@@ -214,12 +213,12 @@ public class Util {
      * See description in <tt>decode(Object expression, Map searchResults, Object defaultValue)</tt>
      * 
      * @param expression the value to compare.
-     * @param searchResults a string of search and result pair. 
+     * @param searchResults a map of search and result pair. 
      * @param defaultValue default value if a search returns no match.
      * @return result of decode
      */
     
-    public static Object decode(Object expression, Map searchResults, Object defaultValue) {
+    public static Object decode(Object expression, Map<String, ?> searchResults, Object defaultValue) {
         return decode(expression, searchResults, defaultValue, false);
     }
     
@@ -255,15 +254,14 @@ public class Util {
      * @param ignoreKeyCase true if cases of keys in searchResults are ignored.
      * @return result of decode
      */
-    public static Object decode(Object expression, Map searchResults, Object defaultValue, boolean ignoreKeyCase) {
+    public static Object decode(Object expression, Map<String, ?> searchResults, Object defaultValue, boolean ignoreKeyCase) {
         if (expression == null || searchResults == null) return defaultValue;
         
         Object value = null;
         String expr = expression.toString();
-        Iterator it = searchResults.keySet().iterator();
-        while(it.hasNext()) {
-            Object key = it.next();
-            if (expr.equals(key.toString()) || (ignoreKeyCase && expr.equalsIgnoreCase(key.toString()))) {
+        for (Map.Entry<String, ?> entry : searchResults.entrySet()) {
+        	String key = entry.getKey();
+            if (expr.equals(key) || (ignoreKeyCase && expr.equalsIgnoreCase(key))) {
                 value = searchResults.get(key);
                 break;
             }
@@ -381,6 +379,19 @@ public class Util {
     }
     
     /**
+     * <tt>ifTrue</tt> method lets you choose a value when a <tt>true</tt> 
+     * value is encountered as well as when a <tt>false</tt> value is encountered.
+     * 
+     * @param state          the state to test
+     * @param valueForTrue   value when state is true
+     * @param valueForFalse  value when state is false
+     * @return valueForTrue if state is true, otherwise valueForFalse.
+     */
+    public static Object ifTrue(boolean state, Object valueForTrue, Object valueForFalse) {
+        return (state)?valueForTrue:valueForFalse;
+    }
+    
+    /**
      * <tt>ifEmpty</tt> method lets you substitute a value when an empty 
      * value is encountered. An empty object is either null or an 
      * empty string.
@@ -482,7 +493,7 @@ public class Util {
      * 
      * @return String
      */
-    public static String getShortClassName(Class c) {
+    public static String getShortClassName(Class<?> c) {
         if (c == null) return "";
         
         String className = c.getName();
@@ -500,7 +511,7 @@ public class Util {
      * 
      * @return String
      */
-    public static String getShortClassNameInLowerCase(Class c) {
+    public static String getShortClassNameInLowerCase(Class<?> c) {
         return getShortClassName(c).toLowerCase();
     }
     
@@ -509,7 +520,7 @@ public class Util {
      * 
      * @return String
      */
-    public static String getFullClassName(Class c) {
+    public static String getFullClassName(Class<?> c) {
         if (c == null) return "";
         
         return c.getName();
@@ -616,7 +627,7 @@ public class Util {
      * @return a Float object converted from the input
      */
     public static Float getSafeFloat(BigDecimal input) {
-        return (input != null)?(new Float(input.floatValue())):null;
+        return (input != null)?Float.valueOf(input.floatValue()):null;
     }
 
     /**
@@ -626,7 +637,7 @@ public class Util {
      * @return a Double object converted from the input
      */
     public static Double getSafeDouble(BigDecimal input) {
-        return (input != null)?(new Double(input.doubleValue())):null;
+        return (input != null)?Double.valueOf(input.doubleValue()):null;
     }
 
     /**
@@ -636,7 +647,7 @@ public class Util {
      * @return an Integer object converted from the input
      */
     public static Integer getSafeInteger(BigDecimal input) {
-        return (input != null)?(new Integer(input.intValue())):null;
+        return (input != null)?Integer.valueOf(input.intValue()):null;
     }
 
     /**
@@ -646,7 +657,7 @@ public class Util {
      * @return a Long object converted from the input
      */
     public static Long getSafeLong(BigDecimal input) {
-        return (input != null)?(new Long(input.longValue())):null;
+        return (input != null)?Long.valueOf(input.longValue()):null;
     }
     
     /**
@@ -660,7 +671,7 @@ public class Util {
         
         if (input != null && !isEmpty(input)) {
             try {
-                f = new Float(input.toString());
+                f = Float.valueOf(input.toString());
             }
             catch(NumberFormatException ex) {
             }
@@ -680,7 +691,7 @@ public class Util {
         
         if (input != null && !isEmpty(input)) {
             try {
-                d = new Double(input.toString());
+                d = Double.valueOf(input.toString());
             }
             catch(NumberFormatException ex) {
             }
@@ -700,7 +711,7 @@ public class Util {
         
         if (input != null && !isEmpty(input)) {
             try {
-                i = new Integer(input.toString());
+                i = Integer.valueOf(input.toString());
             }
             catch(NumberFormatException ex) {
             }
@@ -720,7 +731,7 @@ public class Util {
         
         if (input != null && !isEmpty(input)) {
             try {
-                l = new Long(input.toString());
+                l = Long.valueOf(input.toString());
             }
             catch(NumberFormatException ex) {
             }
@@ -741,7 +752,7 @@ public class Util {
         
         if (sValue != null && !sValue.equals("")) {
             try {
-                c = new Character(sValue.charAt(0));
+                c = Character.valueOf(sValue.charAt(0));
             }
             catch(NumberFormatException ex) {
             }
@@ -859,20 +870,28 @@ public class Util {
         return formatter.parse(dateString, pos);
     }
     
-    public static boolean getBooleanValue(Map inputs, String key, boolean defaultValue) {
-        boolean value = defaultValue;
-        String sValue = (String)inputs.get(key);
-        if (sValue != null && 
-            ("TRUE".equalsIgnoreCase(sValue) || 
-             "T".equalsIgnoreCase(sValue) || 
-             "Y".equalsIgnoreCase(sValue) || 
-             "YES".equalsIgnoreCase(sValue)
-           )
-       ) value = true;
-        return value;
+	public static boolean getBooleanValue(Map<String, ?> inputs, String key,
+			boolean defaultValue) {
+		if (inputs == null) return defaultValue;
+		
+		boolean value = defaultValue;
+		Object sValue = inputs.get(key);
+		if (sValue != null
+				&& ("TRUE".equalsIgnoreCase(sValue.toString())
+						|| "T".equalsIgnoreCase(sValue.toString())
+						|| "Y".equalsIgnoreCase(sValue.toString()) || "YES"
+						.equalsIgnoreCase(sValue.toString())))
+			value = true;
+		return value;
+	}
+    
+    public static boolean getBooleanValueForKey(Map<String, ?> inputs, String key) {
+        return getBooleanValue(inputs, key, false);
     }
     
-    public static int getIntValue(Map inputs, String key, int defaultValue) {
+    public static int getIntValue(Map<String, ?> inputs, String key, int defaultValue) {
+    	if (inputs == null) return defaultValue;
+    	
         int value = defaultValue;
         try {
             Object tmp = inputs.get(key);
@@ -884,11 +903,39 @@ public class Util {
         return value;
     }
     
-    public static String getStringValue(Map inputs, String key, String defaultValue) {
-        String value = defaultValue;
-        String sValue = (String)inputs.get(key);
-        if (sValue != null) value = sValue;
+    public static int getIntValueForKey(Map<String, ?> inputs, String key) {
+        return getIntValue(inputs, key, 0);
+    }
+    
+    public static long getLongValue(Map<String, ?> inputs, String key, long defaultValue) {
+    	if (inputs == null) return defaultValue;
+    	
+    	long value = defaultValue;
+        try {
+            Object tmp = inputs.get(key);
+            if (tmp != null) value = Long.parseLong(tmp.toString());
+        }
+        catch(Exception ex) {
+            value = defaultValue;
+        }
         return value;
+    }
+    
+    public static long getLongValueForKey(Map<String, ?> inputs, String key) {
+        return getLongValue(inputs, key, 0L);
+    }
+    
+    public static String getStringValue(Map<String, ?> inputs, String key, String defaultValue) {
+    	if (inputs == null) return defaultValue;
+    	
+        String value = defaultValue;
+        Object sValue = inputs.get(key);
+        if (sValue != null) value = sValue.toString();
+        return value;
+    }
+    
+    public static String getStringValueForKey(Map<String, ?> inputs, String key) {
+        return getStringValue(inputs, key, (String)null);
     }
     
     /**
@@ -911,5 +958,35 @@ public class Util {
         catch(NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    /**
+     * Creates a copy of string array.
+     * 
+     * @param array an int array
+     * @return a cloned int array
+     */
+    public static int[] cloneArray(int[] array) {
+    	if (array == null) return null;
+    	int[] a = new int[array.length];
+    	for (int i = 0; i < array.length; i++) {
+    		a[i] = array[i];
+    	}
+    	return a;
+    }
+    
+    /**
+     * Creates a copy of string array.
+     * 
+     * @param array a String array
+     * @return a cloned String array
+     */
+    public static String[] cloneArray(String[] array) {
+    	if (array == null) return null;
+    	String[] a = new String[array.length];
+    	for (int i = 0; i < array.length; i++) {
+    		a[i] = array[i];
+    	}
+    	return a;
     }
 }

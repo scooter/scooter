@@ -105,6 +105,13 @@ public abstract class Plugin {
 	}
 
 	/**
+	 * Returns the plugin version
+	 */
+	public String getVersion() {
+		return "0.1.0";
+	}
+
+	/**
 	 * Returns the plugin class name
 	 */
 	public String getPluginClassName() {

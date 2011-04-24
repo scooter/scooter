@@ -52,11 +52,6 @@ public class Constants {
     public static final String ALLOW_CLASSWORK = "scooter.key.allow.classwork";
     
     /**
-     * A hyphen "-" is used to link composite primary key fields.
-     */
-    public static final String PRIMARY_KEY_SEPARATOR = "-";
-    
-    /**
      * Default value when there is no format derived from request uri.
      */
     public static final String DEFAULT_RESPONSE_FORMAT = "html";
@@ -97,7 +92,6 @@ public class Constants {
 //************************************************************************    
 // Global values of the app
 //************************************************************************
-    public static String SCOOTER_VERSION = "";
     
 //************************************************************************    
 // Internal values of the app

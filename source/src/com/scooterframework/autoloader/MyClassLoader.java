@@ -9,7 +9,6 @@ package com.scooterframework.autoloader;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.scooterframework.common.logging.LogUtil;
@@ -28,7 +27,7 @@ public class MyClassLoader extends ClassLoader {
     private String initiatingClassName;
     private ClassWork cwh;
     
-    private Map loadedClasses = Collections.synchronizedMap(new HashMap());
+    private Map<String, LoadedClass> loadedClasses = Collections.synchronizedMap(new HashMap<String, LoadedClass>());
     
     public MyClassLoader(ClassManager caller) {
         this(MyClassLoader.class.getClassLoader(), caller);
@@ -45,15 +44,15 @@ public class MyClassLoader extends ClassLoader {
         return key;
     }
     
-    public synchronized Class loadMyClass(String className) 
+    public synchronized Class<?> loadMyClass(String className) 
     throws ClassNotFoundException {
         initiatingClassName = className;
         return loadClass(className, true);
     }
     
-    protected Class loadClass(String className, boolean resolve) 
+    protected Class<?> loadClass(String className, boolean resolve) 
     throws ClassNotFoundException {
-        Class c = null;
+        Class<?> c = null;
         
         // See if type has already been loaded 
         LoadedClass loadedClass = (LoadedClass)loadedClasses.get(className);
@@ -93,13 +92,12 @@ public class MyClassLoader extends ClassLoader {
         boolean changed = false;
         if (loadedClasses == null || loadedClasses.size() == 0) return changed;
         
-        Iterator it = loadedClasses.keySet().iterator();
-        while(it.hasNext()) {
-            String className = (String)it.next();
+        for (Map.Entry<String, LoadedClass> entry : loadedClasses.entrySet()) {
+            String className = entry.getKey();
             LoadedClass loadedClass = (LoadedClass)loadedClasses.get(className);
             
             SourceFile sourceFile = FileMonitor.getSourceFile(className);
-            if (sourceFile != null && 
+            if (sourceFile != null && loadedClass != null && 
                 loadedClass.loadedTime < sourceFile.getLastSourceModifiedTime()) {
                 changed = true;
                 break;

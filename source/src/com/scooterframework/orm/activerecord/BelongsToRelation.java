@@ -22,17 +22,17 @@ import com.scooterframework.common.util.WordUtil;
  * @author (Fei) John Chen
  */
 public class BelongsToRelation extends Relation {
-    public BelongsToRelation(Class endA, String associationId, String targetModel) {
+    public BelongsToRelation(Class<? extends ActiveRecord> endA, String associationId, String targetModel) {
         super(endA, BELONGS_TO_TYPE, associationId, targetModel);
     }
     
     /**
      * Set the property map.
      */
-    public void setProperties(Map properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
         if (properties != null && properties.containsKey(ActiveRecordConstants.key_counter_cache)) {
-            String counter = (String)properties.get(ActiveRecordConstants.key_counter_cache);
+            String counter = properties.get(ActiveRecordConstants.key_counter_cache);
             if ("true".equalsIgnoreCase(counter)) {
                 counterCacheName = getDefaultCounterCacheName();
                 useCounterCache = true;

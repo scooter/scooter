@@ -23,7 +23,7 @@ public class RouteInfo {
 	String controllerClassName;
     String model;
     String modelClassName;
-	Map requiredFieldValues;
+	Map<String, String> requiredFieldValues;
 	String routeType;
 	RequestInfo requestInfo;
 	String routeName;
@@ -78,7 +78,7 @@ public class RouteInfo {
 		return modelClassName;
 	}
 	
-	public Map getRequiredFieldValues() {
+	public Map<String, String> getRequiredFieldValues() {
 		return requiredFieldValues;
 	}
 	
@@ -103,7 +103,7 @@ public class RouteInfo {
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         String SEPARATOR = ", ";
         
         returnString.append("index = " + index).append(SEPARATOR);

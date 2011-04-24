@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -75,16 +74,16 @@ public class InputInfo implements Serializable {
     }
     
     /**
-     * returns inputs as Map
+     * returns inputs as Map<String, Object>
      */
-    public Map getInputs() {
+    public Map<String, Object> getInputs() {
         return inputs;
     }
     
     /**
-     * sets the inputs Map
+     * sets the inputs Map<String, Object>
      */
-    public void setInputs(Map inputs) {
+    public void setInputs(Map<String, Object> inputs) {
         this.inputs = inputs;
     }
     
@@ -103,18 +102,18 @@ public class InputInfo implements Serializable {
     }
     
     /**
-     * returns outputFilters as Map
+     * returns outputFilters as Map<String, String>
      */
-    public Map getOutputFilters()
+    public Map<String, String> getOutputFilters()
     {
         return outputFilters;
     }
     
     /**
-     * sets the outputFilters Map
+     * sets the outputFilters Map<String, String>
      */
-    public void setOutputFilters(Map outputFilters) {
-        this.inputs = outputFilters;
+    public void setOutputFilters(Map<String, String> outputFilters) {
+        this.outputFilters = outputFilters;
     }
     
     /**
@@ -160,16 +159,16 @@ public class InputInfo implements Serializable {
     }
 
     /**
-     * returns a collection of child InputInfo objects
+     * returns a collection<InputInfo> of child InputInfo objects
      */
-    public Collection getChildInputInfoObjects() {
+    public Collection<InputInfo> getChildInputInfoObjects() {
         return childInputInfoList;
     }
 
     /**
      * sets a collection of child InputInfo objects
      */
-    public void setChildInputInfoObjects(Collection childInputInfoList) {
+    public void setChildInputInfoObjects(Collection<InputInfo> childInputInfoList) {
         this.childInputInfoList = childInputInfoList;
     }
 
@@ -189,9 +188,8 @@ public class InputInfo implements Serializable {
      */
     public String getFKString() {
         String fkNames = "";
-        Iterator it = inputs.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String)it.next();
+        for (Map.Entry<String, Object> entry : inputs.entrySet()) {
+            String key = entry.getKey();
             if (key.startsWith("&")) {
                 String fkName = key.substring(1);
                 fkNames += fkName + ",";
@@ -211,11 +209,10 @@ public class InputInfo implements Serializable {
      * 
      * @return List
      */
-    public List getFKs() {
-        List fkNames = new ArrayList();
-        Iterator it = inputs.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String)it.next();
+    public List<String> getFKs() {
+        List<String> fkNames = new ArrayList<String>();
+        for (Map.Entry<String, Object> entry : inputs.entrySet()) {
+            String key = entry.getKey();
             if (key.startsWith("&")) {
                 String fkName = key.substring(1);
                 fkNames.add(fkName);
@@ -237,9 +234,9 @@ public class InputInfo implements Serializable {
     
     private String processorName;
     
-    private Map inputs = new HashMap();
+    private Map<String, Object> inputs = new HashMap<String, Object>();
     
-    private Map outputFilters;
+    private Map<String, String> outputFilters = new HashMap<String, String>();
     
     private String connectionName;
     
@@ -248,5 +245,5 @@ public class InputInfo implements Serializable {
     private String childQueryType = CONSTRUCT_CHILD_QUERY_THRU_UNION;
     
     //a collection of child InputInfo
-    private Collection childInputInfoList = new ArrayList();
+    private Collection<InputInfo> childInputInfoList = new ArrayList<InputInfo>();
 }

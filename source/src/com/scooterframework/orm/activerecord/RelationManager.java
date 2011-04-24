@@ -9,10 +9,10 @@ package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.util.Converters;
@@ -45,7 +45,7 @@ public class RelationManager {
      * 
      * @param recordClass class type
      */
-    public void registerRelations(Class recordClass) {
+    public void registerRelations(Class<? extends ActiveRecord> recordClass) {
         _registerRelations(recordClass);
     }
     
@@ -81,8 +81,8 @@ public class RelationManager {
      * @param targetClass   target class
      * @param properties    string of properties
      */
-    public void setupRelation(Class ownerClass, String type, String associationId, 
-                              Class targetClass, String properties) {
+    public void setupRelation(Class<? extends ActiveRecord> ownerClass, String type, String associationId, 
+                              Class<? extends ActiveRecord> targetClass, String properties) {
         if (ownerClass == null) 
             throw new IllegalArgumentException("Error in setupRelation: ownerClass is not specified.");
         
@@ -101,11 +101,11 @@ public class RelationManager {
         String key = getRelationKey(ownerClass, associationId);
         if (relations.containsKey(key)) return;
         
-        Map pmap = Converters.convertSqlOptionStringToMap(properties);
+        Map<String, String> pmap = Converters.convertSqlOptionStringToMap(properties);
         
         if (targetModel == null) {
 	        if (pmap != null) {
-	            targetModel = (String)pmap.get(ActiveRecordConstants.key_model);
+	            targetModel = pmap.get(ActiveRecordConstants.key_model);
 	        }
 	        if (targetModel == null) {
 	        	if (targetClass != null) {
@@ -123,7 +123,7 @@ public class RelationManager {
         
         String mapping = null;
         if (pmap != null) {
-            mapping = (String)pmap.get(ActiveRecordConstants.key_mapping);
+            mapping = pmap.get(ActiveRecordConstants.key_mapping);
         }
         if (mapping == null) {
             mapping = getDefaultMapping(ownerClass, type, associationId, targetClass);
@@ -135,7 +135,7 @@ public class RelationManager {
             r.setProperties(pmap);
         }
         r.setMapping(mapping);
-        if (targetClass != null) r.setTargetClass(targetClass);
+        r.setTargetClass(targetClass);
         r.setRelationKey(key);
         cacheRelation(key, r);
         
@@ -150,9 +150,10 @@ public class RelationManager {
      * @param targets            target association name
      * @param throughAssociation the through association name
      * @param properties         string of properties
-     * @param joinInputs        map of input key/value pairs for the join model
+     * @param joinInputs         map of input key/value pairs for the join model
      */
-    public void setupHasManyThroughRelation(Class ownerClass, String targets, String throughAssociation, String properties, Map joinInputs) {
+    public void setupHasManyThroughRelation(Class<? extends ActiveRecord> ownerClass, 
+    		String targets, String throughAssociation, String properties, Map<String, Object> joinInputs) {
         if (ownerClass == null) 
             throw new IllegalArgumentException("Error in setupHasManyThroughRelation: ownerClass is not specified.");
         
@@ -171,11 +172,11 @@ public class RelationManager {
             throw new IllegalArgumentException("Error in setupHasManyThroughRelation: " + 
             throughAssociation + " association must be specified in class " + ownerClass + ".");
         
-        Map pmap = Converters.convertSqlOptionStringToMap(properties);
-        Class middleC = acRelation.getTargetClass();
+        Map<String, String> pmap = Converters.convertSqlOptionStringToMap(properties);
+        Class<? extends ActiveRecord> middleC = acRelation.getTargetClass();
         _registerRelations(middleC);
         
-        String source = (String)pmap.get(ActiveRecordConstants.key_source);
+        String source = pmap.get(ActiveRecordConstants.key_source);
         Relation cbRelation = null;
         if (source == null) {
 	        String cbKey = getRelationKey(middleC, targets);
@@ -235,21 +236,20 @@ public class RelationManager {
      * @param clz ActiveRecord class type
      * @return List
      */
-    public List getAllRelationNameTypes(Class clz) {
+    public List<String> getAllRelationNameTypes(Class<? extends ActiveRecord> clz) {
         _registerRelations(clz);
         
         String model = ActiveRecordUtil.getModelName(clz);
         String relationOwnerKey = getRelationOwnerKey(model);
-        List nameTypes = new ArrayList();
+        List<String> nameTypes = new ArrayList<String>();
         
-        synchronized(relations) {
-            Iterator it = relations.keySet().iterator();
-            while(it.hasNext()) {
-                String key = (String)it.next();
-                if (key.startsWith(relationOwnerKey)) {
-                    Relation r = (Relation)relations.get(key);
-                    nameTypes.add(key + " = " + r.getRelationType());
-                }
+    	for (Map.Entry<String, Relation> entry : relations.entrySet()) {
+            String key = entry.getKey();
+            if (key == null) continue;
+            if (key.startsWith(relationOwnerKey)) {
+                Relation r = entry.getValue();
+                String rType = (r != null)?r.getRelationType():null;
+                nameTypes.add(key + " = " + rType);
             }
         }
         
@@ -262,20 +262,17 @@ public class RelationManager {
      * @param owner ActiveRecord class type
      * @return List of relation instances
      */
-    public List getOwnedRelations(Class owner) {
+    public List<Relation> getOwnedRelations(Class<? extends ActiveRecord> owner) {
         _registerRelations(owner);
         
         String model = ActiveRecordUtil.getModelName(owner);
         String relationOwnerKey = getRelationOwnerKey(model);
-        List rls = new ArrayList();
-        
-        synchronized(relations) {
-            Iterator it = relations.keySet().iterator();
-            while(it.hasNext()) {
-                String key = (String)it.next();
-                if (key.startsWith(relationOwnerKey)) {
-                    rls.add(relations.get(key));
-                }
+        List<Relation> rls = new ArrayList<Relation>();
+
+        for (Map.Entry<String, Relation> entry : relations.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.startsWith(relationOwnerKey)) {
+                rls.add(entry.getValue());
             }
         }
         return rls;
@@ -289,23 +286,20 @@ public class RelationManager {
      * @param target target ActiveRecord class type
      * @return List of relation instances
      */
-    public List getRelations(Class owner, Class target) {
+    public List<Relation> getRelations(Class<? extends ActiveRecord> owner, Class<? extends ActiveRecord> target) {
         _registerRelations(owner);
         
         String model = ActiveRecordUtil.getModelName(owner);
         String relationOwnerKey = getRelationOwnerKey(model);
-        List rls = new ArrayList();
-        
-        synchronized(relations) {
-            Iterator it = relations.keySet().iterator();
-            while(it.hasNext()) {
-                String key = (String)it.next();
-                if (key.startsWith(relationOwnerKey)) {
-                	Relation r = (Relation)relations.get(key);
-                	if (target.getName().equals(r.getTargetClass().getName())) {
-                		rls.add(r);
-                	}
-                }
+        List<Relation> rls = new ArrayList<Relation>();
+
+    	for (Map.Entry<String, Relation> entry : relations.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.startsWith(relationOwnerKey)) {
+            	Relation r = (Relation)relations.get(key);
+            	if (target.getName().equals(r.getTargetClass().getName())) {
+            		rls.add(r);
+            	}
             }
         }
         return rls;
@@ -318,21 +312,12 @@ public class RelationManager {
      */
     public void removeRelationsFor(String model) {
         String relationOwnerKey = getRelationOwnerKey(model);
-        
-        List rls = new ArrayList();
-        synchronized(relations) {
-            Iterator it = relations.keySet().iterator();
-            while(it.hasNext()) {
-                String key = (String)it.next();
-                if (key.startsWith(relationOwnerKey)) {
-                    rls.add(key);
-                }
+
+    	for (Map.Entry<String, Relation> entry : relations.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.startsWith(relationOwnerKey)) {
+            	relations.remove(key);
             }
-        }
-        
-        Iterator it = rls.iterator();
-        while(it.hasNext()) {
-            relations.remove(it.next());
         }
     }
     
@@ -343,7 +328,7 @@ public class RelationManager {
      * @param associationId association id for target model in lower case
      * @return relation
      */
-    public Relation getRelation(Class owner, String associationId) {
+    public Relation getRelation(Class<? extends ActiveRecord> owner, String associationId) {
         _registerRelations(owner);
         return (Relation)relations.get(getRelationKey(owner, associationId));
     }
@@ -355,14 +340,18 @@ public class RelationManager {
      * @param target class type for relation target
      * @return relation type
      */
-    public String getRelationType(Class owner, Class target) {
-    	List list = getRelations(owner, target);
+    public String getRelationType(Class<? extends ActiveRecord> owner, Class<? extends ActiveRecord> target) {
+    	List<Relation> list = getRelations(owner, target);
+    	if (list == null) return null;
+    	
     	String type = null;
-    	Iterator it = list.iterator();
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
-    		Relation r = (Relation)it.next();
-    		type = r.getRelationType();
-    		break;
+    		Relation r = it.next();
+    		if (r != null) {
+	    		type = r.getRelationType();
+	    		break;
+    		}
     	}
     	return type;
     }
@@ -374,10 +363,12 @@ public class RelationManager {
      * @param endB class type for target class
      * @return true if endA class belongs-to endB class
      */
-    public boolean existsBelongsToRelationBetween(Class endA, Class endB) {
-    	List list = getRelations(endA, endB);
+    public boolean existsBelongsToRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return false;
+    	
     	boolean status = false;
-    	Iterator it = list.iterator();
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
     		if (Relation.BELONGS_TO_TYPE.equals(r.getRelationType())) {
@@ -395,13 +386,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return true if endA class has-one endB class
      */
-    public boolean existsHasOneRelationBetween(Class endA, Class endB) {
-    	List list = getRelations(endA, endB);
+    public boolean existsHasOneRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return false;
+    	
     	boolean status = false;
-    	Iterator it = list.iterator();
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.HAS_ONE_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.HAS_ONE_TYPE.equals(r.getRelationType())) {
     			status = true;
     			break;
             }
@@ -416,13 +409,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return true if endA class has-many endB class
      */
-    public boolean existsHasManyRelationBetween(Class endA, Class endB) {
-    	List list = getRelations(endA, endB);
+    public boolean existsHasManyRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return false;
+    	
     	boolean status = false;
-    	Iterator it = list.iterator();
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.HAS_MANY_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.HAS_MANY_TYPE.equals(r.getRelationType())) {
     			status = true;
     			break;
             }
@@ -437,13 +432,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return true if endA class has-many-through endB class
      */
-    public boolean existsHasManyThroughRelationBetween(Class endA, Class endB) {
-    	List list = getRelations(endA, endB);
+    public boolean existsHasManyThroughRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return false;
+    	
     	boolean status = false;
-    	Iterator it = list.iterator();
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.HAS_MANY_THROUGH_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.HAS_MANY_THROUGH_TYPE.equals(r.getRelationType())) {
     			status = true;
     			break;
             }
@@ -458,13 +455,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return a belongs-to relation
      */
-    public Relation getBelongsToRelationBetween(Class endA, Class endB) {
+    public Relation getBelongsToRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
     	Relation rel = null;
-    	List list = getRelations(endA, endB);
-    	Iterator it = list.iterator();
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return null;
+    	
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.BELONGS_TO_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.BELONGS_TO_TYPE.equals(r.getRelationType())) {
     			rel = r;
     			break;
             }
@@ -479,13 +478,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return a has-one relation
      */
-    public Relation getHasOneRelationBetween(Class endA, Class endB) {
+    public Relation getHasOneRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
     	Relation rel = null;
-    	List list = getRelations(endA, endB);
-    	Iterator it = list.iterator();
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return null;
+    	
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.HAS_ONE_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.HAS_ONE_TYPE.equals(r.getRelationType())) {
     			rel = r;
     			break;
             }
@@ -500,13 +501,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return a has-many relation
      */
-    public Relation getHasManyRelationBetween(Class endA, Class endB) {
+    public Relation getHasManyRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
     	Relation rel = null;
-    	List list = getRelations(endA, endB);
-    	Iterator it = list.iterator();
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return null;
+    	
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.HAS_MANY_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.HAS_MANY_TYPE.equals(r.getRelationType())) {
     			rel = r;
     			break;
             }
@@ -521,13 +524,15 @@ public class RelationManager {
      * @param endB class type for target class
      * @return a has-many-through relation
      */
-    public Relation getHasManyThroughRelationBetween(Class endA, Class endB) {
+    public Relation getHasManyThroughRelationBetween(Class<? extends ActiveRecord> endA, Class<? extends ActiveRecord> endB) {
     	Relation rel = null;
-    	List list = getRelations(endA, endB);
-    	Iterator it = list.iterator();
+    	List<Relation> list = getRelations(endA, endB);
+    	if (list == null) return null;
+    	
+    	Iterator<Relation> it = list.iterator();
     	while(it.hasNext()) {
     		Relation r = (Relation)it.next();
-    		if (Relation.HAS_MANY_THROUGH_TYPE.equals(r.getRelationType())) {
+    		if (r != null && Relation.HAS_MANY_THROUGH_TYPE.equals(r.getRelationType())) {
     			rel = r;
     			break;
             }
@@ -547,7 +552,7 @@ public class RelationManager {
      * @param idField   id field name for the category
      * @param typeField type field name for the category
      */
-    public void registerCategory(Class center, String category, String idField, String typeField) {
+    public void registerCategory(Class<? extends ActiveRecord> center, String category, String idField, String typeField) {
         Category cat = (Category)categoryMap.get(category);
         if (cat == null) {
             cat = new Category(center, category, idField, typeField);
@@ -561,17 +566,14 @@ public class RelationManager {
      * @param center    center class of the category
      * @return a category list
      */
-    public List getRegisteredCategory(Class center) {
+    public List<Category> getRegisteredCategory(Class<? extends ActiveRecord> center) {
         String centerClassName = center.getName();
-        List categories = new ArrayList();
+        List<Category> categories = new ArrayList<Category>();
         
-        synchronized(categoryMap) {
-            Iterator it = categoryMap.keySet().iterator();
-            while(it.hasNext()) {
-                Category category = (Category)categoryMap.get(it.next());
-                if (centerClassName.equals(category.getCenterClass().getName())) {
-                    categories.add(category);
-                }
+        for (Map.Entry<String, Category> entry : categoryMap.entrySet()) {
+            Category category = entry.getValue();
+            if (category != null && centerClassName.equals(category.getCenterClass().getName())) {
+                categories.add(category);
             }
         }
         return categories;
@@ -639,7 +641,7 @@ public class RelationManager {
      * @param target        target name of the associated class.
      * @param b             The end b class
      */
-    public String getDefaultMapping(Class a, String type, String target, Class b) {
+    public String getDefaultMapping(Class<? extends ActiveRecord> a, String type, String target, Class<? extends ActiveRecord> b) {
         String mapping = "";
         
         // In belongs-to relation, class A holds FK and is also the owner.
@@ -699,7 +701,7 @@ public class RelationManager {
         return mapping;
     }
     
-    private void verifyExistenceOfColumn(Class clz, String columnName) {
+    private void verifyExistenceOfColumn(Class<? extends ActiveRecord> clz, String columnName) {
         try {
             ActiveRecordUtil.verifyExistenceOfColumn(clz, columnName);
         }
@@ -710,7 +712,7 @@ public class RelationManager {
         }
     }
     
-    private Relation createRelation(Class a, String type, String associationId, String targetModel) {
+    private Relation createRelation(Class<? extends ActiveRecord> a, String type, String associationId, String targetModel) {
         Relation r = null;
         
         if (Relation.BELONGS_TO_TYPE.equalsIgnoreCase(type)) {
@@ -752,7 +754,7 @@ public class RelationManager {
         completedClasses.add(className);
     }
 
-    private void _registerRelations(Class clz) {
+    private void _registerRelations(Class<? extends ActiveRecord> clz) {
         String fullClassName = clz.getName();
         if (!hasCompletedRelationSetup(fullClassName)) {
             ActiveRecord home = ActiveRecordUtil.getHomeInstance(fullClassName);
@@ -790,7 +792,7 @@ public class RelationManager {
      * @param associationId association id for target model in lower case
      * @return relation key
      */
-    private String getRelationKey(Class owner, String associationId) {
+    private String getRelationKey(Class<? extends ActiveRecord> owner, String associationId) {
         return getRelationKey(ActiveRecordUtil.getModelName(owner), associationId);
     }
     
@@ -819,10 +821,10 @@ public class RelationManager {
         return (a + ":").toLowerCase();
     }
     
-    private void validateCascade(Map properties, String rtype, String relationKey) {
+    private void validateCascade(Map<String, String> properties, String rtype, String relationKey) {
         if (properties == null) return;
         
-        String cascade = (String)properties.get(ActiveRecordConstants.key_cascade);
+        String cascade = properties.get(ActiveRecordConstants.key_cascade);
         cascade = (cascade == null)?Relation.CASCADE_NONE:cascade;
         
         if (Relation.BELONGS_TO_TYPE.equals(rtype) && !Relation.CASCADE_NONE.equals(cascade)) {
@@ -850,14 +852,14 @@ public class RelationManager {
      * 
      * See {@link #getRelationKey(String a, String b)} method.
      */
-    private Map relations = Collections.synchronizedMap(new HashMap());
+    private Map<String, Relation> relations = new ConcurrentHashMap<String, Relation>();
     
     //List of setup classes. Each entry in the list is a full class name.
-    private List completedClasses = Collections.synchronizedList(new ArrayList());
+    private List<String> completedClasses = Collections.synchronizedList(new ArrayList<String>());
     
     /**
      * Map of category name and corresponding category instance, key is 
      * category name and value is the Category instance.
      */
-    private Map categoryMap = Collections.synchronizedMap(new HashMap());
+    private Map<String, Category> categoryMap = new ConcurrentHashMap<String, Category>();
 }

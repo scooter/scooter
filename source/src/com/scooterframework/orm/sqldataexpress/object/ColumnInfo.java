@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -13,8 +13,8 @@ import java.sql.Types;
 
 /**
  * ColumnInfo class.
- * This class is a mirror of JDK's ResultSetMetaData class. 
- * 
+ * This class is a mirror of JDK's ResultSetMetaData class.
+ *
  * @author (Fei) John Chen
  */
 public class ColumnInfo implements Serializable {
@@ -22,40 +22,40 @@ public class ColumnInfo implements Serializable {
 	 * Generated serialVersionUID
 	 */
 	private static final long serialVersionUID = 8726915213111824504L;
-	
+
 	public ColumnInfo() {}
-    
+
     public String getSchemaName() {
         return m_sSchemaName;
     }
-    
+
     void setSchemaName(String schemaName) {
         if ( schemaName != null ) schemaName = schemaName.toUpperCase();
         m_sSchemaName = schemaName;
     }
-    
+
     public String getCatalogName() {
         return m_sCatalogName;
     }
-    
+
     void setCatalogName(String catalogName) {
         if ( catalogName != null ) catalogName = catalogName.toUpperCase();
         m_sCatalogName = catalogName;
     }
-    
+
     public String getTableName() {
         return m_sTableName;
     }
-    
+
     void setTableName(String tableName) {
         if ( tableName != null ) tableName = tableName.toUpperCase();
         m_sTableName = tableName;
     }
-    
+
     public boolean isPrimaryKey() {
         return m_bPrimaryKey;
     }
-    
+
     public void setPrimaryKey(boolean primaryKey) {
         m_bPrimaryKey = primaryKey;
     }
@@ -63,7 +63,7 @@ public class ColumnInfo implements Serializable {
     public String getColumnClassName() {
         return m_sColumnClassName;
     }
-    
+
     void setColumnClassName(String columnClassName) {
         m_sColumnClassName = columnClassName;
     }
@@ -71,51 +71,51 @@ public class ColumnInfo implements Serializable {
     public String getColumnName() {
         return m_sColumnName;
     }
-    
+
     void setColumnName(String columnName) {
         if ( columnName != null ) columnName = columnName.toUpperCase();
         m_sColumnName = columnName;
     }
-    
+
     public String getColumnTypeName() {
         return m_sColumnTypeName;
     }
-    
+
     void setColumnTypeName(String columnTypeName) {
         if ( columnTypeName != null ) columnTypeName = columnTypeName.toUpperCase();
         m_sColumnTypeName = columnTypeName;
     }
-    
+
     public int getColumnDisplaySize() {
         return m_iColumnDisplaySize;
     }
-    
+
     void setColumnDisplaySize(int displaySize) {
         m_iColumnDisplaySize = displaySize;
     }
-    
+
     public int getSQLDataType() {
         return m_iDataType;
     }
-    
+
     void setSQLDataType(int sqlDataType) {
         m_iDataType = sqlDataType;
     }
-    
+
     public int getPrecision() {
         return m_iPrecision;
     }
-    
+
     void setPrecision(int precision) {m_iPrecision = precision;}
-    
+
     public int getScale() { return m_iScale; }
-    
+
     void setScale(int scale) {m_iScale = scale;}
-    
+
     public boolean isNull() { return m_bNullable; }
     public boolean isNotNull() { return m_bNotNullable; }
     public boolean isNullUnknown() { return m_bNullableUnknown; }
-    
+
     void setNull(int nullable) {
         if ( ResultSetMetaData.columnNullable == nullable ) {
             m_bNullable = true;
@@ -127,50 +127,50 @@ public class ColumnInfo implements Serializable {
             m_bNullableUnknown = true;
         }
     }
-    
+
     public boolean isAutoIncrement() { return m_bAutoIncrement; }
-    
+
     void setAutoIncrement(boolean autoIncrement) {
         m_bAutoIncrement = autoIncrement;
         if (autoIncrement) m_bPrimaryKey = true;
     }
-    
+
     public boolean isCaseSensitive() { return m_bCaseSensitive; }
-    
+
     void setCaseSensitive(boolean caseSensitive) {m_bCaseSensitive = caseSensitive;}
-    
+
     public boolean isCurrency() { return m_bCurrency; }
-    
+
     void setCurrency(boolean currency) {m_bCurrency = currency;}
-    
+
     public boolean isDefinitelyWritable() { return m_bDefinitelyWritable; }
-    
+
     void setDefinitelyWritable(boolean definitelyWritable) {m_bDefinitelyWritable = definitelyWritable;}
-    
+
     public boolean isReadOnly() { return m_bReadOnly; }
-    
+
     void setReadOnly(boolean readOnly) {m_bReadOnly = readOnly;}
-    
+
     public boolean isSearchable() { return m_bSearchable; }
-    
+
     void setSearchable(boolean searchable) {m_bSearchable = searchable;}
-    
+
     public boolean isSigned() { return m_bSigned; }
-    
+
     void setSigned(boolean signed) {m_bSigned = signed;}
-    
+
     public boolean isWritable() { return m_bWritable; }
-    
+
     void setWritable(boolean writable) {m_bWritable = writable;}
-    
+
     /**
      * Returns a string representation of the object.
      * @return String
      */
     public String toString() {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         String LINE_BREAK = "\r\n";
-        
+
         returnString.append( "SchemaName = " + m_sSchemaName).append( LINE_BREAK );
         returnString.append( "CatalogName = " + m_sCatalogName).append( LINE_BREAK );
         returnString.append( "TableName = " + m_sTableName).append( LINE_BREAK );
@@ -193,13 +193,13 @@ public class ColumnInfo implements Serializable {
         returnString.append( "isSearchable = " + m_bSearchable).append( LINE_BREAK );
         returnString.append( "isSigned = " + m_bSigned).append( LINE_BREAK );
         returnString.append( "isWritable = " + m_bWritable).append( LINE_BREAK );
-        
+
         return returnString.toString();
     }
-    
+
     /**
-     * Checks if this column is of date type. 
-     * 
+     * Checks if this column is of date type.
+     *
      * <p>
      * The following types from java.sql.Types are treated as date type:
      * <ul>
@@ -207,32 +207,32 @@ public class ColumnInfo implements Serializable {
      *   <li>java.sql.Types.TIMESTAMP  93 </li>
      * </ul>
      * </p>
-     * 
+     *
      * @return true if it is of date type
      */
     public boolean isDate() {
         return m_iDataType == Types.DATE;
     }
-    
+
     /**
-     * Checks if this column is of timestamp type. 
-     * 
+     * Checks if this column is of timestamp type.
+     *
      * <p>
      * The following types from java.sql.Types are treated as timestamp type:
      * <ul>
      *   <li>java.sql.Types.TIMESTAMP  93 </li>
      * </ul>
      * </p>
-     * 
+     *
      * @return true if it is of timestamp type
      */
     public boolean isTimestamp() {
         return m_iDataType == Types.TIMESTAMP;
     }
-    
+
     /**
-     * Checks if a column is of numeric type. 
-     * 
+     * Checks if a column is of numeric type.
+     *
      * <p>
      * The following types from java.sql.Types are treated as numeric type:
      * <ul>
@@ -247,38 +247,38 @@ public class ColumnInfo implements Serializable {
      *   <li>java.sql.Types.TINYINT -6 </li>
      * </ul>
      * </p>
-     * 
+     *
      * @param dataType
      * @return true if it is of numeric type
      */
     public static boolean isNumeric(int dataType) {
         boolean result = false;
         switch(dataType) {
-            case Types.BIGINT:// -5 
+            case Types.BIGINT:// -5
                 result = true; break;
-            case Types.DECIMAL:// 3 
+            case Types.DECIMAL:// 3
                 result = true; break;
-            case Types.DOUBLE:// 8 
+            case Types.DOUBLE:// 8
                 result = true; break;
-            case Types.FLOAT:// 6 
+            case Types.FLOAT:// 6
                 result = true; break;
-            case Types.INTEGER:// 4 
+            case Types.INTEGER:// 4
                 result = true; break;
-            case Types.NUMERIC:// 2 
+            case Types.NUMERIC:// 2
                 result = true; break;
-            case Types.REAL:// 7 
+            case Types.REAL:// 7
                 result = true; break;
-            case Types.SMALLINT:// 5 
+            case Types.SMALLINT:// 5
                 result = true; break;
-            case Types.TINYINT:// -6 
+            case Types.TINYINT:// -6
                 result = true; break;
         }
         return result;
     }
-    
+
     /**
-     * Checks if this column is of numeric type. 
-     * 
+     * Checks if this column is of numeric type.
+     *
      * <p>
      * The following types from java.sql.Types are treated as numeric type:
      * <ul>
@@ -293,7 +293,7 @@ public class ColumnInfo implements Serializable {
      *   <li>java.sql.Types.TINYINT -6 </li>
      * </ul>
      * </p>
-     * 
+     *
      * @return true if it is of numeric type
      */
     public boolean isNumeric() {

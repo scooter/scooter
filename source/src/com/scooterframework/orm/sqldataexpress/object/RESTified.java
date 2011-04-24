@@ -40,7 +40,7 @@ public interface RESTified {
      * 
      * @return map of restified id data
      */
-    public Map getRestfulIdMap();
+    public Map<String, Object> getRestfulIdMap();
     
     /**
      * <p>Sets the id value of the resource. The format of the id string must 

@@ -24,7 +24,7 @@ public class ViewMainGenerator extends AbstractGenerator {
 	private String relativePathToView;
 	private String viewFileName;
 
-	public ViewMainGenerator(String templateFilePath, Map props, String controller, String action) {
+	public ViewMainGenerator(String templateFilePath, Map<String, String> props, String controller, String action) {
 		super(templateFilePath, props);
 		
 		this.controller = controller.toLowerCase();
@@ -42,21 +42,25 @@ public class ViewMainGenerator extends AbstractGenerator {
 		viewFileName = isEmpty(viewExtension)?action:(action + viewExtension);
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, String> getTemplateProperties() {
+		Map<String, String> templateProps = new HashMap<String, String>();
 		templateProps.put("controller", controller);
 		templateProps.put("action", action);
 		return templateProps;
 	}
 	
+	@Override
 	protected String getRootPath() {
-		return getProperty("app.path").toString();
+		return getProperty("app.path");
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return relativePathToView;
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return viewFileName;
 	}

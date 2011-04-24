@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,7 +33,6 @@ import com.scooterframework.orm.sqldataexpress.exception.LookupFailureException;
 import com.scooterframework.orm.sqldataexpress.exception.UnsupportedStoredProcedureAPINameException;
 import com.scooterframework.orm.sqldataexpress.object.Function;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatement;
-import com.scooterframework.orm.sqldataexpress.object.JdbcStatementParameter;
 import com.scooterframework.orm.sqldataexpress.object.Parameter;
 import com.scooterframework.orm.sqldataexpress.object.ParameterFactory;
 import com.scooterframework.orm.sqldataexpress.object.PrimaryKey;
@@ -55,18 +53,14 @@ public class SqlExpressUtil {
     private static LogUtil log = LogUtil.getLogger(SqlExpressUtil.class.getName());
     
     private static final String niceChars = 
-    	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_$";
+    	".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_$";
     
     private static boolean isEmpty(String s) {
     	return (s == null || "".equals(s))?true:false;
     }
     
     private static String toUpperCase(String s) {
-        return (s == null)?null:s.toUpperCase();
-    }
-    
-    private static String validateValueAndToUpperCase(String s) {
-        return isEmpty(s)?null:s.toUpperCase();
+        return (s == null || "".equals(s))?s:s.toUpperCase();
     }
 
     public static List<String> getConnectionNames() {
@@ -96,6 +90,9 @@ public class SqlExpressUtil {
      * @return properties of the connection name
      */
     public static Properties getConnectionProperties(String connName) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
         Properties p = DatabaseConfig.getInstance().getPredefinedDatabaseConnectionProperties(connName);
         return p;
     }
@@ -126,6 +123,35 @@ public class SqlExpressUtil {
         return url;
     }
     
+    public static String getExtendedTableName(String connName, TableInfo ti) {
+		return DBAdapterFactory.getInstance().getAdapter(connName)
+				.getExpandedTableName(connName, ti.getCatalog(),
+						ti.getSchema(), ti.getName());
+    }
+    
+    /**
+     * Returns the extended table name.
+     * 
+     * <p>The result table name may take one of the following cases:
+     * <pre>
+     *   {catalog}.{schema}.{table}
+     *   {catalog}.{table} //for MySQL
+     *   {schema}.{table}  //for Oracle
+     *   {table}
+     * </pre>
+     * 
+     * @param connName   database connection name
+     * @param catalog    catalog name
+     * @param schema     schema name
+     * @param tableName  table name
+     * @return an expanded table name
+     */
+    public static String getExtendedTableName(String connName,
+			String catalog, String schema, String tableName) {
+		return DBAdapterFactory.getInstance().getAdapter(connName)
+				.getExpandedTableName(connName, catalog, schema, tableName);
+    }
+    
     /**
      * Checks if the underline connection is for Oracle database.
      * 
@@ -146,6 +172,9 @@ public class SqlExpressUtil {
     public static boolean isBuiltinVendor(String vendor, String connName) {
     	if (vendor == null) 
     		throw new IllegalArgumentException("Vendor input is empty.");
+    	
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
     	
     	Properties p = getConnectionProperties(connName);
     	String v = p.getProperty(DatabaseConfig.KEY_DB_CONNECTION_VENDOR);
@@ -174,6 +203,9 @@ public class SqlExpressUtil {
      * @return a string array containing catalog and schema
      */
     public static String[] getCatalogAndSchema(String connName) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
     	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
     	return dba.getCatalogAndSchema(connName);
     }
@@ -224,29 +256,34 @@ public class SqlExpressUtil {
     }
     
     /**
-     * Returns a UserDatabaseConnection instance for default connection name.
+     * Returns a UserDatabaseConnection instance for default database 
+     * connection name.
      */
     public static UserDatabaseConnection getUserDatabaseConnection() throws SQLException {
         return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection();
     }
     
     /**
-     * Returns a UserDatabaseConnection instance for a specific connection name.
+     * Returns a UserDatabaseConnection instance for a specific database 
+     * connection context.
      * 
-     * @param connName     name of a connection
+     * @param dcc  a DatabaseConnectionContext instance
      */
-    public static UserDatabaseConnection getUserDatabaseConnection(String connName) throws SQLException {
-        return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection(connName);
+    public static UserDatabaseConnection getUserDatabaseConnection(DatabaseConnectionContext dcc) throws SQLException {
+        return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection(dcc);
     }
     
     /**
      * Returns a UserDatabaseConnection instance for a specific database 
-     * connection context.
+     * connection name.
      * 
-     * @param dcc a DatabaseConnectionContext instance
+     * @param connName  name of a connection
      */
-    public static UserDatabaseConnection getUserDatabaseConnection(DatabaseConnectionContext dcc) throws SQLException {
-        return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection(dcc);
+    public static UserDatabaseConnection getUserDatabaseConnection(String connName) throws SQLException {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
+        return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection(connName);
     }
     
     /**
@@ -265,6 +302,9 @@ public class SqlExpressUtil {
      * @return a database connection
      */
     public static Connection getConnection(String connName) throws SQLException {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
     	return getUserDatabaseConnection(connName).getConnection();
     }
     
@@ -298,6 +338,9 @@ public class SqlExpressUtil {
      * @return a read-only database connection
      */
     public static Connection getReadonlyConnection(String connName) throws SQLException {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
         Connection conn = getConnection(connName);
         if (conn != null) {
             conn.setReadOnly(true);
@@ -318,25 +361,34 @@ public class SqlExpressUtil {
         }
         return conn;
     }
-    
-    /**
-     * Returns a list of TableInfo instances for the database connection.
-     * 
-     * @param conn  the database connection
-     * @param catalog a catalog name; must match the catalog name as it
-     *        is stored in the database; "" retrieves those without a catalog;
-     *        <tt>null</tt> means that the catalog name should not be used to narrow
-     *        the search
-     * @param schema a schema name; must match the schema name
-     *        as it is stored in the database; "" retrieves those without a schema;
-     *        <tt>null</tt> means that the schema name should not be used to narrow
-     *        the search
-     * @param tableName a table name; must match the
-     *        table name as it is stored in the database 
-     * @param types a list of table types to include; <tt>null</tt> returns all types 
-     * @return a list of TableInfo instances
-     * @throws java.sql.SQLException
-     */
+
+	/**
+	 * Returns a list of TableInfo instances for the database connection.
+	 * 
+	 * @param conn
+	 *            the database connection
+	 * @param catalog
+	 *            a catalog name; must match the catalog name as it is stored in
+	 *            the database; "" retrieves those without a catalog;
+	 *            <tt>null</tt> means that the catalog name should not be used
+	 *            to narrow the search
+	 * @param schema
+	 *            a schema name; must match the schema name as it is stored in
+	 *            the database; "" retrieves those without a schema;
+	 *            <tt>null</tt> means that the schema name should not be used to
+	 *            narrow the search
+	 * @param tableName
+	 *            a table name; must match the table name as it is stored in the
+	 *            database
+	 * @param types
+	 *            a list of table types to include; <tt>null</tt> returns all
+	 *            types
+	 * @param uppercase
+	 *            <tt>true</tt> to convert <tt>catalog</tt>, <tt>schema</tt> 
+	 *            and <tt>tableName</tt> to upper case.
+	 * @return a list of TableInfo instances
+	 * @throws java.sql.SQLException
+	 */
     public static List<TableInfo> getDatabaseTables(Connection conn, 
                                                 String catalog, 
                                                 String schema, 
@@ -364,25 +416,31 @@ public class SqlExpressUtil {
         rs.close();
         return list;
     }
-    
-    /**
-     * Returns a list of TableInfo instances for the database connection.
-     * 
-     * @param conn  the database connection
-     * @param catalog a catalog name; must match the catalog name as it
-     *        is stored in the database; "" retrieves those without a catalog;
-     *        <tt>null</tt> means that the catalog name should not be used to narrow
-     *        the search
-     * @param schema a schema name; must match the schema name
-     *        as it is stored in the database; "" retrieves those without a schema;
-     *        <tt>null</tt> means that the schema name should not be used to narrow
-     *        the search
-     * @param tableName a table name; must match the
-     *        table name as it is stored in the database 
-     * @param types a list of table types to include; <tt>null</tt> returns all types 
-     * @return a list of TableInfo instances
-     * @throws java.sql.SQLException
-     */
+
+	/**
+	 * Returns a list of TableInfo instances for the database connection.
+	 * 
+	 * @param conn
+	 *            the database connection
+	 * @param catalog
+	 *            a catalog name; must match the catalog name as it is stored in
+	 *            the database; "" retrieves those without a catalog;
+	 *            <tt>null</tt> means that the catalog name should not be used
+	 *            to narrow the search
+	 * @param schema
+	 *            a schema name; must match the schema name as it is stored in
+	 *            the database; "" retrieves those without a schema;
+	 *            <tt>null</tt> means that the schema name should not be used to
+	 *            narrow the search
+	 * @param tableName
+	 *            a table name; must match the table name as it is stored in the
+	 *            database
+	 * @param types
+	 *            a list of table types to include; <tt>null</tt> returns all
+	 *            types
+	 * @return a list of TableInfo instances
+	 * @throws java.sql.SQLException
+	 */
     public static List<TableInfo> getDatabaseTables(Connection conn, 
                                                 String catalog, 
                                                 String schema, 
@@ -689,93 +747,69 @@ public class SqlExpressUtil {
         return st;
     }
     
-    // populate more parameter properties for the JdbcStatement
-    public static JdbcStatement furtherLookupJdbcStatement(UserDatabaseConnection udc, JdbcStatement st) {
-        if (st == null) 
-            throw new IllegalArgumentException("JdbcStatement object is empty.");
+    /**
+     * Looks up <tt>{@link com.scooterframework.orm.sqldataexpress.object.TableInfo TableInfo}</tt>.
+     * The input <tt>tableName</tt> can represent either a table name or 
+     * a view name.
+     * 
+     * <p>This method assumes that value of the <tt>tableName</tt> may 
+     * take one of the following three cases:
+     * <pre>
+     *   {catalog}.{schema}.{table}
+     *   {schema}.{table}
+     *   {table}
+     * </pre>
+     * 
+     * @param connName   database connection name
+     * @param tableName  table or view name
+     * @return <tt>{@link com.scooterframework.orm.sqldataexpress.object.TableInfo TableInfo}</tt> instance.
+     */
+    public static TableInfo lookupTableInfo(String connName, String tableName) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
+        if (tableName == null) 
+            throw new IllegalArgumentException("tableName cannot be null.");
         
+        TableInfo ti = null;
+    	UserDatabaseConnection udc = null;
         try {
-            Collection parameters = st.getParameters();
-            Iterator it = parameters.iterator();
-            while(it.hasNext()) {
-                JdbcStatementParameter jdbcParam = (JdbcStatementParameter)it.next();
-                if (jdbcParam.isUsedByCount()) continue;
-                if (jdbcParam.getSqlDataType() != Parameter.UNKNOWN_SQL_DATA_TYPE) {
-                    //do not furtherLookup if the sql data type is already known.
-                    continue;
-                }
-                
-                String tableName = jdbcParam.getTableName();
-                String columnName = jdbcParam.getColumnName();
-                
-                int sqlDataType = 0;
-                String sqlDataTypeName = null;
-                String javaClassName = null;
-                
-                if (tableName != null && columnName != null) {
-                    // find more properties of this column
-                    TableInfo ti = DBStore.getInstance().getTableInfo(tableName);
-                    if (ti == null) {
-                        // lookup 
-                        ti = lookupTableInfo(udc, tableName);
-                    }
-                    
-                    // add more properties for this column
-                    RowInfo header = ti.getHeader();
-                    int columnIndex = header.getColumnPositionIndex(columnName);
-                    
-                    sqlDataType = header.getColumnSqlDataType(columnIndex);
-                    sqlDataTypeName = header.getColmnDataTypeName(columnIndex);
-                    javaClassName = header.getColumnJavaClassName(columnIndex);
-                    
-                    jdbcParam.setSqlDataType(sqlDataType);
-                    jdbcParam.setSqlDataTypeName(sqlDataTypeName);
-                    jdbcParam.setJavaClassName(javaClassName);
-                }
-                else {
-                    log.error("Can not detecting parameter properties because " + 
-                              "either table name or column name is null for the " + 
-                              "parameter with index " + jdbcParam.getIndex());
-                }
-            }
+            udc = SqlExpressUtil.getUserDatabaseConnection(connName);
+            ti = lookupTableInfo(udc, tableName);
+        }
+        catch(LookupFailureException lfEx) {
+        	throw lfEx;
         }
         catch(Exception ex) {
-            log.error("Error in furtherLookupJdbcStatement() because of " + ex.getMessage());
+            String errorMessage = "Failed to get meta data info of '" + tableName + 
+            		"' with database connection '" + connName + "'";
+            errorMessage += ". Reason: " + ex.getMessage() + ".";
+            throw new LookupFailureException(errorMessage, ex);
+        }
+        finally {
+            DAOUtil.closeConnection(udc);
         }
         
-        return st;
-    }
-    
-    public static TableInfo lookupAndRegisterTable(String connName, String table) {
-        if (table == null) 
-            throw new IllegalArgumentException("Table name is empty.");
-        
-        String errorMessage = "Failed to get meta data info of table " + table + 
-        		" with database connection named \"" + connName;
-        TableInfo ti = DBStore.getInstance().getTableInfo(table);
-        if (ti == null) {
-        	UserDatabaseConnection udc = null;
-            try {
-                udc = SqlExpressUtil.getUserDatabaseConnection(connName);
-                ti = lookupTableInfo(udc, table);
-            }
-            catch(Exception ex) {
-            	ex.printStackTrace();
-                errorMessage += ". Reason: " + ex.getMessage() + ".";
-            }
-            finally {
-                DAOUtil.closeConnection(udc);
-            }
-        }
-        
-        if (ti == null) {
-            throw new LookupFailureException(errorMessage);
-        }
         return ti;
     }
     
-    // find table or view info
-    // 
+    /**
+     * Looks up <tt>{@link com.scooterframework.orm.sqldataexpress.object.TableInfo TableInfo}</tt>.
+     * The input <tt>tableName</tt> can represent either a table name or 
+     * a view name.
+     * 
+     * <p>This method assumes that value of the <tt>tableName</tt> may 
+     * take one of the following three cases:
+     * <pre>
+     *   {catalog}.{schema}.{table}
+     *   {schema}.{table}
+     *   {table}
+     * </pre>
+     * 
+     * @param udc        instance of <tt>{@link com.scooterframework.orm.sqldataexpress.connection.UserDatabaseConnection UserDatabaseConnection}</tt>
+     * @param tableName  table or view name
+     * @return <tt>{@link com.scooterframework.orm.sqldataexpress.object.TableInfo TableInfo}</tt> instance.
+     */
     public static TableInfo lookupTableInfo(UserDatabaseConnection udc, String tableName) {
         if (udc == null) 
             throw new IllegalArgumentException("UserDatabaseConnection udc is null.");
@@ -783,43 +817,44 @@ public class SqlExpressUtil {
         if (tableName == null) 
             throw new IllegalArgumentException("Table name is empty.");
         
-        // check if it is a table or a view
-        String catalog = null;
-        String schema = null;
-        TableInfo ti = null;
+        String connName = udc.getConnectionName();
+        DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
+        String[] s3 = dba.resolveCatalogAndSchemaAndTable(connName, tableName);
+        String catalog = s3[0];
+        String schema = s3[1];
+        String table = s3[2];
+        
+        TableInfo ti = DBStore.getInstance().getTableInfo(connName, catalog, schema, table);
+        if (ti != null) return ti;
+        
         try {
-        	String[] s2 = getCatalogAndSchema(udc.getConnectionName());
-        	catalog = s2[0];
-        	schema = s2[1];
-        	
             String tableType = TableInfo.TYPE_TABLE; //default
+            tableType = getTableType(udc.getConnection(), catalog, schema, table, TableInfo.getSupportedTypes());
             
-            tableType = getTableType(udc.getConnection(), catalog, schema, 
-            		tableName, TableInfo.SUPPORTED_TYPES);
             if (TableInfo.TYPE_TABLE.equals(tableType)) {
-            	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
-                ti = lookupTable(dba, udc.getConnection(), catalog, schema, tableName);
+                ti = lookupTable(dba, udc.getConnection(), catalog, schema, table);
             }
             else if (TableInfo.TYPE_VIEW.equals(tableType)){
-            	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
-                ti = lookupView(dba, udc.getConnection(), catalog, schema, tableName);
+                ti = lookupView(dba, udc.getConnection(), catalog, schema, table);
             }
             else {
                 throw new SQLException("Unknown table type: " + tableType + 
-                		". Only TABLE and VIEW are supported.");
+                		". Supported types are TABLE and VIEW.");
             }
             
             if (ti == null) 
-                throw new LookupFailureException("Failed to find table info for table " + tableName + ".");
+                throw new LookupFailureException("Failed to find table info for '" + tableName + "'.");
             
-            DBStore.getInstance().addTableInfo(tableName, ti);
+            DBStore.getInstance().addTableInfo(connName, catalog, schema, table, ti);
         }
         catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error("Exception in lookupTableInfo: catalog=" + catalog + 
-            		", schema=" + schema + ", table=" + tableName + 
-            		", because " + ex);
-            throw new LookupFailureException(ex);
+            String errorMessage = "Failed to get meta data info of '" + tableName + 
+    					"' with database connection '" + connName + "'" + 
+    					" catalog '" + catalog + "', schema '" + schema + "'.";
+            errorMessage += " Reason: " + ex.getMessage() + ".";
+            
+            log.error("Exception in lookupTableInfo(): " + errorMessage);
+            throw new LookupFailureException(errorMessage, ex);
         }
         
         return ti;
@@ -827,13 +862,15 @@ public class SqlExpressUtil {
     
     // find table type: TABLE or VIEW
     private static String getTableType(Connection conn, String catalog, 
-    		String schema, String tableName, String[] supportedTypes) 
+    		String schema, String table, String[] supportedTypes) 
     throws SQLException {
         if (conn == null) 
             throw new IllegalArgumentException("Connection is null.");
         
-        if (tableName == null) 
+        if (table == null) 
             throw new IllegalArgumentException("Table name is empty.");
+        
+        table = DatabaseConfig.getInstance().getFullTableName(table);
         
         // check if it is a table or a view
         String tableType = TableInfo.TYPE_TABLE; //default
@@ -841,7 +878,7 @@ public class SqlExpressUtil {
         try {
             DatabaseMetaData dbmd = conn.getMetaData();
             rs = dbmd.getTables(toUpperCase(catalog), toUpperCase(schema), 
-            		toUpperCase(tableName), supportedTypes);
+            		toUpperCase(table), supportedTypes);
             if (rs.next()) {
             	tableType = rs.getString("TABLE_TYPE");
             }
@@ -859,12 +896,14 @@ public class SqlExpressUtil {
     
     // find the table information
     private static TableInfo lookupTable(DBAdapter dba, Connection conn, 
-    	String catalog, String schema, String tableName) throws SQLException {
+    	String catalog, String schema, String table) throws SQLException {
         if (conn == null) 
             throw new IllegalArgumentException("Connection is null.");
         
-        if (tableName == null) 
+        if (table == null) 
             throw new IllegalArgumentException("Table name is empty.");
+        
+        String fullTableName = DatabaseConfig.getInstance().getFullTableName(table);
         
         TableInfo ti = null;
         Statement stmt = null;
@@ -872,21 +911,25 @@ public class SqlExpressUtil {
         ResultSet rs2 = null;
         
         try {
-            String sqlString = dba.getOneRowSelectSQL(catalog, schema, tableName);
+            String sqlString = dba.getOneRowSelectSQL(catalog, schema, fullTableName);
+            log.debug("lookupTable   catalog: " + catalog);
+            log.debug("lookupTable    schema: " + schema);
+            log.debug("lookupTable sqlString: " + sqlString);
+            
+            ti = new TableInfo();
+            ti.setCatalog(catalog);
+            ti.setSchema(schema);
+            ti.setName(table);
             
             stmt = conn.createStatement();
 
             // Query the table
             rs = stmt.executeQuery(sqlString);
-            ti = new TableInfo();
-            ti.setCatalog(catalog);
-            ti.setSchema(schema);
-            ti.setName(tableName);
             
-            RowInfo header = new RowInfo(tableName, rs.getMetaData());
+            RowInfo header = new RowInfo(table, rs.getMetaData());
             header.setCatalog(catalog);
             header.setSchema(schema);
-            header.setTable(tableName);
+            header.setTable(table);
             
             ti.setHeader(header);
             DAOUtil.closeResultSet(rs);
@@ -897,12 +940,9 @@ public class SqlExpressUtil {
             
             // get primary keys
             if (!header.hasPrimaryKey()) {
-                PrimaryKey pk = lookupTablePrimaryKey(conn, catalog, schema, tableName);
+                PrimaryKey pk = lookupPrimaryKey(conn, catalog, schema, table);
                 if (pk != null) header.setPrimaryKeyColumns(pk.getColumns());
             }
-        }
-        catch(SQLException ex) {
-            throw ex;
         }
         finally {
             DAOUtil.closeResultSet(rs);
@@ -910,37 +950,35 @@ public class SqlExpressUtil {
             DAOUtil.closeStatement(stmt);
         }
         
-        if (ti == null) throw new LookupFailureException("Failed to find table info with name " + tableName);
-        
         return ti;
     }
     
     // find the view information
-    private static TableInfo lookupView(DBAdapter dba, Connection conn, String catalog, 
-    		String schema, String tableName) throws SQLException {
+    private static TableInfo lookupView(DBAdapter dba, Connection conn, 
+    		String catalog, String schema, String viewName) throws SQLException {
         if (conn == null) 
             throw new IllegalArgumentException("Connection is null.");
         
-        if (tableName == null) 
-            throw new IllegalArgumentException("Table name is empty.");
+        if (viewName == null) 
+            throw new IllegalArgumentException("View name is empty.");
         
         TableInfo ti = null;
         ResultSet rs = null;
         try {
-            DatabaseMetaData dbmd = conn.getMetaData();
-            rs = dbmd.getColumns(toUpperCase(catalog), toUpperCase(schema), 
-            		toUpperCase(tableName), (String)null);
-            
             ti = new TableInfo();
             ti.setCatalog(catalog);
             ti.setSchema(schema);
-            ti.setName(tableName);
+            ti.setName(viewName);
+            
+            DatabaseMetaData dbmd = conn.getMetaData();
+            rs = dbmd.getColumns(toUpperCase(catalog), toUpperCase(schema), 
+            		toUpperCase(viewName), (String)null);
             
             RowInfo header = ti.getHeader();
             header.setResultSetMetaDataForView(rs);
             header.setCatalog(catalog);
             header.setSchema(schema);
-            header.setTable(tableName);
+            header.setTable(viewName);
             
             // set some table properties
             ti.setSchema(ti.getHeader().getColumnInfo(0).getSchemaName());
@@ -951,102 +989,98 @@ public class SqlExpressUtil {
             header.setSchema(ti.getSchema());
             header.setTable(ti.getName());
         }
-        catch(SQLException ex) {
-            throw ex;
-        }
         finally {
             DAOUtil.closeResultSet(rs);
         }
         
-        if (ti == null) throw new LookupFailureException("Failed to find table info with name " + tableName);
-        
         return ti;
     }
     
-    public static PrimaryKey lookupAndRegisterPrimaryKeyForDefaultConnection(String catalog, String schema, String table) {
-        if (table == null || "".equals(table)) 
-            throw new IllegalArgumentException("Table name is empty in lookupAndRegisterPrimaryKey().");
-        
-        PrimaryKey pk = null;
-        if (isEmpty(catalog) && isEmpty(schema)) {
-        	String defaultConnectionName = DatabaseConfig.getInstance().getDefaultDatabaseConnectionName();
-        	String[] s2 = SqlExpressUtil.getCatalogAndSchema(defaultConnectionName);
-        	catalog = s2[0];
-        	schema = s2[1];
-        }
-    	
-        pk = DBStore.getInstance().getPrimaryKey(catalog, schema, table);
-        if (pk == null) {
-            pk = lookupTablePrimaryKeyForDefaultConnection(catalog, schema, table);
-            if (pk != null) {
-                DBStore.getInstance().addPrimaryKey(catalog, schema, table, pk);
-            }
-        }
-        return pk;
-    }
-    
     /**
-     * Looks up primary key of a table.
+     * Looks up <tt>{@link com.scooterframework.orm.sqldataexpress.object.PrimaryKey PrimaryKey}</tt>.
      * 
-     * @param catalog
-     * @param schema
-     * @param table
-     * @return PrimaryKey
+     * <p>This method assumes that value of the <tt>tableName</tt> may 
+     * take one of the following three cases:
+     * <pre>
+     *   {catalog}.{schema}.{table}
+     *   {schema}.{table}
+     *   {table}
+     * </pre>
+     * 
+     * @param connName   db connection name
+     * @param tableName  table name
+     * @return <tt>{@link com.scooterframework.orm.sqldataexpress.object.PrimaryKey PrimaryKey}</tt> instance.
      */
-    public static PrimaryKey lookupTablePrimaryKeyForDefaultConnection(String catalog, String schema, String table) {
+    public static PrimaryKey lookupPrimaryKey(String connName, String tableName) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+    	
+        if (tableName == null) 
+            throw new IllegalArgumentException("tableName cannot be null.");
+
+        DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
+        String[] s3 = dba.resolveCatalogAndSchemaAndTable(connName, tableName);
+        String catalog = s3[0];
+        String schema = s3[1];
+        String table = s3[2];
+        
+        PrimaryKey pk = DBStore.getInstance().getPrimaryKey(connName, catalog, schema, table);
+        if (pk != null) return pk;
+        
+        String errorMessage = "Failed to get primary key for table '" + tableName + 
+        		"' with database connection '" + connName + "'.";
+        
         Connection connection = null;
-        PrimaryKey pk = null;
-        String errorMessage = "Failed to get primary key for table " + table;
         try {
-            if (isEmpty(catalog) && isEmpty(schema)) {
-            	String defaultConnectionName = DatabaseConfig.getInstance().getDefaultDatabaseConnectionName();
-            	String[] s2 = SqlExpressUtil.getCatalogAndSchema(defaultConnectionName);
-            	catalog = s2[0];
-            	schema = s2[1];
-            }
-            
-            connection = SqlExpressUtil.getConnection();
+        	connection = SqlExpressUtil.getConnection(connName);
             connection.setReadOnly(false);
-            pk = lookupTablePrimaryKey(connection, catalog, schema, table);
+            pk = lookupPrimaryKey(connection, catalog, schema, table);
+            
+            if (pk == null) {
+            	log.info(errorMessage);
+            } else {
+                DBStore.getInstance().addPrimaryKey(connName, catalog, schema, table, pk);
+            }
+        }
+        catch(LookupFailureException lfEx) {
+        	throw lfEx;
         }
         catch(Exception ex) {
-            errorMessage += ", because " + ex.getMessage() + ".";
-            log.error(errorMessage);
+            errorMessage += " Reason: " + ex.getMessage() + ".";
+            throw new LookupFailureException(errorMessage, ex);
         }
         finally {
-            DAOUtil.closeConnection(connection);
+        	DAOUtil.closeConnection(connection);
         }
+        
         return pk;
     }
     
-    /**
-     * Looks up primary key of a table.
-     * 
-     * @param conn
-     * @param catalog
-     * @param schema
-     * @param table
-     * @return PrimaryKey
-     */
-    public static PrimaryKey lookupTablePrimaryKey(Connection conn, String catalog, String schema, String table) {
+    private static PrimaryKey lookupPrimaryKey(Connection conn, String catalog, String schema, String table) {
         if (conn == null) 
             throw new IllegalArgumentException("Connection is null.");
         
         if (isEmpty(table)) 
             throw new IllegalArgumentException("Table name is empty for lookupTablePrimaryKey().");
         
-        List pkNames = new ArrayList();
+        String fullTableName = DatabaseConfig.getInstance().getFullTableName(table);
+        
+        List<String> pkNames = new ArrayList<String>();
         ResultSet rs = null;
         PrimaryKey pk = null;
         try {
-            catalog = validateValueAndToUpperCase(catalog);
-            schema = validateValueAndToUpperCase(schema);
-            table = validateValueAndToUpperCase(table);
+            catalog = toUpperCase(catalog);
+            schema = toUpperCase(schema);
+            fullTableName = toUpperCase(fullTableName);
             DatabaseMetaData dbmd = conn.getMetaData();
-            rs = dbmd.getPrimaryKeys(catalog, schema, table);
+            rs = dbmd.getPrimaryKeys(catalog, schema, fullTableName);
             while (rs.next()) {
-                //catalog = rs.getString("TABLE_CAT");
-                //schema = rs.getString("TABLE_SCHEM");
+                String _catalog = rs.getString("TABLE_CAT");
+                if (catalog == null) catalog = _catalog;
+                
+                String _schema = rs.getString("TABLE_SCHEM");
+                if (schema == null) schema = _schema;
+                
                 //table = rs.getString("TABLE_NAME");
                 String column = rs.getString("COLUMN_NAME");
                 pkNames.add(column);
@@ -1071,10 +1105,16 @@ public class SqlExpressUtil {
      * @return total record count
      */
     public static Object countTotalRecords(String connName, String table) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+
+    	if (table == null) 
+    		throw new IllegalArgumentException("table cannot be null.");
+    	
     	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
     	String countSQL = dba.getTotalCountSQL(connName, table);
     	
-        Map inputs = new HashMap();
+        Map<String, Object> inputs = new HashMap<String, Object>();
         inputs.put(DataProcessor.input_key_database_connection_name, connName);
 
         Object result = SqlServiceClient.retrieveObjectBySQL(countSQL, inputs);
@@ -1082,13 +1122,19 @@ public class SqlExpressUtil {
     }
     
     /**
-     * Returns finder sql
+     * Returns finder SQL query statement.
      * 
      * @param connName database connection name
      * @param table table name
-     * @return finder sql
+     * @return finder SQL query
      */
     public static String getFinderSQL(String connName, String table) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+
+    	if (table == null) 
+    		throw new IllegalArgumentException("table cannot be null.");
+    	
     	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
     	return dba.getRetrieveAllSQL(connName, table);
     }
@@ -1101,6 +1147,12 @@ public class SqlExpressUtil {
      * @return expanded table name
      */
     public static String getExpandedTableName(String connName, String table) {
+    	if (connName == null) 
+    		throw new IllegalArgumentException("connName cannot be null.");
+
+    	if (table == null) 
+    		throw new IllegalArgumentException("table cannot be null.");
+    	
     	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
     	return dba.getExpandedTableName(connName, table);
     }
@@ -1118,7 +1170,7 @@ public class SqlExpressUtil {
      * @param restfulId  restful id
      * @return map
      */
-    public static Map getTableKeyMapForRestfulId(RowInfo ri, String restfulId) {
+    public static Map<String, String> getTableKeyMapForRestfulId(RowInfo ri, String restfulId) {
         if (restfulId == null) throw new IllegalArgumentException("restfulId cannot be null in getTableKeyMap().");
         
         String[] ids = Converters.convertStringToStringArray(restfulId, DatabaseConfig.PRIMARY_KEY_SEPARATOR, false);
@@ -1144,7 +1196,7 @@ public class SqlExpressUtil {
         }
         
         int total = columns.length;
-        Map map = new HashMap(total);
+        Map<String, String> map = new HashMap<String, String>(total);
         for (int i = 0; i < total; i++) {
             String column = columns[i];
             String value = ids[i];

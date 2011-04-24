@@ -148,6 +148,8 @@ public class ContentHandlerHelper {
 		}
 		os.close();
 		byte[] buf = os.toByteArray();
+		is.close();
+		in.close();
         
 		publish(response, buf, mimeType);
     }

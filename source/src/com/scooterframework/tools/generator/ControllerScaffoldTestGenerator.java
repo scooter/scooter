@@ -17,10 +17,13 @@ import java.util.Map;
  */
 public class ControllerScaffoldTestGenerator extends ControllerScaffoldGenerator {
 
-	public ControllerScaffoldTestGenerator(String templateFilePath, Map props, String model) {
-		super(templateFilePath, props, model);
+	public ControllerScaffoldTestGenerator(String templateFilePath,
+			Map<String, String> props, String connectionName,
+			String controller, String model) {
+		super(templateFilePath, props, connectionName, controller, model);
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return (noPrefix)?(DIRECTORY_NAME_TEST + File.separatorChar + FUNCTIONAL_TEST):
 					(DIRECTORY_NAME_TEST + File.separatorChar + 
@@ -28,6 +31,7 @@ public class ControllerScaffoldTestGenerator extends ControllerScaffoldGenerator
 							packageName.replace('.', File.separatorChar));
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return controllerClassName + "Test" + FILE_EXTENSION_JAVA;
 	}

@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.sqldataexpress.object.ColumnInfo;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
 import com.scooterframework.web.util.O;
@@ -24,21 +23,23 @@ import com.scooterframework.web.util.O;
  * @author (Fei) John Chen
  */
 public class ViewEditGenerator extends ViewScaffoldGenerator {
-	public ViewEditGenerator(String templateFilePath, Map props, String controller, String model) {
-		super(templateFilePath, props, controller, model);
+	public ViewEditGenerator(String templateFilePath,
+			Map<String, String> props, String connName, String controller,
+			String model) {
+		super(templateFilePath, props, connName, controller, model);
 	}
 
 	protected String getAction() {
 		return "edit";
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, Object> getTemplateProperties() {
+		Map<String, Object> templateProps = new HashMap<String, Object>();
 
-		List columns = new ArrayList();
-		ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
+		List<Map<String, Object>> columns = new ArrayList<Map<String, Object>>();
 		RowInfo ri = O.rowInfoOf(recordHome);
-		Iterator it = O.columns(recordHome);
+		Iterator<ColumnInfo> it = O.columns(recordHome);
 		while(it.hasNext()) {
 			ColumnInfo ci = (ColumnInfo)it.next();
 			String columnName = ci.getColumnName();
@@ -69,7 +70,7 @@ public class ViewEditGenerator extends ViewScaffoldGenerator {
 		    	columnFormat = "(yyyy-mm-dd hh-mm-ss)";
 		    }
 		    
-		    Map column = new HashMap();
+		    Map<String, Object> column = new HashMap<String, Object>();
 		    if (isPKColumn) column.put("readonly", "readonly");
 		    column.put("isPKColumn", isPKColumn);
 		    column.put("isLongText", isLongText);

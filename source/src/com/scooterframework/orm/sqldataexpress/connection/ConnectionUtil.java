@@ -10,9 +10,8 @@ package com.scooterframework.orm.sqldataexpress.connection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -145,12 +144,7 @@ public class ConnectionUtil {
 			throw new CreateConnectionFailureException(errorMessage
 					+ " because " + ex.getMessage(), ex);
 		}
-
-		if (connection == null)
-			throw new CreateConnectionFailureException(
-					"createConnection() failed for dataSourceName: "
-							+ jndiDataSourceName + " and user " + username);
-
+		
 		return connection;
 	}
 
@@ -391,22 +385,18 @@ public class ConnectionUtil {
     
 	public static String getSetRoleStatement(Properties roles) {
 		String roleStr = "";
-		Set keys = roles.keySet();
-		if (keys != null) {
-			Iterator it = keys.iterator();
-			while (it.hasNext()) {
-				String key = (String) it.next();
-				String pwd = (String) roles.get(key);
-				if (pwd != null) {
-					roleStr = roleStr + " " + key + " identified by ? ,";
-				} else {
-					roleStr = roleStr + " " + key + ",";
-				}
+		for(Map.Entry<Object, Object> entry : roles.entrySet()) {
+			String key = (String) entry.getKey();
+			String pwd = (String) entry.getValue();
+			if (pwd != null) {
+				roleStr = roleStr + " " + key + " identified by ? ,";
+			} else {
+				roleStr = roleStr + " " + key + ",";
 			}
-			// remove the last ,
-			roleStr = roleStr.substring(0, roleStr.length() - 1);
 		}
-		return "set role " + roleStr;
+		// remove the last ,
+		roleStr = roleStr.substring(0, roleStr.length() - 1);
+		return "SET ROLE " + roleStr;
 	}
 
 	public static void checkReadonly(Connection connection,

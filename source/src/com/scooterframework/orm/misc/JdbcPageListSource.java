@@ -16,10 +16,11 @@ import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ActiveRecordConstants;
 import com.scooterframework.orm.activerecord.ActiveRecordUtil;
 import com.scooterframework.orm.sqldataexpress.exception.BaseSQLException;
+import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
 
 /**
- * <p>JdbcPageListSource class retrieves paged record list by using jdbc.</p>
+ * <p>JdbcPageListSource class retrieves paged record list by using ActiveRecord.</p>
  * 
  * <p>The caller of this class is responsible for setting proper values for limit, 
  * offset, recount, and inputs map. Default values will be used when they are 
@@ -27,7 +28,7 @@ import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
  * <tt>DataProcessor.DEFAULT_PAGINATION_LIMIT</tt>. The default value for 
  * offset is zero. The default value for recount is true./<p>
  * 
- * <p>You can specify more conditional sql query strings in the inputOptions map 
+ * <p>You can specify more conditional SQL query strings in the inputOptions map 
  * with key ActiveRecord.key_conditions_sql.</p>
  * 
  * @author (Fei) John Chen
@@ -38,8 +39,8 @@ public class JdbcPageListSource extends PageListSource {
      * 
      * @param modelClass the ActiveRecord entity type to be paginated. 
      */
-    public JdbcPageListSource(Class modelClass) {
-         this(modelClass, new HashMap());
+    public JdbcPageListSource(Class<? extends ActiveRecord> modelClass) {
+         this(modelClass, new HashMap<String, String>());
     }
     
     /**
@@ -48,7 +49,7 @@ public class JdbcPageListSource extends PageListSource {
      * @param modelClass the ActiveRecord entity type to be paginated. 
      * @param inputOptions Map of control information.
      */
-    public JdbcPageListSource(Class modelClass, Map inputOptions) {
+    public JdbcPageListSource(Class<? extends ActiveRecord> modelClass, Map<String, String> inputOptions) {
          this(modelClass, inputOptions, true);
     }
     
@@ -60,7 +61,7 @@ public class JdbcPageListSource extends PageListSource {
      * @param recount <tt>true</tt> if recount of total records is allowed;
      *		    <tt>false</tt> otherwise.
      */
-    public JdbcPageListSource(Class modelClass, Map inputOptions, boolean recount) {
+    public JdbcPageListSource(Class<? extends ActiveRecord> modelClass, Map<String, String> inputOptions, boolean recount) {
     	super(inputOptions, recount);
     	
     	if (modelClass == null) {
@@ -72,15 +73,20 @@ public class JdbcPageListSource extends PageListSource {
     	}
     	
         this.modelClass = modelClass;
-    }
+        
+		inputOptions.put(DataProcessor.input_key_database_connection_name,
+			ActiveRecordUtil.getHomeInstance(modelClass).getConnectionName());
+	}
 
     protected int countTotalRecords() {
-    	Map options = inputOptions;
+    	Map<String, String> options = inputOptions;
         int totalRecords = 0;
         
         try {
             // count records
-            Map inputs = ActiveRecordUtil.getGateway(modelClass).constructFindSQL(options, options);
+        	Map<String, Object> conditions = new HashMap<String, Object>(options.size());
+        	conditions.putAll(options);
+            Map<String, Object> inputs = ActiveRecordUtil.getGateway(modelClass).constructFindSQL(conditions, options);
             String findSQL = (String)inputs.get(ActiveRecordConstants.key_finder_sql);
             String selectCountSQL = "SELECT count(*) total FROM (" + findSQL + ") xxx";
             
@@ -94,10 +100,12 @@ public class JdbcPageListSource extends PageListSource {
         return totalRecords;
     }
     
-    protected List retrieveList() {
-        Map options = inputOptions;
-        return ActiveRecordUtil.getGateway(modelClass).findAll(options, options);
+    protected List<ActiveRecord> retrieveList() {
+        Map<String, String> options = inputOptions;
+    	Map<String, Object> conditions = new HashMap<String, Object>(options.size());
+    	conditions.putAll(options);
+        return ActiveRecordUtil.getGateway(modelClass).findAll(conditions, options);
     }
 
-    private Class modelClass;
+    private Class<? extends ActiveRecord> modelClass;
 }

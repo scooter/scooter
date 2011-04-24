@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.connection.DatabaseConnectionContext;
@@ -71,9 +72,9 @@ abstract public class AbstractTransactionImpl implements Transaction {
         bTransactionHasEnded = true;
         
         try {
-            Iterator it = connList.iterator();
+            Iterator<UserDatabaseConnection> it = connList.iterator();
             while(it.hasNext()) {
-                UserDatabaseConnection udc = (UserDatabaseConnection)it.next();
+                UserDatabaseConnection udc = it.next();
                 DAOUtil.closeConnection(udc.getConnection());
             }
             connList.clear();
@@ -186,8 +187,8 @@ abstract public class AbstractTransactionImpl implements Transaction {
         return udc;
     }
 
-    protected HashMap nameConnMap = new HashMap();
-    protected List connList = new ArrayList();
+    protected Map<String, UserDatabaseConnection> nameConnMap = new HashMap<String, UserDatabaseConnection>();
+    protected List<UserDatabaseConnection> connList = new ArrayList<UserDatabaseConnection>();
     protected String transactionType = null;
     protected boolean bTransactionHasStarted = false;
     protected boolean bTransactionHasEnded = false;

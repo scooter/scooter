@@ -41,23 +41,23 @@ import com.scooterframework.tools.common.ToolsUtil;
  * <pre>
 	Usage:
 	    java -jar tools/server.jar app_name [port, [config ...]]
-	
+
 	Examples:
 	    This page:
 	        java -jar tools/server.jar -help
-	
+
 	    Run Jetty Server with default jetty.xml in tools/servers/jetty/etc and port 8080:
 	        java -jar tools/server.jar blog
-	
+
 	    Run Jetty Server with default jetty.xml in tools/servers/jetty/etc but on port 8090:
 	        java -jar tools/server.jar blog 8090
-	
+
 	    Run Jetty Server with the blog sample app on port 8091:
 	        java -jar tools/server.jar examples/blog 8091
-	
+
 	    Run Jetty Server with the blog sample app installed in user home:
 	        java -jar tools/server.jar /home/john/blog
-	
+
 	    Run Jetty Server as JettyPlus (JNDI, JAAS etc.) with config files in tools/servers/jetty/etc:
 	        java -jar tools/server.jar blog etc/jetty-plus.xml etc/jetty.xml
  * </pre>
@@ -223,9 +223,9 @@ public class StartServer {
 	private static void validateXMLsExistence(String jettyHome, List<String> names) {
 		Iterator<String> it = names.iterator();
 		while(it.hasNext()) {
-			String name = (String)it.next();
+			String name = it.next();
 			if (!name.endsWith(".xml")) continue;
-			
+
 			String jettyXMLPath = jettyHome + File.separator + name;
 			File jx = new File(jettyXMLPath);
             if (!jx.exists()) {
@@ -240,7 +240,7 @@ public class StartServer {
 	}
 
 	private static String getXMLsAsString(String jettyHome, List<String> jettyXMLs) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<String> it = jettyXMLs.iterator();
 		while(it.hasNext()) {
 			sb.append(jettyHome).append(File.separator);
@@ -250,11 +250,13 @@ public class StartServer {
 		return (s.endsWith(", "))?s.substring(0, s.length()-2):s;
 	}
 
+	@SuppressWarnings("unused")
 	private static String getJDKHome() {
 		String s = System.getProperty("java.home");
 		return s.substring(0, s.length()-4);
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean existsToolsJar(String jdkHome) {
 		boolean exist = false;
 		File f = new File(jdkHome + File.separator +
@@ -294,8 +296,8 @@ public class StartServer {
     throws IllegalAccessException, InvocationTargetException,
             NoSuchMethodException, ClassNotFoundException
     {
-        Class invoked_class = classloader.loadClass(classname);
-        Class[] method_param_types = new Class[1];
+        Class<?> invoked_class = classloader.loadClass(classname);
+        Class<?>[] method_param_types = new Class[1];
         method_param_types[0]= args.getClass();
         Method main = invoked_class.getDeclaredMethod("main", method_param_types);
         Object[] method_params = new Object[1];

@@ -7,8 +7,6 @@
  */
 package com.scooterframework.transaction;
 
-import java.util.Iterator;
-
 import javax.naming.InitialContext;
 import javax.transaction.UserTransaction;
 
@@ -74,9 +72,7 @@ public class JtaTransaction extends AbstractTransactionImpl {
         try {
             super.commit();
             
-            Iterator it = connList.iterator();
-            while(it.hasNext()) {
-                UserDatabaseConnection udc = (UserDatabaseConnection)it.next();
+            for (UserDatabaseConnection udc : connList) {
                 if (UserDatabaseConnection.JDBC_CONNECTION.equals(udc.getConnectionType()))
                     DAOUtil.commit(udc.getConnection());
             }
@@ -101,9 +97,7 @@ public class JtaTransaction extends AbstractTransactionImpl {
         try {
             super.rollback();
             
-            Iterator it = connList.iterator();
-            while(it.hasNext()) {
-                UserDatabaseConnection udc = (UserDatabaseConnection)it.next();
+            for (UserDatabaseConnection udc : connList) {
                 if (UserDatabaseConnection.JDBC_CONNECTION.equals(udc.getConnectionType()))
                     DAOUtil.rollback(udc.getConnection());
             }

@@ -8,7 +8,6 @@
 package com.scooterframework.web.controller;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +24,7 @@ import com.scooterframework.common.util.StringUtil;
  * </p>
  * 
  * <p>
- * There are six supported scopes: thread, parameter, request, sesison, context
+ * There are six supported scopes: thread, parameter, request, session, context
  * and global. The first scope supports data held in current thread, the next 
  * four scopes map to the corresponding scopes in Servlet and JSP for web 
  * environment. The global scope provides a place for the whole application to 
@@ -74,7 +73,7 @@ public abstract class ActionContext {
     /**
      * Global data map.
      */
-    private static Map globalData = new HashMap();
+    private static Map<String, Object> globalData = new HashMap<String, Object>();
 
     public ActionContext() {
     }
@@ -82,32 +81,35 @@ public abstract class ActionContext {
     /**
      * <p>Gets data in parameter scope as a map.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public abstract Map getParameterDataAsMap();
+    public abstract Map<String, Object> getParameterDataAsMap();
     
     /**
      * <p>Gets data in request scope as a map.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public abstract Map getRequestDataAsMap();
+    public abstract Map<String, Object> getRequestDataAsMap();
     
     /**
      * <p>Gets data in both parameter scope and request scope as a map.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public Map getAllRequestDataAsMap() {
-        Map pm = getParameterDataAsMap();
-        Map rm = getRequestDataAsMap();
-        pm.putAll(rm);
+    public Map<String, Object> getAllRequestDataAsMap() {
+        Map<String, Object> pm = getParameterDataAsMap();
+        Map<String, Object> rm = getRequestDataAsMap();
+        
+        if (pm == null) pm = new HashMap<String, Object>();
+        
+        if (rm != null) pm.putAll(rm);
         return pm;
     }
 
@@ -115,21 +117,20 @@ public abstract class ActionContext {
      * <p>Gets data in parameter scope as a map. Only those keys with a specific 
      * keyPrefix will be processed.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public Map getParameterDataAsMap(String keyPrefix) {
-        Map m = getParameterDataAsMap();
+    public Map<String, Object> getParameterDataAsMap(String keyPrefix) {
+        Map<String, Object> m = getParameterDataAsMap();
         if (keyPrefix == null || "".equals(keyPrefix)) return m;
         
-        Map m2 = new HashMap();
-        Iterator it = m.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            if (key.startsWith(keyPrefix)) {
+        Map<String, Object> m2 = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : m.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.startsWith(keyPrefix)) {
                 String key2 = key.substring(keyPrefix.length());
-                m2.put(key2, m.get(key));
+                m2.put(key2, entry.getValue());
             }
         }
         return m2;
@@ -139,19 +140,18 @@ public abstract class ActionContext {
      * <p>Gets data in request scope as a map. Only those keys with a specific 
      * keyPrefix will be processed.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public Map getRequestDataAsMap(String keyPrefix) {
-        Map m = getRequestDataAsMap();
+    public Map<String, Object> getRequestDataAsMap(String keyPrefix) {
+        Map<String, Object> m = getRequestDataAsMap();
         if (keyPrefix == null || "".equals(keyPrefix)) return m;
         
-        Map m2 = new HashMap();
-        Iterator it = m.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            if (key.startsWith(keyPrefix)) {
+        Map<String, Object> m2 = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : m.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.startsWith(keyPrefix)) {
                 String key2 = key.substring(keyPrefix.length());
                 m2.put(key2, m.get(key));
             }
@@ -163,39 +163,42 @@ public abstract class ActionContext {
      * <p>Gets data in both parameter scope and request scope as a map. Only those 
      * keys with a specific keyPrefix will be processed.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public Map getAllRequestDataAsMap(String keyPrefix) {
-        Map pm = getParameterDataAsMap(keyPrefix);
-        Map rm = getRequestDataAsMap(keyPrefix);
-        pm.putAll(rm);
+    public Map<String, Object> getAllRequestDataAsMap(String keyPrefix) {
+        Map<String, Object> pm = getParameterDataAsMap(keyPrefix);
+        Map<String, Object> rm = getRequestDataAsMap(keyPrefix);
+        
+        if (pm == null) pm = new HashMap<String, Object>();
+        
+        if (rm != null) pm.putAll(rm);
         return pm;
     }
     
     /**
      * <p>Gets data in session scope as a map.</p>
      * 
-     * <p>Return guarrented: An empty map will be returned if there is no data.</p>
+     * <p>Return guaranteed: An empty map will be returned if there is no data.</p>
      * 
      * @return Map
      */
-    public abstract Map getSessionDataAsMap();
+    public abstract Map<String, Object> getSessionDataAsMap();
     
     /**
      * Gets data in context scope as a map.
      * 
      * @return Map
      */
-    public abstract Map getContextDataAsMap();
+    public abstract Map<String, Object> getContextDataAsMap();
     
     /**
      * Gets data in global scope as a map.
      * 
      * @return Map
      */
-    public static Map getGlobalDataAsMap() {
+    public static Map<String, Object> getGlobalDataAsMap() {
         return globalData;
     }
     
@@ -231,15 +234,16 @@ public abstract class ActionContext {
      * @return Object
      */
     public Object getFromParameterDataIgnoreCase(String key) {
+    	if (key == null) return null;
+    	
         Object tmp = null;
-        Map m = getParameterDataAsMap();
+        Map<String, Object> m = getParameterDataAsMap();
         if (m == null) return null;
         
-        Iterator it = m.keySet().iterator();
-        while(it.hasNext()) {
-            String name = (String)it.next();
+        for (Map.Entry<String, Object> entry : m.entrySet()) {
+            String name = entry.getKey();
             if (name.equalsIgnoreCase(key)) {
-                tmp = m.get(key);
+                tmp = entry.getValue();
                 break;
             }
         }
@@ -316,7 +320,7 @@ public abstract class ActionContext {
      * @param type flash message type
      * @return list of messages
      */
-    public List getAllFlashMessages(String type) {
+    public List<Message> getAllFlashMessages(String type) {
         FlashMessage fm = (FlashMessage)getFromRequestData(KEY_FLASH_MESSAGE);
         return (fm != null)?fm.getAll(type):null;
     }
@@ -342,7 +346,7 @@ public abstract class ActionContext {
      * <p>Gets data represented by the key from the first scope it is found.</p>
      * 
      * <p>
-     * There are six supported scopes: thread, parameter, request, sesison, context
+     * There are six supported scopes: thread, parameter, request, session, context
      * and global. The first scope supports data held in current thread, the next 
      * four scopes map to the corresponding scopes in Servlet and JSP for web 
      * environment. The global scope provides a place for the whole application to 
@@ -378,7 +382,7 @@ public abstract class ActionContext {
      * <p>Gets data represented by the key from the specific scope.</p>
      * 
      * <p>
-     * There are six supported scopes: thread, parameter, request, sesison, context
+     * There are six supported scopes: thread, parameter, request, session, context
      * and global. The first scope supports data held in current thread, the next 
      * four scopes map to the corresponding scopes in Servlet and JSP for web 
      * environment. The global scope provides a place for the whole application to 
@@ -576,7 +580,7 @@ public abstract class ActionContext {
      * 
      * @return Map of error
      */
-    public Map getErrorAsMap() {
+    public Map<String, Object> getErrorAsMap() {
         return errors;
     }
     
@@ -585,8 +589,8 @@ public abstract class ActionContext {
      * 
      * @param errors Map
      */
-    public void setErrors(Map errors) {
-        errors.putAll(errors);
+    public void setErrors(Map<String, Object> errors) {
+    	if (errors != null) this.errors.putAll(errors);
     }
     
     /**
@@ -611,7 +615,7 @@ public abstract class ActionContext {
     /**
      * Errors map.
      */
-    protected Map errors = new HashMap();
+    protected Map<String, Object> errors = new HashMap<String, Object>();
     
     
     /**
@@ -624,16 +628,17 @@ public abstract class ActionContext {
      * @param pkNames an array of primary key names.
      * @return map Map of primary key data.
      */
-    public Map retrievePrimaryKeyDataMapFromRequest(String keyPrefix, String[] pkNames) {
-        if (pkNames == null || pkNames.length == 0) return new HashMap();
+    public Map<String, Object> retrievePrimaryKeyDataMapFromRequest(String keyPrefix, String[] pkNames) {
+        if (pkNames == null || pkNames.length == 0) return new HashMap<String, Object>();
         if (keyPrefix == null) keyPrefix = "";
         
-        Map hm = new HashMap();
-        Map dataMap = getAllRequestDataAsMap(keyPrefix);
-        Iterator it = dataMap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            if (StringUtil.isStringInArray(key, pkNames, true)) hm.put(key.toLowerCase(), dataMap.get(key));
+        Map<String, Object> hm = new HashMap<String, Object>();
+        Map<String, Object> dataMap = getAllRequestDataAsMap(keyPrefix);
+        if (dataMap == null) return hm;
+        
+        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && StringUtil.isStringInArray(key, pkNames, true)) hm.put(key.toLowerCase(), entry.getValue());
         }
         
         return hm;
@@ -645,7 +650,7 @@ public abstract class ActionContext {
      * @param pkNames an array of primary key names.
      * @return map Map of primary key data.
      */
-    public Map retrievePrimaryKeyDataMapFromRequest(String[] pkNames) {
+    public Map<String, Object> retrievePrimaryKeyDataMapFromRequest(String[] pkNames) {
         return retrievePrimaryKeyDataMapFromRequest("", pkNames);
     }
     
@@ -667,7 +672,7 @@ public abstract class ActionContext {
      * object is found, <tt>Locale.getDefault()</tt> is returned. </p>
      * 
      * <p>
-     * There are six supported scopes: thread, parameter, request, sesison, context
+     * There are six supported scopes: thread, parameter, request, session, context
      * and global. The first scope supports data held in current thread, the next 
      * four scopes map to the corresponding scopes in Servlet and JSP for web 
      * environment. The global scope provides a place for the whole application to 
@@ -833,7 +838,7 @@ public abstract class ActionContext {
      */
     abstract protected void setCycleToCycleMap(String name, Object cycle);
     
-    private class Cycle {
+    private static class Cycle {
         public Cycle(String items) {
             cycleStrings = items;
             setItems(items);
@@ -848,7 +853,7 @@ public abstract class ActionContext {
         String getValue() {
             int pointer = getPointer();
             if (pointer == -1) return "";
-            latestItem = (String)itemsList.get(pointer);
+            latestItem = itemsList.get(pointer);
             
             return latestItem;
         }
@@ -880,7 +885,7 @@ public abstract class ActionContext {
         }
         
         private String cycleStrings = "";
-        private List itemsList = null;
+        private List<String> itemsList = null;
         private int currentIndex = 0;
         private String latestItem = "";
         private int totalSize = 0;

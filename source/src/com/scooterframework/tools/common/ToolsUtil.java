@@ -162,7 +162,7 @@ public class ToolsUtil {
 		return p;
 	}
     
-	public static void processAllFiles(File targetDir, Map allProps) throws IOException {
+	public static void processAllFiles(File targetDir, Map<String, String> allProps) throws IOException {
     	File[] files = targetDir.listFiles();
     	if (files == null) return;
     	for (int i = 0; i < files.length; i++) {

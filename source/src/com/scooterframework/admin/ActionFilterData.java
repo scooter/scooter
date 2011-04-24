@@ -29,7 +29,7 @@ public class ActionFilterData
      * @param type      a string to indicate filter type
      * @param filters   a list of method names that act as filters separated by comma
      */
-    public ActionFilterData(Class filterClz, String type, String filters) {
+    public ActionFilterData(Class<?> filterClz, String type, String filters) {
         this(filterClz, type, null, filters, null);
     }
     
@@ -42,7 +42,7 @@ public class ActionFilterData
      * @param filters   a list of method names that act as filters separated by comma
      * @param actions   a list of method names separated by comma
      */
-    public ActionFilterData(Class filterClz, String type, String option, String filters, String actions) {
+    public ActionFilterData(Class<?> filterClz, String type, String option, String filters, String actions) {
         this.filterClz = filterClz;
         this.type = type;
         this.option = option;
@@ -62,8 +62,8 @@ public class ActionFilterData
      * @param action
      * @return a list of filters for the action
      */
-    public List getFilters(String action) {
-        List filters = new ArrayList();
+    public List<ActionControlFilter> getFilters(String action) {
+        List<ActionControlFilter> filters = new ArrayList<ActionControlFilter>();
         
         //check if the action is eligible
         if ((isForAllActions() && (filterNames != null)) ||
@@ -84,13 +84,13 @@ public class ActionFilterData
     	return type;
     }
 
-    private List _getFilters() {
-        List filters = new ArrayList();
+    private List<ActionControlFilter> _getFilters() {
+        List<ActionControlFilter> filters = new ArrayList<ActionControlFilter>();
         
         //apply all filters on this action
-        Iterator it = filterNames.iterator();
+        Iterator<String> it = filterNames.iterator();
         while(it.hasNext()) {
-            String filter = (String)it.next();
+            String filter = it.next();
             filters.add(getFilter(filterClz, filter));
         }
         
@@ -109,7 +109,7 @@ public class ActionFilterData
         return FilterManager.FILTER_OPTION_EXCEPT.equals(option);
     }
     
-    private ActionControlFilter getFilter(Class fc, String filter) {
+    private ActionControlFilter getFilter(Class<?> fc, String filter) {
         String key = ActionControlFilter.formatKey(fc, filter);
         ActionControlFilter acf = null;
         if (acfMap.containsKey(key)) {
@@ -125,7 +125,7 @@ public class ActionFilterData
     /**
      * the declaring class of filter methods
      */
-    private Class filterClz = null;
+    private Class<?> filterClz = null;
     
     /**
      * filter type field
@@ -137,13 +137,13 @@ public class ActionFilterData
      */
     private String option = null;
     
-    private List filterNames;
+    private List<String> filterNames;
     
-    private List actionNames;
+    private List<String> actionNames;
     
     /**
      * Map of ActionControlFilter. Key is a combination of the filter method 
      * name and its class name
      */
-    private static Map acfMap = new HashMap();
+    private static Map<String, ActionControlFilter> acfMap = new HashMap<String, ActionControlFilter>();
 }

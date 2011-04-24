@@ -41,7 +41,12 @@ public class $controller_class_name$ extends ApplicationController {
      * <tt>show</tt> method returns a <tt>$model_name$</tt> record.
      */
     public String show() {
+$if(hasPrimaryKey)$
+        ActiveRecord $model_name$ = $model_class_name$.findByPK(p("id"));
+$else$
         ActiveRecord $model_name$ = $model_class_name$.findById(p("id"));
+$endif$
+
         if ($model_name$ == null) {
             flash("notice", "There is no $model_name$ record with primary key id as " + p("id") + ".");
         }
@@ -94,7 +99,12 @@ public class $controller_class_name$ extends ApplicationController {
     public String update() {
         ActiveRecord $model_name$ = null;
         try {
+$if(hasPrimaryKey)$
+            $model_name$ = $model_class_name$.findByPK(p("id"));
+$else$
             $model_name$ = $model_class_name$.findById(p("id"));
+$endif$
+
             if ($model_name$ != null) {
                 $model_name$.setData(params());
                 $model_name$.update();
@@ -119,7 +129,12 @@ public class $controller_class_name$ extends ApplicationController {
      * <tt>delete</tt> method deletes a <tt>$model_name$</tt> record.
      */
     public String delete() {
+$if(hasPrimaryKey)$
+        ActiveRecord $model_name$ = $model_class_name$.findByPK(p("id"));
+$else$
         ActiveRecord $model_name$ = $model_class_name$.findById(p("id"));
+$endif$
+
         if ($model_name$ != null) {
             $model_name$.delete();
             flash("notice", "$model_name_camel$ was successfully deleted.");

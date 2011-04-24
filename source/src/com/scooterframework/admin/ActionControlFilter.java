@@ -21,7 +21,7 @@ public class ActionControlFilter {
      * @param owner   the declaring class of the filter method
      * @param filter  a public method name in the controller that acts as a filter.
      */
-    public ActionControlFilter(Class owner, String filter) {
+    public ActionControlFilter(Class<?> owner, String filter) {
         this.owner = owner;
         this.filterMethod = filter;
         key = formatKey(owner, filter);
@@ -51,7 +51,7 @@ public class ActionControlFilter {
         return key;
     }
     
-    public static String formatKey(Class owner, String filter) {
+    public static String formatKey(Class<?> owner, String filter) {
         return owner.getName() + "_" + filter + "_";
     }
     
@@ -59,7 +59,7 @@ public class ActionControlFilter {
     /**
      *  the declaring class of the filter method
      */
-    private Class owner;
+    private Class<?> owner;
     
     /**
      * A public method name in the controller class that acts as a filter.

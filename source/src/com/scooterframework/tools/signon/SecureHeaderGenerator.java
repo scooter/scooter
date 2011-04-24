@@ -22,7 +22,7 @@ public class SecureHeaderGenerator extends AbstractGenerator {
 	private String relativePathToView;
 	private String viewFileName;
 
-	public SecureHeaderGenerator(String templateFilePath, Map props) {
+	public SecureHeaderGenerator(String templateFilePath, Map<String, String> props) {
 		super(templateFilePath, props);
 		
 		String headerName = "header";
@@ -39,20 +39,24 @@ public class SecureHeaderGenerator extends AbstractGenerator {
 		viewFileName = isEmpty(viewExtension)?headerName:(headerName + viewExtension);
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
-		templateProps.put("app_name", WordUtil.titleize(getProperty("app.name").toString()));
+	@Override
+	protected Map<String, String> getTemplateProperties() {
+		Map<String, String> templateProps = new HashMap<String, String>();
+		templateProps.put("app_name", WordUtil.titleize(getProperty("app.name")));
 		return templateProps;
 	}
 	
+	@Override
 	protected String getRootPath() {
-		return getProperty("app.path").toString();
+		return getProperty("app.path");
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return relativePathToView;
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return viewFileName;
 	}

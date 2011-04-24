@@ -81,4 +81,8 @@ public class SpyMemcachedCacheProvider extends CacheProvider {
     public void onStop() {
     	client.shutdown(timeout, TimeUnit.SECONDS);
     }
+    
+    public String getVersion() {
+    	return "0.1.0";
+    }
 }

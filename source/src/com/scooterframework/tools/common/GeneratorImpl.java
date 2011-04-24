@@ -8,7 +8,6 @@
 package com.scooterframework.tools.common;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -34,21 +33,25 @@ public abstract class GeneratorImpl implements Generator {
 	private static final String CHANGED_YES = "Y";
 	
 	protected String templateFilePath;
-	private Map props;
+	private Map<String, String> props;
 	
 	public static final String linebreak = System.getProperty("line.separator", "\r\n");
 	
-	public GeneratorImpl(Map props) {
+	public GeneratorImpl(Map<String, String> props) {
 		this.props = props;
 	}
 	
-	public GeneratorImpl(String templateFilePath, Map props) {
+	public GeneratorImpl(String templateFilePath, Map<String, String> props) {
 		this.templateFilePath = templateFilePath;
 		this.props = props;
 	}
 	
-	protected Object getProperty(String key) {
+	protected String getProperty(String key) {
 		return props.get(key);
+	}
+	
+	protected String toString(Object o) {
+		return (o != null)?o.toString():null;
 	}
 
 	protected String getTemplateFileContent(String templateFilePath) {
@@ -87,7 +90,7 @@ public abstract class GeneratorImpl implements Generator {
 		return getTemplateFileContent(templateFilePath);
 	}
 	
-	protected abstract Map getTemplateProperties();
+	protected abstract Map<String, ?> getTemplateProperties();
 	
 	protected abstract String getRootPath();
 	
@@ -95,7 +98,7 @@ public abstract class GeneratorImpl implements Generator {
 	
 	protected abstract String getOutputFileName();
 	
-	protected void generate(String templateContent, Map props, String rootPath, 
+	protected void generate(String templateContent, Map<String, ?> props, String rootPath, 
 			String relativePathToFile, String outputFileName, boolean overwrite) {
 		String outputFile = (relativePathToFile == null || "".equals(relativePathToFile))?
 				outputFileName:(relativePathToFile + File.separatorChar + outputFileName);
@@ -103,7 +106,7 @@ public abstract class GeneratorImpl implements Generator {
 		generate(templateContent, props, fullPathToOutputFile, overwrite);
 	}
 	
-	protected void generate(String templateContent, Map props, 
+	protected void generate(String templateContent, Map<String, ?> props, 
 			String fullPathToOutputFile, boolean overwrite) {
 		int status = -1;
 		if (templateContent == null) {
@@ -117,7 +120,6 @@ public abstract class GeneratorImpl implements Generator {
 				status = GeneratorHelper.outputTo(processedContent, 
 						fullPathToOutputFile, overwrite);
 				if (CHANGED_YES.equals(processStatus)) {
-					status = 1;
 					log(Util.decode(status, "-1=exists, 0=create, 1=recreate", "      ") + " " + fullPathToOutputFile.replace('\\', '/'));
 				}
 			}
@@ -128,7 +130,7 @@ public abstract class GeneratorImpl implements Generator {
 		}
 	}
 	
-	protected String[] processTemplateContent(String templateContent, Map props) {
+	protected String[] processTemplateContent(String templateContent, Map<String, ?> props) {
 		String[] results = new String[2];
 		results[0] = CHANGED_NO;
 		results[1] = templateContent;
@@ -143,24 +145,23 @@ public abstract class GeneratorImpl implements Generator {
 		return results;
 	}
 	
-	protected String renderContent(String originalContent, Map props) {
+	protected String renderContent(String originalContent, Map<String, ?> props) {
 		return ("Q".equals(props.get(Generator.TEMPLATE_PARSER_TYPE)))?
 				renderContent_Q(originalContent, props)
 				:renderContent_ST(originalContent, props);
 	}
 	
-	private String renderContent_Q(String originalContent, Map props) {
+	private String renderContent_Q(String originalContent, Map<String, ?> props) {
 		String newContent = originalContent;
-		Iterator it = props.keySet().iterator();
-		while(it.hasNext()) {
-			String key = (String)it.next();
-			String value = escape((String)props.get(key));
+		for (Map.Entry<String, ?> entry : props.entrySet()) {
+			String key = entry.getKey();
+			String value = escape(entry.getValue());
 			newContent = newContent.replaceAll("\\Q{" + key + "}", value);
 		}
 		return newContent;
 	}
 	
-	private String renderContent_ST(String originalContent, Map props) {
+	private String renderContent_ST(String originalContent, Map<String, ?> props) {
 		StringTemplate st = new StringTemplate(originalContent);
 		st.setAttributes(props);
 		return st.toString();
@@ -174,7 +175,10 @@ public abstract class GeneratorImpl implements Generator {
 		return (s == null || "".equals(s.trim()))?true:false;
 	}
     
-    public static String escape(String s) {
+    public static String escape(Object o) {
+    	if (o == null) return null;
+    	
+    	String s = o.toString();
     	if (s.indexOf('\\') == -1) return s;
     	return s.replaceAll("\\\\", "\\\\\\\\");
     }

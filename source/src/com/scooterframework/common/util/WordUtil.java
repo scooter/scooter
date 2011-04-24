@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -9,7 +9,6 @@ package com.scooterframework.common.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -17,21 +16,21 @@ import java.util.StringTokenizer;
 
 /**
  * <p>Conversion between singular and plural form of a noun word.</p>
- * 
+ *
  * @author (Fei) John Chen
  */
 public class WordUtil {
-	
-	private static Map resolvedSingle2Plurals = new HashMap();
-	private static List resolvedPlurals = new ArrayList();
-	private static Map resolvedPlural2Singles = new HashMap();
-	private static List resolvedSingles = new ArrayList();
-	
-	public static Map single2plurals = new HashMap();
-	public static List plurals = new ArrayList();
-	public static Map plural2singles = new HashMap();
-    public static List singles = new ArrayList();
-    
+
+	private static final Map<String, String> resolvedSingle2Plurals = new HashMap<String, String>();
+	private static final List<String> resolvedPlurals = new ArrayList<String>();
+	private static final Map<String, String> resolvedPlural2Singles = new HashMap<String, String>();
+	private static final List<String> resolvedSingles = new ArrayList<String>();
+
+	public static final Map<String, String> single2plurals = new HashMap<String, String>();
+	public static final List<String> plurals = new ArrayList<String>();
+	public static final Map<String, String> plural2singles = new HashMap<String, String>();
+    public static final List<String> singles = new ArrayList<String>();
+
     static {
     	//Irregular plurals:
         single2plurals.put("child", "children");
@@ -45,7 +44,7 @@ public class WordUtil {
         single2plurals.put("person", "people");
         single2plurals.put("tooth", "teeth");
         single2plurals.put("woman", "women");
-        
+
         //Some nouns do not change at all:
         single2plurals.put("cod", "cod");
         single2plurals.put("deer", "deer");
@@ -56,22 +55,22 @@ public class WordUtil {
         single2plurals.put("trout", "trout");
         single2plurals.put("species", "species");
         single2plurals.put("series", "series");
-        
+
         //Other nouns that do not change:
         single2plurals.put("data", "data");
         single2plurals.put("dice", "dice");
         single2plurals.put("media", "media");
-        
-        //Singular ends in -us, plural ends in -i: alumnus/alumni, focus/foci, nucleus/nuclei, 
+
+        //Singular ends in -us, plural ends in -i: alumnus/alumni, focus/foci, nucleus/nuclei,
         //octopus/octopi, radius/radii, stimulus/stimuli, virus/viri
         //Exceptions to the above
         single2plurals.put("bus", "buses");
-        
+
         //Singular ends in -ex, plural ends in -ices: appendix/appendices, index/indices
         single2plurals.put("index", "indices");
         single2plurals.put("vertex", "vertices");
-        
-        //These include nouns that are traditionally plural, but are also used for singular forms: 
+
+        //These include nouns that are traditionally plural, but are also used for singular forms:
         single2plurals.put("barracks", "barracks");
         single2plurals.put("crossroads", "crossroads");
         single2plurals.put("die", "dice");
@@ -80,8 +79,8 @@ public class WordUtil {
         single2plurals.put("means", "means");
         single2plurals.put("series", "series");
         single2plurals.put("species", "species");
-        
-        //Exception to Rule 6: Some nouns ending in f or fe are made plural 
+
+        //Exception to Rule 6: Some nouns ending in f or fe are made plural
         //by changing f or fe to ves. with the following exceptions:
         single2plurals.put("chief", "chiefs");
         single2plurals.put("chef", "chefs");
@@ -94,15 +93,15 @@ public class WordUtil {
         single2plurals.put("safe", "safes");
         single2plurals.put("mischief", "mischiefs");
         single2plurals.put("grief", "griefs");
-        
+
         //Rule 7b: All musical terms ending in -o have plurals ending in just -s.
         single2plurals.put("cello", "cellos");
         single2plurals.put("photo", "photos");
         single2plurals.put("solo", "solos");
         single2plurals.put("soprano", "sopranos");
         single2plurals.put("studio", "studios");
-        
-        //Exception to Rule 7: Most nouns ending in o preceded by a consonant 
+
+        //Exception to Rule 7: Most nouns ending in o preceded by a consonant
         //is formed into a plural by adding es with the following exceptions:
         single2plurals.put("canto", "cantos");
         single2plurals.put("lasso", "lassos");
@@ -110,7 +109,7 @@ public class WordUtil {
         single2plurals.put("memento", "mementos");
         single2plurals.put("photo", "photos");
         single2plurals.put("sirocco", "siroccos");
-        
+
         //Rule 7c: Plural forms of words ending in -o (-os):
         single2plurals.put("albino", "albinos");
         single2plurals.put("armadillo", "armadillos");
@@ -138,7 +137,7 @@ public class WordUtil {
         single2plurals.put("torso", "torsos");
         single2plurals.put("tobacco", "tobaccos");
         single2plurals.put("typo", "typos");
-        
+
         //Rule 7c: Plural forms of words ending in -o (-oes):
         single2plurals.put("echo", "echoes");
         single2plurals.put("embargo", "embargoes");
@@ -147,7 +146,7 @@ public class WordUtil {
         single2plurals.put("tomato", "tomatoes");
         single2plurals.put("torpedo", "torpedoes");
         single2plurals.put("veto", "vetoes");
-        
+
         //Rule 7c: Plural forms of words ending in -o (-os or -oes):
         single2plurals.put("avocado", "avocados");
         single2plurals.put("buffalo", "buffaloes");
@@ -169,11 +168,11 @@ public class WordUtil {
         single2plurals.put("tornado", "tornadoes");
         single2plurals.put("volcano", "volcanoes");
         single2plurals.put("zero", "zeros");
-        
+
         //others
         single2plurals.put("forum", "forums");
-        
-        //Things that come in pairs 
+
+        //Things that come in pairs
         plurals.add("binoculars");
         plurals.add("forceps");
         plurals.add("jeans");
@@ -185,8 +184,8 @@ public class WordUtil {
         plurals.add("tongs");
         plurals.add("trousers");
         plurals.add("tweezers");
-        
-        //Nouns that end in -s but have no singular (aggregate nouns) 
+
+        //Nouns that end in -s but have no singular (aggregate nouns)
         plurals.add("accommodations");
         plurals.add("amends");
         plurals.add("archives");
@@ -210,8 +209,8 @@ public class WordUtil {
         plurals.add("thanks");
         plurals.add("vespers");
         plurals.add("victuals");
-        
-        //Nouns that are plural but do not end in -s 
+
+        //Nouns that are plural but do not end in -s
         plurals.add("children");
         plurals.add("cattle");
         plurals.add("corpora");
@@ -220,7 +219,7 @@ public class WordUtil {
         plurals.add("people");
         plurals.add("police");
         plurals.add("women");
-        
+
         //Nouns that are always singular -- uncountable
         singles.add("cooper");
         singles.add("corn");
@@ -233,7 +232,7 @@ public class WordUtil {
         singles.add("silver");
         singles.add("sugar");
         singles.add("wheat");
-        
+
         //plural2singles.put("data", "data");
         //plural2singles.put("media", "media");
         plural2singles.put("dice", "dice");
@@ -241,7 +240,7 @@ public class WordUtil {
         plural2singles.put("vertices", "vertex");
         plural2singles.put("movies", "movie");
         plural2singles.put("viri", "virus");
-        
+
         plural2singles.put("axes", "axis");
         plural2singles.put("crises", "crisis");
         plural2singles.put("analyses", "analysis");
@@ -251,51 +250,49 @@ public class WordUtil {
         plural2singles.put("moves", "move");
         plural2singles.put("caves", "cave");
         plural2singles.put("toes", "toe");
-        
+
         //merge plural2singles with single2plurals
-        Iterator its = single2plurals.keySet().iterator();
-        while(its.hasNext()) {
-        	Object sk = its.next();
-        	Object sv = single2plurals.get(sk);
-        	Object pv = plural2singles.get(sv);
+        for (Map.Entry<String, String> entry : single2plurals.entrySet()) {
+        	String sk = entry.getKey();
+        	String sv = entry.getValue();
+        	String pv = plural2singles.get(sv);
         	if (pv == null) {
         		plural2singles.put(sv, sk);
         	}
         }
-        
+
         //merge single2plurals with plural2singles
-        Iterator itp = plural2singles.keySet().iterator();
-        while(itp.hasNext()) {
-        	Object pk = itp.next();
-        	Object pv = plural2singles.get(pk);
-        	Object sv = single2plurals.get(pv);
+        for (Map.Entry<String, String> entry : plural2singles.entrySet()) {
+        	String pk = entry.getKey();
+        	String pv = entry.getValue();
+        	String sv = single2plurals.get(pv);
         	if (sv == null) {
         		single2plurals.put(pv, pk);
         	}
         }
     }
-    
+
     /**
      * Returns a pluralized word.
-     * 
+     *
      * @param word          the word to be converted to plural form
      * @return pluralized string
      */
     public static String pluralize(String word) {
     	if (word == null || "".equals(word)) return word;
-    	
-    	String plform = (String)resolvedSingle2Plurals.get(word);
+
+    	String plform = resolvedSingle2Plurals.get(word);
     	if (plform == null && (resolvedPlurals.contains(word) || resolvedPlural2Singles.containsKey(word))) {
     		plform = word;
     	}
     	if (plform != null) return plform;
-    	
+
         String tmp = word.toLowerCase();
-        plform = (String)single2plurals.get(tmp);
+        plform = single2plurals.get(tmp);
         if (plform == null && (plurals.contains(tmp) || singles.contains(tmp) || plural2singles.containsKey(tmp))) {
             plform = tmp;
         }
-        
+
     	if (plform != null) {
     		;
     	}
@@ -307,14 +304,14 @@ public class WordUtil {
         else if (tmp.endsWith("ix")) {
             plform = replaceLast(tmp, "ix", "ices");
         }
-        //Singular ends in -us, plural ends in -i: alumnus/alumni, focus/foci, nucleus/nuclei, 
+        //Singular ends in -us, plural ends in -i: alumnus/alumni, focus/foci, nucleus/nuclei,
         //octopus/octopi, radius/radii, stimulus/stimuli, virus/viri
         else if (tmp.endsWith("us")) {
             plform = replaceLast(tmp, "us", "i");
         }
         //Rule #2: For words that end in a "hissing" sound (-s, -z, -x, -ch, -sh), add an -es to form the plural.
     	//Note: I removed tmp.endsWith("s") || as this cause "posts"->"postses".
-        else if (!tmp.endsWith("es") && (tmp.endsWith("z") || 
+        else if (!tmp.endsWith("es") && (tmp.endsWith("z") ||
         		 tmp.endsWith("x") || tmp.endsWith("ch") || tmp.endsWith("sh"))) {
             plform = tmp + "es";
         }
@@ -338,7 +335,7 @@ public class WordUtil {
         }
         //Rule #7: The plurals of words ending in -o are formed by either adding -s or by adding -es
         else if (tmp.endsWith("o")) {
-            //All words that end in a vowel plus -o (-ao, -eo, -io, -oo, -uo) have plurals that end in just -s: 
+            //All words that end in a vowel plus -o (-ao, -eo, -io, -oo, -uo) have plurals that end in just -s:
             if (tmp.endsWith("ao") || tmp.endsWith("eo") || tmp.endsWith("io") ||
                 tmp.endsWith("oo") || tmp.endsWith("uo")) {
                 plform = word + "s";
@@ -354,7 +351,7 @@ public class WordUtil {
             plform = replaceLast(tmp, "um", "a");
         }
         //Singular ends in -on, plural ends in -a: criterion/criteria, phenomenon/phenomena
-        else if (tmp.endsWith("on")) {
+        else if (tmp.endsWith("on") && !tmp.endsWith("ation")) {
             plform = replaceLast(tmp, "on", "a");
         }
         //Singular ends in -a, plural ends in -ae: alumna/alumnae, formula/formulae, antenna/antennae
@@ -373,7 +370,7 @@ public class WordUtil {
         else if (!tmp.endsWith("s")){
             plform = word + "s";
         }
-        //Rule #8: The plurals of single capital letters, acronyms, and Arabic numerals 
+        //Rule #8: The plurals of single capital letters, acronyms, and Arabic numerals
         //(1,2,3,...) take an -s WITHOUT an apostrophe:
     	else if (word.toUpperCase().equals(word)) {
             plform = word + "s";
@@ -383,7 +380,7 @@ public class WordUtil {
         	resolvedPlurals.add(word);
         	return word;
         }
-        
+
         //check cases
     	boolean caseChanged = false;
         int wl = word.length();
@@ -398,39 +395,39 @@ public class WordUtil {
         		caseChanged = true;
         	}
         }
-        
+
         if (caseChanged) plform = new String(pChars);
         if (!plform.equalsIgnoreCase(word)) {
 	        resolvedSingle2Plurals.put(word, plform);
 	        resolvedPlural2Singles.put(plform, word);
         }
-        
+
         return plform;
     }
-    
-    
-    
+
+
+
     /**
      * Returns a singularized word from a plural word.
-     * 
+     *
      * @param word          the word to be converted to singular form
      * @return singularized string
      */
     public static String singularize(String word) {
     	if (word == null || "".equals(word)) return word;
-    	
-    	String sgform = (String)resolvedPlural2Singles.get(word);
+
+    	String sgform = resolvedPlural2Singles.get(word);
     	if (sgform == null && (resolvedSingles.contains(word) || resolvedSingle2Plurals.containsKey(word))) {
     		sgform = word;
     	}
     	if (sgform != null) return sgform;
-    	
+
         String tmp = word.toLowerCase();
-        sgform = (String)plural2singles.get(tmp);
+        sgform = plural2singles.get(tmp);
         if (sgform == null && (plurals.contains(tmp) || singles.contains(tmp) || single2plurals.containsKey(tmp))) {
         	sgform = tmp;
         }
-        
+
         if (sgform != null) {
     		;
     	}
@@ -440,7 +437,7 @@ public class WordUtil {
         else if (tmp.endsWith("i")) {
         	sgform = replaceLast(tmp, "i", "us");
         }
-        else if (tmp.endsWith("ses") && !tmp.endsWith("bases") || 
+        else if (tmp.endsWith("ses") && !tmp.endsWith("bases") ||
                 tmp.endsWith("zes") || tmp.endsWith("xes") ||
                 tmp.endsWith("ches") || tmp.endsWith("shes")) {
             sgform = replaceLast(tmp, "es", "");
@@ -484,7 +481,7 @@ public class WordUtil {
         	resolvedSingles.add(word);
         	return word;
         }
-        
+
         //check cases
     	boolean caseChanged = false;
         int wl = word.length();
@@ -499,38 +496,38 @@ public class WordUtil {
         		caseChanged = true;
         	}
         }
-        
+
         if (caseChanged) sgform = new String(sChars);
         if (!sgform.equalsIgnoreCase(word)) {
 	        resolvedPlural2Singles.put(word, sgform);
 	        resolvedSingle2Plurals.put(sgform, word);
         }
-        
+
 		return sgform;
     }
-    
+
     /**
      * Replaces the last occurance of an old symbol with a new symbol.
-     * 
+     *
      * @param data              the original string
      * @param oldSymbol         the old symbols to be replaced
      * @param newSymbol         the corresponding new symbol
-     * @return a new string 
+     * @return a new string
      */
     public static String replaceLast(String data, String oldSymbol, String newSymbol) {
         if (data == null || data.indexOf(oldSymbol) == -1) return data;
-        
+
         int lastIndex = data.lastIndexOf(oldSymbol);
         int oldLength = oldSymbol.length();
-        String result = data.substring(0, lastIndex) + newSymbol + 
+        String result = data.substring(0, lastIndex) + newSymbol +
                         data.substring(lastIndex + oldLength);
-        
+
         return result;
     }
-    
+
     /**
      * Adds more pairs of single and plural words.
-     * 
+     *
      * @param single singular form of the word
      * @param plural plural form of the word
      */
@@ -538,21 +535,21 @@ public class WordUtil {
     	resolvedSingle2Plurals.put(single, plural);
     	resolvedPlural2Singles.put(plural, single);
     }
-    
+
     /**
-     * Converts string to Camel case. 
-     * 
+     * Converts string to Camel case.
+     *
      * @param word          the word to be converted to camelized form
      * @return a camelized string
      */
     public static String camelize(String word) {
     	return camelize(word, false);
     }
-    
+
     /**
      * Converts string to Camel case. If <tt>firstLetterInLowerCase</tt>
-     * is true, then the first letter of the result string is in lower case. 
-     * 
+     * is true, then the first letter of the result string is in lower case.
+     *
      * <pre>
      * Examples:
      *   camelize("hello")               ==> "Hello"
@@ -560,17 +557,17 @@ public class WordUtil {
      *   camelize("active_record")       ==> "ActiveRecord"
      *   camelize("active_record", true) ==> "activeRecord"
      * </pre>
-     * 
+     *
      * @param word                      the word to be converted to camelized form
      * @param firstLetterInLowerCase    true if the first character should be in lower case
      * @return a camelized string
      */
     public static String camelize(String word, boolean firstLetterInLowerCase) {
     	if (word == null || "".equals(word)) return word;
-    	
+
     	String result = "";
     	if (word.indexOf('_') != -1) {
-    		StringBuffer sb = new StringBuffer();
+    		StringBuilder sb = new StringBuilder();
     		int count = 0;
     		StringTokenizer st = new StringTokenizer(word, "_");
     		while(st.hasMoreTokens()) {
@@ -590,10 +587,10 @@ public class WordUtil {
     	}
     	return result;
     }
-    
+
     private static String camelizeOneWord(String word, boolean firstLetterInLowerCase) {
     	if (word == null || "".equals(word)) return word;
-    	
+
     	String firstChar = word.substring(0,1);
     	String result = (firstLetterInLowerCase)?firstChar.toLowerCase():firstChar.toUpperCase();
     	if (word.length() > 1) {
@@ -601,10 +598,10 @@ public class WordUtil {
     	}
     	return result;
     }
-    
+
     /**
      * <tt>underscore</tt> is the reverse of <tt>camelize</tt> method.
-     * 
+     *
      * <pre>
      * Examples:
      *   underscore("Hello world")  ==> "hello world"
@@ -612,15 +609,15 @@ public class WordUtil {
      *   underscore("The RedCross") ==> "the red_cross"
      *   underscore("ABCD")         ==> "abcd"
      * </pre>
-     * 
+     *
      * @param phase             the original string
      * @return an underscored string
      */
     public static String underscore(String phase) {
     	if (phase == null || "".equals(phase)) return phase;
-    	
+
     	phase = phase.replace('-', '_');
-    	StringBuffer sb = new StringBuffer();
+    	StringBuilder sb = new StringBuilder();
     	int total = phase.length();
     	for (int i = 0; i < total; i++)	{
     		char c = phase.charAt(i);
@@ -648,34 +645,34 @@ public class WordUtil {
     	}
     	return sb.toString();
     }
-    
+
     private static String A2Z = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static String a2z = "abcdefghijklmnopqrstuvwxyz";
-    
+
     private static boolean isInA2Z(char c) {
     	return (A2Z.indexOf(c) != -1)?true:false;
     }
-    
+
     private static boolean isIna2z(char c) {
     	return (a2z.indexOf(c) != -1)?true:false;
     }
-    
+
     /**
      * Replaces all dashes and underscores by spaces and capitalizes all the words.
-     * 
+     *
      * <pre>
      * Examples:
      *   titleize("ch 1:  Java-ActiveRecordIsFun") ==> "Ch 1:  Java Active Record Is Fun"
      * </pre>
-     * 
+     *
      * @param phase             the original string
      * @return a titleized string
      */
     public static String titleize(String phase) {
     	if (phase == null || "".equals(phase)) return phase;
-    	
+
     	phase = humanize(phase);
-    	StringBuffer sb = new StringBuffer();
+    	StringBuilder sb = new StringBuilder();
     	int total = phase.length();
     	for (int i = 0; i < total; i++)	{
     		char c = phase.charAt(i);
@@ -698,17 +695,17 @@ public class WordUtil {
     	}
     	return sb.toString();
     }
-    
+
     /**
-     * Replaces all dashes and underscores by spaces and capitalizes the first 
-     * word. Also removes 
-     * 
+     * Replaces all dashes and underscores by spaces and capitalizes the first
+     * word. Also removes
+     *
      * <pre>
      * Examples:
      *   humanize("active_record") ==> "Active record"
      *   humanize("post_id")       ==> "Post"
      * </pre>
-     * 
+     *
      * @param phase             the original string
      * @return a humanized string
      */
@@ -718,50 +715,50 @@ public class WordUtil {
         if (phase.endsWith("_id")) phase += " ";
     	return camelize(phase.replaceAll("_id ", " ").replace('_', ' ').trim());
     }
-    
+
     /**
-     * Returns a database table name corresponding to the input model class 
-     * name. 
-     * 
+     * Returns a database table name corresponding to the input model class
+     * name.
+     *
      * <pre>
      * Examples:
      *   tableize("Person")   ==> "people"
      *   tableize("LineItem") ==> "line_items"
      * </pre>
-     * 
+     *
      * @param modelClassName
      * @return the table name of the java model class name
      */
     public static String tableize(String modelClassName) {
     	return pluralize(underscore(modelClassName));
     }
-    
+
     /**
-     * Returns a model class name corresponding to the input database 
+     * Returns a model class name corresponding to the input database
      * table name.
-     * 
+     *
      * <pre>
      * Examples:
      *   classify("people")   ==> "Person"
      *   classify("line_items") ==> "LineItem"
      * </pre>
-     * 
+     *
      * @param tableName java class name of the model
      * @return a java model class name
      */
     public static String classify(String tableName) {
     	return camelize(singularize(tableName));
     }
-    
+
     /**
-     * Returns an ordinalized string. 
-     * 
+     * Returns an ordinalized string.
+     *
      * <pre>
      * Examples:
      *   ordinalize(100)  ==> "100th"
      *   ordinalize(1003) ==> "1003rd"
      * </pre>
-     * 
+     *
      * @param number            the number
      * @return an ordinalized string for the number
      */

@@ -10,10 +10,15 @@ package com.scooterframework.admin;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * SamiManager class.
+ * 
+ * @author (Fei) John Chen
+ */
 public class SamiManager {
 	private static SamiManager me;
-	private Set<Class> controllers = new HashSet<Class>();
-	private Set<Class> models = new HashSet<Class>();
+	private Set<Class<?>> controllers = new HashSet<Class<?>>();
+	private Set<Class<?>> models = new HashSet<Class<?>>();
 	
 	private SamiManager() {
 	}
@@ -33,7 +38,7 @@ public class SamiManager {
 	 * 
 	 * @param controllerClass  the fully configured controller class
 	 */
-	public void registerController(Class controllerClass) {
+	public void registerController(Class<?> controllerClass) {
 		controllers.add(controllerClass);
 	}
 	
@@ -42,7 +47,7 @@ public class SamiManager {
 	 * 
 	 * @param modelClass  the fully configured model class
 	 */
-	public void registerModel(Class modelClass) {
+	public void registerModel(Class<?> modelClass) {
 		models.add(modelClass);
 	}
 	
@@ -51,7 +56,7 @@ public class SamiManager {
 	 * @param clazz
 	 * @return true if the controller class has been configured.
 	 */
-	public boolean hasConfiguredAsController(Class clazz) {
+	public boolean hasConfiguredAsController(Class<?> clazz) {
 		return controllers.contains(clazz);
 	}
 	
@@ -60,7 +65,7 @@ public class SamiManager {
 	 * @param clazz
 	 * @return true if the model class has been configured.
 	 */
-	public boolean hasConfiguredAsModel(Class clazz) {
+	public boolean hasConfiguredAsModel(Class<?> clazz) {
 		return models.contains(clazz);
 	}
 	
@@ -69,7 +74,7 @@ public class SamiManager {
 	 * 
 	 * @param controllerClass  the fully configured controller class
 	 */
-	public void deRegisterController(Class controllerClass) {
+	public void deRegisterController(Class<?> controllerClass) {
 		controllers.remove(controllerClass);
 	}
 	
@@ -78,7 +83,7 @@ public class SamiManager {
 	 * 
 	 * @param modelClass  the fully configured model class
 	 */
-	public void deRegisterModel(Class modelClass) {
+	public void deRegisterModel(Class<?> modelClass) {
 		models.remove(modelClass);
 	}
 }

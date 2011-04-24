@@ -38,16 +38,22 @@ public class FileInfo {
 		}
 		
 		sizeInBytes = file.length();
-		
-		relativePath = "";
+		relativePath = getRelativePath(file);
+	}
+	
+	public static String getRelativePath(File file) {
+		String rPath = "";
 		String cPath = "";
 		try {
 			cPath = file.getCanonicalPath();
-		} catch (Exception ex) {}
-		if (cPath.length() >= appPath.length()) {
-			relativePath = cPath.substring(appPath.length());
+		} catch (Exception ex) {
+			;
 		}
-		relativePath = relativePath.replace('\\', '/');
+		if (cPath.startsWith(appPath)) {
+			rPath = cPath.substring(appPath.length());
+		}
+		rPath = rPath.replace('\\', '/');
+		return rPath;
 	}
 	
 	public File getFile() {
@@ -59,7 +65,7 @@ public class FileInfo {
 	}
 	
 	public Date getLastModified() {
-		return lastModified;
+		return (lastModified == null)?lastModified:(new Date(lastModified.getTime()));
 	}
 	
 	public String getType() {

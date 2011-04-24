@@ -30,9 +30,9 @@ public class AutoLoadedObjectFactory extends ObjectFactory
         return me;
     }
     
-    public Class loadClass(String className) 
+    public Class<?> loadClass(String className) 
     throws ClassNotFoundException {
-        Class c = null;
+        Class<?> c = null;
         if (!ApplicationConfig.getInstance().isOrmAlone()) {
             c = ClassManager.getInstance().loadMyClass(className);
         }

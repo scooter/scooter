@@ -47,7 +47,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 	
 	@Test
 	public void test_hasManyThrough_add_and_detach() {
-		ActiveRecord linda = Vet.findFirst("first_name='Linda'");
+		ActiveRecord linda = Vet.where("first_name='Linda'").getRecord();
 		AssociatedRecords assocs = linda.allAssociated("specialties");
 		assertEquals("total specialties for Linda", 2, assocs.size());
 		assertEquals("total specialties before add", 3, Specialty.findAll().size());
@@ -74,7 +74,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 	
 	@Test
 	public void test_hasManyThrough_add_and_delete() {
-		ActiveRecord linda = Vet.findFirst("first_name='Linda'");
+		ActiveRecord linda = Vet.where("first_name='Linda'").getRecord();
 		AssociatedRecords assocs = linda.allAssociated("specialties");
 		assertEquals("total specialties for Linda", 2, assocs.size());
 		assertEquals("total specialties before add", 3, Specialty.findAll().size());
@@ -116,7 +116,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 		 *             LEFT OUTER JOIN TYPES ON OWNERS_PETS.TYPE_ID=TYPES.ID 
 		 * WHERE OWNERS.ID = 6
 		 */
-		ActiveRecord owner6 = Owner.findFirst("id=6", "include:pets=>visits, pets=>type");
+		ActiveRecord owner6 = Owner.where("owners.id=6").includes("pets=>visits, pets=>type").getRecord();
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		AssociatedRecords assocs = owner6.allAssociated("pets");
 		assertEquals("total pets for owner #6 before add a pet in assocs", 2, assocs.size());
@@ -195,7 +195,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 		 *             INNER JOIN TYPES ON OWNERS_PETS.TYPE_ID=TYPES.ID 
 		 * WHERE OWNERS.ID = 6
 		 */
-		ActiveRecord owner6 = Owner.findFirst("id=6", "strict_include:pets=>visits, pets=>type");
+		ActiveRecord owner6 = Owner.where("owners.id=6").includes("pets=>visits, pets=>type", true).getRecord();
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		AssociatedRecords assocs = owner6.allAssociated("pets");
 		assertEquals("total pets for owner #6 before add a pet in assocs", 2, assocs.size());
@@ -258,7 +258,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 		/**
 		 * SELECT OWNERS.* FROM OWNERS WHERE ID = 6
 		 */
-		ActiveRecord owner6 = Owner.findFirst("id=6");
+		ActiveRecord owner6 = Owner.where("id=6").getRecord();
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		
 		/**
@@ -277,7 +277,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 		/**
 		 * SELECT PETS.* FROM PETS WHERE ID = 8
 		 */
-		ActiveRecord pet8 = Pet.findFirst("id=8");
+		ActiveRecord pet8 = Pet.where("id=8").getRecord();
 		
 		/**
 		 * UPDATE OWNERS SET PETS_COUNT = 1 WHERE ID = 6
@@ -309,14 +309,14 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 		/**
 		 * SELECT PETS.* FROM PETS WHERE ID = 8
 		 */
-		ActiveRecord pet8 = Pet.findFirst("id=8");
+		ActiveRecord pet8 = Pet.where("id=8").getRecord();
 		assertEquals("name of pet #8", "Max", pet8.getField("name").toString());
 		assertEquals("owner id of pet #8", "6", pet8.getField("owner_id").toString());
 		
 		/**
 		 * SELECT OWNERS.* FROM OWNERS WHERE ID = 2
 		 */
-		ActiveRecord owner2 = Owner.findFirst("id=2");
+		ActiveRecord owner2 = Owner.where("id=2").getRecord();
 		assertEquals("first name of owner #2", "Betty", owner2.getField("first_name").toString());
 		assertEquals("total pets for owner #2 before adding a pet", "1", ""+owner2.getField("pets_count"));
 		
@@ -334,7 +334,7 @@ public class ActiveRecordRelationTest extends ScooterTestHelper {
 		/**
 		 * SELECT OWNERS.* FROM OWNERS WHERE ID = 6
 		 */
-		ActiveRecord owner6 = Owner.findFirst("id=6");
+		ActiveRecord owner6 = Owner.where("id=6").getRecord();
 		assertEquals("first name of owner #6", "Jean", owner6.getField("first_name").toString());
 		assertEquals("total pets for owner #6 after detaching a pet", "1", ""+owner6.getField("pets_count"));
 		

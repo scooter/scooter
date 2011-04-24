@@ -9,7 +9,6 @@ package com.scooterframework.web.route;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -22,30 +21,27 @@ import java.util.Properties;
  */
 public class MatchMaker {
 	
-	private static MatchMaker me;
+	private static MatchMaker me = new MatchMaker();
 
-	private static RootRoute rootRoute;
-	private static List defaultRoutes = new ArrayList();
-	private static List namedRoutes = new ArrayList();
-	private static List regularRoutes = new ArrayList();
-	private static List restRoutes = new ArrayList();
+	private RootRoute rootRoute;
+	private List<DefaultRoute> defaultRoutes = new ArrayList<DefaultRoute>();
+	private List<NamedRoute> namedRoutes = new ArrayList<NamedRoute>();
+	private List<RegularRoute> regularRoutes = new ArrayList<RegularRoute>();
+	private List<RestRoute> restRoutes = new ArrayList<RestRoute>();
 	
-	private Map requestRouteMap = new HashMap();
-    private Map resourceMap = new HashMap();
+	private Map<String, RouteInfo> requestRouteMap = new HashMap<String, RouteInfo>();
+    private Map<String, Resource> resourceMap = new HashMap<String, Resource>();
     
-    private static List allRoutes = new ArrayList();
+    private static List<Route> allRoutes = new ArrayList<Route>();
 	
 	private MatchMaker() {
 	}
 	
 	public static synchronized MatchMaker getInstance() {
-        if (me == null) {
-            me = new MatchMaker();
-        }
         return me;
     }
     
-    public List getAllRoutes() {
+    public List<Route> getAllRoutes() {
         return allRoutes;
     }
     
@@ -85,7 +81,7 @@ public class MatchMaker {
         allRoutes.add(route);
 	}
 	
-	public void addDefaultRoutes(List routes) {
+	public void addDefaultRoutes(List<DefaultRoute> routes) {
 		defaultRoutes.addAll(routes);
         allRoutes.addAll(routes);
 	}
@@ -99,7 +95,7 @@ public class MatchMaker {
         allRoutes.add(route);
 	}
 	
-	public void addNamedRoutes(List routes) {
+	public void addNamedRoutes(List<NamedRoute> routes) {
 		namedRoutes.addAll(routes);
         allRoutes.addAll(routes);
 	}
@@ -113,7 +109,7 @@ public class MatchMaker {
         allRoutes.add(route);
 	}
 	
-	public void addRegularRoutes(List routes) {
+	public void addRegularRoutes(List<RegularRoute> routes) {
 		regularRoutes.addAll(routes);
         allRoutes.addAll(routes);
 	}
@@ -127,12 +123,12 @@ public class MatchMaker {
         allRoutes.add(route);
 	}
 	
-	public void addRestRoutes(List routes) {
+	public void addRestRoutes(List<RestRoute> routes) {
 		restRoutes.addAll(routes);
         allRoutes.addAll(routes);
 	}
     
-    public Map getResourceMap() {
+    public Map<String, Resource> getResourceMap() {
         return resourceMap;
     }
     
@@ -152,7 +148,7 @@ public class MatchMaker {
      * @return resource
      */
     public Resource getResource(String resourceName) {
-        return (Resource)resourceMap.get(resourceName);
+        return resourceMap.get(resourceName);
     }
     
     /**
@@ -163,9 +159,8 @@ public class MatchMaker {
      */
     public Resource getResourceForModel(String model) {
         Resource resource = null;
-        Iterator it = resourceMap.keySet().iterator();
-        while(it.hasNext()) {
-            Resource res = (Resource)resourceMap.get(it.next());
+        for (Map.Entry<String, Resource> entry : resourceMap.entrySet()) {
+            Resource res = entry.getValue();
             if (model.equals(res.getModel())) {
                 resource = res;
                 break;
@@ -195,7 +190,7 @@ public class MatchMaker {
         if ("/".equals(requestInfo.getRequestPath())) return null;
         
 		String requestKey = requestInfo.getRequestKey();
-		RouteInfo routeInfo = (RouteInfo)requestRouteMap.get(requestKey);
+		RouteInfo routeInfo = requestRouteMap.get(requestKey);
 		if (routeInfo != null) {
 			return routeInfo;
 		}
@@ -205,7 +200,7 @@ public class MatchMaker {
         int size = allRoutes.size();
         for (int i = 0; i < size; i++) {
             index = i;
-            Route r = (Route)allRoutes.get(i);
+            Route r = allRoutes.get(i);
 			if (r.isRouteFor(requestInfo)) {
 				route = r;
 				break;
@@ -242,13 +237,11 @@ public class MatchMaker {
 		return routeInfo;
 	}
     
-    private Route getRouteFromList(String routeName, List routes) {
+    private Route getRouteFromList(String routeName, List<? extends Route> routes) {
         if (routeName == null || routes == null || routes.size() == 0) return null;
         
         Route route = null;
-        Iterator it = routes.iterator();
-        while(it.hasNext()) {
-            Route r = (Route)it.next();
+        for (Route r : routes) {
             if (routeName.equals(r.getName())) {
                 route = r;
                 break;

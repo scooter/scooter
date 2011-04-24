@@ -93,7 +93,7 @@ public class RecordsController extends ApplicationController {
         setViewData("table", table);
         
         String connName = database;
-        Map inputs = params();
+        Map<String, Object> inputs = params();
         RowData record = null;
         try {
             record = Record.createRecord(inputs, connName, table);
@@ -126,7 +126,7 @@ public class RecordsController extends ApplicationController {
         
         String connName = database;
         String restfulId = p("id");
-        Map inputs = params();
+        Map<String, Object> inputs = params();
         RowData record = null;
         try {
             record = Record.getRow(connName, table, restfulId);
@@ -165,7 +165,7 @@ public class RecordsController extends ApplicationController {
         
         String connName = database;
         String restfulId = p("id");
-        Map inputs = params();
+        Map<String, Object> inputs = params();
         
         try {
             int deleteCount = Record.deleteRecord(inputs, connName, table, restfulId);
@@ -209,7 +209,7 @@ public class RecordsController extends ApplicationController {
     }
     
     protected String viewPath(String action) {
-        String controller = (String)p(Constants.CONTROLLER);
+        String controller = p(Constants.CONTROLLER);
         return EnvConfig.getViewURI(controller, action);
     }
 }

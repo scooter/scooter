@@ -27,14 +27,14 @@ import com.scooterframework.common.logging.LogUtil;
 public class ClassWorkHelper {
     private static LogUtil log = LogUtil.getLogger(ClassWorkHelper.class.getName());
     
-    private static Collection allowedClassNames = new ArrayList();
+    private static Collection<String> allowedClassNames = new ArrayList<String>();
     
-    public static void preloadClasses(Collection classNames) throws Exception {
+    public static void preloadClasses(Collection<String> classNames) throws Exception {
     	if (classNames == null) return;
     	allowedClassNames = classNames;
-    	Iterator it = classNames.iterator();
+    	Iterator<String> it = classNames.iterator();
     	while(it.hasNext()) {
-    		String className = (String)it.next();
+    		String className = it.next();
     		AutoLoadedObjectFactory.getInstance().loadClass(className);
     	}
     	allowedClassNames.clear();
@@ -64,11 +64,11 @@ public class ClassWorkHelper {
 		if (pkgPrefix == null) pkgPrefix = "";
     	
     	File classDir = new File(codeDir);
-    	Set classNames = new HashSet();
+    	Set<String> classNames = new HashSet<String>();
     	getClassNamesSet(codeDir, classNames);
-    	Iterator it = classNames.iterator();
+    	Iterator<String> it = classNames.iterator();
     	while(it.hasNext()) {
-    		String classFileName = (String)it.next();
+    		String classFileName = it.next();
     		String className = classFileName.substring(classDir.getCanonicalPath().length());
     		if (className.startsWith(File.separator)) {
     			className = className.substring(1);
@@ -90,7 +90,7 @@ public class ClassWorkHelper {
     	preloadClasses(allowedClassNames);
     }
     
-    private static void getClassNamesSet(String dirPath, Set items) throws IOException {
+    private static void getClassNamesSet(String dirPath, Set<String> items) throws IOException {
     	File dir = new File(dirPath);
     	File[] files = dir.listFiles();
     	if (files == null) return;

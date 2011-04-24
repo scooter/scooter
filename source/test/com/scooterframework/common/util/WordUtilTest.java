@@ -9,7 +9,7 @@ package com.scooterframework.common.util;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Iterator;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -22,10 +22,9 @@ import org.junit.Test;
 public class WordUtilTest {
     
     @Test public void test_map_plural2singles() {
-    	Iterator it = WordUtil.plural2singles.keySet().iterator();
-    	while(it.hasNext()) {
-    		String pword = (String)it.next();
-    		String sword = (String)WordUtil.plural2singles.get(pword);
+    	for (Map.Entry<String, String> entry : WordUtil.plural2singles.entrySet()) {
+    		String pword = entry.getKey();
+    		String sword = entry.getValue();
     		String result = WordUtil.pluralize(sword);
     		assertEquals(pword, result);
     	}

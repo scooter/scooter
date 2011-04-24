@@ -29,7 +29,7 @@ public class Category {
      * @param idField   id field name for the category
      * @param typeField type field name for the category
      */
-    public Category(Class center, String category, String idField, String typeField) {
+    public Category(Class<? extends ActiveRecord> center, String category, String idField, String typeField) {
         this.center = center;
         this.category = category;
         this.idField = idField;
@@ -41,7 +41,7 @@ public class Category {
      * 
      * @return center class of the category.
      */
-    public Class getCenterClass() {
+    public Class<? extends ActiveRecord> getCenterClass() {
         return center;
     }
     
@@ -64,7 +64,7 @@ public class Category {
      * @return entity
      */
     public String getEntityByType(String type) {
-        return (String)typeEntity.get(type);
+        return typeEntity.get(type);
     }
     
     /**
@@ -72,9 +72,9 @@ public class Category {
      * 
      * @return set of entity names
      */
-    public Set getEntitys() {
-        Set entities = new HashSet();
-        Iterator it = typeEntity.keySet().iterator();
+    public Set<String> getEntitys() {
+        Set<String> entities = new HashSet<String>();
+        Iterator<String> it = typeEntity.keySet().iterator();
         while(it.hasNext()) {
             entities.add(typeEntity.get(it.next()));
         }
@@ -110,10 +110,9 @@ public class Category {
         if (entity == null) return null;
         
         String type = null;
-        Iterator it = typeEntity.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            if (entity.equals(typeEntity.get(key))) {
+        for (Map.Entry<String, String> entry : typeEntity.entrySet()) {
+            String key = entry.getKey();
+            if (entity.equals(entry.getValue())) {
                 type = key;
                 break;
             }
@@ -126,7 +125,7 @@ public class Category {
      * 
      * @return set of type names
      */
-    public Set getTypes() {
+    public Set<String> getTypes() {
         return typeEntity.keySet();
     }
     
@@ -158,9 +157,9 @@ public class Category {
     }
     
     /**
-     * Canter class of the category. For example, "Tagging.class"
+     * Center class of the category. For example, "Tagging.class"
      */
-    private Class center;
+    private Class<? extends ActiveRecord> center;
     
     /**
      * Name of a category. For example, "taggable".
@@ -181,5 +180,5 @@ public class Category {
      * Map of type and entity, key is type and value is corresponding 
      * entity name.
      */
-    private Map typeEntity = new HashMap();
+    private Map<String, String> typeEntity = new HashMap<String, String>();
 }

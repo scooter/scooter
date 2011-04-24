@@ -7,10 +7,12 @@
  */
 package com.scooterframework.builtin.databrowser;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.scooterframework.orm.misc.SqlPageListSourceImpl;
+import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
 import com.scooterframework.orm.sqldataexpress.object.TableData;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
@@ -18,7 +20,7 @@ import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
 
 /**
  * <p>TableSqlPageListSource class retrieves paged record list for a specific 
- * table. Finder sql query is derived from the table.</p>
+ * table. Finder SQL query is derived from the table.</p>
  * 
  * <p>Finder SQL query example: </p>
  * <pre>
@@ -41,10 +43,11 @@ public class TableSqlPageListSource extends SqlPageListSourceImpl {
     	this.tableName = tableName;
     }
     
-    protected List retrieveList() {
+    protected List<RowData> retrieveList() {
     	RowInfo ri = Record.getRowInfo(connName, tableName);
     	
-    	Map inputs = inputOptions;
+    	Map<String, Object> inputs = new HashMap<String, Object>();
+    	inputs.putAll(inputOptions);
     	inputs.put(DataProcessor.input_key_database_connection_name, connName);
     	
         TableData td = SqlServiceClient.retrieveTableDataBySQL(finderSql, inputs);

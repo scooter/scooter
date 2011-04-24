@@ -18,13 +18,15 @@ import java.util.List;
 public class CurrentThreadCacheClient {
 	private static final String KEY_ERROR = "key.error";
 	
+	@SuppressWarnings("unchecked")
 	public static Exception getFirstError() {
-		List<Exception> errors = (List)CurrentThreadCache.get(KEY_ERROR);
+		List<Exception> errors = (List<Exception>)CurrentThreadCache.get(KEY_ERROR);
 		return (errors != null && errors.size() > 0)?errors.get(0):null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void storeError(Exception ex) {
-		List<Exception> errors = (List)CurrentThreadCache.get(KEY_ERROR);
+		List<Exception> errors = (List<Exception>)CurrentThreadCache.get(KEY_ERROR);
 		if (errors == null) {
 			errors = new ArrayList<Exception>();
 			CurrentThreadCache.set(KEY_ERROR, errors);
@@ -32,8 +34,9 @@ public class CurrentThreadCacheClient {
 		errors.add(ex);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static boolean hasError() {
-		List<Exception> errors = (List)CurrentThreadCache.get(KEY_ERROR);
+		List<Exception> errors = (List<Exception>)CurrentThreadCache.get(KEY_ERROR);
 		return (errors != null && errors.size() > 0)?true:false;
 	}
 }

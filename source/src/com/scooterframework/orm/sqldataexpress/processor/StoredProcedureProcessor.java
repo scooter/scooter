@@ -48,7 +48,7 @@ public class StoredProcedureProcessor extends DataProcessorImpl {
     /**
      * execute with output filter
      */
-    public OmniDTO execute(UserDatabaseConnection udc, Map inputs, Map outputFilters) 
+    public OmniDTO execute(UserDatabaseConnection udc, Map<String, Object> inputs, Map<String, String> outputFilters) 
     throws BaseSQLException {
     	Connection connection = udc.getConnection();
     	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
@@ -65,10 +65,10 @@ public class StoredProcedureProcessor extends DataProcessorImpl {
             if ( inputs.size() < inputCount ) throw new Exception("Input parameters insufficient exception.");
             
             // set parameters
-            Collection parameters = sp.getParameters();
-            Iterator pit = parameters.iterator();
+            Collection<Parameter> parameters = sp.getParameters();
+            Iterator<Parameter> pit = parameters.iterator();
             while(pit.hasNext()) {
-                Parameter p = (Parameter) pit.next();
+                Parameter p = pit.next();
                 if (Parameter.MODE_INOUT.equals(p.getMode()) ||
                     Parameter.MODE_OUT.equals(p.getMode()) ||
                     Parameter.MODE_RETURN.equals(p.getMode())) { //function return
@@ -133,9 +133,9 @@ public class StoredProcedureProcessor extends DataProcessorImpl {
     private void handleResultSet(DBAdapter dba, OmniDTO returnTO, CallableStatement cstmt) 
     throws SQLException {
         // handle out cursors or other outputs if there is any
-        Iterator pit = sp.getParameters().iterator();
+        Iterator<Parameter> pit = sp.getParameters().iterator();
         while(pit.hasNext()) {
-            Parameter p = (Parameter) pit.next();
+            Parameter p = pit.next();
             if (Parameter.MODE_INOUT.equals(p.getMode()) ||
                 Parameter.MODE_OUT.equals(p.getMode()) ||
                 Parameter.MODE_RETURN.equals(p.getMode())) { //function return
@@ -171,10 +171,10 @@ public class StoredProcedureProcessor extends DataProcessorImpl {
         }
     }
     
-    private void handleFilteredResultSet(DBAdapter dba, OmniDTO returnTO, CallableStatement cstmt, Map outputs) 
+    private void handleFilteredResultSet(DBAdapter dba, OmniDTO returnTO, CallableStatement cstmt, Map<String, String> outputFilter) 
     throws SQLException {
         // handle out cursors or other outputs if there is any
-        Iterator pit = sp.getParameters().iterator();
+        Iterator<Parameter> pit = sp.getParameters().iterator();
         while(pit.hasNext()) {
             Parameter p = (Parameter) pit.next();
             if (Parameter.MODE_INOUT.equals(p.getMode()) ||
@@ -186,16 +186,16 @@ public class StoredProcedureProcessor extends DataProcessorImpl {
                     Cursor cursor = sp.getCursor(p.getName(), rs);
                     int cursorWidth = cursor.getDimension();
                     
-                    Set allowedColumns = getAllowedColumns(outputs, cursor);
+                    Set<String> allowedColumns = getAllowedColumns(outputFilter, cursor);
                     TableData rt = new TableData();
                     RowInfo newHeader = getFilteredHeaderInfo(allowedColumns, cursor);
                     rt.setHeader(newHeader);
                     returnTO.addTableData(p.getName(), rt);
                     
                     while(rs.next()) {
-                        ArrayList cellValues = new ArrayList();
+                        ArrayList<Object> cellValues = new ArrayList<Object>();
                         for (int i = 0; i < cursorWidth; i++) {
-                            if (outputs.containsKey(cursor.getColumnName(i))) {
+                            if (outputFilter.containsKey(cursor.getColumnName(i))) {
                                 cellValues.add(dba.getObjectFromResultSetByType(rs, 
                                                                             cursor.getColumnJavaClassName(i), 
                                                                             cursor.getColumnSqlDataType(i),
@@ -209,7 +209,7 @@ public class StoredProcedureProcessor extends DataProcessorImpl {
                     rs.close();
                 } 
                 else {
-                    if (outputs.containsKey(p.getName())) {
+                    if (outputFilter.containsKey(p.getName())) {
                         returnTO.addNamedObject(p.getName(), dba.getObjectFromStatementByType(cstmt, 
                                                                                           p.getJavaClassName(), 
                                                                                           p.getSqlDataType(), 

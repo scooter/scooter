@@ -1,1 +1,1 @@
-The message we found is <%=request.getAttribute("content")%>
+The message we found is <i><%=request.getAttribute("content")%></i>. -- JSP

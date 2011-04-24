@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.sqldataexpress.object.ColumnInfo;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
 import com.scooterframework.web.util.O;
@@ -24,23 +23,25 @@ import com.scooterframework.web.util.O;
  * @author (Fei) John Chen
  */
 public class ViewAddGenerator extends ViewScaffoldGenerator {
-	public ViewAddGenerator(String templateFilePath, Map props, String controller, String model) {
-		super(templateFilePath, props, controller, model);
+	public ViewAddGenerator(String templateFilePath,
+			Map<String, String> props, String connName, String controller,
+			String model) {
+		super(templateFilePath, props, connName, controller, model);
 	}
 
 	protected String getAction() {
 		return "add";
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, Object> getTemplateProperties() {
+		Map<String, Object> templateProps = new HashMap<String, Object>();
 
-		List columns = new ArrayList();
-		ActiveRecord recordHome = generateActiveRecordHomeInstance(model);
+		List<Map<String, Object>> columns = new ArrayList<Map<String, Object>>();
 		RowInfo ri = O.rowInfoOf(recordHome);
-		Iterator it = O.columns(recordHome);
+		Iterator<ColumnInfo> it = O.columns(recordHome);
 		while(it.hasNext()) {
-			ColumnInfo ci = (ColumnInfo)it.next();
+			ColumnInfo ci = it.next();
 			String columnName = ci.getColumnName();
 		    boolean isAuditedColumn = ri.isAuditedForCreateOrUpdate(columnName);
 		    if (isAuditedColumn) continue;
@@ -67,7 +68,7 @@ public class ViewAddGenerator extends ViewScaffoldGenerator {
 		    	columnFormat = "(yyyy-mm-dd hh-mm-ss)";
 		    }
 		    
-		    Map column = new HashMap();
+		    Map<String, Object> column = new HashMap<String, Object>();
 		    column.put("isLongText", isLongText);
 		    column.put("isDateColumn", isDateColumn);
 		    column.put("isTimestampColumn", isTimestampColumn);

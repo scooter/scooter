@@ -84,4 +84,8 @@ public class XMemcachedCacheProvider extends CacheProvider {
 			log.error("Error in shutdown(): " + ex.getMessage());
 		}
     }
+    
+    public String getVersion() {
+    	return "0.1.0";
+    }
 }

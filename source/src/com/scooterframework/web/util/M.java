@@ -43,10 +43,10 @@ public class M {
         if (data == null || "".equals(data)) return true;
         
         if (data instanceof Collection) {
-            result = ((Collection)data).isEmpty();
+            result = ((Collection<?>)data).isEmpty();
         }
         else if (data instanceof Map) {
-            result = ((Map)data).isEmpty();
+            result = ((Map<?, ?>)data).isEmpty();
         }
         else if (data.getClass().isArray() && 
                  Array.getLength(data) == 0) {

@@ -29,8 +29,8 @@ public class OwnersController extends ApplicationController {
     public String search() {
     	String lastName = p("last_name");
         List owners = (lastName == null || "".equals(lastName))?
-                Owner.findAll((String)null, "include:pets"):
-        		Owner.findAll("last_name='" + lastName + "'", "include:pets");
+                Owner.includes("pets").getRecords():
+        		Owner.where("last_name='" + lastName + "'").includes("pets").getRecords();
 
         if (owners != null) {
         	if (owners.size() > 1) {
@@ -59,7 +59,7 @@ public class OwnersController extends ApplicationController {
             setViewData("owner_page", page);
             return renderView("paged_list");
         }
-        setViewData("owners", Owner.findAll((String)null, "include:pets"));
+        setViewData("owners", Owner.includes("pets").getRecords());
         return null;
     }
 
@@ -67,7 +67,7 @@ public class OwnersController extends ApplicationController {
      * <tt>show</tt> method returns a <tt>owner</tt> record.
      */
     public String show() {
-        ActiveRecord owner = Owner.findFirst("owners.id=" + p("id"), "include:pets=>visits, pets=>type");
+        ActiveRecord owner = Owner.where("owners.id=" + p("id")).includes("pets=>visits, pets=>type").getRecord();
         if (owner == null) {
             flash("notice", "There is no owner record with primary key as " + p("id"));
         }
@@ -111,7 +111,7 @@ public class OwnersController extends ApplicationController {
      * <tt>edit</tt> method prepares data for editing an existing <tt>owner</tt> record.
      */
     public String edit() {
-    	ActiveRecord owner = Owner.findFirst("id=" + p("id"));
+    	ActiveRecord owner = Owner.where("id=" + p("id")).getRecord();
         if (owner == null) {
             flash("notice", "There is no owner record with primary key as " + p("id"));
         }
@@ -127,7 +127,7 @@ public class OwnersController extends ApplicationController {
     public String update() {
         ActiveRecord owner = null;
         try {
-            owner = Owner.findFirst("id=" + p("id"));
+            owner = Owner.where("id=" + p("id")).getRecord();
             if (owner != null) {
                 owner.setData(params());
                 owner.update();

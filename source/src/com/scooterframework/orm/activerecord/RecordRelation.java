@@ -8,7 +8,6 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,8 +60,9 @@ public class RecordRelation {
     /**
      * <p>Finds the associated record with some <tt>options</tt>.</p>
      *
-     * <p>See description of {@link com.scooterframework.orm.activerecord.ActiveRecord#findFirst(String, String)}
-     * method for details about <tt>options</tt>.</p>
+     * <p>See description on top of the 
+     * {@link com.scooterframework.orm.activerecord.ActiveRecord ActiveRecord} 
+     * for details about <tt>options</tt>.</p>
      *
      * <p>Note: When the same option has already been specified in the relation
      * method such as <tt>hasOne</tt> or <tt>belongsTo</tt>, the value listed
@@ -80,8 +80,9 @@ public class RecordRelation {
      * of this class must override this method in order to provide specific
      * data retrieval mechanism.</p>
      *
-     * <p>See description of {@link com.scooterframework.orm.activerecord.ActiveRecord#findFirst(String, String)}
-     * method for details about <tt>options</tt>.</p>
+     * <p>See description on top of the 
+     * {@link com.scooterframework.orm.activerecord.ActiveRecord ActiveRecord} 
+     * for details about <tt>options</tt>.</p>
      *
      * <p>Note: When the same option has already been specified in the relation
      * method such as <tt>hasOne</tt> or <tt>belongsTo</tt>, the value listed
@@ -119,8 +120,9 @@ public class RecordRelation {
      * <p>Finds all the associated records. If there is data in cache, then return
      * the data in cache.</p>
      *
-     * <p>See description of {@link com.scooterframework.orm.activerecord.ActiveRecord#findAll(String, String)}
-     * method for details about <tt>options</tt>.</p>
+     * <p>See description on top of the 
+     * {@link com.scooterframework.orm.activerecord.ActiveRecord ActiveRecord} 
+     * for details about <tt>options</tt>.</p>
      *
      * <p>Note: When the same option has already been specified in the relation
      * method such as <tt>hasMany</tt> or <tt>hasManyThrough</tt>, the value listed
@@ -138,8 +140,9 @@ public class RecordRelation {
      * of this class must override this method in order to provide specific
      * data retrieval mechanism.</p>
      *
-     * <p>See description of {@link com.scooterframework.orm.activerecord.ActiveRecord#findAll(String, String)}
-     * method for details about <tt>options</tt>.</p>
+     * <p>See description on top of the 
+     * {@link com.scooterframework.orm.activerecord.ActiveRecord ActiveRecord} 
+     * for details about <tt>options</tt>.</p>
      *
      * <p>Note: When the same option has already been specified in the relation
      * method such as <tt>hasMany</tt> or <tt>hasManyThrough</tt>, the value listed
@@ -206,7 +209,7 @@ public class RecordRelation {
      *
      * @return retrieved active record instance list
      */
-    protected List retrieveAssociatedDataList() {
+    protected List<ActiveRecord> retrieveAssociatedDataList() {
         return retrieveAssociatedDataList(lastUsedOptions);
     }
 
@@ -219,7 +222,7 @@ public class RecordRelation {
      * @param options options used in retrieving the record
      * @return retrieved active record instance list
      */
-    protected List retrieveAssociatedDataList(String options) {
+    protected List<ActiveRecord> retrieveAssociatedDataList(String options) {
         throw new RelationException("The method must be called by subclass of HasMany or HasManyThrough type.");
     }
 
@@ -275,14 +278,14 @@ public class RecordRelation {
      * <tt>owner.oid = status.order_id</tt>. Therefore, in the created map, the
      * key is order_id, while the value is the data from owner.oid field.</p>
      */
-    protected Map getFKDataMapForOther() {
+    protected Map<String, Object> getFKDataMapForOther() {
     	boolean noParent = false;
-        Map fkData = new HashMap();
-        Map mappingMap = relation.getMappingMap();
-        Iterator it = mappingMap.keySet().iterator();
-        while(it.hasNext()) {
-            String leftKey = (String)it.next();
-            Object rightValue = mappingMap.get(leftKey);
+        Map<String, Object> fkData = new HashMap<String, Object>();
+        Map<String, String> mappingMap = relation.getMappingMap();
+        for (Map.Entry<String, String> entry : mappingMap.entrySet()) {
+            String leftKey = entry.getKey();
+            String rightValue = entry.getValue();
+            if (rightValue == null) continue;
             Object parentValue = owner.getField(leftKey);
             if (parentValue == null) {
             	noParent = true;
@@ -299,14 +302,12 @@ public class RecordRelation {
      *
      * @return map
      */
-    protected Map getNullFKDataMapForOther() {
-        Map fkData = new HashMap();
-        Map mappingMap = relation.getMappingMap();
-        Iterator it = mappingMap.keySet().iterator();
-        while(it.hasNext()) {
-            String leftKey = (String)it.next();
-            Object rightValue = mappingMap.get(leftKey);
-            fkData.put(rightValue, null);
+    protected Map<String, Object> getNullFKDataMapForOther() {
+        Map<String, Object> fkData = new HashMap<String, Object>();
+        Map<String, String> mappingMap = relation.getMappingMap();
+        for (Map.Entry<String, String> entry : mappingMap.entrySet()) {
+        	String rightValue = entry.getValue();
+            if (rightValue != null) fkData.put(rightValue, null);
         }
 
         return fkData;
@@ -328,5 +329,5 @@ public class RecordRelation {
      * belongs-to relation; or AssociatedRecords object for has-many and
      * has-many-through relation.
      */
-    protected Map associationDataMap = new HashMap();
+    protected Map<String, Object> associationDataMap = new HashMap<String, Object>();
 }

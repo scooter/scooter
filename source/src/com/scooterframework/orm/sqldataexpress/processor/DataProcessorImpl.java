@@ -22,7 +22,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +49,7 @@ abstract public class DataProcessorImpl implements DataProcessor {
     /**
      * execute
      */
-    public OmniDTO execute(UserDatabaseConnection udc, Map inputs) 
+    public OmniDTO execute(UserDatabaseConnection udc, Map<String, Object> inputs) 
     throws BaseSQLException {
         return execute(udc, inputs, null);
     }
@@ -58,7 +57,7 @@ abstract public class DataProcessorImpl implements DataProcessor {
     /**
      * execute with output filter
      */
-    abstract public OmniDTO execute(UserDatabaseConnection udc, Map inputs, Map outputFilters) 
+    abstract public OmniDTO execute(UserDatabaseConnection udc, Map<String, Object> inputs, Map<String, String> outputFilters) 
     throws BaseSQLException;
     
     /**
@@ -92,17 +91,17 @@ abstract public class DataProcessorImpl implements DataProcessor {
         return b;
     }
     
-    protected Set getAllowedColumns(Map outputs, Cursor cursor) {
-    	Set allowedColumns = new HashSet();
-        if (outputs == null) outputs = new HashMap();
+    protected Set<String> getAllowedColumns(Map<String, String> outputFilter, Cursor cursor) {
+    	Set<String> allowedColumns = new HashSet<String>();
+        if (outputFilter == null) outputFilter = new HashMap<String, String>();
         
-        Set exceptColumns = null;
-        String exceptColumnsStr = (String)outputs.get(SqlServiceConstants.OUTPUT_FILTER_EXCEPT);
+        Set<String> exceptColumns = null;
+        String exceptColumnsStr = outputFilter.get(SqlServiceConstants.OUTPUT_FILTER_EXCEPT);
         if (exceptColumnsStr != null && exceptColumnsStr.trim().length() > 0)
         	exceptColumns = Converters.convertStringToSet(exceptColumnsStr.toUpperCase());
         
-        Set onlyColumns = null;
-        String onlyColumnsStr = (String)outputs.get(SqlServiceConstants.OUTPUT_FILTER_ONLY);
+        Set<String> onlyColumns = null;
+        String onlyColumnsStr = outputFilter.get(SqlServiceConstants.OUTPUT_FILTER_ONLY);
         if (onlyColumnsStr != null && onlyColumnsStr.trim().length() > 0)
         	onlyColumns = Converters.convertStringToSet(onlyColumnsStr.toUpperCase());
         
@@ -120,10 +119,10 @@ abstract public class DataProcessorImpl implements DataProcessor {
     }
                     
     // add those column names in the outputs to a new string array. 
-    protected RowInfo getFilteredHeaderInfo(Set allowedColumns, Cursor cursor) {
+    protected RowInfo getFilteredHeaderInfo(Set<String> allowedColumns, Cursor cursor) {
         RowInfo header = new RowInfo();
         int columnWidth = cursor.getDimension();
-        List allowedColumnInfos = new ArrayList();
+        List<ColumnInfo> allowedColumnInfos = new ArrayList<ColumnInfo>();
         
         for (int i = 0; i < columnWidth; i++) {
             ColumnInfo ci = cursor.getColumnInfo(i);
@@ -133,24 +132,8 @@ abstract public class DataProcessorImpl implements DataProcessor {
         }
         
         header.setColumnInfoList(allowedColumnInfos);
-        
         return header;
     }
-    
-    // convert to string array
-    protected String[] convertFromObjectListToStringArray(ArrayList inputAry) {
-        int inputWidth = inputAry.size();
-        String[] outputAry = new String[inputWidth];
-        Iterator it = inputAry.iterator();
-        int i = 0;
-        while(it.hasNext()) {
-            outputAry[i] = (String)it.next();
-            i = i + 1;
-        }
-        return outputAry;
-    }
-    
-    
     
     protected void setNull(PreparedStatement pstmt, int parameterIndex, int targetSqlType) 
     throws SQLException {
@@ -362,7 +345,7 @@ abstract public class DataProcessorImpl implements DataProcessor {
     protected int convert2int(Object obj, Parameter p) {
     	Integer i = null;
     	try {
-    		i = new Integer(obj.toString());
+    		i = Integer.valueOf(obj.toString());
     	}
     	catch(Exception ex) {
     		throw new IllegalArgumentException("Failed to convert object of " + 
@@ -492,7 +475,7 @@ abstract public class DataProcessorImpl implements DataProcessor {
                 pstmt.setObject(parameterIndex, parameterObj, targetSqlType);
             }
         }
-        catch(SQLException ex) {
+        catch(Exception ex) {
             if (ex instanceof SQLException) {
                 throw (SQLException) ex;
             }

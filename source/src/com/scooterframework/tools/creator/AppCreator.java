@@ -26,7 +26,7 @@ import com.scooterframework.tools.common.ToolsUtil;
  * Usage examples:
  * <pre>  
 	Usage:
-	    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle, postgresql) [app_domain]]
+	    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle, postgresql, sqlserver) [app_domain]]
 	
 	Examples:
 	    This page:
@@ -175,7 +175,7 @@ public class AppCreator {
     	FileUtil.copyDir(new File(sourceDir), new File(targetDir));
     	
     	//create all properties
-    	Map allProps = new HashMap();
+    	Map<String, String> allProps = new HashMap<String, String>();
     	allProps.put("scooter.home", scooterHome);
     	allProps.put("app_name_title", WordUtil.titleize(appName));
     	allProps.put("app_name", appName);
@@ -197,7 +197,7 @@ public class AppCreator {
 		log("");
 	}
     
-    private static void setMoreProperties(Map templateProps, String databaseType) {
+    private static void setMoreProperties(Map<String, String> templateProps, String databaseType) {
 		
 		String appName = templateProps.get("app_name").toString();
 		
@@ -247,6 +247,12 @@ public class AppCreator {
 			testDbURL        = "jdbc:sybase:Tds://localhost/" + appName + "_test" + commonProperties;
 			productionDbURL  = "jdbc:sybase:Tds://localhost/" + appName + "_production" + commonProperties;
 		}
+		else if ("sqlserver".equals(databaseType)) {
+			dbDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+			developmentDbURL = "jdbc:sqlserver://localhost:1433;databaseName=" + appName + "_development" + commonProperties;
+			testDbURL        = "jdbc:sqlserver://localhost:1433;databaseName=" + appName + "_test" + commonProperties;
+			productionDbURL  = "jdbc:sqlserver://localhost:1433;databaseName=" + appName + "_production" + commonProperties;
+		}
 		else {
 			dbDriver = "MyDB_DriverClassName";
 		}
@@ -268,25 +274,25 @@ public class AppCreator {
     	log("    This is a utility that creates a Scooter-powered web application.");
     	log("");
     	log("Usage:");
-    	log("    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle, postgresql) [app_domain]]");
+    	log("    java -jar tools/create.jar app_name [database_type (h2, hsqldb, mysql, oracle, postgresql, sqlserver) [app_domain]]");
     	log("");
     	log("Examples:");
     	log("    This page:");
     	log("        java -jar tools/create.jar -help");
     	log("");
-    	log("    Create a blog application backed by default database:");
+    	log("    Create a blog application backed by default database (mysql):");
     	log("        java -jar tools/create.jar blog");
     	log("");
     	log("    Create a blog application in user home directory:");
     	log("        java -jar tools/create.jar /home/john/projects/blog");
     	log("");
-    	log("    Create a blog application backed by H2 database:");
-    	log("        java -jar tools/create.jar blog h2");
+    	log("    Create a blog application backed by PostgreSQL database:");
+    	log("        java -jar tools/create.jar blog postgresql");
     	log("");
-    	log("    Create a blog application backed by HSQLDB:");
-    	log("        java -jar tools/create.jar blog hsqldb");
+    	log("    Create a blog application backed by SQLServer:");
+    	log("        java -jar tools/create.jar blog sqlserver");
     	log("");
-    	log("    Create a blog application backed by Oracle:");
+    	log("    Create a blog application backed by Oracle under package com.example.web:");
     	log("        java -jar tools/create.jar blog oracle com.example.web");
     	log("    Generated package prefix will be com.example.web.blog.");
     	log("");

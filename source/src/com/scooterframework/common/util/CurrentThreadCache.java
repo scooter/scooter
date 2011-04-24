@@ -16,12 +16,12 @@ import java.util.Map;
  * @author (Fei) John Chen
  */
 public class CurrentThreadCache {
-    private static ThreadLocal local = new ThreadLocal();
+    private static ThreadLocal<Map<String, Object>> local = new ThreadLocal<Map<String, Object>>();
 
-    private static Map getMap() {
-        Map map = (Map)local.get();
+    private static Map<String, Object> getMap() {
+        Map<String, Object> map = local.get();
         if (map == null) {
-        	map = new HashMap();
+        	map = new HashMap<String, Object>();
         	local.set(map);
         }
         return map;
@@ -44,7 +44,7 @@ public class CurrentThreadCache {
      * @param value value of the property
      */
     public static void set(String key, Object value) {
-        Map map = getMap();
+        Map<String, Object> map = getMap();
         map.put(key, value);
     }
     

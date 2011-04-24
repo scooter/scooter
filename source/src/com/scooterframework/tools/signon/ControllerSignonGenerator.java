@@ -28,7 +28,7 @@ public class ControllerSignonGenerator extends AbstractGenerator {
 	private boolean noPrefix;
 	private boolean noSuffix;
 
-	public ControllerSignonGenerator(String templateFilePath, Map props, String controller) {
+	public ControllerSignonGenerator(String templateFilePath, Map<String, String> props, String controller) {
 		super(templateFilePath, props);
 		
 		controllerName = controller.toLowerCase();
@@ -52,8 +52,9 @@ public class ControllerSignonGenerator extends AbstractGenerator {
 		}
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, String> getTemplateProperties() {
+		Map<String, String> templateProps = new HashMap<String, String>();
 		templateProps.put("package_line", packageLine);
 		templateProps.put("package_name", packageName);
 		templateProps.put("controller_class_name", controllerClassName);
@@ -62,12 +63,14 @@ public class ControllerSignonGenerator extends AbstractGenerator {
 		return templateProps;
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return (noPrefix)?DIRECTORY_NAME_SRC:
 					(DIRECTORY_NAME_SRC + File.separatorChar +
 					packageName.replace('.', File.separatorChar));
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return controllerClassName + FILE_EXTENSION_JAVA;
 	}

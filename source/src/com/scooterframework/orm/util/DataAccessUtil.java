@@ -18,10 +18,12 @@ import java.util.StringTokenizer;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.util.BeanUtil;
 import com.scooterframework.common.util.Converters;
+import com.scooterframework.common.util.Message;
 import com.scooterframework.common.validation.ValidationResults;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ReferenceData;
 import com.scooterframework.orm.activerecord.ReferenceDataStore;
+import com.scooterframework.orm.sqldataexpress.object.ColumnInfo;
 import com.scooterframework.orm.sqldataexpress.object.RESTified;
 import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
@@ -83,7 +85,7 @@ public class DataAccessUtil {
             data = ((Properties)object).getProperty(property);
         }
         else if (object instanceof Map) {
-            data = ((Map)object).get(property);
+            data = ((Map<?, ?>)object).get(property);
         }
         else {
             data = BeanUtil.getBeanProperty(object, property);
@@ -172,7 +174,7 @@ public class DataAccessUtil {
      * @param associationName association name.
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(ActiveRecord record, String associationName) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(ActiveRecord record, String associationName) {
         return allAssociatedRecordsOf(record, associationName, false);
     }
     
@@ -187,23 +189,23 @@ public class DataAccessUtil {
      * @param refresh true if reload database data
      * @return list of associated records.
      */
-    public static List allAssociatedRecordsOf(ActiveRecord record, String associationName, boolean refresh) {
+    public static List<ActiveRecord> allAssociatedRecordsOf(ActiveRecord record, String associationName, boolean refresh) {
         if (record == null || associationName == null) return null;
         if (associationName.indexOf('.') == -1) return record.allAssociated(associationName, refresh).getRecords();
         
-        List records = new ArrayList();
-        List associations = Converters.convertStringToList(associationName, ".");
-        
+        List<String> associations = Converters.convertStringToList(associationName, ".");
         int totalAssociations = associations.size();
-        records = record.allAssociated((String)associations.get(0), refresh).getRecords();
+        List<ActiveRecord> records = record.allAssociated((String)associations.get(0), refresh).getRecords();
         if (records == null) return null;
         
         for (int i = 1; i < totalAssociations; i++) {
-            String associationId = (String)associations.get(i);
-            List tmp = new ArrayList();
+            String associationId = associations.get(i);
+            List<ActiveRecord> tmp = new ArrayList<ActiveRecord>();
             int totalRecords = records.size();
             for (int j = 0; j < totalRecords; j++) {
-                List rds = ((ActiveRecord)records.get(j)).allAssociated(associationId, refresh).getRecords();
+            	ActiveRecord r = records.get(j);
+            	if (r == null) continue;
+                List<ActiveRecord> rds = r.allAssociated(associationId, refresh).getRecords();
                 if (rds != null && rds.size() > 0) tmp.addAll(rds);
             }
             records = tmp;
@@ -284,7 +286,7 @@ public class DataAccessUtil {
      * @param record an ActiveRecord instance
      * @return List of error messages.
      */
-    public static List getErrorMessages(ActiveRecord record) {
+    public static List<Message> getErrorMessages(ActiveRecord record) {
         if (record != null) {
             ValidationResults vr = record.getValidationResults();
             if (vr.failed()) {
@@ -299,7 +301,7 @@ public class DataAccessUtil {
      * 
      * @return List
      */
-    public static List getReferenceDataList(String type) {
+    public static List<ReferenceData> getReferenceDataList(String type) {
         return ReferenceDataStore.getReferenceDataList(type);
     }
     
@@ -340,7 +342,7 @@ public class DataAccessUtil {
      * @param model model name
      * @return iterator
      */
-    public static Iterator columnNames(String model) {
+    public static Iterator<String> columnNames(String model) {
         return columnNames(homeInstance(model));
     }
     
@@ -353,8 +355,8 @@ public class DataAccessUtil {
      * @param record an active record instance or home instance
      * @return iterator
      */
-    public static Iterator columnNames(ActiveRecord record) {
-        return (record != null)?columnNames(record.getRowInfo()):(new ArrayList()).iterator();
+    public static Iterator<String> columnNames(ActiveRecord record) {
+        return (record != null)?columnNames(record.getRowInfo()):(new ArrayList<String>()).iterator();
     }
     
     /**
@@ -366,14 +368,14 @@ public class DataAccessUtil {
      * @param rowInfo a RowInfo instance
      * @return iterator
      */
-    public static Iterator columnNames(RowInfo rowInfo) {
-        Iterator it = null;
+    public static Iterator<String> columnNames(RowInfo rowInfo) {
+        Iterator<String> it = null;
         if (rowInfo != null) {
             String[] columnNames = rowInfo.getColumnNames();
             it = Converters.convertArrayToList(columnNames).iterator();
         }
         else {
-            it = (new ArrayList()).iterator();
+            it = (new ArrayList<String>()).iterator();
         }
         return it;
     }
@@ -387,8 +389,8 @@ public class DataAccessUtil {
      * @param td a TableData instance
      * @return iterator
      */
-    public static Iterator columnNames(TableData td) {
-        return (td != null)?columnNames(td.getHeader()):(new ArrayList()).iterator();
+    public static Iterator<String> columnNames(TableData td) {
+        return (td != null)?columnNames(td.getHeader()):(new ArrayList<String>()).iterator();
     }
     
     /**
@@ -400,8 +402,8 @@ public class DataAccessUtil {
      * @param rd a RowData instance
      * @return iterator
      */
-    public static Iterator columnNames(RowData rd) {
-        return (rd != null)?columnNames(rd.getRowInfo()):(new ArrayList()).iterator();
+    public static Iterator<String> columnNames(RowData rd) {
+        return (rd != null)?columnNames(rd.getRowInfo()):(new ArrayList<String>()).iterator();
     }
     
     /**
@@ -413,12 +415,12 @@ public class DataAccessUtil {
      * @param record    a restified record
      * @return iterator
      */
-    public static Iterator columnNames(RESTified record) {
+    public static Iterator<String> columnNames(RESTified record) {
         if (record != null) {
             if (record instanceof ActiveRecord) return columnNames((ActiveRecord)record);
             if (record instanceof RowData) return columnNames((RowData)record);
         }
-        return (new ArrayList()).iterator();
+        return (new ArrayList<String>()).iterator();
     }
     
     /**
@@ -431,16 +433,16 @@ public class DataAccessUtil {
      * @param records a collection of records
      * @return iterator
      */
-    public static Iterator columnNames(Collection records) {
+    public static Iterator<String> columnNames(Collection<?> records) {
         Object record = null;
         if (records != null) {
-            Iterator it = records.iterator();
+            Iterator<?> it = records.iterator();
             if (it.hasNext()) record = it.next();
         }
         
         if (record instanceof ActiveRecord) return columnNames((ActiveRecord)record);
         if (record instanceof RowData) return columnNames((RowData)record);
-        return (new ArrayList()).iterator();
+        return (new ArrayList<String>()).iterator();
     }
     
     /**
@@ -452,7 +454,7 @@ public class DataAccessUtil {
      * @param model model name
      * @return iterator
      */
-    public static Iterator columns(String model) {
+    public static Iterator<ColumnInfo> columns(String model) {
         return columns(homeInstance(model));
     }
     
@@ -465,8 +467,8 @@ public class DataAccessUtil {
      * @param record an ActiveRecord record instance or home instance
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(ActiveRecord record) {
-        return (record != null)?columns(record.getRowInfo()):(new ArrayList()).iterator();
+    public static Iterator<ColumnInfo> columns(ActiveRecord record) {
+        return (record != null)?columns(record.getRowInfo()):(new ArrayList<ColumnInfo>()).iterator();
     }
     
     /**
@@ -478,14 +480,14 @@ public class DataAccessUtil {
      * @param rowInfo a RowInfo instance
      * @return iterator
      */
-    public static Iterator columns(RowInfo rowInfo) {
-        Iterator it = null;
+    public static Iterator<ColumnInfo> columns(RowInfo rowInfo) {
+        Iterator<ColumnInfo> it = null;
         if (rowInfo != null) {
             it = rowInfo.columns().iterator();
         }
         
         if (it == null) {
-            it = (new ArrayList()).iterator();
+            it = (new ArrayList<ColumnInfo>()).iterator();
         }
         return it;
     }
@@ -499,12 +501,12 @@ public class DataAccessUtil {
      * @param record    a restified record
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(RESTified record) {
+    public static Iterator<ColumnInfo> columns(RESTified record) {
         if (record != null) {
             if (record instanceof ActiveRecord) return columns((ActiveRecord)record);
             if (record instanceof RowData) return columns((RowData)record);
         }
-        return (new ArrayList()).iterator();
+        return (new ArrayList<ColumnInfo>()).iterator();
     }
     
     /**
@@ -516,8 +518,8 @@ public class DataAccessUtil {
      * @param rd a RowData record instance
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(RowData rd) {
-        return (rd != null)?columns(rd.getRowInfo()):(new ArrayList()).iterator();
+    public static Iterator<ColumnInfo> columns(RowData rd) {
+        return (rd != null)?columns(rd.getRowInfo()):(new ArrayList<ColumnInfo>()).iterator();
     }
     
     /**
@@ -530,16 +532,16 @@ public class DataAccessUtil {
      * @param records a collection of records
      * @return an iterator of ColumnInfo instances
      */
-    public static Iterator columns(Collection records) {
+    public static Iterator<ColumnInfo> columns(Collection<?> records) {
         Object record = null;
         if (records != null) {
-            Iterator it = records.iterator();
+            Iterator<?> it = records.iterator();
             if (it.hasNext()) record = it.next();
         }
         
         if (record instanceof ActiveRecord) return columns((ActiveRecord)record);
         if (record instanceof RowData) return columns((RowData)record);
-        return (new ArrayList()).iterator();
+        return (new ArrayList<ColumnInfo>()).iterator();
     }
     
     /**
@@ -551,8 +553,8 @@ public class DataAccessUtil {
      * @param items a collection of items
      * @return an iterator of the collection
      */
-    public static Iterator iteratorOf(Collection items) {
-        return (items != null)?items.iterator():(new ArrayList()).iterator();
+    public static <T> Iterator<T> iteratorOf(Collection<T> items) {
+        return (items != null)?items.iterator():(new ArrayList<T>()).iterator();
     }
     
     /**
@@ -564,8 +566,8 @@ public class DataAccessUtil {
      * @param map a map
      * @return an iterator of the collection
      */
-    public static Iterator iteratorOf(Map map) {
-        return (map != null)?map.keySet().iterator():(new ArrayList()).iterator();
+    public static <K, V> Iterator<K> iteratorOf(Map<K, V> map) {
+        return (map != null)?map.keySet().iterator():(new ArrayList<K>()).iterator();
     }
     
     /**

@@ -478,11 +478,11 @@ public class T {
      * 
      * @return Map
      */
-    public static Map getDateAsMap() {
+    public static Map<String, String> getDateAsMap() {
         String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
         String[] weekdays = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
         
-        Map map = new HashMap();
+        Map<String, String> map = new HashMap<String, String>();
         Calendar calendar = Calendar.getInstance();
         map.put("year", "" + calendar.get(Calendar.YEAR));
         map.put("mon", "" + (calendar.get(Calendar.MONTH) + 1));

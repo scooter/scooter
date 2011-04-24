@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -11,7 +11,7 @@ import com.scooterframework.orm.sqldataexpress.exception.BaseSQLException;
 
 /**
  * class UnregisteredCategoryException
- * 
+ *
  * @author (Fei) John Chen
  */
 public class UnregisteredCategoryException extends BaseSQLException {
@@ -23,17 +23,17 @@ public class UnregisteredCategoryException extends BaseSQLException {
 	public UnregisteredCategoryException(String unregisteredCategory) {
         this.unregisteredCategory = unregisteredCategory;
     }
-    
+
     public String getUnregisteredCategory() {
         return unregisteredCategory;
     }
-    
+
     public String toString() {
-        StringBuffer returnSB = new StringBuffer();
+        StringBuilder returnSB = new StringBuilder();
         returnSB.append("Category ").append(unregisteredCategory);
         returnSB.append(" is not registered.");
         return returnSB.toString();
     }
-    
+
     private String unregisteredCategory;
 }

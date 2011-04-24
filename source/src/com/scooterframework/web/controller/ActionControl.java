@@ -10,6 +10,7 @@ package com.scooterframework.web.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.scooterframework.admin.FilterManagerFactory;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.DateUtil;
 import com.scooterframework.common.util.ExpandedMessage;
 import com.scooterframework.common.util.Message;
 import com.scooterframework.common.util.Util;
@@ -105,11 +107,19 @@ public class ActionControl {
     }
     
     /**
+     * <p>
      * Returns request extension which is linked to key 
-     * {@link com.scooterframework.admin.Constants#FORMAT}.
+     * {@link com.scooterframework.admin.Constants#FORMAT}.</p>
      * 
+     * </p>
+     * This is obtained from the request path. For example, if the request 
+     * path is <tt>/blog/posts/1.xml</tt>, then the format is <tt>xml</tt>, 
+     * which means the client wants the response be sent 
+     * in <tt>xml</tt> format.</p>
+     * 
+     * <p>
      * The value of <tt>format()</tt> is what is used as a default format 
-     * for response.
+     * for response.</p>
      */
     public static String format() {
     	return (String)ACH.getAC().getFromRequestData(Constants.FORMAT);
@@ -151,7 +161,7 @@ public class ActionControl {
      * 
      * @return string model class name
      */
-    public static String getModelClassName(Class controllerClass) {
+    public static String getModelClassName(Class<?> controllerClass) {
         return EnvConfig.getInstance().getModelClassNameFromControllerClassName(controllerClass.getName());
     }
     
@@ -162,8 +172,10 @@ public class ActionControl {
      * @param sqlOptions SQL options string
      * @return Paginator instance
      */
-    public static Paginator jdbcPaginator(Class modelClass, String sqlOptions) {
-        return jdbcPaginator(modelClass, Converters.convertSqlOptionStringToMap(sqlOptions));
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, String sqlOptions) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+    	map.putAll(Converters.convertSqlOptionStringToMap(sqlOptions));
+        return jdbcPaginator(modelClass, map);
     }
     
     /**
@@ -173,9 +185,9 @@ public class ActionControl {
      * @param sqlOptions SQL options map
      * @return Paginator instance
      */
-    public static Paginator jdbcPaginator(Class modelClass, Map sqlOptions) {
-        Map pagingControl = ACH.getAC().getParameterDataAsMap();
-        return new Paginator(new JdbcPageListSource(modelClass, sqlOptions), pagingControl);
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, Map<String, Object> sqlOptions) {
+        Map<String, String> pagingControl = Converters.convertMapToMapSS(ACH.getAC().getParameterDataAsMap());
+        return new Paginator(new JdbcPageListSource(modelClass, Converters.convertMapToMapSS(sqlOptions)), pagingControl);
     }
     
     /**
@@ -184,7 +196,7 @@ public class ActionControl {
      * 
      * @return a map of all request parameters
      */
-    public static Map params() {
+    public static Map<String, Object> params() {
         return ACH.getAC().getAllRequestDataAsMap();
     }
     
@@ -195,7 +207,7 @@ public class ActionControl {
      * @param keyPrefix
      * @return a map of request parameters
      */
-    public static Map paramsWithPrefix(String keyPrefix) {
+    public static Map<String, Object> paramsWithPrefix(String keyPrefix) {
         return ACH.getAC().getAllRequestDataAsMap(keyPrefix);
     }
     
@@ -222,6 +234,64 @@ public class ActionControl {
      */
     public static String p(String key) {
         return params(key);
+    }
+    
+    /**
+     * Returns a string array corresponding to a key in request parameters or 
+     * request attributes.
+     * 
+     * @param key name of a key in the request parameters
+     * @return a string array corresponding to a key in the request parameters
+     */
+    public static String[] pArray(String key) {
+    	Object o = ACH.getAC().getFromAllRequestData(key);
+    	if (o == null) return new String[0];
+    	
+    	String[] valueAry = null;
+    	if (o instanceof Object[]) {
+    		valueAry = (String[])o;
+    	}
+    	else {
+    		valueAry = new String[1];
+    		valueAry[0] = (String)o;
+    	}
+        return valueAry;
+    }
+    
+    /**
+     * Returns a date instance corresponding to a key in request parameters or 
+     * request attributes.
+     * 
+     * @param key name of a key in the request parameters
+     * @return a date instance corresponding to a key in the request parameters
+     */
+    public static Date pDate(String key) {
+        return DateUtil.parseDate(p(key));
+    }
+    
+    /**
+     * Returns a date instance corresponding to a key in request parameters or 
+     * request attributes.
+     * 
+     * @param key      name of a key in the request parameters
+     * @param pattern  the pattern describing the date and time format
+     * @return a date instance corresponding to a key in the request parameters
+     */
+    public static Date pDate(String key, String pattern) {
+        return DateUtil.parseDate(p(key), pattern);
+    }
+    
+    /**
+     * Returns true or false corresponding to a key in request parameters or 
+     * request attributes.
+     * 
+     * Only string of "true"--regardless of case--would return <tt>true</tt>.
+     * 
+     * @param key name of a key in the request parameters
+     * @return true or false corresponding to a key in the request parameters
+     */
+    public static Boolean pBoolean(String key) {
+        return Boolean.valueOf(p(key));
     }
     
     /**
@@ -323,8 +393,9 @@ public class ActionControl {
      * 
      * @return field values of a route.
      */
-    public static Map routeFieldValues() {
-        return (Map)ACH.getAC().getFromAllRequestData(RouteConstants.FIELD_VALUES);
+    @SuppressWarnings("unchecked")
+	public static Map<String, String> routeFieldValues() {
+        return (Map<String, String>)ACH.getAC().getFromAllRequestData(RouteConstants.FIELD_VALUES);
     }
     
     /**
@@ -334,8 +405,7 @@ public class ActionControl {
      * @return value of a field for route.
      */
     public static String routeFieldValue(String field) {
-        Object o = routeFieldValues().get(field);
-        return Util.getSafeString(o);
+        return routeFieldValues().get(field);
     }
     
     public static Object getFromThreadData(String key) {
@@ -619,7 +689,7 @@ public class ActionControl {
      * @param nameValuePairs a map of name and value pairs as HTTP query string
      * @return a formatted forward-tagged URI string
      */
-    public static String forwardTo(String uri, Map nameValuePairs) {
+    public static String forwardTo(String uri, Map<String, Object> nameValuePairs) {
         return ActionResult.forwardTo(uri, nameValuePairs);
     }
     
@@ -663,7 +733,7 @@ public class ActionControl {
      * @param nameValuePairs a map of name and value pairs as HTTP query string
      * @return a formatted redirect-tagged URI string
      */
-    public static String redirectTo(String uri, Map nameValuePairs) {
+    public static String redirectTo(String uri, Map<String, Object> nameValuePairs) {
         return ActionResult.redirectTo(uri, nameValuePairs);
     }
     
@@ -761,7 +831,8 @@ public class ActionControl {
 		return (UploadFile)getUploadFilesMap().get(key);
     }
     
-    private static List<FileItem> prepareFileItems() throws Exception {
+    @SuppressWarnings("unchecked")
+	private static List<FileItem> prepareFileItems() throws Exception {
     	List<FileItem> files = (List<FileItem>)CurrentThreadCache.get(Constants.FILE_UPLOAD_REQUEST_FILES);
 		return files;
     }
@@ -925,7 +996,7 @@ public class ActionControl {
      * 
      * @return a map of all view data
      */
-    public static Map getViewDataMap() {
+    public static Map<String, Object> getViewDataMap() {
     	return params();
     }
     
@@ -979,8 +1050,10 @@ public class ActionControl {
      *   renderView("/home/foo/templates/show.st");
      *   
      *   //render view file show.jsp and return result in text format
-     *   renderView("show.jsp", "text");
+     *   renderView("show", "text");
      * </pre>
+     * 
+     * <p>The response <tt>format</tt> does not apply to <tt>jsp</tt> views.</p>
      * 
      * @param view  The render template file
      * @param format  the response format
@@ -1002,7 +1075,7 @@ public class ActionControl {
      * @param viewDataMap  data (name/value pairs) to be passed to the view
      * @return rendered content
      */
-    public static String renderView(String view, Map viewDataMap) {
+    public static String renderView(String view, Map<String, Object> viewDataMap) {
     	return renderView(view, format(), viewDataMap);
     }
     
@@ -1014,12 +1087,21 @@ public class ActionControl {
      * specified, the default extension is defined by <tt>view.extension</tt> 
      * property in the <tt>environment.properties</tt> file. 
      * 
+     * <p>Examples:</p>
+     * <pre>
+     * //return a view coded in String Template as html
+     * return renderView("paged_list.st", "html", map);
+     * 
+     * //return a view coded in FreeMarker Template as text
+     * return renderView("paged_list.ftl", "text", map);
+     * </pre>
+     * 
      * @param view  the render template file
      * @param format  response format of the render template file
      * @param viewDataMap  data (name/value pairs) to be passed to the view
      * @return rendered content
      */
-    public static String renderView(String view, String format, Map viewDataMap) {
+    public static String renderView(String view, String format, Map<String, Object> viewDataMap) {
     	if (view == null) 
     		throw new IllegalArgumentException("View can not be null for rendering.");
     	
@@ -1117,7 +1199,7 @@ public class ActionControl {
     /**
      * Returns the FilterManager for a class type.
      */
-    public static FilterManager filterManagerFor(Class clazz) {
+    public static FilterManager filterManagerFor(Class<?> clazz) {
     	return FilterManagerFactory.getInstance().getFilterManager(clazz);
     }
 }

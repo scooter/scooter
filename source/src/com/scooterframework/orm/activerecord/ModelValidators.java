@@ -7,7 +7,6 @@
  */
 package com.scooterframework.orm.activerecord;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.scooterframework.common.util.Converters;
@@ -70,11 +69,9 @@ public class ModelValidators extends Validators {
      * @param messageKey key to the message in MessagesResources file
      */
     public void validatesUniqenessOf(String columnNames, String messageKey) {
-        List colNames = Converters.convertStringToList(columnNames);
+        List<String> colNames = Converters.convertStringToList(columnNames);
         if (colNames == null) return;
-        Iterator it = colNames.iterator();
-        while(it.hasNext()) {
-            String colName = (String)it.next();
+        for (String colName : colNames) {
             Object colData = getData(colName);
             if (colData != null) {
                 boolean numeric = isNumericColumn(colName);

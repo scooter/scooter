@@ -23,7 +23,7 @@ public class UndefinedReverseRelationException extends RelationException  {
         super(message);
     }
     
-    public UndefinedReverseRelationException(Class entity1, Class entity2) {
+    public UndefinedReverseRelationException(Class<? extends ActiveRecord> entity1, Class<? extends ActiveRecord> entity2) {
         super("There is no defined reverse relationship for the relation from " + 
                     ActiveRecordUtil.getModelName(entity1) + " to " + 
                     ActiveRecordUtil.getModelName(entity2) + ".");

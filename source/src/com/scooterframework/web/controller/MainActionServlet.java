@@ -38,7 +38,7 @@ public class MainActionServlet extends HttpServlet {
      * The class name of the <tt>RequestProcessor</tt> instance we will use 
      * to process all incoming requests.</p>
      */
-    protected static String processorClassName = null;
+    private static String processorClassName = null;
     
     /**
      * The key for this servlet in servlet context.

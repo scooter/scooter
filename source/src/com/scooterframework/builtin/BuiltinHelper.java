@@ -23,10 +23,10 @@ import com.scooterframework.web.util.W;
  * @author (Fei) John Chen
  */
 public class BuiltinHelper {
-	public static String FILE_BROWSER_LINK_PREFIX = "/admin/files";
-	public static String FILE_BROWSER_LINK_PREFIX_DIR = FILE_BROWSER_LINK_PREFIX + "/list?f=";
-	public static String FILE_BROWSER_LINK_PREFIX_FILE = FILE_BROWSER_LINK_PREFIX + "/show?f=";
-	public static String FILE_BROWSER_LINK_ROOT = FILE_BROWSER_LINK_PREFIX_DIR + "/";
+	public static final String FILE_BROWSER_LINK_PREFIX = "/admin/files";
+	public static final String FILE_BROWSER_LINK_PREFIX_DIR = FILE_BROWSER_LINK_PREFIX + "/list?f=";
+	public static final String FILE_BROWSER_LINK_PREFIX_FILE = FILE_BROWSER_LINK_PREFIX + "/show?f=";
+	public static final String FILE_BROWSER_LINK_ROOT = FILE_BROWSER_LINK_PREFIX_DIR + "/";
 	
     /**
      * Checks if the request comes from localhost.

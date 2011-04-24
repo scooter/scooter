@@ -21,7 +21,7 @@ import com.scooterframework.tools.common.AbstractGenerator;
  * @author (Fei) John Chen
  */
 public class ConnectionGenerator extends AbstractGenerator {
-	public ConnectionGenerator(String connectionName, Map props) throws SQLException {
+	public ConnectionGenerator(String connectionName, Map<String, String> props) throws SQLException {
 		super(props);
 		
 		//test connection
@@ -44,14 +44,17 @@ public class ConnectionGenerator extends AbstractGenerator {
     	log("Connection test successful.");
 	}
 
-	protected Map getTemplateProperties() {
+	@Override
+	protected Map<String, String> getTemplateProperties() {
 		return null;
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return null;
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return null;
 	}

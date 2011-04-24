@@ -29,9 +29,9 @@ public class ObjectFactory
         return me;
     }
     
-    public Class loadClass(String className) 
+    public Class<?> loadClass(String className) 
     throws ClassNotFoundException {
-        Class c = null;
+        Class<?> c = null;
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = getClass().getClassLoader();
@@ -40,14 +40,14 @@ public class ObjectFactory
         return c;
     }
     
-    public Object newInstance(Class clz) {
+    public Object newInstance(Class<?> clz) {
         return newInstance(clz.getName());
     }
     
     public Object newInstance(String className) {
         Object o = null;
         try {
-            Class c = loadClass(className);
+            Class<?> c = loadClass(className);
             o = c.newInstance();
         } catch (Exception ex) {
             throw new ObjectCreationException(className, ex);
@@ -55,14 +55,14 @@ public class ObjectFactory
         return o;
     }
     
-    public Object newInstance(Class clz, Class[] parameterTypes, Object[] initargs) {
+    public Object newInstance(Class<?> clz, Class<?>[] parameterTypes, Object[] initargs) {
     	return newInstance(clz.getName(), parameterTypes, initargs);
     }
     
-    public Object newInstance(String className, Class[] parameterTypes, Object[] initargs) {
+    public Object newInstance(String className, Class<?>[] parameterTypes, Object[] initargs) {
         Object o = null;
         try {
-            Class c = loadClass(className);
+            Class<?> c = loadClass(className);
             o = c.getConstructor(parameterTypes).newInstance(initargs);
         } catch (Exception ex) {
             throw new ObjectCreationException(className, ex);

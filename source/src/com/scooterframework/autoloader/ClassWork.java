@@ -46,8 +46,8 @@ public class ClassWork {
 		}
 	}
 	
-	public Class changeClass(String className) throws ClassNotFoundException {
-		Class result = null;
+	public Class<?> changeClass(String className) throws ClassNotFoundException {
+		Class<?> result = null;
 
 		try {
 			CtClass cc = pool.get(className);
@@ -97,12 +97,12 @@ public class ClassWork {
 		return result;
     }
     
-	private void addMethods(CtClass cc, List methods) throws CannotCompileException, IOException {
+	private void addMethods(CtClass cc, List<String> methods) throws CannotCompileException, IOException {
 		cc.defrost();
 		CtMethod m = null;
-		Iterator it = methods.iterator();
+		Iterator<String> it = methods.iterator();
 		while (it.hasNext()) {
-			String method = (String) it.next();
+			String method = it.next();
 			m = CtMethod.make(filterSourceCode(method, cc.getName()), cc);
 			try {
 				cc.addMethod(m);

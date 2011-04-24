@@ -152,7 +152,7 @@ public class AssociatedRecord {
     
     private AssociatedRecord internal_attach(ActiveRecord newTarget) {
         // make sure the record type is valid
-        Class classB = recordRelation.getRelation().getTargetClass();
+        Class<? extends ActiveRecord> classB = recordRelation.getRelation().getTargetClass();
         ActiveRecordUtil.validateRecordType(classB, newTarget);
         
         // now we can attach the record
@@ -174,8 +174,8 @@ public class AssociatedRecord {
                 }
                 
                 //nullify FK in child object whether the child is new or not
-                Map fkMap = new HashMap();
-                Object[] colNames = recordRelation.getRelation().getLeftSideMappingItems();
+                Map<String, Object> fkMap = new HashMap<String, Object>();
+                String[] colNames = recordRelation.getRelation().getLeftSideMappingItems();
                 for (int i = 0; i < colNames.length; i++) {
                     fkMap.put(colNames[i], null);
                 }
@@ -233,7 +233,7 @@ public class AssociatedRecord {
                 }
                 
                 //set FK in target, based on owner's PK data
-                Map fkData = recordRelation.getFKDataMapForOther();
+                Map<String, Object> fkData = recordRelation.getFKDataMapForOther();
                 newTarget.setData(fkData);
                 newTarget.save();
             }
@@ -299,8 +299,8 @@ public class AssociatedRecord {
             //associatedRecord is the parent.
             
             //nullify FK in child object whether the child is new or not
-            Map fkMap = new HashMap();
-            Object[] colNames = recordRelation.getRelation().getLeftSideMappingItems();
+            Map<String, Object> fkMap = new HashMap<String, Object>();
+            String[] colNames = recordRelation.getRelation().getLeftSideMappingItems();
             for (int i = 0; i < colNames.length; i++) {
                 fkMap.put(colNames[i], null);
             }
@@ -340,8 +340,8 @@ public class AssociatedRecord {
             //Note: In this case, owner(the parent) is detached from its child.
             
             //nullify FK in child object whether the child is new or not
-            Map fkMap = new HashMap();
-            Object[] colNames = recordRelation.getRelation().getRightSideMappingItems();
+            Map<String, Object> fkMap = new HashMap<String, Object>();
+            String[] colNames = recordRelation.getRelation().getRightSideMappingItems();
             for (int i = 0; i < colNames.length; i++) {
                 fkMap.put(colNames[i], null);
             }

@@ -25,10 +25,10 @@ import com.scooterframework.tools.common.ToolsUtil;
  * Usage examples:
  * <pre>
 	Usage:
-	    java -jar tools/generate.jar [app_path] scaffold model_name_in_singular_form
-	    java -jar tools/generate.jar [app_path] scaffold-ajax model_name_in_singular_form
+	    java -jar tools/generate.jar [app_path] scaffold {model_name_in_singular_form}[@connection_name]
+	    java -jar tools/generate.jar [app_path] scaffold-ajax {model_name_in_singular_form}[@connection_name]
 	    java -jar tools/generate.jar [app_path] controller controller_name_in_plural_form [method] [method] ...
-	    java -jar tools/generate.jar [app_path] model model_name_in_singular_form
+	    java -jar tools/generate.jar [app_path] model {model_name_in_singular_form}[@connection_name]
 	
 	Examples:
 	    This page:
@@ -36,6 +36,9 @@ import com.scooterframework.tools.common.ToolsUtil;
 	
 	    Generate scaffold code for blog app's domain named post:
 	        java -jar tools/generate.jar blog scaffold post
+	
+	    Generate scaffold code for blog app's domain named post based on blog_oracle database:
+	        java -jar tools/generate.jar blog scaffold post@blog_oracle
 	
 	    Generate ajax scaffold code for blog app's domain named post:
 	        java -jar tools/generate.jar blog scaffold-ajax post
@@ -155,7 +158,7 @@ public class CodeGenerator {
     	log("Target dir: " + targetDir);
     	
     	//create all properties
-    	Map allProps = new HashMap();
+    	Map<String, String> allProps = new HashMap<String, String>();
     	allProps.put("scooter.home", scooterHome);
     	allProps.put("webapps.path", webappsPath);
     	allProps.put("app.path", webappPath);
@@ -171,6 +174,11 @@ public class CodeGenerator {
 			return;
 		}
 		
+		String[] s3 = getCCM(useImplicitAppName, args);
+		String connName = s3[0];
+		String controller = s3[1];
+		String model = s3[2];
+		
 		String typeName = getTypeName(useImplicitAppName, args);
 		if ("scaffold".equals(typeName)) {
 			//generate application controller
@@ -184,65 +192,63 @@ public class CodeGenerator {
 	    	String csgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffold.tmpl";
-			String model = enforceSingle(getName(useImplicitAppName, args));
-			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, model);
+			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, connName, controller, model);
 			csg.generate();
 			
 	    	String cstgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffoldTest.tmpl";
-			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, model);
+			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, connName, controller, model);
 			cstg.generate();
 
 			//generate model
 	    	String mgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"Model.tmpl";
-			Generator mg = new ModelGenerator(mgPath, allProps, model);
+			Generator mg = new ModelGenerator(mgPath, allProps, connName, model);
 			mg.generate();
 			
 	    	String mtgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"ModelTest.tmpl";
-			Generator mtg = new ModelTestGenerator(mtgPath, allProps, model);
+			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model);
 			mtg.generate();
 
 			//generate views
-			String controller = WordUtil.pluralize(model);
 
 	    	String vigPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"index.tmpl";
-			Generator vig = new ViewIndexGenerator(vigPath, allProps, controller, model);
+			Generator vig = new ViewIndexGenerator(vigPath, allProps, connName, controller, model);
 			vig.generate();
 
 	    	String vsgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"show.tmpl";
-			Generator vsg = new ViewShowGenerator(vsgPath, allProps, controller, model);
+			Generator vsg = new ViewShowGenerator(vsgPath, allProps, connName, controller, model);
 			vsg.generate();
 
 	    	String vagPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"add.tmpl";
-			Generator vag = new ViewAddGenerator(vagPath, allProps, controller, model);
+			Generator vag = new ViewAddGenerator(vagPath, allProps, connName, controller, model);
 			vag.generate();
 
 	    	String vegPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"edit.tmpl";
-			Generator veg = new ViewEditGenerator(vegPath, allProps, controller, model);
+			Generator veg = new ViewEditGenerator(vegPath, allProps, connName, controller, model);
 			veg.generate();
 
 	    	String vpgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"paged_list.tmpl";
-			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, controller, model);
+			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, connName, controller, model);
 			vpg.generate();
 
 			//update resources
@@ -260,65 +266,63 @@ public class CodeGenerator {
 	    	String csgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffoldAjax.tmpl";
-			String model = enforceSingle(getName(useImplicitAppName, args));
-			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, model);
+			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, connName, controller, model);
 			csg.generate();
 			
 	    	String cstgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffoldTest.tmpl";
-			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, model);
+			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, connName, controller, model);
 			cstg.generate();
 
 			//generate model
 	    	String mgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"Model.tmpl";
-			Generator mg = new ModelGenerator(mgPath, allProps, model);
+			Generator mg = new ModelGenerator(mgPath, allProps, connName, model);
 			mg.generate();
 			
 	    	String mtgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"ModelTest.tmpl";
-			Generator mtg = new ModelTestGenerator(mtgPath, allProps, model);
+			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model);
 			mtg.generate();
 
 			//generate views
-			String controller = WordUtil.pluralize(model);
 
 	    	String vigPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"index.tmpl";
-			Generator vig = new ViewIndexGenerator(vigPath, allProps, controller, model);
+			Generator vig = new ViewIndexGenerator(vigPath, allProps, connName, controller, model);
 			vig.generate();
 
 	    	String vsgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"show.tmpl";
-			Generator vsg = new ViewShowGenerator(vsgPath, allProps, controller, model);
+			Generator vsg = new ViewShowGenerator(vsgPath, allProps, connName, controller, model);
 			vsg.generate();
 
 	    	String vagPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"add.tmpl";
-			Generator vag = new ViewAddGenerator(vagPath, allProps, controller, model);
+			Generator vag = new ViewAddGenerator(vagPath, allProps, connName, controller, model);
 			vag.generate();
 
 	    	String vegPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"edit.tmpl";
-			Generator veg = new ViewEditGenerator(vegPath, allProps, controller, model);
+			Generator veg = new ViewEditGenerator(vegPath, allProps, connName, controller, model);
 			veg.generate();
 
 	    	String vpgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"paged_list.tmpl";
-			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, controller, model);
+			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, connName, controller, model);
 			vpg.generate();
 
 			//update resources
@@ -333,7 +337,7 @@ public class CodeGenerator {
 			Generator cag = new ControllerApplicationGenerator(cagPath, allProps);
 			cag.generate(false);
 
-			String controller = getName(useImplicitAppName, args);
+			controller = getControllerName(useImplicitAppName, args, false);
 			String[] actions = null;
 			if (useImplicitAppName) {
 				if (args.length == 2) {
@@ -381,18 +385,16 @@ public class CodeGenerator {
 			}
 		}
 		else if ("model".equals(typeName)) {
-			String model = enforceSingle(getName(useImplicitAppName, args));
-			
 	    	String mgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"Model.tmpl";
-			Generator mg = new ModelGenerator(mgPath, allProps, model);
+			Generator mg = new ModelGenerator(mgPath, allProps, connName, model);
 			mg.generate();
 			
 	    	String mtgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"ModelTest.tmpl";
-			Generator mtg = new ModelTestGenerator(mtgPath, allProps, model);
+			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model);
 			mtg.generate();
 		}
 		else {
@@ -413,8 +415,47 @@ public class CodeGenerator {
     	return typeName;
     }
     
-    private static String getName(boolean useImplicitAppName, String[] args) {
-    	return (useImplicitAppName)?args[1]:args[2];
+    private static String getControllerName(boolean useImplicitAppName, String[] args, boolean plural) {
+    	String controllerName = (useImplicitAppName)?args[1]:args[2];
+    	int index = controllerName.indexOf('@');
+    	if (index != -1) {
+    		controllerName = controllerName.substring(0, index);
+    	}
+    	if (plural) controllerName = WordUtil.pluralize(controllerName);
+    	return controllerName;
+    }
+    
+    private static String[] getCCM(boolean useImplicitAppName, String[] args) {
+    	String connectionName = null;
+    	String controllerName = null;
+    	String modelName = null;
+    	String s = (useImplicitAppName)?args[1]:args[2];
+    	int index = s.indexOf('@');
+    	if (index != -1) {
+    		String s1 = s.substring(0, index);
+    		String s2 = s.substring(index + 1);
+    		connectionName = s2;
+    		controllerName = s1;
+    		modelName = s1;
+    	}
+    	else {
+    		controllerName = s;
+    		modelName = s;
+    	}
+    	
+    	if (controllerName.indexOf('.') != -1) {
+    		controllerName = controllerName.replace('.', '_');
+    		controllerName = WordUtil.camelize(controllerName).toLowerCase();
+    	}
+
+		controllerName = WordUtil.pluralize(controllerName);
+		modelName = enforceSingle(modelName);
+		
+		String[] s3 = new String[3];
+		s3[0] = connectionName;
+		s3[1] = controllerName;
+		s3[2] = modelName;
+    	return s3;
     }
 
 	private static String enforceSingle(String word) {
@@ -438,16 +479,20 @@ public class CodeGenerator {
     	log("    This utility generates codes.");
     	log("");
     	log("Usage:");
-    	log("    java -jar tools/generate.jar [app_path] scaffold model_name_in_singular_form");
+    	log("    java -jar tools/generate.jar [app_path] scaffold {model_name_in_singular_form}[@connection_name]");
+    	log("    java -jar tools/generate.jar [app_path] scaffold-ajax {model_name_in_singular_form}[@connection_name]");
     	log("    java -jar tools/generate.jar [app_path] controller controller_name_in_plural_form [method] [method] ...");
-    	log("    java -jar tools/generate.jar [app_path] model model_name_in_singular_form");
+    	log("    java -jar tools/generate.jar [app_path] model {model_name_in_singular_form}[@connection_name]");
     	log("");
     	log("Examples:");
     	log("    This page:");
     	log("        java -jar tools/generate.jar -help");
     	log("");
-    	log("    Generate scaffold code for blog app's domain named post:");
+    	log("    Generate scaffold code for blog app's domain named post based on default db connection:");
     	log("        java -jar tools/generate.jar blog scaffold post");
+    	log("");
+    	log("    Generate scaffold code for blog app's domain named post based on blog_oracle database:");
+    	log("        java -jar tools/generate.jar blog scaffold post@blog_oracle");
     	log("");
     	log("    Generate ajax scaffold code for blog app's domain named post:");
     	log("        java -jar tools/generate.jar blog scaffold-ajax post");

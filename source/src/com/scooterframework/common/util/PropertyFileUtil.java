@@ -34,12 +34,13 @@ public class PropertyFileUtil {
     public static Properties loadPropertiesFromResource(String resourceName) 
     throws Exception {
         Properties props = new Properties();
+        InputStream is = null;
         try {
             // load all properties
             log.debug("loading properties from resource " + resourceName);
             String pFile = resourceName;
             if (!resourceName.startsWith("/")) pFile = "/" + resourceName;
-            InputStream is = PropertyFileUtil.class.getResourceAsStream(pFile);
+            is = PropertyFileUtil.class.getResourceAsStream(pFile);
             if (is != null) {
                 props.load(is);
                 is.close();
@@ -49,6 +50,14 @@ public class PropertyFileUtil {
             }
         } catch(Exception ex) {
             throw ex;
+        }
+        finally {
+        	try {
+        		if (is != null) is.close();
+        	}
+        	catch(Exception ex) {
+        		is = null;
+        	}
         }
         return props;
     }
@@ -98,6 +107,14 @@ public class PropertyFileUtil {
         } catch (IOException ioe) {
             throw new Exception("Error reading file " + fullFileName + ".");
         }
+        finally {
+        	try {
+        		if (is != null) is.close();
+        	}
+        	catch(Exception ex) {
+        		is = null;
+        	}
+        }
 	}
 	
 	/**
@@ -106,7 +123,7 @@ public class PropertyFileUtil {
      */
     public static void printAllProperties(ResourceBundle rb) {
         if (rb != null) {
-            Enumeration en = rb.getKeys();
+            Enumeration<?> en = rb.getKeys();
             while (en.hasMoreElements()) {
                 Object key = en.nextElement();
                 String value = rb.getString(key.toString());
@@ -124,13 +141,12 @@ public class PropertyFileUtil {
      */
     public static void printAllProperties(Properties pp, String nameValueSpliter, String propertyDelimiter) {    
         if (pp != null) {
-            Enumeration en = pp.keys();
+            Enumeration<?> en = pp.keys();
             while (en.hasMoreElements()) {
                 Object key = en.nextElement();
                 String value = pp.getProperty(key.toString());
-                //log.debug("key [" + key + "]  value =  [" + value + "]");
-                
                 log.debug("key [" + key + "]  value = [" + value + "]");
+                
                 log.debug("parsed: " + parseNestedPropertiesFromLine(value, nameValueSpliter, propertyDelimiter));
             }
         } 

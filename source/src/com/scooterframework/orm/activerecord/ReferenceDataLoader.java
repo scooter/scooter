@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -25,11 +25,11 @@ import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
 
 /**
  * ReferenceDataLoader is responsible for loading reference data.
- * 
+ *
  * @author (Fei) John Chen
  */
 public class ReferenceDataLoader implements Observer {
-    private static Map referenceDataTaskMap = new HashMap();
+    private static Map<String, ReferenceDataTimerTask> referenceDataTaskMap = new HashMap<String, ReferenceDataTimerTask>();
     private static long oneHundredDays = 8640000;
     private static boolean started = false;
     private Date oldDate = null;
@@ -38,58 +38,58 @@ public class ReferenceDataLoader implements Observer {
     public ReferenceDataLoader() {
         oldDate = new Date();
         oldDate.setTime(oldDate.getTime()-oneHundredDays);
-        
+
         DatabaseConfig.getInstance().addObserver(this);
     }
-    
+
     public void start() {
         if (started) return;
-        
+
         timer = new Timer();
-        
-        List refNames = DatabaseConfig.getInstance().getReferenceDataNames();
+
+        List<String> refNames = DatabaseConfig.getInstance().getReferenceDataNames();
         if (refNames != null && refNames.size() > 0) {
-            Iterator it = refNames.iterator();
+            Iterator<String> it = refNames.iterator();
             while(it.hasNext()) {
-                String name = (String)it.next();
+                String name = it.next();
                 Properties prop = DatabaseConfig.getInstance().getReferenceDataProperties(name);
                 ReferenceDataTimerTask task = new ReferenceDataTimerTask(name, prop);
                 referenceDataTaskMap.put(name, task);
                 schedule(task, task.period);
             }
         }
-        
+
         started = true;
     }
-    
+
     /**
      * Terminates this loader, discarding any currently scheduled tasks.
-     * 
+     *
      * @see  java.util.Timer#cancel()
      */
     public void cancel() {
         timer.cancel();
     }
-    
+
     /**
      * Terminates this loader, discarding any currently scheduled tasks.
-     * 
+     *
      * @see  java.util.Timer#cancel()
      */
     public void stop() {
         timer.cancel();
         started = false;
     }
-    
+
     /**
      * Updates this loader, restarts the timer task if its period is changed.
      */
     public void update(Observable o, Object arg) {
-        List refNames = DatabaseConfig.getInstance().getReferenceDataNames();
+        List<String> refNames = DatabaseConfig.getInstance().getReferenceDataNames();
         if (refNames != null && refNames.size() > 0) {
-            Iterator it = refNames.iterator();
+            Iterator<String> it = refNames.iterator();
             while(it.hasNext()) {
-                String name = (String)it.next();
+                String name = it.next();
                 Properties prop = DatabaseConfig.getInstance().getReferenceDataProperties(name);
                 if (referenceDataTaskMap.containsKey(name)) {
                     ReferenceDataTimerTask task = (ReferenceDataTimerTask)referenceDataTaskMap.get(name);
@@ -108,27 +108,26 @@ public class ReferenceDataLoader implements Observer {
                 }
             }
         }
-        
+
         //now remove all reference data tasks that have been removed from property file.
-        Iterator it = referenceDataTaskMap.keySet().iterator();
-        while(it.hasNext()) {
-            Object name = it.next();
+        for (Map.Entry<String, ReferenceDataTimerTask> entry : referenceDataTaskMap.entrySet()) {
+        	String name = entry.getKey();
             if (!refNames.contains(name)) {
-                ReferenceDataTimerTask task = (ReferenceDataTimerTask)referenceDataTaskMap.get(name);
+                ReferenceDataTimerTask task = entry.getValue();
                 task.cancel();
                 referenceDataTaskMap.remove(name);
             }
         }
     }
-    
+
     public static boolean isStarted() {
         return started;
     }
-    
-    public static Map getReferenceDataTasks() {
+
+    public static Map<String, ReferenceDataTimerTask>  getReferenceDataTasks() {
         return referenceDataTaskMap;
     }
-    
+
     private void schedule(TimerTask task, long period) {
         if (period > 0) {
             timer.schedule(task, oldDate, period);
@@ -137,8 +136,8 @@ public class ReferenceDataLoader implements Observer {
             timer.schedule(task, oldDate);
         }
     }
-    
-    class ReferenceDataTimerTask extends TimerTask {
+
+    private static class ReferenceDataTimerTask extends TimerTask {
         String theName = "";
         String clz = null;
         String sql = null;
@@ -150,22 +149,22 @@ public class ReferenceDataLoader implements Observer {
         boolean periodModified = false;
         boolean runOnlyOnce = false;
         boolean donotRun = false;
-        
+
         public ReferenceDataTimerTask(String name, Properties prop) {
             super();
             theName = name;
             init(prop);
         }
-        
+
         private void init(Properties prop) {
             clz = prop.getProperty("class");
             sql = prop.getProperty("sql");
-            if (clz == null && sql == null) 
+            if (clz == null && sql == null)
                 throw new IllegalArgumentException("Either clz or sql must be specified for reference data " + theName + ".");
-            
+
             key = prop.getProperty("key");
             value = prop.getProperty("value");
-            
+
             long thePeriod = 0;
             try {
                 thePeriod = Long.parseLong(prop.getProperty("period", "0"));
@@ -173,15 +172,15 @@ public class ReferenceDataLoader implements Observer {
             catch(NumberFormatException nfex) {
                 thePeriod = 0;
             }
-            
+
             periodModified = false;
             //if ((hasRun && (thePeriod != 0) || !hasRun && (thePeriod == 0)) && (period != thePeriod)) {
             if (period != thePeriod) {
                 periodModified = true;
             }
-            
+
             period = thePeriod;
-            
+
             if (period == 0) {
                 runOnlyOnce = true;
             }
@@ -189,23 +188,18 @@ public class ReferenceDataLoader implements Observer {
                 donotRun = true;
             }
         }
-        
-        public Date getLoadedTime() {
-            return loadedTime;
-        }
-        
+
         public void resetProperties(Properties prop) {
             init(prop);
         }
-        
+
         public void run() {
             if (donotRun || (runOnlyOnce && hasRun)) return;
-            
+
             if (clz != null) {
-                List records = null;
+                List<ActiveRecord> records = null;
                 if (sql != null) {
                     records = ActiveRecordUtil.getGateway(clz).findAllBySQL(sql);
-                    ReferenceDataStore.setReferenceData(theName, records);
                 }
                 else {
                     records = ActiveRecordUtil.getGateway(clz).findAll();
@@ -213,16 +207,16 @@ public class ReferenceDataLoader implements Observer {
                 ReferenceDataStore.setReferenceData(theName, convertRecordsToReferenceDataList(records));
             }
             else {
-                List rows = SqlServiceClient.retrieveRowsBySQL(sql);
+                List<RowData> rows = SqlServiceClient.retrieveRowsBySQL(sql);
                 ReferenceDataStore.setReferenceData(theName, convertRowsToReferenceDataList(rows));
             }
-            
+
             loadedTime = new Date();
             hasRun = true;
         }
-        
+
         public String toString() {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("name=" + theName).append(", ");
             sb.append("clz=" + clz).append(", ");
             sb.append("sql=" + sql).append(", ");
@@ -232,28 +226,28 @@ public class ReferenceDataLoader implements Observer {
             sb.append("loadedTime=" + loadedTime);
             return sb.toString();
         }
-        
-        private List convertRecordsToReferenceDataList(List records) {
+
+        private List<ReferenceData> convertRecordsToReferenceDataList(List<ActiveRecord> records) {
             if (records == null) return null;
-            
-            List list = new ArrayList(records.size());
-            Iterator it = records.iterator();
+
+            List<ReferenceData> list = new ArrayList<ReferenceData>(records.size());
+            Iterator<ActiveRecord> it = records.iterator();
             while(it.hasNext()) {
-                ActiveRecord record = (ActiveRecord)it.next();
+                ActiveRecord record = it.next();
                 ReferenceDataRecord rdr = new ReferenceDataRecord(theName, key, value, record);
                 list.add(rdr);
             }
             return list;
         }
-        
-        private List convertRowsToReferenceDataList(List records) {
+
+        private List<ReferenceData> convertRowsToReferenceDataList(List<RowData> records) {
             if (records == null) return null;
-            
-            List list = new ArrayList(records.size());
-            Iterator it = records.iterator();
+
+            List<ReferenceData> list = new ArrayList<ReferenceData>(records.size());
+            Iterator<RowData> it = records.iterator();
             while(it.hasNext()) {
-                RowData row = (RowData)it.next();
-                ReferenceDataRecord rdr = new ReferenceDataRecord(theName, key, value, row);
+                RowData row = it.next();
+                ReferenceData rdr = new ReferenceDataRecord(theName, key, value, row);
                 list.add(rdr);
             }
             return list;

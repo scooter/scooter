@@ -14,87 +14,78 @@ import java.sql.Types;
  * 
  * @author (Fei) John Chen
  */
-public class JdbcStatementParameter extends Parameter
-{
-    public JdbcStatementParameter() 
-    {
-        super();
-        this.mode = MODE_IN;
-        bUsedByCount = false;
-    }
-    
+public class JdbcStatementParameter extends Parameter {
+	public JdbcStatementParameter() {
+		super();
+		this.mode = MODE_IN;
+		bUsedByCount = false;
+	}
 
-    /**
-     * returns tableName
-     */
-    public String getTableName()
-    {
-        return tableName;
-    }
-    
-    /**
-     * sets tableName
-     */
-    public void setTableName(String tableName)
-    {
-        this.tableName = tableName;
-    }
-    
-    /**
-     * returns columnName
-     */
-    public String getColumnName()
-    {
-        return columnName;
-    }
-    
-    /**
-     * sets columnName
-     */
-    public void setColumnName(String columnName)
-    {
-        this.columnName = columnName;
-    }
-    
-    /**
-     * sets if the parameter is used by a count() function
-     */
-    public void setUsedByCount(boolean usedByCount)
-    {
-        if (usedByCount) 
-        {
-            bUsedByCount = true;
-            sqlDataType = Types.NUMERIC;
-            sqlDataTypeName = "NUMBER";
-            javaClassName = getJavaType(sqlDataType);
-        }
-    }
-    
-    /**
-     * checks if the parameter is used by count() function
-     */
-    public boolean isUsedByCount()
-    {
-        return bUsedByCount;
-    }
-    
-    /**
-     * Returns a string representation of the object.
-     * @return String
-     */
-    public String toString() {
-        StringBuffer returnString = new StringBuffer();
+	/**
+	 * returns tableName
+	 */
+	public String getTableName() {
+		return tableName;
+	}
 
-        returnString.append(super.toString()).append(", ");
+	/**
+	 * sets tableName
+	 */
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 
-        returnString.append("tableName = " + tableName).append(", ");
-        returnString.append("columnName = " + columnName).append(", ");
-        returnString.append("bUsedByCount = " + bUsedByCount);
-        
-        return returnString.toString();
-    }
+	/**
+	 * returns columnName
+	 */
+	public String getColumnName() {
+		return columnName;
+	}
 
-    protected String tableName = null;
-    protected String columnName = null;
-    protected boolean bUsedByCount = false;
+	/**
+	 * sets columnName
+	 */
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
+	}
+
+	/**
+	 * sets if the parameter is used by a count() function
+	 */
+	public void setUsedByCount(boolean usedByCount) {
+		if (usedByCount) {
+			bUsedByCount = true;
+			sqlDataType = Types.NUMERIC;
+			sqlDataTypeName = "NUMBER";
+			javaClassName = getJavaType(sqlDataType);
+		}
+	}
+
+	/**
+	 * checks if the parameter is used by count() function
+	 */
+	public boolean isUsedByCount() {
+		return bUsedByCount;
+	}
+
+	/**
+	 * Returns a string representation of the object.
+	 * 
+	 * @return String
+	 */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(super.toString()).append(", ");
+
+		sb.append("tableName = " + tableName).append(", ");
+		sb.append("columnName = " + columnName).append(", ");
+		sb.append("bUsedByCount = " + bUsedByCount);
+
+		return sb.toString();
+	}
+
+	protected String tableName = null;
+	protected String columnName = null;
+	protected boolean bUsedByCount = false;
 }

@@ -49,7 +49,7 @@ public interface OmniDTOBasic extends java.io.Serializable
      * output for every cursor. The key is the name of the cursor. The value 
      * is a TableData. 
      */
-    public Map getTableDataMap();
+    public Map<String, TableData> getTableDataMap();
     
     /**
      * adds a TableData
@@ -59,7 +59,7 @@ public interface OmniDTOBasic extends java.io.Serializable
     /**
      * returns childrenOmniDTOList
      */
-    public List getChildrenOmniDTOList();
+    public List<OmniDTO> getChildrenOmniDTOList();
     
     /**
      * returns childrenOmniDTO from List
@@ -74,7 +74,7 @@ public interface OmniDTOBasic extends java.io.Serializable
     /**
      * returns childrenOmniDTOMap
      */
-    public Map getChildrenOmniDTOMap();
+    public Map<String, OmniDTO> getChildrenOmniDTOMap();
     
     /**
      * returns childrenOmniDTO from Map

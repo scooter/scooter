@@ -63,13 +63,7 @@ public class ScooterRequestFilter implements Filter {
     /**
      * Character encoding to be used.
      */
-    protected String encoding = null; 
-
-    /**
-     * The filter configuration object we are associated with.  If this value
-     * is null, this filter instance is not currently configured.
-     */
-    private FilterConfig filterConfig = null;
+    protected String encoding = null;
 
 
     /**
@@ -78,7 +72,6 @@ public class ScooterRequestFilter implements Filter {
      * @param filterConfig The filter configuration object
      */
     public void init(FilterConfig filterConfig) throws ServletException {
-        this.filterConfig = filterConfig;
         this.excludedPaths = filterConfig.getInitParameter("excluded_paths");
         this.encoding = filterConfig.getInitParameter("encoding");
         
@@ -94,7 +87,6 @@ public class ScooterRequestFilter implements Filter {
      */
     public void destroy() {
         this.excludedPaths = null;
-        this.filterConfig = null;
     }
 
     /**
@@ -116,7 +108,7 @@ public class ScooterRequestFilter implements Filter {
         if (encoding != null) {
             request.setCharacterEncoding(encoding);
             if (!staticContent) {
-                response.setContentType("text/html;charset="+encoding);
+            	response.setCharacterEncoding(encoding);
             }
         }
         
@@ -179,7 +171,7 @@ public class ScooterRequestFilter implements Filter {
         
         //request header
         Properties headers = new Properties();
-        Enumeration headerNames = request.getHeaderNames();
+        Enumeration<?> headerNames = request.getHeaderNames();
         while(headerNames.hasMoreElements()) {
             String name = (String)headerNames.nextElement();
             String value = request.getHeader(name);
@@ -205,8 +197,9 @@ public class ScooterRequestFilter implements Filter {
             try {
             	List<FileItem> files = new ArrayList<FileItem>();
                 ServletFileUpload fileUpload = EnvConfig.getInstance().getServletFileUpload();
-                List<FileItem> items = fileUpload.parseRequest(request);
-                for (FileItem item : items) {
+                List<?> items = fileUpload.parseRequest(request);
+                for (Object fi : items) {
+                	FileItem item = (FileItem)fi;
                 	if (item.isFormField()) {
                 		ActionControl.storeToRequest(item.getFieldName(), item.getString());
                 	}

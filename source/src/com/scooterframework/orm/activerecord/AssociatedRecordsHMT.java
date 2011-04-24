@@ -31,7 +31,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         super(recordRelation);
     }
     
-    public AssociatedRecordsHMT(RecordRelation recordRelation, List records) {
+    public AssociatedRecordsHMT(RecordRelation recordRelation, List<? extends ActiveRecord> records) {
         super(recordRelation, records);
     }
     
@@ -46,13 +46,13 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @param joinInput A map of input data for the join record. 
      * @return updated AssociatedRecords
      */
-    public AssociatedRecords add(ActiveRecord record, Map joinInput) {
+    public AssociatedRecords add(ActiveRecord record, Map<String, Object> joinInput) {
         if (record == null) return this;
         
-        List records = new ArrayList();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
         records.add(record);
         
-        List joinInputs = new ArrayList();
+        List<Map<String, Object>> joinInputs = new ArrayList<Map<String, Object>>();
         joinInputs.add(joinInput);
         
         return add(records, joinInputs);
@@ -67,14 +67,14 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @param records a list of records to be added to the relation. 
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords add(List records) {
+    public AssociatedRecords add(List<? extends ActiveRecord> records) {
         if (records == null || records.size() == 0) return this;
         
         HasManyThroughRelation hmtRelation = (HasManyThroughRelation)super.getRelation();
-        Map inputsMap = hmtRelation.getJoinInputs();
+        Map<String, Object> inputsMap = hmtRelation.getJoinInputs();
         
         int size = records.size();
-        List inputsMapList = new ArrayList(size);
+        List<Map<String, Object>> inputsMapList = new ArrayList<Map<String, Object>>(size);
         for (int i=0; i<size; i++) {
             inputsMapList.add(i, inputsMap);
         }
@@ -91,7 +91,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @param joinInputs a list of input data map for the through table. 
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords add(List records, List joinInputs) {
+    public AssociatedRecords add(List<? extends ActiveRecord> records, List<Map<String, Object>> joinInputs) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -111,7 +111,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords internal_add(List records, List joinInputs) {
+    private AssociatedRecords internal_add(List<? extends ActiveRecord> records, List<Map<String, Object>> joinInputs) {
         if (records == null || records.size() == 0) return this;
         
         if (joinInputs != null && joinInputs.size() != records.size()) 
@@ -124,7 +124,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         validateRecordType(getRelation().getTargetClass(), records);
         
         // now add the records to db and memory by 
-        if (associatedRecords == null) associatedRecords = new ArrayList();
+        if (associatedRecords == null) associatedRecords = new ArrayList<ActiveRecord>();
         
         ActiveRecord owner = getOwner();
         if (!owner.isNewRecord()) {
@@ -133,8 +133,8 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
             Relation cbRelation = hmtRelation.getCBRelation();
             
             int inputSize = records.size();
-            for(int i=0; i<inputSize; i++) {
-                ActiveRecord record = (ActiveRecord)records.get(i);
+			for (int i = 0; i < inputSize; i++) {
+                ActiveRecord record = records.get(i);
                 if (record == null) continue;
                 
                 if (record.isNewRecord() || record.isDirty()) record.save();
@@ -144,7 +144,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
                     //now construct a join class
                     ActiveRecord joinRecord = (ActiveRecord)OrmObjectFactory.getInstance().newInstance(hmtRelation.getMiddleC());
                     if (joinInputs != null) {
-                        Map inputs = (Map)joinInputs.get(i);
+                        Map<String, Object> inputs = joinInputs.get(i);
                         joinRecord.setData(inputs);
                     }
                     
@@ -189,7 +189,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @return updated AssociatedRecords.
      */
     public AssociatedRecords detach(ActiveRecord target, boolean keepJoinRecord) {
-        List records = new ArrayList();
+        List<ActiveRecord> records = new ArrayList<ActiveRecord>();
         if (target != null) records.add(target);
         return detach(records, keepJoinRecord);
     }
@@ -204,7 +204,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @param records list of records to be detached.
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords detach(List records) {
+    public AssociatedRecords detach(List<? extends ActiveRecord> records) {
         return detach(records, false);
     }
     
@@ -223,7 +223,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @param keepJoinRecord if true, keep the join record. Otherwise, delete it.
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords detach(List records, boolean keepJoinRecord) {
+    public AssociatedRecords detach(List<? extends ActiveRecord> records, boolean keepJoinRecord) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -243,7 +243,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords internal_detach(List records, boolean keepJoinRecord) {
+    private AssociatedRecords internal_detach(List<? extends ActiveRecord> records, boolean keepJoinRecord) {
         if (records == null || records.size() == 0) return this;
         
         //retrieve current list
@@ -325,7 +325,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * @param records a list of records to be deleted.
      * @return updated AssociatedRecords.
      */
-    public AssociatedRecords delete(List records) {
+    public AssociatedRecords delete(List<? extends ActiveRecord> records) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         AssociatedRecords assocs = null;
         try {
@@ -345,7 +345,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         return assocs;
     }
     
-    private AssociatedRecords internal_delete(List records) {
+    private AssociatedRecords internal_delete(List<? extends ActiveRecord> records) {
         if (records == null || records.size() == 0) return this;
         
         //retrieve current list
@@ -394,7 +394,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
      * 
      * @return updated AssociatedRecords
      */
-    public AssociatedRecords replace(List records) {
+    public AssociatedRecords replace(List<? extends ActiveRecord> records) {
         throw new UnsupportFeatureException("replace() is not supported by has-many-through relation.");
     }
     
@@ -430,34 +430,32 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         HasManyThroughRelation rel = (HasManyThroughRelation)getRelation();
         
         //construct a conditions map
-        Map conditions = new HashMap();
+        Map<String, Object> conditions = new HashMap<String, Object>();
         
-        Map acMappingMap = getMappingMap(rel.getACMapping());
-        Iterator it1 = acMappingMap.keySet().iterator();
-        while(it1.hasNext()) {
-            Object aFld = it1.next();
-            Object cFld = acMappingMap.get(aFld);
-            conditions.put(cFld, recordA.getField((String)aFld));
+        Map<String, String> acMappingMap = getMappingMap(rel.getACMapping());
+        for (Map.Entry<String, String> entry : acMappingMap.entrySet()) {
+        	String aFld = entry.getKey();
+        	String cFld = entry.getValue();
+        	conditions.put(cFld, recordA.getField(aFld));
         }
         
-        Map cbMappingMap = getMappingMap(rel.getCBMapping());
-        Iterator it2 = cbMappingMap.keySet().iterator();
-        while(it2.hasNext()) {
-            Object cFld = it2.next();
-            Object bFld = cbMappingMap.get(cFld);
-            conditions.put(cFld, recordB.getField((String)bFld));
+        Map<String, String> cbMappingMap = getMappingMap(rel.getCBMapping());
+        for (Map.Entry<String, String> entry : cbMappingMap.entrySet()) {
+            String cFld = entry.getKey();
+            String bFld = entry.getValue();
+            conditions.put(cFld, recordB.getField(bFld));
         }
         
         //If this join record is in a category and the endB class is a type of 
         //the category, then add more to the conditions map.
-        Class joinClass = rel.getMiddleC();
-        List categories = RelationManager.getInstance().getRegisteredCategory(joinClass);
+        Class<? extends ActiveRecord> joinClass = rel.getMiddleC();
+        List<Category> categories = RelationManager.getInstance().getRegisteredCategory(joinClass);
         if (categories != null && categories.size() > 0) {
             boolean inCategory = false;
             Category category = null;
-            Iterator itc = categories.iterator();
+            Iterator<Category> itc = categories.iterator();
             while(itc.hasNext()) {
-                category = (Category)itc.next();
+                category = itc.next();
                 if (category.isEntityInCategory(rel.getTargetModel())) {
                     inCategory = true;
                     break;
@@ -474,7 +472,7 @@ public class AssociatedRecordsHMT extends AssociatedRecords {
         return joinRecord;
     }
     
-    private Map getMappingMap(String mapping) {
+    private Map<String, String> getMappingMap(String mapping) {
         return Converters.convertStringToMap(mapping);
     }
 }

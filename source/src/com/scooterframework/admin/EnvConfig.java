@@ -8,15 +8,14 @@
 package com.scooterframework.admin;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -32,7 +31,7 @@ import com.scooterframework.web.controller.ActionContext;
 import com.scooterframework.web.controller.NoViewFileException;
 
 /**
- * EnvConfig class configurates the application during startup time.
+ * EnvConfig class configures the application during startup time.
  * 
  * <p>
  * You can add more mappings by using the <tt>additional.mimetypes</tt> 
@@ -77,6 +76,7 @@ public class EnvConfig implements Observer {
     public static final String DEFAULT_VALUE_viewExtension = "jsp";
     public static final String DEFAULT_VALUE_rootURL = "/WEB-INF/views/index.jsp";
     public static final String DEFAULT_VALUE_errorPageURI = "/WEB-INF/views/error.jsp";
+    public static final String DEFAULT_VALUE_compileErrorPageURI = "/WEB-INF/views/compileError.jsp";
     public static final String DEFAULT_VALUE_allowDisplayingErrorDetails = "true";
     public static final String DEFAULT_VALUE_allowDataBrowser = "true";
     public static final String DEFAULT_VALUE_additionalMimeTypes = "";
@@ -90,7 +90,7 @@ public class EnvConfig implements Observer {
 
     private static EnvConfig me;
     private Properties appProperties = null;
-    private static Map defaultMimeTypesMap = Collections.synchronizedMap(new HashMap());
+    private static Map<String, String> defaultMimeTypesMap = new ConcurrentHashMap<String, String>();
 
     private String siteAdminUsername = DEFAULT_VALUE_siteAdminUsername;
     private String siteAdminPassword = DEFAULT_VALUE_siteAdminPassword;
@@ -114,6 +114,7 @@ public class EnvConfig implements Observer {
     private String viewExtension = DEFAULT_VALUE_viewExtension;
     private String rootURL = DEFAULT_VALUE_rootURL;
     private String errorPageURI = DEFAULT_VALUE_errorPageURI;
+    private String compileErrorPageURI = DEFAULT_VALUE_compileErrorPageURI;
     private String allowDisplayingErrorDetails = DEFAULT_VALUE_allowDisplayingErrorDetails;
     private String allowDataBrowser = DEFAULT_VALUE_allowDataBrowser;
     private String additionalMimeTypes = DEFAULT_VALUE_additionalMimeTypes;
@@ -127,15 +128,19 @@ public class EnvConfig implements Observer {
     private DiskFileItemFactory fileFactory;
     private ServletFileUpload fileUpload;
 
-    private Map cacheProvidersMap = Collections.synchronizedMap(new HashMap());
-    private Map contentHandlersMap = Collections.synchronizedMap(new HashMap());
-    private Map mimeTypesMap = Collections.synchronizedMap(new HashMap());
+    private Map<String, Object> cacheProvidersMap = new ConcurrentHashMap<String, Object>();
+    private Map<String, String> mimeTypesMap = new ConcurrentHashMap<String, String>();
 
     static {
         try {
         	Properties extMimeMapping = 
         		PropertyFileUtil.loadPropertiesFromResource(EXTENSION_MIMETYPES_RESOURCE);
-        	defaultMimeTypesMap.putAll(extMimeMapping);
+        	for (Map.Entry<Object, Object> entry : extMimeMapping.entrySet()) {
+        		Object name = entry.getKey();
+        		Object value = entry.getValue();
+        		if (name != null && value != null) 
+				defaultMimeTypesMap.put(name.toString(), value.toString());
+        	}
         	
             me = new EnvConfig();
         }catch(Exception ex) {
@@ -147,12 +152,13 @@ public class EnvConfig implements Observer {
     private EnvConfig() {
         init();
         PropertyFileChangeMonitor.getInstance().registerObserver(this, DATA_PROPERTIES_FILE);
+        
+        EventsManager.getInstance().registerListener(Constants.EVENT_COMPILE, SoundPlayer.getInstance());
     }
 
     private void clear() {
     	mimeTypesMap.clear();
     	cacheProvidersMap.clear();
-    	contentHandlersMap.clear();
     	PluginManager.getInstance().removePlugins();
     	fileFactory = null;
     	fileUpload = null;
@@ -210,30 +216,27 @@ public class EnvConfig implements Observer {
 
         messageResourcesFileBase = getProperty("message.resources.file.base", DEFAULT_VALUE_messageResourcesFileBase);
         errorPageURI = getProperty("app.error.page.uri", DEFAULT_VALUE_errorPageURI);
+        compileErrorPageURI = getProperty("app.compile.error.page.uri", DEFAULT_VALUE_compileErrorPageURI);
         allowDisplayingErrorDetails = getProperty("allow.displaying.error.details", DEFAULT_VALUE_allowDisplayingErrorDetails);
         allowDataBrowser = getProperty("allow.databrowser", DEFAULT_VALUE_allowDataBrowser);
         additionalMimeTypes = getProperty("additional.mimetypes", DEFAULT_VALUE_additionalMimeTypes);
         additionalSinglePlural = getProperty("additional.single.plural", DEFAULT_VALUE_additionalSinglePlural);
         
-        Map mimeTypes = Converters.convertStringToMap(additionalMimeTypes, ":", ",");
+        Map<String, String> mimeTypes = Converters.convertStringToMap(additionalMimeTypes, ":", ",");
         mimeTypesMap.putAll(mimeTypes);
 
-        Map words = Converters.convertStringToMap(additionalSinglePlural, ":", ",");
-        Iterator it = words.keySet().iterator();
-        while(it.hasNext()) {
-            String s = (String)it.next();
-            String p = (String)words.get(s);
-            WordUtil.addPlural(s, p);
+        Map<String, String> words = Converters.convertStringToMap(additionalSinglePlural, ":", ",");
+        for (Map.Entry<String, String> entry : words.entrySet()) {
+        	String value = entry.getValue();
+            WordUtil.addPlural(entry.getKey(), (value != null)?value:(String)null);
         }
-
-        String nameValueSpliter = "=";
-        String propertyDelimiter = ",";
-        Enumeration en = appProperties.keys();
+        
+        Enumeration<Object> en = appProperties.keys();
         while (en.hasMoreElements()) {
             String key = (String) en.nextElement();
             if (key.startsWith("plugin")) {
                 String name = key.substring(key.indexOf('.') + 1);
-                Properties p = PropertyFileUtil.parseNestedPropertiesFromLine(getProperty(key), nameValueSpliter, propertyDelimiter);
+                Properties p = PropertyFileUtil.parseNestedPropertiesFromLine(getProperty(key), "=", ",");
                 p.setProperty(Plugin.KEY_PLUGIN_NAME, name);
                 PluginManager.getInstance().registerPlugin(name, p);
                 
@@ -280,6 +283,10 @@ public class EnvConfig implements Observer {
     	fileUpload.setSizeMax(maxRequestSize);
     	fileUpload.setFileSizeMax(fileSizeMax);
     }
+	
+	private void initializePlugins() {
+		PluginManager.getInstance().startPlugins();
+	}
 
     public static synchronized EnvConfig getInstance() {
         return me;
@@ -287,6 +294,7 @@ public class EnvConfig implements Observer {
 
     public void update(Observable o, Object arg) {
         init();
+        initializePlugins();
     }
 
     /**
@@ -774,6 +782,13 @@ public class EnvConfig implements Observer {
     }
 
     /**
+     * Returns compile error page URI.
+     */
+    public String getCompileErrorPageURI() {
+        return compileErrorPageURI;
+    }
+
+    /**
      * Checks if displaying error details is allowed.
      *
      * @return true if allowed
@@ -802,7 +817,7 @@ public class EnvConfig implements Observer {
     /**
      * Returns cache provider names
      */
-    public Iterator getPredefinedCacheProviderNames() {
+    public Iterator<String> getPredefinedCacheProviderNames() {
         return cacheProvidersMap.keySet().iterator();
     }
 
@@ -839,7 +854,7 @@ public class EnvConfig implements Observer {
     /**
      * Returns the extension/mimetype mapping.
      */
-    public Map getMimeTypeMap() {
+    public Map<String, String> getMimeTypeMap() {
     	return mimeTypesMap;
     }
     
@@ -850,7 +865,8 @@ public class EnvConfig implements Observer {
      * @return the MIME type string for the extension.
      */
     public String getMimeType(String extension) {
-    	return (String)mimeTypesMap.get(extension);
+    	Object o = mimeTypesMap.get(extension);
+    	return (o != null)?o.toString():(String)null;
     }
     
     /**

@@ -23,7 +23,7 @@ public class ViewLogoutGenerator extends AbstractGenerator {
 	private String relativePathToView;
 	private String viewFileName;
 
-	public ViewLogoutGenerator(String templateFilePath, Map props, String controller, String action) {
+	public ViewLogoutGenerator(String templateFilePath, Map<String, String> props, String controller, String action) {
 		super(templateFilePath, props);
 		
 		this.controller = controller.toLowerCase();
@@ -41,22 +41,26 @@ public class ViewLogoutGenerator extends AbstractGenerator {
 		viewFileName = isEmpty(viewExtension)?action:(action + viewExtension);
 	}
 
-	protected Map getTemplateProperties() {
-		Map templateProps = new HashMap();
+	@Override
+	protected Map<String, String> getTemplateProperties() {
+		Map<String, String> templateProps = new HashMap<String, String>();
 		templateProps.put("controller", controller);
 		templateProps.put("action", action);
 		templateProps.put("app_name", getProperty("app.name"));
 		return templateProps;
 	}
 	
+	@Override
 	protected String getRootPath() {
-		return getProperty("app.path").toString();
+		return getProperty("app.path");
 	}
 
+	@Override
 	protected String getRelativePathToOutputFile() {
 		return relativePathToView;
 	}
 
+	@Override
 	protected String getOutputFileName() {
 		return viewFileName;
 	}

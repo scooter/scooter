@@ -4,7 +4,7 @@
         com.scooterframework.web.util.W"
 %>
 <h2><%=W.label("welcome.message")%></h2>
-<h4>Have a fun drive!</h4>
+<h4>Have a fun drive! Try <%=W.labelLink("these examples", "/examples")%></h4>
 
 <h2 class="sectionTitle">Getting started</h2>
 

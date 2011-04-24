@@ -33,7 +33,7 @@ public class BeanUtil {
      * @exception MethodCreationException if <tt>bean</tt> or
      *  <tt>method</tt> is null
      */
-    public static Method getMethod(Class clz, String methodName) {
+    public static Method getMethod(Class<?> clz, String methodName) {
         if (clz == null) {
             throw new IllegalArgumentException("BeanUtil.getMethod(): No bean class specified");
         }

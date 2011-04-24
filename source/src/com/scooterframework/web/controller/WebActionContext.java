@@ -77,16 +77,17 @@ public class WebActionContext extends ActionContext {
      * Gets data in parameter scope as a map. The value corresponding to a key
      * may either be a string or be a string array.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getParameterDataAsMap() {
-        Map hm = new HashMap();
+    public Map<String, Object> getParameterDataAsMap() {
+        Map<String, Object> hm = new HashMap<String, Object>();
         
-        Enumeration en = getHttpServletRequest().getParameterNames();
+        @SuppressWarnings("unchecked")
+		Enumeration<String> en = getHttpServletRequest().getParameterNames();
         while(en.hasMoreElements()) {
-            String name = (String)en.nextElement();
+            String name = en.nextElement();
             String[] valueAry = getHttpServletRequest().getParameterValues(name);
             if (valueAry != null) {
                 if (valueAry.length == 1) {
@@ -104,16 +105,17 @@ public class WebActionContext extends ActionContext {
     /**
      * Gets data in request scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getRequestDataAsMap() {
-        Map hm = new HashMap();
+    public Map<String, Object> getRequestDataAsMap() {
+        Map<String, Object> hm = new HashMap<String, Object>();
         
-        Enumeration en = getHttpServletRequest().getAttributeNames();
+        @SuppressWarnings("unchecked")
+		Enumeration<String> en = getHttpServletRequest().getAttributeNames();
         while (en.hasMoreElements()) {
-            String name  = (String)en.nextElement();
+            String name  = en.nextElement();
             Object value = getHttpServletRequest().getAttribute(name);
             hm.put(name, value);
         }
@@ -124,18 +126,19 @@ public class WebActionContext extends ActionContext {
     /**
      * Gets data in session scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getSessionDataAsMap() {
-        Map hm = new HashMap();
+    public Map<String, Object> getSessionDataAsMap() {
+        Map<String, Object> hm = new HashMap<String, Object>();
         
         HttpSession session = getHttpServletRequest().getSession();
         
-        Enumeration en = session.getAttributeNames();
+        @SuppressWarnings("unchecked")
+		Enumeration<String> en = session.getAttributeNames();
         while (en.hasMoreElements()) {
-            String name  = (String)en.nextElement();
+            String name  = en.nextElement();
             Object value = session.getAttribute(name);
             hm.put(name, value);
         }
@@ -146,16 +149,17 @@ public class WebActionContext extends ActionContext {
     /**
      * Gets data in context scope as a map.
      * 
-     * Return guarrented: An empty map will be returned if there is no data.
+     * Return guaranteed: An empty map will be returned if there is no data.
      * 
      * @return Map
      */
-    public Map getContextDataAsMap() {
-        Map hm = new HashMap();
+    public Map<String, Object> getContextDataAsMap() {
+        Map<String, Object> hm = new HashMap<String, Object>();
         
-        Enumeration en = servletContext.getAttributeNames();
+        @SuppressWarnings("unchecked")
+		Enumeration<String> en = servletContext.getAttributeNames();
         while (en.hasMoreElements()) {
-            String name  = (String)en.nextElement();
+            String name  = en.nextElement();
             Object value = servletContext.getAttribute(name);
             hm.put(name, value);
         }
@@ -301,7 +305,7 @@ public class WebActionContext extends ActionContext {
         namedCycles.put(name, cycle);
     }
     
-    private Map namedCycles = new HashMap();
+    private Map<String, Object> namedCycles = new HashMap<String, Object>();
     
     protected ServletContext servletContext;
     protected HttpServletRequest servletRequest;

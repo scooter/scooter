@@ -47,7 +47,7 @@ public class AssociatedRecordsInCategory {
      */
     public AssociatedRecords getAssociatedRecordsByType(String type) {
         String entity = categoryInstance.getEntityByType(type);
-        return (AssociatedRecords)targetAssrMap.get(entity);
+        return targetAssrMap.get(entity);
     }
     
     /**
@@ -59,7 +59,7 @@ public class AssociatedRecordsInCategory {
      * @return an ActiveRecord instance at the index
      */
     public ActiveRecord getRecord(String type, int index) {
-        List records = getRecords(type);
+        List<ActiveRecord> records = getRecords(type);
         ActiveRecord record = null;
         if (records != null && index < records.size()) record = (ActiveRecord)records.get(index);
         return record;
@@ -70,7 +70,7 @@ public class AssociatedRecordsInCategory {
      * 
      * @return a list of ActiveRecord instances for all types
      */
-    public List getRecords() {
+    public List<ActiveRecord> getRecords() {
         return getRecords(false);
     }
     
@@ -80,13 +80,12 @@ public class AssociatedRecordsInCategory {
      * @param refresh <tt>true</tt> if database records are to be relaoded.
      * @return a list of ActiveRecord instances for all types
      */
-    public List getRecords(boolean refresh) {
-        List list = new ArrayList();
-        Iterator it = targetAssrMap.keySet().iterator();
-        while(it.hasNext()) {
-            Object entity = it.next();
-            AssociatedRecords ars = (AssociatedRecords)targetAssrMap.get(entity);
-            List records = ars.getRecords(refresh);
+    public List<ActiveRecord> getRecords(boolean refresh) {
+        List<ActiveRecord> list = new ArrayList<ActiveRecord>();
+        for (Map.Entry<String, AssociatedRecords> entry : targetAssrMap.entrySet()) {
+            AssociatedRecords ars = targetAssrMap.get(entry.getKey());
+            if (ars == null) continue;
+            List<ActiveRecord> records = ars.getRecords(refresh);
             if (records != null) list.addAll(records);
         }
         
@@ -101,7 +100,7 @@ public class AssociatedRecordsInCategory {
      * @param type type name in the category
      * @return a list of ActiveRecord instances for the specific type
      */
-    public List getRecords(String type) {
+    public List<ActiveRecord> getRecords(String type) {
         return getRecords(type, false);
     }
     
@@ -111,11 +110,11 @@ public class AssociatedRecordsInCategory {
      * @param type type name in the category
      * @return a list of ActiveRecord instances for the specific type
      */
-    public List getRecords(String type, boolean refresh) {
-        List list = new ArrayList();
+    public List<ActiveRecord> getRecords(String type, boolean refresh) {
+        List<ActiveRecord> list = new ArrayList<ActiveRecord>();
         AssociatedRecords ars = getAssociatedRecordsByType(type);
         if (ars != null) {
-            List records = ars.getRecords(refresh);
+            List<ActiveRecord> records = ars.getRecords(refresh);
             if (records != null) list.addAll(records);
         }
         return list;
@@ -158,10 +157,9 @@ public class AssociatedRecordsInCategory {
      */
     public int size() {
         int size = 0;
-        Iterator it = targetAssrMap.keySet().iterator();
-        while(it.hasNext()) {
-            Object entity = it.next();
-            AssociatedRecords ars = (AssociatedRecords)targetAssrMap.get(entity);
+        for (Map.Entry<String, AssociatedRecords> entry : targetAssrMap.entrySet()) {
+            AssociatedRecords ars = entry.getValue();
+            if (ars == null) continue;
             size += ars.size();
         }
         return size;
@@ -191,7 +189,7 @@ public class AssociatedRecordsInCategory {
      * @param joinInput A map of input data for the join record. 
      * @return updated AssociatedRecordsInCategory
      */
-    public AssociatedRecordsInCategory add(ActiveRecord record, Map joinInput) {
+    public AssociatedRecordsInCategory add(ActiveRecord record, Map<String, Object> joinInput) {
         if (record != null) {
             getAssociatedRecordsHMT(record).add(record, joinInput);
         }
@@ -206,12 +204,12 @@ public class AssociatedRecordsInCategory {
      * @param targets a list of target record to be added to the association. 
      * @return updated AssociatedRecordsInCategory
      */
-    public AssociatedRecordsInCategory add(List targets) {
+    public AssociatedRecordsInCategory add(List<? extends ActiveRecord> targets) {
         if (targets == null || targets.size() == 0) return this;
         
         int size = targets.size();
         for (int i=0; i<size; i++) {
-            add((ActiveRecord)targets.get(i));
+            add(targets.get(i));
         }
         return this;
     }
@@ -225,7 +223,7 @@ public class AssociatedRecordsInCategory {
      * @param joinInputs a list of input data map for the through table. 
      * @return updated AssociatedRecordsInCategory
      */
-    public AssociatedRecordsInCategory add(List targets, List joinInputs) {
+    public AssociatedRecordsInCategory add(List<? extends ActiveRecord> targets, List<Map<String, Object>> joinInputs) {
         if (targets == null || targets.size() == 0) return this;
         
         if (joinInputs != null && joinInputs.size() != targets.size()) 
@@ -233,7 +231,7 @@ public class AssociatedRecordsInCategory {
         
         int size = targets.size();
         for (int i=0; i<size; i++) {
-            add((ActiveRecord)targets.get(i), (Map)joinInputs.get(i));
+            add(targets.get(i), joinInputs.get(i));
         }
         return this;
     }
@@ -261,12 +259,12 @@ public class AssociatedRecordsInCategory {
      * @param targets a list of target record to be deleted from the association. 
      * @return updated AssociatedRecordsInCategory
      */
-    public AssociatedRecordsInCategory delete(List targets) {
+    public AssociatedRecordsInCategory delete(List<? extends ActiveRecord> targets) {
         if (targets == null || targets.size() == 0) return this;
         
         int size = targets.size();
         for (int i=0; i<size; i++) {
-            delete((ActiveRecord)targets.get(i));
+            delete(targets.get(i));
         }
         return this;
     }
@@ -310,12 +308,12 @@ public class AssociatedRecordsInCategory {
      * @param targets a list of target record to be deleted from the association. 
      * @return updated AssociatedRecordsInCategory
      */
-    public AssociatedRecordsInCategory detach(List targets) {
+    public AssociatedRecordsInCategory detach(List<? extends ActiveRecord> targets) {
         if (targets == null || targets.size() == 0) return this;
         
         int size = targets.size();
         for (int i=0; i<size; i++) {
-            detach((ActiveRecord)targets.get(i));
+            detach(targets.get(i));
         }
         return this;
     }
@@ -329,12 +327,12 @@ public class AssociatedRecordsInCategory {
      * @param keepJoinRecord if true, keep the join record. Otherwise, delete it.
      * @return updated AssociatedRecordsInCategory
      */
-    public AssociatedRecordsInCategory detach(List targets, boolean keepJoinRecord) {
+    public AssociatedRecordsInCategory detach(List<? extends ActiveRecord> targets, boolean keepJoinRecord) {
         if (targets == null || targets.size() == 0) return this;
         
         int size = targets.size();
         for (int i=0; i<size; i++) {
-            detach((ActiveRecord)targets.get(i), keepJoinRecord);
+            detach(targets.get(i), keepJoinRecord);
         }
         return this;
     }
@@ -347,10 +345,10 @@ public class AssociatedRecordsInCategory {
         
         if (type == null) {
             //get all types
-            Set targets = categoryInstance.getEntitys();
-            Iterator it = targets.iterator();
+            Set<String> targets = categoryInstance.getEntitys();
+            Iterator<String> it = targets.iterator();
             while(it.hasNext()) {
-                String target = (String)it.next();
+                String target = it.next();
                 AssociatedRecords ars = owner.allAssociated(target, refresh);
                 targetAssrMap.put(target, ars);
             }
@@ -391,7 +389,7 @@ public class AssociatedRecordsInCategory {
      * Key of the map is entity name of the target, value is the related 
      * AssociatedRecords instance.
      */
-    private Map targetAssrMap = new HashMap();
+    private Map<String, AssociatedRecords> targetAssrMap = new HashMap<String, AssociatedRecords>();
     
     //indicate if associated records have been retrieved or not
     protected boolean latestRecordsLoaded = false;

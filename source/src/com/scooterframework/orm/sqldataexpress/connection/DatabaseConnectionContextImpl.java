@@ -8,7 +8,6 @@
 package com.scooterframework.orm.sqldataexpress.connection;
 
 import java.sql.Connection;
-import java.util.Iterator;
 import java.util.Properties;
 
 import com.scooterframework.common.util.Util;
@@ -217,9 +216,7 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
         
         String theVendor = null;
         
-        Iterator it = DatabaseConfig.ALL_BUILTIN_DATABASE_VENDORS.iterator();
-        while(it.hasNext()){
-            String vendor = (String)it.next();
+        for (String vendor : DatabaseConfig.ALL_BUILTIN_DATABASE_VENDORS) {
             if (input.toUpperCase().indexOf(vendor.toUpperCase()) != -1) {
                 theVendor = vendor;
                 break;
@@ -249,10 +246,10 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
             //verify transaction isolation level
             int tilLevel = Util.getSafeIntValue(til);
             if (tilLevel != Connection.TRANSACTION_NONE && 
+                tilLevel != Connection.TRANSACTION_READ_COMMITTED && 
                 tilLevel != Connection.TRANSACTION_READ_UNCOMMITTED && 
-                tilLevel != Connection.TRANSACTION_READ_UNCOMMITTED && 
-                tilLevel != Connection.TRANSACTION_READ_UNCOMMITTED && 
-                tilLevel != Connection.TRANSACTION_READ_UNCOMMITTED) {
+                tilLevel != Connection.TRANSACTION_REPEATABLE_READ && 
+                tilLevel != Connection.TRANSACTION_SERIALIZABLE) {
                 throw new IllegalArgumentException("Transaction isolation level specified is not valid: \"" + tilLevel + "\".");
             }
             else {
@@ -266,7 +263,7 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
         String loginTimeoutStr = prop.getProperty(DatabaseConnectionContext.KEY_LOGINTIMEOUT);
         if (loginTimeoutStr != null) {
             try {
-                loginTimeout = new Integer(loginTimeoutStr);
+                loginTimeout = Integer.valueOf(loginTimeoutStr);
             }
             catch(Exception ex) {
                 throw new IllegalArgumentException("Failed to parse login timeout string: " + loginTimeoutStr);

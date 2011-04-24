@@ -44,10 +44,10 @@ public class ControllerFactory {
             try {
                 controller = AutoLoadedObjectFactory.getInstance().newInstance(controllerClassName);
             } catch (Exception ex) {
-                log.info("Failed to create instance of \"" + controllerClassName + "\";");
                 if (EnvConfig.getInstance().allowAutoCRUD() || 
                     RouteConfig.getInstance().allowAutoREST()) {
-                    log.info("Use default controller class \"" + defaultControllerClass + "\".");
+                    log.debug("No controller class of \"" + controllerClassName + 
+                    		"\" created. Use default controller class \"" + defaultControllerClass + "\".");
                     controller = AutoLoadedObjectFactory.getInstance().newInstance(defaultControllerClass);
                 }
                 else {
@@ -62,7 +62,7 @@ public class ControllerFactory {
         return controller;
     }
     
-    private static Map controllerMap = Collections.synchronizedMap(new HashMap());
+    private static Map<String, Object> controllerMap = Collections.synchronizedMap(new HashMap<String, Object>());
 
     private static LogUtil log = LogUtil.getLogger(ControllerFactory.class.getName());
 }
