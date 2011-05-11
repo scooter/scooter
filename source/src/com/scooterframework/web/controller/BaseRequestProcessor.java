@@ -28,6 +28,7 @@ import com.scooterframework.common.exception.MethodCreationException;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.BeanUtil;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.StringUtil;
 import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.web.route.NoRouteFoundException;
@@ -539,7 +540,7 @@ public class BaseRequestProcessor {
     throws IOException, ServletException {
     	if (hasRendered(request)) return;
     	
-        String target = getViewURI(aps.controller, aps.action);
+        String target = getViewURI(StringUtil.toLowerCase(aps.controller), StringUtil.toLowerCase(aps.action));
         doForward(target, request, response);
     }
     
