@@ -222,7 +222,7 @@ public class ActionResult {
         
         if (ActionControl.isAjaxRequest()) {
         	if (!newURI.toLowerCase().startsWith("http")) {
-        		newURI = W.getURL(newURI, "fullurl:true");
+        		newURI = W.getURL(newURI);
         	}
         	newURI = "<script type=\"text/javascript\">window.location=\"" + newURI + "\"</script>";
         	return TAG_HTML + newURI;
