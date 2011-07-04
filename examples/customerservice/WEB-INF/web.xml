@@ -5,7 +5,7 @@
   "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-  <display-name>Scooter-powered customerservice Application</display-name>
+  <display-name>Scooter-powered ajaxtodo Application</display-name>
 
   <!-- Define servlet-mapped and path-mapped example filters -->
   
