@@ -295,6 +295,15 @@ public class ActionControl {
     }
     
     /**
+     * Checks if this is an AJAX request.
+     * 
+     * @return true if this is an AJAX request.
+     */
+    public static boolean isAjaxRequest() {
+    	return (params(Constants.AJAX_REQUEST) != null)?true:false;
+    }
+    
+    /**
      * Checks if this is a file-upload request or multipart request.
      * 
      * @return true if this is a file-upload request or multipart request.

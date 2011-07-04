@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.orm.activerecord.ActiveRecord;
+import com.scooterframework.web.util.W;
 
 /**
  * ActionResult class contains keys, tags and convenient methods for decorating 
@@ -211,10 +212,23 @@ public class ActionResult {
      * @return a formatted redirect-tagged URI string
      */
     public static String redirectTo(String uri, String nameValuePairs) {
-        if (nameValuePairs == null || "".equals(nameValuePairs)) {
-            return TAG_REDIRECT_TO + uri;
+    	if (uri == null) 
+    		throw new IllegalArgumentException("uri cannot be null.");
+    	
+    	String newURI = uri;
+        if (nameValuePairs != null && !"".equals(nameValuePairs)) {
+        	newURI = uri + "?" + nameValuePairs;
         }
-        return TAG_REDIRECT_TO + uri + "?" + nameValuePairs;
+        
+        if (ActionControl.isAjaxRequest()) {
+        	if (!newURI.toLowerCase().startsWith("http")) {
+        		newURI = W.getURL(newURI, "fullurl:true");
+        	}
+        	newURI = "<script type=\"text/javascript\">window.location=\"" + newURI + "\"</script>";
+        	return TAG_HTML + newURI;
+        }
+        
+        return TAG_REDIRECT_TO + newURI;
     }
     
     /**
