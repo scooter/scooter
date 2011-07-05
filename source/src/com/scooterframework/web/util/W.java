@@ -1440,9 +1440,13 @@ public class W {
         }
         
         String url = actionPath;
-        String contextPath = getContextPath();
-        if (!actionPath.startsWith(contextPath) && !actionPath.toLowerCase().startsWith("http")) {
-            url = contextPath + url;
+        String al = actionPath.toLowerCase();
+        if (!al.startsWith("http")) {
+            String contextPath = getContextPath();
+        	String cp = (contextPath.endsWith("/"))?contextPath:(contextPath + "/");
+        	if (!al.startsWith(cp.toLowerCase())) {
+        		url = contextPath + url;
+        	}
         }
         
         String fullurl = options.get("fullurl");
