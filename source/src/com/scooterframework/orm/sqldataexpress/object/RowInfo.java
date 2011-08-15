@@ -111,6 +111,13 @@ public class RowInfo implements Serializable {
     /**
      * sets meta data for the row
      */
+    public void setResultSetMetaDataForTable(ResultSet rs) {
+        parseResultSetForTable(rs);
+    }
+
+    /**
+     * sets meta data for the row
+     */
     public void setResultSetMetaDataForView(ResultSet rs) {
         parseResultSetForView(rs);
     }
@@ -586,6 +593,20 @@ public class RowInfo implements Serializable {
     }
 
     /**
+     * Returns default value for data entry screen.
+     *
+     * @param colName the column name.
+     * @return string of default values
+     */
+    public String getColumnDefaultForEntryScreen(String colName) {
+        ColumnInfo ci = getColumnInfo(colName);
+        if (ci != null) {
+            return ci.getColumnDefaultForEntryScreen();
+        }
+        return "";
+    }
+
+    /**
      * returns delete sql of jdbc style
      */
     public String getDeleteSqlInJDBCStyle() {
@@ -717,6 +738,23 @@ public class RowInfo implements Serializable {
 
         try {
             parseResultSetMetaData(rs.getMetaData());
+        }
+        catch(SQLException ex) {
+            throw new FailureDetectingRowMetaDataException(ex);
+        }
+    }
+
+    private void parseResultSetForTable(ResultSet rs) {
+        if (rs == null) return;
+
+        try {
+            int index = 0;
+            while (rs.next()) {
+                ColumnInfo ci = getColumnInfo(index);
+                ci.setColumnDefault(rs.getString("COLUMN_DEF"));
+                ci.setColumnTypeName(rs.getString("TYPE_NAME"));
+                ++index;
+            }
         }
         catch(SQLException ex) {
             throw new FailureDetectingRowMetaDataException(ex);

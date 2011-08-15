@@ -1,3 +1,6 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
 <%@ page import="
         java.util.Iterator,
         com.scooterframework.admin.Constants,
@@ -37,7 +40,7 @@ for (Iterator it = O.columnNames(record); it.hasNext();) {
     boolean isAuditedColumn = ri.isAuditedForCreateOrUpdate(columnName);
     if (isAuditedColumn) continue;
     
-    Object columnValue = record.getField(columnName);
+    Object columnValue = ri.getColumnDefaultForEntryScreen(columnName);
     boolean isRequired = ri.isRequiredColumn(columnName);
     boolean isLongText = ri.isLongTextColumn(columnName, 255);
     boolean isDateColumn = ri.isDateColumn(columnName);
@@ -60,9 +63,10 @@ for (Iterator it = O.columnNames(record); it.hasNext();) {
 <%  } else { %>
     <tr>
         <td align="right"><%if (isRequired) {%><span class="required">*</span><%}%><b><%=WordUtil.titleize(columnName)%>:</b></td>
-        <td><input type="TEXT" id="<%=columnName%>" name="<%=columnName%>" value="<%=T.text(columnValue)%>" size="80" /></td>
-<%        if (isDateColumn) { %> (yyyy-mm-dd) <% } %>
-<%        if (isTimestampColumn) { %> (yyyy-mm-dd hh-mm-ss) <% } %>
+        <td><input type="TEXT" id="<%=columnName%>" name="<%=columnName%>" value="<%=T.text(columnValue)%>" size="80" />
+<%        if (isDateColumn) { %> </br>(yyyy-mm-dd) <% } %>
+<%        if (isTimestampColumn) { %> </br>(yyyy-mm-dd hh-mm-ss) <% } %>
+        </td>
     </tr>
 <%
     }

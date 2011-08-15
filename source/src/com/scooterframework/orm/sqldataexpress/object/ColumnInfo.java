@@ -77,6 +77,24 @@ public class ColumnInfo implements Serializable {
         m_sColumnName = columnName;
     }
 
+    public String getColumnDefault() {
+        return m_ColumnDefault;
+    }
+
+    void setColumnDefault(String columnDefault) {
+        m_ColumnDefault = columnDefault;
+    }
+    
+    public String getColumnDefaultForEntryScreen() {
+    	if (m_ColumnDefault != null) {
+    		if (m_ColumnDefault.equalsIgnoreCase("CURRENT_TIMESTAMP") || 
+    				m_ColumnDefault.toUpperCase().startsWith("SYS")) {
+    			m_ColumnDefault = "";
+    		}
+    	}
+        return m_ColumnDefault;
+    }
+
     public String getColumnTypeName() {
         return m_sColumnTypeName;
     }
@@ -177,6 +195,7 @@ public class ColumnInfo implements Serializable {
         returnString.append( "isPrimaryKey = " + m_bPrimaryKey ).append( LINE_BREAK );
         returnString.append( "ColumnClassName = " + m_sColumnClassName).append( LINE_BREAK );
         returnString.append( "ColumnName = " + m_sColumnName).append( LINE_BREAK );
+        returnString.append( "ColumnDefault = " + m_ColumnDefault).append( LINE_BREAK );
         returnString.append( "ColumnTypeName = " + m_sColumnTypeName).append( LINE_BREAK );
         returnString.append( "ColumnDisplaySize = " + m_iColumnDisplaySize).append( LINE_BREAK );
         returnString.append( "DataType = " + m_iDataType).append( LINE_BREAK );
@@ -237,6 +256,7 @@ public class ColumnInfo implements Serializable {
      * The following types from java.sql.Types are treated as numeric type:
      * <ul>
      *   <li>java.sql.Types.BIGINT  -5 </li>
+     *   <li>java.sql.Types.BIT     -7 </li>
      *   <li>java.sql.Types.DECIMAL  3 </li>
      *   <li>java.sql.Types.DOUBLE   8 </li>
      *   <li>java.sql.Types.FLOAT    6 </li>
@@ -255,6 +275,8 @@ public class ColumnInfo implements Serializable {
         boolean result = false;
         switch(dataType) {
             case Types.BIGINT:// -5
+                result = true; break;
+            case Types.BIT:// -7
                 result = true; break;
             case Types.DECIMAL:// 3
                 result = true; break;
@@ -283,6 +305,7 @@ public class ColumnInfo implements Serializable {
      * The following types from java.sql.Types are treated as numeric type:
      * <ul>
      *   <li>java.sql.Types.BIGINT  -5 </li>
+     *   <li>java.sql.Types.BIT     -7 </li>
      *   <li>java.sql.Types.DECIMAL  3 </li>
      *   <li>java.sql.Types.DOUBLE   8 </li>
      *   <li>java.sql.Types.FLOAT    6 </li>
@@ -306,6 +329,7 @@ public class ColumnInfo implements Serializable {
     private boolean m_bPrimaryKey = false;
     private String m_sColumnClassName = "";
     private String m_sColumnName = "";
+    private String m_ColumnDefault;
     private String m_sColumnTypeName = "";
     private int m_iColumnDisplaySize;
     private int m_iDataType;

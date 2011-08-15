@@ -41,9 +41,10 @@ Iterator cols = O.columns((RowInfo)W.get("header"));
   <th>SQL Type</th>
   <th>Type Name</th>
   <th>Size</th>
-  <th>Scale</th>
   <th>Precision</th>
+  <th>Scale</th>
   <th>Null</th>
+  <th>Default</th>
 </tr>
 <%
 int index = 0;
@@ -63,6 +64,7 @@ while(cols.hasNext()) {
   <td align="right"><%=ci.getPrecision()%></td>
   <td align="right"><%=ci.getScale()%></td>
   <td align="center"><%=T.booleanWord(ci.isNull(), "Y", "")%></td>
+  <td align="right"><%=ci.getColumnDefault()%></td>
 </tr>
 <%}%>
 </table>

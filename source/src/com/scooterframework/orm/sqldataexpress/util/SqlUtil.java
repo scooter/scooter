@@ -56,12 +56,12 @@ public class SqlUtil {
     /**
      * Converts from SQL data type to Java class type.
      *
-     * Here is a list of presumed Java class name and its correpsonding sql data type:
+     * Here is a list of presumed Java class name and its corresponding SQL data type:
      * <pre>
      *  java.sql.Array         public static final int ARRAY 2003
      *  java.lang.Long         public static final int BIGINT -5
      *  byte[]                 public static final int BINARY -2
-     *  java.lang.Object       public static final int BIT -7
+     *  java.lang.Boolean      public static final int BIT -7
      *  java.sql.Blob          public static final int BLOB 2004
      *  java.lang.Boolean      public static final int BOOLEAN 16
      *  java.lang.String       public static final int CHAR 1
@@ -98,7 +98,6 @@ public class SqlUtil {
      *
      * The following types are simply converted to "java.lang.Object":
      * <ul>
-     *   <li>public static final int BIT -7</li>
      *   <li>public static final int DATALINK 70</li>
      *   <li>public static final int DISTINCT 2001</li>
      *   <li>public static final int JAVA_OBJECT 2000</li>
@@ -153,6 +152,7 @@ public class SqlUtil {
             case 93: //TIMESTAMP
                 javaClassName = "java.sql.Timestamp";
                 break;
+            case -7: //BIT
             case 16: //BOOLEAN
                 javaClassName = "java.lang.Boolean";
                 break;

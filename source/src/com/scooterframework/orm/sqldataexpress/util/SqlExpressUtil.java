@@ -933,6 +933,12 @@ public class SqlExpressUtil {
             
             ti.setHeader(header);
             DAOUtil.closeResultSet(rs);
+
+            //set more properties
+            DatabaseMetaData dbmd = conn.getMetaData();
+            rs2 = dbmd.getColumns(toUpperCase(catalog), toUpperCase(schema), 
+            		toUpperCase(table), (String)null);
+            header.setResultSetMetaDataForTable(rs2);
             
             // set some table properties
             //ti.setSchema(ti.getHeader().getColumnInfo(0).getSchemaName());

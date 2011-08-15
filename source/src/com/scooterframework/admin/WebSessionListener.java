@@ -21,7 +21,7 @@ import javax.servlet.http.HttpSessionListener;
 public class WebSessionListener implements HttpSessionListener {
 	private static int sessionCount = 0;
 	private static int sessionCountMax = 0;
-	private static Date sessionCountMaxDate = new Date();
+	private static Date sessionCountMaxDate;
 
 	public void sessionCreated(HttpSessionEvent se) {
 		synchronized (this) {
