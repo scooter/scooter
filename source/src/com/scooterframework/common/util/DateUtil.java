@@ -80,6 +80,9 @@ public class DateUtil {
     /**
      * <p>Returns a date instance from a <tt>dateStr</tt> string. </p>
      * 
+     * <p>When the input string is either <tt>0000-00-00</tt> or 
+     * <tt>0000-00-00 00:00:00</tt>, a null value is returned.
+     * 
      * <p>
      * Note: By the time of this version, the only allowed date-time patterns 
      * for automatic form processing are listed in description of 
@@ -92,6 +95,9 @@ public class DateUtil {
      */
     public static Date parseDate(String dateStr, String pattern, Locale locale) {
         if (dateStr == null || "".equals(dateStr)) return null;
+        
+        if (dateStr.equals("0000-00-00") || 
+        	dateStr.equals("0000-00-00 00:00:00")) return null;
         
         Date date = null;
         try {
