@@ -1,0 +1,28 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
+	com.scooterframework.orm.sqldataexpress.object.RESTified,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.W"
+%>
+
+<%
+RESTified $model$ = (RESTified)W.request("$model$");
+%>
+
+<h2>Show $model$</h2>
+<%=W.errorMessage("$model$")%>
+
+$columns: { column |
+<p>
+  <b>$column.columnHeader$:</b>
+  <%=O.hv("$model$.$column.columnNameLower$")%>
+</p>}$
+
+<br />
+
+<%=W.labelLink("Edit", R.editResourceRecordPath("$resource$", $model$))%>|
+<%=W.labelLink("List", R.resourcePath("$resource$"))%>|
+<%=W.labelLink("Paged List", R.resourcePath("$resource$") + "?paged=true")%>

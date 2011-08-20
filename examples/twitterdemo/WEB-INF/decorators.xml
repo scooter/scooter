@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<decorators defaultdir="/WEB-INF/views/layouts/sitemesh">
+    <excludes>
+        <pattern>/static/*</pattern>
+    </excludes>
+
+    <decorator name="main" page="twoColumnsLayout.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+
+    <decorator name="home" page="oneColumnLayout.jsp">
+        <pattern>/</pattern>
+    </decorator>
+
+    <decorator name="admin" page="adminLayout.jsp">
+        <pattern>/admin/*</pattern>
+    </decorator>
+
+    <decorator name="panel" page="panel.jsp"/>
+    <decorator name="printable" page="printable.jsp"/>
+    <decorator name="nochange" page="nochange.jsp"/>
+
+    <decorator name="signon" page="oneColumnLayout.jsp">
+        <pattern>/signon/logout</pattern>
+        <pattern>/signon/login</pattern>
+    </decorator>
+</decorators>

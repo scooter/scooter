@@ -1,0 +1,1 @@
+The message we found is <i>$content$</i>. -- StringTemplate

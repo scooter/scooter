@@ -1,0 +1,47 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
+	java.util.Iterator,
+	com.scooterframework.orm.sqldataexpress.object.RESTified,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.T,
+	com.scooterframework.web.util.W"
+%>
+
+<div id="$resource$_list">
+
+<h2><%=T.pluralize(O.count("$list_key$"), "$model$")%></h2>
+<%=W.errorMessage("$model$")%>
+
+<table class="sTable">
+    <tr>$columns: { column |
+        <th>$column.columnHeader$</th>}$
+        <th></th>
+    </tr>
+<%
+for (Iterator it = O.iteratorOf("$list_key$"); it.hasNext();) {
+    RESTified $model$ = (RESTified)it.next();
+%>
+    <tr class="<%=W.cycle("odd, even")%>">$columns: { column |
+        <td><%=O.hp($model$, "$column.columnNameLower$")%></td>}$
+        <td nowrap>
+            <%=W.labelLink("show", R.resourceRecordPath("$resource$", $model$),     "data-ajax:true; data-method:GET; data-target:#entry; data-handler:html")%>
+            <%=W.labelLink("edit", R.editResourceRecordPath("$resource$", $model$), "data-ajax:true; data-method:GET; data-target:#entry; data-handler:html")%>
+            <%=W.labelLink("delete", R.resourceRecordPath("$resource$", $model$),   "data-ajax:true; data-method:DELETE; data-target:#$resource$_list; data-handler:html; data-confirm:Are you sure?")%>
+        </td>
+    </tr>
+<%}%>
+</table>
+
+<br />
+
+<%=W.labelLink("Add $model$", R.addResourcePath("$resource$"), "data-ajax:true; data-method:GET; data-target:#entry; data-handler:html")%>|
+<%=W.labelLink("Paged List", R.resourcePath("$resource$") + "?paged=true", "data-ajax:true; data-method:GET; data-target:#$resource$_list; data-handler:html")%>
+
+<br/>
+
+<div id="entry"></div>
+
+</div>

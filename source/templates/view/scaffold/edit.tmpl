@@ -1,0 +1,60 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
+	com.scooterframework.orm.sqldataexpress.object.RESTified,
+	com.scooterframework.web.util.F,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.W"
+%>
+
+<h2>Edit $model$</h2>
+<%=W.errorMessage("$model$")%>
+
+<%=F.formForOpen("$resource$", "$model$")%>
+$columns: { column |
+$if(column.readonly)$
+<p>
+  $if(column.isRequired)$
+    <span class="required">*</span><%=F.label("$column.columnNameLower$")%><br />
+  $else$
+    <%=F.label("$column.columnNameLower$")%><br />
+  $endif$
+  <input type="text" id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" value="<%=O.hv("$model$.$column.columnNameLower$")%>" size="$column.size$" readonly="readonly" />
+</p>
+$elseif(column.isLongText)$
+<p>
+  $if(column.isRequired)$
+    <span class="required">*</span><%=F.label("$column.columnNameLower$")%><br />
+  $else$
+    <%=F.label("$column.columnNameLower$")%><br />
+  $endif$
+  <textarea id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" cols="$column.size$" rows="10"><%=O.hv("$model$.$column.columnNameLower$")%></textarea>
+</p>
+$else$
+<p>
+  $if(column.isRequired)$
+    <span class="required">*</span><%=F.label("$column.columnNameLower$")%><br />
+  $else$
+    <%=F.label("$column.columnNameLower$")%><br />
+  $endif$
+  <input type="text" id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" value="<%=O.hv("$model$.$column.columnNameLower$")%>" size="$column.size$" /> $column.columnFormat$
+</p>
+$endif$
+
+$if(column.isDateColumn)$
+    <script type="text/javascript">
+        jQuery(function(){jQuery('#$model$_$column.columnNameLower$').datepicker({ dateFormat: 'yy-mm-dd' });});
+    </script>
+$endif$
+}$
+
+  <input id="$model$_submit" name="commit" type="submit" value="Update" />&nbsp;&nbsp;&nbsp;<input type="reset"/>
+<%=F.formForClose("$resource$")%>
+
+<br />
+
+<%=W.labelLink("Show", R.resourceRecordPath("$resource$", (RESTified)W.request("$model$")))%>|
+<%=W.labelLink("List", R.resourcePath("$resource$"))%>|
+<%=W.labelLink("Paged List", R.resourcePath("$resource$") + "?paged=true")%>

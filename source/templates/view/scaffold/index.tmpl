@@ -1,0 +1,39 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
+	java.util.Iterator,
+	com.scooterframework.orm.sqldataexpress.object.RESTified,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.T,
+	com.scooterframework.web.util.W"
+%>
+
+<h2><%=T.pluralize(O.count("$list_key$"), "$model$")%></h2>
+<%=W.errorMessage("$model$")%>
+
+<table class="sTable">
+    <tr>$columns: { column |
+        <th>$column.columnHeader$</th>}$
+        <th></th>
+    </tr>
+<%
+for (Iterator it = O.iteratorOf("$list_key$"); it.hasNext();) {
+    RESTified $model$ = (RESTified)it.next();
+%>
+    <tr class="<%=W.cycle("odd, even")%>">$columns: { column |
+        <td><%=O.hp($model$, "$column.columnNameLower$")%></td>}$
+        <td nowrap>
+            <%=W.labelLink("show", R.resourceRecordPath("$resource$", $model$))%>
+            <%=W.labelLink("edit", R.editResourceRecordPath("$resource$", $model$))%>
+            <%=W.labelLink("delete", R.resourceRecordPath("$resource$", $model$), "confirm:'Are you sure?'; method:delete")%>
+        </td>
+    </tr>
+<%}%>
+</table>
+
+<br />
+
+<%=W.labelLink("Add $model$", R.addResourcePath("$resource$"))%>|
+<%=W.labelLink("Paged List", R.resourcePath("$resource$") + "?paged=true")%>

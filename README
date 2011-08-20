@@ -1,0 +1,81 @@
+Scooter Framework
+=================
+
+----------
+What is it
+----------
+This is the latest Scooter Framework source code. 
+See release.txt for detailed updates.
+
+--------------------
+How to create an app
+--------------------
+Creating an app is much easier with this version. Just one command:
+
+Creating an app under webapps directory:
+>java -jar tools/create.jar blog
+
+Creating an app in user's home directory:
+>java -jar tools/create.jar /home/users/john/projects/blog
+
+Use -help option to get more options.
+
+------------------------------------------------
+How to create an AJAX-powered app in one command
+------------------------------------------------
+
+Use the "scaffold-ajax" option:
+>java -jar tools/generate.jar blog scaffold-ajax post
+
+-----------------
+How to run an app
+-----------------
+
+Run an app with port 9090
+>java -jar tools/server.jar blog 9090
+
+Run an app with default port 8080
+>java -jar tools/server.jar /home/users/john/projects/blog
+
+-----------------------------------------
+How to invoke http://localhost:8080/posts
+-----------------------------------------
+Change the contextPath from "/blog" to "/" in blog/WEB-INF/jetty-web.xml
+
+-------------------------------------------------
+How to find out how many concurrent user sessions
+-------------------------------------------------
+http://localhost:8080/blog/admin/site
+
+---------------------------------
+How to find out what are deployed
+---------------------------------
+http://localhost:8080/blog/admin/files/list
+
+--------------------
+How to build scooter
+--------------------
+1. Set JAVA_HOME environment variable pointing to a JDK installation.
+2. Type 'ant build' to create a scooter.jar
+
+Type 'ant' to get a list of targets
+
+---------------------------
+How to test Scooter and App
+---------------------------
+
+Test Scooter framework:
+>ant test
+
+Unit test an application:
+>ant app_test_unit -DappPath=webapps/blog
+
+Functional test an application:
+>ant app_test_fun -DappPath=/home/users/john/projects/blog
+
+
+-----
+TODOs
+-----
+1. Update video
+2. Add more documentation
