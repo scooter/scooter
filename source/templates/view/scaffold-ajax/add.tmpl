@@ -14,12 +14,20 @@
 $columns: { column |
 $if(column.isLongText)$
 <p>
-  <%=F.label("$column.columnNameLower$")%><br />
+  $if(column.isRequired)$
+    <span class="required">*</span><%=F.label("$column.columnNameLower$")%><br />
+  $else$
+    <%=F.label("$column.columnNameLower$")%><br />
+  $endif$
   <textarea id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" cols="$column.size$" rows="10"><%=O.hv("$model$.$column.columnNameLower$")%></textarea>
 </p>
 $else$
 <p>
-  <%=F.label("$column.columnNameLower$")%><br />
+  $if(column.isRequired)$
+    <span class="required">*</span><%=F.label("$column.columnNameLower$")%><br />
+  $else$
+    <%=F.label("$column.columnNameLower$")%><br />
+  $endif$
   <input type="text" id="$model$_$column.columnNameLower$" name="$column.columnNameLower$" value="<%=O.hv("$model$.$column.columnNameLower$")%>" size="$column.size$" /> $column.columnFormat$
 </p>
 $endif$
