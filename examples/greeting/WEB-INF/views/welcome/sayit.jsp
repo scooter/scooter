@@ -1,1 +1,0 @@
-The message we found is <i><%=request.getAttribute("content")%></i>. -- JSP
