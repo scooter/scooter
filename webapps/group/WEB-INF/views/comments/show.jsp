@@ -1,0 +1,260 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<%@ page import="
+	com.scooterframework.orm.sqldataexpress.object.RESTified,
+	com.scooterframework.web.util.O,
+	com.scooterframework.web.util.R,
+	com.scooterframework.web.util.W"
+%>
+
+<%
+RESTified comment = (RESTified)W.request("comment");
+%>
+
+<h2>Show comment</h2>
+<%=W.errorMessage("comment")%>
+
+
+<p>
+  <b>Cid:</b>
+  <%=O.hv("comment.cid")%>
+</p>
+<p>
+  <b>Eid:</b>
+  <%=O.hv("comment.eid")%>
+</p>
+<p>
+  <b>A:</b>
+  <%=O.hv("comment.a")%>
+</p>
+<p>
+  <b>B:</b>
+  <%=O.hv("comment.b")%>
+</p>
+<p>
+  <b>C:</b>
+  <%=O.hv("comment.c")%>
+</p>
+<p>
+  <b>D:</b>
+  <%=O.hv("comment.d")%>
+</p>
+<p>
+  <b>E:</b>
+  <%=O.hv("comment.e")%>
+</p>
+<p>
+  <b>F:</b>
+  <%=O.hv("comment.f")%>
+</p>
+<p>
+  <b>Employeename:</b>
+  <%=O.hv("comment.employeename")%>
+</p>
+<p>
+  <b>G:</b>
+  <%=O.hv("comment.g")%>
+</p>
+<p>
+  <b>H:</b>
+  <%=O.hv("comment.h")%>
+</p>
+<p>
+  <b>I:</b>
+  <%=O.hv("comment.i")%>
+</p>
+<p>
+  <b>J:</b>
+  <%=O.hv("comment.j")%>
+</p>
+<p>
+  <b>K:</b>
+  <%=O.hv("comment.k")%>
+</p>
+<p>
+  <b>L:</b>
+  <%=O.hv("comment.l")%>
+</p>
+<p>
+  <b>M:</b>
+  <%=O.hv("comment.m")%>
+</p>
+<p>
+  <b>N:</b>
+  <%=O.hv("comment.n")%>
+</p>
+<p>
+  <b>O:</b>
+  <%=O.hv("comment.o")%>
+</p>
+<p>
+  <b>P:</b>
+  <%=O.hv("comment.p")%>
+</p>
+<p>
+  <b>Q:</b>
+  <%=O.hv("comment.q")%>
+</p>
+<p>
+  <b>R:</b>
+  <%=O.hv("comment.r")%>
+</p>
+<p>
+  <b>S:</b>
+  <%=O.hv("comment.s")%>
+</p>
+<p>
+  <b>T:</b>
+  <%=O.hv("comment.t")%>
+</p>
+<p>
+  <b>U:</b>
+  <%=O.hv("comment.u")%>
+</p>
+<p>
+  <b>V:</b>
+  <%=O.hv("comment.v")%>
+</p>
+<p>
+  <b>W:</b>
+  <%=O.hv("comment.w")%>
+</p>
+<p>
+  <b>X:</b>
+  <%=O.hv("comment.x")%>
+</p>
+<p>
+  <b>Y:</b>
+  <%=O.hv("comment.y")%>
+</p>
+<p>
+  <b>Z:</b>
+  <%=O.hv("comment.z")%>
+</p>
+<p>
+  <b>Aa:</b>
+  <%=O.hv("comment.aa")%>
+</p>
+<p>
+  <b>Bb:</b>
+  <%=O.hv("comment.bb")%>
+</p>
+<p>
+  <b>Cc:</b>
+  <%=O.hv("comment.cc")%>
+</p>
+<p>
+  <b>Dd:</b>
+  <%=O.hv("comment.dd")%>
+</p>
+<p>
+  <b>Ee:</b>
+  <%=O.hv("comment.ee")%>
+</p>
+<p>
+  <b>Ff:</b>
+  <%=O.hv("comment.ff")%>
+</p>
+<p>
+  <b>Gg:</b>
+  <%=O.hv("comment.gg")%>
+</p>
+<p>
+  <b>Hh:</b>
+  <%=O.hv("comment.hh")%>
+</p>
+<p>
+  <b>Ii:</b>
+  <%=O.hv("comment.ii")%>
+</p>
+<p>
+  <b>Jj:</b>
+  <%=O.hv("comment.jj")%>
+</p>
+<p>
+  <b>Kk:</b>
+  <%=O.hv("comment.kk")%>
+</p>
+<p>
+  <b>Ll:</b>
+  <%=O.hv("comment.ll")%>
+</p>
+<p>
+  <b>Mm:</b>
+  <%=O.hv("comment.mm")%>
+</p>
+<p>
+  <b>Nn:</b>
+  <%=O.hv("comment.nn")%>
+</p>
+<p>
+  <b>Oo:</b>
+  <%=O.hv("comment.oo")%>
+</p>
+<p>
+  <b>Pp:</b>
+  <%=O.hv("comment.pp")%>
+</p>
+<p>
+  <b>Qq:</b>
+  <%=O.hv("comment.qq")%>
+</p>
+<p>
+  <b>Rr:</b>
+  <%=O.hv("comment.rr")%>
+</p>
+<p>
+  <b>Ss:</b>
+  <%=O.hv("comment.ss")%>
+</p>
+<p>
+  <b>Tt:</b>
+  <%=O.hv("comment.tt")%>
+</p>
+<p>
+  <b>Uu:</b>
+  <%=O.hv("comment.uu")%>
+</p>
+<p>
+  <b>Vv:</b>
+  <%=O.hv("comment.vv")%>
+</p>
+<p>
+  <b>Ww:</b>
+  <%=O.hv("comment.ww")%>
+</p>
+<p>
+  <b>Xx:</b>
+  <%=O.hv("comment.xx")%>
+</p>
+<p>
+  <b>Yy:</b>
+  <%=O.hv("comment.yy")%>
+</p>
+<p>
+  <b>Zz:</b>
+  <%=O.hv("comment.zz")%>
+</p>
+<p>
+  <b>A1:</b>
+  <%=O.hv("comment.a1")%>
+</p>
+<p>
+  <b>A2:</b>
+  <%=O.hv("comment.a2")%>
+</p>
+<p>
+  <b>A3:</b>
+  <%=O.hv("comment.a3")%>
+</p>
+<p>
+  <b>A4:</b>
+  <%=O.hv("comment.a4")%>
+</p>
+
+<br />
+
+<%=W.labelLink("Edit", R.editResourceRecordPath("comments", comment))%>|
+<%=W.labelLink("List", R.resourcePath("comments"))%>|
+<%=W.labelLink("Paged List", R.resourcePath("comments") + "?paged=true")%>
