@@ -18,8 +18,8 @@ public class Version {
      * string in order to record the latest version.
      * 
      * <p>
-     * Format of the version number: {major}.{minor}.{tiny}
+     * Format of the version number: {major}.{minor}.{tiny} (build #)
      * </p>
      */
-    static final String CURRENT_VERSION = "1.1.2";
+    static final String CURRENT_VERSION = "1.2.x (build 1201)";
 }

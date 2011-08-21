@@ -8,13 +8,17 @@
 package com.scooterframework.orm.sqldataexpress.vendor;
 
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Map;
 import java.util.Properties;
 
+import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Util;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
+import com.scooterframework.orm.sqldataexpress.object.Parameter;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 
@@ -24,6 +28,7 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  * @author (Fei) John Chen
  */
 public class MySQLDBAdapter extends DBAdapter {
+    private static LogUtil log = LogUtil.getLogger(MySQLDBAdapter.class.getName());
 
 	@Override
 	public String[] getCatalogAndSchema(String connName) {
@@ -108,23 +113,16 @@ public class MySQLDBAdapter extends DBAdapter {
 
         if ("java.sql.Timestamp".equals(javaClassType) ||
             "java.sql.Date".equals(javaClassType) ||
-            sqlDataType == 91 || sqlDataType == 93) {
-            try {
-                theObj = rs.getTimestamp(index);
-                return theObj;
-            }
-            catch(SQLException ex) {
-                String message = ex.getMessage();
-                if ((message != null) && (
-                    message.startsWith("Value '0000-00-00' can not be represented as java.sql.Timestamp") ||
-                    (message.startsWith("Value '") && (message.indexOf("can not be represented as java.sql.Timestamp") != -1)))
-                    ){
-                    return null;
-                }
-                else {
-                    throw ex;
-                }
-            }
+            sqlDataType == Types.DATE || sqlDataType == Types.TIMESTAMP) {
+        	try {
+        		theObj = rs.getTimestamp(index);
+        	}
+        	catch(SQLException ex) {
+        		log.warn("Failed to obtain value for SQL data type " + 
+        				sqlDataType + " of index " + index + ".", ex);
+        	}
+            
+            return theObj;
         }
 
         return super.getObjectFromResultSetByType(rs, javaClassType, sqlDataType, index);
@@ -136,25 +134,38 @@ public class MySQLDBAdapter extends DBAdapter {
 
         if ("java.sql.Timestamp".equals(javaClassType) ||
             "java.sql.Date".equals(javaClassType) ||
-            sqlDataType == 91 || sqlDataType == 93) {
-            try {
+            sqlDataType == Types.DATE || sqlDataType == Types.TIMESTAMP) {
+        	try {
                 theObj = cstmt.getTimestamp(index);
-                return theObj;
-            }
-            catch(SQLException ex) {
-                String message = ex.getMessage();
-                if ((message != null) && (
-                    message.startsWith("Value '0000-00-00' can not be represented as java.sql.Timestamp") ||
-                    (message.startsWith("Value '") && (message.indexOf("can not be represented as java.sql.Timestamp") != -1)))
-                    ){
-                    return null;
-                }
-                else {
-                    throw ex;
-                }
-            }
+        	}
+        	catch(SQLException ex) {
+        		log.warn("Failed to obtain value for SQL data type " + 
+        				sqlDataType + " of index " + index + ".", ex);
+        	}
+            return theObj;
         }
 
         return super.getObjectFromStatementByType(cstmt, javaClassType, sqlDataType, index);
+    }
+    
+    @Override
+    public boolean vendorSpecificSetObject(PreparedStatement pstmt, Object obj, Parameter p, Map<String, Object> inputs)
+    throws Exception {
+        boolean status = false;
+        
+        int targetSqlType = p.getSqlDataType();
+        if (obj != null && (targetSqlType == Types.DATE ||
+        					targetSqlType == Types.TIME ||
+        					targetSqlType == Types.TIMESTAMP)) {
+        	if (obj instanceof String) {
+            	if ("0000-00-00".equals(obj) ||
+            		"0000-00-00 00:00:00".equals(obj)) {
+            		pstmt.setString(p.getIndex(), (String)obj);
+                    status = true;
+            	}
+        	}
+        }
+
+        return status;
     }
 }

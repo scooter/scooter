@@ -125,24 +125,16 @@ public class LogUtil {
 	 * Method to log a trace message
 	 *
 	 */
-	public void trace(String message) {
-		log(message, TRACE);
+	public void trace(Object message) {
+		log(message, TRACE, (Throwable)null);
 	}
 
 	/**
 	 * Method to log a trace message
 	 *
 	 */
-	public void trace(Object message) {
-		log(message, TRACE);
-	}
-
-	/**
-	 * Method to log a debug message
-	 *
-	 */
-	public void debug(String message) {
-		log(message, DEBUG);
+	public void trace(Object message, Throwable throwable) {
+		log(message, TRACE, throwable);
 	}
 
 	/**
@@ -150,15 +142,15 @@ public class LogUtil {
 	 *
 	 */
 	public void debug(Object message) {
-		log(message, DEBUG);
+		log(message, DEBUG, (Throwable)null);
 	}
 
 	/**
-	 * Method to log an info message
+	 * Method to log a debug message
 	 *
 	 */
-	public void info(String message) {
-		log(message, INFO);
+	public void debug(Object message, Throwable throwable) {
+		log(message, DEBUG, throwable);
 	}
 
 	/**
@@ -166,15 +158,15 @@ public class LogUtil {
 	 *
 	 */
 	public void info(Object message) {
-		log(message, INFO);
+		log(message, INFO, (Throwable)null);
 	}
 
 	/**
-	 * Method to log a warning message
+	 * Method to log an info message
 	 *
 	 */
-	public void warn(String message) {
-		log(message, WARN);
+	public void info(Object message, Throwable throwable) {
+		log(message, INFO, throwable);
 	}
 
 	/**
@@ -182,15 +174,15 @@ public class LogUtil {
 	 *
 	 */
 	public void warn(Object message) {
-		log(message, WARN);
+		log(message, WARN, (Throwable)null);
 	}
 
 	/**
-	 * Method to log an error message
+	 * Method to log a warning message
 	 *
 	 */
-	public void error(String message) {
-		log(message, ERROR);
+	public void warn(Object message, Throwable throwable) {
+		log(message, WARN, throwable);
 	}
 
 	/**
@@ -198,15 +190,15 @@ public class LogUtil {
 	 *
 	 */
 	public void error(Object message) {
-		log(message, ERROR);
+		log(message, ERROR, (Throwable)null);
 	}
 
 	/**
-	 * Method to log a fatal message
+	 * Method to log an error message
 	 *
 	 */
-	public void fatal(String message) {
-		log(message, FATAL);
+	public void error(Object message, Throwable throwable) {
+		log(message, ERROR, throwable);
 	}
 
 	/**
@@ -214,39 +206,15 @@ public class LogUtil {
 	 *
 	 */
 	public void fatal(Object message) {
-		log(message, FATAL);
-	}
-
-	/**
-	 * Method to log an info message
-	 *
-	 */
-	public void info(int id, String message) {
-		log(message, INFO);
-	}
-
-	/**
-	 * Method to log a warning message
-	 *
-	 */
-	public void warn(int id, String message) {
-		log(message, WARN);
-	}
-
-	/**
-	 * Method to log an error message
-	 *
-	 */
-	public void error(int id, String message) {
-		log(message, ERROR);
+		log(message, FATAL, (Throwable)null);
 	}
 
 	/**
 	 * Method to log a fatal message
 	 *
 	 */
-	public void fatal(int id, String message) {
-		log(message, FATAL);
+	public void fatal(Object message, Throwable throwable) {
+		log(message, FATAL, throwable);
 	}
 
 	/**
@@ -280,13 +248,12 @@ public class LogUtil {
 		return (logger != null) ? logger.isInfoEnabled() : false;
 	}
 
-
-	private void log(Object object, int iLogLevel) {
+	private void log(Object object, int iLogLevel, Throwable throwable) {
 		String message = (object == null) ? "null" : object.toString();
-		log(message, iLogLevel);
+		log(message, iLogLevel, throwable);
 	}
 
-	private void log(String message, int iLogLevel) {
+	private void log(String message, int iLogLevel, Throwable throwable) {
 		if (!loggerEnabled)
 			return;
 
@@ -298,30 +265,36 @@ public class LogUtil {
 		if (logger != null) {
 			switch (iLogLevel) {
 			case TRACE:
-				logger.trace(message);
+				logger.trace(message, throwable);
 				break;
 			case DEBUG:
-				logger.debug(message);
+				logger.debug(message, throwable);
 				break;
 			case INFO:
-				logger.info(message);
+				logger.info(message, throwable);
 				break;
 			case WARN:
-				logger.warn(message);
+				logger.warn(message, throwable);
 				break;
 			case ERROR:
-				logger.error(message);
+				logger.error(message, throwable);
 				break;
 			case FATAL:
-				logger.fatal(message);
+				logger.fatal(message, throwable);
 				break;
 			default:
-				logger.debug(message);
+				logger.debug(message, throwable);
 			}
 		} else {
 			String logLevelDesc = getLogLevelDesc(iLogLevel);
 			StringBuilder logMessage = new StringBuilder();
 			String messageText = (message == null) ? "null" : message;
+			if ("null".equals(messageText)) {
+				messageText = (throwable == null) ? messageText : throwable.getMessage();
+			}
+			else {
+				messageText = (throwable == null) ? messageText : (messageText + " " + throwable.getMessage());
+			}
 
 			// Build the log message.
 			logMessage.append("[").append(System.currentTimeMillis()).append(

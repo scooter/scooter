@@ -13,7 +13,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -612,9 +611,9 @@ public class RowInfo implements Serializable {
      *
      * @return string of default values
      */
-    public String[] getColumnDefaults() {
+    public Object[] getColumnDefaults() {
     	if (columnInfos == null) return null;
-    	String[] res = new String[columnInfos.size()];
+    	Object[] res = new Object[columnInfos.size()];
     	int index = 0;
     	for (ColumnInfo ci : columnInfos) {
     		res[index] = ci.getColumnDefaultForEntryScreen();
