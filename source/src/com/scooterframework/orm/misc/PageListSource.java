@@ -88,7 +88,13 @@ public abstract class PageListSource {
         if (inputs == null || inputs.keySet().size() == 0) return;
         
         if (inputOptions != null) {
-        	inputOptions.putAll(inputs);
+    		for (Map.Entry<String, String> entry : inputs.entrySet()) {
+    			String key = entry.getKey();
+    			if (Paginator.key_limit.equals(key) ||
+    					Paginator.key_offset.equals(key) ||
+    					Paginator.key_npage.equals(key)) continue;
+    			inputOptions.put(key, entry.getValue());
+    		}
         }
     }
     

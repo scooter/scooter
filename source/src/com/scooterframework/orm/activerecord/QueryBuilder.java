@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.scooterframework.orm.misc.JdbcPageListSource;
+import com.scooterframework.orm.misc.Paginator;
 import com.scooterframework.orm.sqldataexpress.util.SqlConstants;
 
 /**
@@ -58,10 +60,48 @@ public class QueryBuilder {
 		validateBuild();
 		return tg.findFirst(conditionsSQL, conditionsSQLDataMap, options);
 	}
+
+    /**
+     * <p>Returns a Paginator that satisfy the query built by 
+     * the <tt>QueryBuilder</tt>. Total number of records and paged list of 
+     * records can be obtained from the returned Paginator instance.</p>
+     *
+     * @return a Paginator instance
+     */
+	public Paginator getPaginator() {
+		validateBuild();
+		Class<? extends ActiveRecord> modelClass = tg.getModelClass();
+		
+		Map<String, String> inputOptions = new HashMap<String, String>();
+		for (Map.Entry<String, String> entry : options.entrySet()) {
+			String key = entry.getKey();
+			if (Paginator.key_limit.equals(key) ||
+					Paginator.key_offset.equals(key) ||
+					Paginator.key_npage.equals(key)) continue;
+			inputOptions.put(key, entry.getValue());
+		}
+		
+		Map<String, String> pagingControl = new HashMap<String, String>();
+		
+		if (options.containsKey(ActiveRecordConstants.key_limit))
+			pagingControl.put(Paginator.key_limit, options.get(ActiveRecordConstants.key_limit));
+		
+		if (options.containsKey(ActiveRecordConstants.key_offset))
+			pagingControl.put(Paginator.key_offset, options.get(ActiveRecordConstants.key_offset));
+		
+		if (options.containsKey(ActiveRecordConstants.key_page))
+			pagingControl.put(Paginator.key_npage, options.get(ActiveRecordConstants.key_page));
+		
+		return new Paginator(new JdbcPageListSource(modelClass, inputOptions), pagingControl);
+	}
 	
 	private void validateBuild() {
 		if (usedHaving && !usedGroupBy) {
 			throw new RuntimeException("Group-by clause must be used with having clause.");
+		}
+
+		if (usedOffset && usedPage) {
+			throw new RuntimeException("Page and offset cannot be set both at the same time.");
 		}
 	}
     

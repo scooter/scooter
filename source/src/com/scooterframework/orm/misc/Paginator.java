@@ -20,14 +20,14 @@ import com.scooterframework.orm.sqldataexpress.util.SqlConstants;
 /**
  * <p>Paginator class manages pagination of records of a model object. </p>
  *
- * <p>Any information on a url link can be passed to this object through
+ * <p>Any information on a URL link can be passed to this object through
  * controlOptions parameter. </p>
  *
  * <p>The following keys have an impact on the result of pagination:</p>
  *
  * <ul>
- * <li>key_limit "<tt>limit</tt>": specifies limit of a page, default to 15.</li>
- * <li>key_npage "<tt>npage</tt>": specifies the number of the page to be opened by this click.</li>
+ * <li>key_limit "<tt>limit</tt>": specifies limit of a page. Default is 10.</li>
+ * <li>key_npage "<tt>npage</tt>": specifies the number of the page to be opened by this click. Default is 1.</li>
  * <li>key_order_by "<tt>order_by</tt>": order by clause.</li>
  * <li>key_sort "<tt>sort</tt>": column to be sorted.</li>
  * <li>key_order "<tt>order</tt>": sort direction, either "up" (default) or "down".</li>
@@ -35,13 +35,16 @@ import com.scooterframework.orm.sqldataexpress.util.SqlConstants;
  * <p>Note: Either use key_order_by or use key_sort and key_order together.</p>
  *
  * <p>The following keys are for information only:
- * key_cpage = "<tt>cpage</tt>": specifies the origin page number of the current click.
- * key_link  = "<tt>r</tt>": specifies the origin place of the current click.</p>
+ * <ul>
+ * <li>key_cpage "<tt>cpage</tt>": specifies the origin page number of the current click. Default is 1.</li>
+ * <li>key_link "<tt>r</tt>": specifies the origin place of the current click.</li>
+ * </ul>
+ * </p>
  *
  * <p>If a key/value pair is not used by the paginator, it will reappear in
  * query string outputs. </p>
  *
- * <p>In addition, all sql related information can be passed to the paginator
+ * <p>In addition, all SQL related information can be passed to the paginator
  * through its PageListSource instance.</p>
  *
  * <p>Usage example:</p>
@@ -73,10 +76,13 @@ public class Paginator
      * @param controlOptions String of control information.
      */
     public Paginator(PageListSource pls, String controlOptions) {
+    	this.pls = pls;
+    	
     	Map<String, String> map = new HashMap<String, String>();
     	map.putAll(Converters.convertStringToMap(controlOptions));
         this.controlOptions = map;
-        initialize(pls, map);
+        
+        initialize(pls, this.controlOptions);
     }
 
     /**
@@ -87,17 +93,11 @@ public class Paginator
      * @param controlOptions Map of control information.
      */
     public Paginator(PageListSource pls, Map<String, ?> controlOptions) {
+    	this.pls = pls;
         this.controlOptions = Converters.convertMapToMapSS(controlOptions);
+        if (controlOptions == null) controlOptions = new HashMap<String, String>();
+        
         initialize(pls, this.controlOptions);
-    }
-
-    /**
-     * Return offset
-     */
-    public int getOffset() {
-        int offset = (cpage-1) * limit;
-        if (totalCounted && offset >= totalCount) offset = totalCount - limit;
-        return (offset > 0)?offset:0;
     }
 
     /**
@@ -105,6 +105,13 @@ public class Paginator
      */
     public int getLimit() {
         return limit;
+    }
+
+    /**
+     * Return offset
+     */
+    public int getOffset() {
+        return offset;
     }
 
     /**
@@ -328,16 +335,40 @@ public class Paginator
 
         return sb.toString();
     }
+    
+    /**
+     * Returns a Paginator instance for the next page.
+     */
+    public Paginator nextPage() {
+    	Map<String, String> options = new HashMap<String, String>();
+    	options.putAll(controlOptions);
+    	options.put(key_npage, cpage + 1 + "");
+    	options.put(key_cpage, cpage + "");
+    	options.remove(key_offset);
+    	return new Paginator(pls, options);
+    }
 
     protected void initialize(PageListSource pls, Map<String, String> options) {
         limit = Util.getIntValue(options, key_limit, DEFAULT_PAGE_LIMIT);
+        
+        if (options.containsKey(key_npage)) {
+        	cpage = Util.getIntValue(options, key_npage, 1);
+        	
+        	offset = (cpage - 1) * limit;
+        	if (totalCounted && offset >= totalCount) offset = totalCount - limit;
+        	offset = (offset > 0)?offset:0;
+        }
+        else if (options.containsKey(key_offset)) {
+        	offset = Util.getIntValue(options, key_offset, 0);
+        	cpage = 1 + (offset/limit);
+        }
+        
         opage = Util.getIntValue(options, key_cpage, 1);
-        cpage = Util.getIntValue(options, key_npage, 1);
         ref   = Util.getStringValue(options, key_link, "");
 
-        pls.setLimit(limit);
-        pls.setOffset(getOffset());
         pls.setInputs(options);//in case some other conditions are passed into options
+        pls.setLimit(limit);
+        pls.setOffset(offset);
         pls.execute();
 
         totalCount = pls.getTotalCount();
@@ -385,6 +416,7 @@ public class Paginator
     public static final String link_value_next = "next";
     public static final String link_value_last = "last";
     public static final String key_limit = "limit";
+    public static final String key_offset = "offset";
     public static final String key_cpage = "cpage";
     public static final String key_npage = "npage";
 
@@ -430,6 +462,8 @@ public class Paginator
      * by default the query results are in ascending order.</p>
      */
     public static final String key_order = SqlConstants.key_order;
+    
+    protected PageListSource pls;
 
     protected Map<String, String> controlOptions = new HashMap<String, String>();
 
@@ -439,6 +473,11 @@ public class Paginator
      * Maximum number of records per page
      */
     protected int limit = DEFAULT_PAGE_LIMIT;
+
+    /**
+     * Number of records to skip
+     */
+    protected int offset = 0;
 
     /**
      * Link reference
