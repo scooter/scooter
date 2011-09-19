@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="SCOOTER_LIB/stringtemplate/antlr-2.7.7.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/stringtemplate/stringtemplate-3.2.1.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/scooter.jar"/>
+	<classpathentry kind="lib" path="SCOOTER_SUPPORT/servlet-api-2.5-20081211.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

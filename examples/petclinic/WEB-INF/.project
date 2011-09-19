@@ -20,5 +20,10 @@
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lib</locationURI>
 		</link>
+		<link>
+			<name>SCOOTER_SUPPORT</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/support</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

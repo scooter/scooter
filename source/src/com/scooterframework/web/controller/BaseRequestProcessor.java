@@ -125,7 +125,7 @@ public class BaseRequestProcessor {
         Object controllerInstance = getControllerInstance(aps.controllerClassName);
         if (controllerInstance == null) {
             if (EnvConfig.getInstance().allowForwardToControllerNameViewWhenControllerNotExist()) {
-                log.debug("Controller instance for \"" + aps.controller + 
+                log.info("Controller instance for \"" + aps.controller + 
                     "\" does not exist, forward to view \"" + aps.controller + 
                     File.separator + aps.action + "\".");
                 return null;

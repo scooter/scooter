@@ -304,7 +304,9 @@ public class ApplicationConfig {
         initializePlugins();
         
         applicationStarted = true;
-        if (log != null) log.info("Application started.");
+        if (log != null) {
+        	log.info("Application started with Scooter version: " + Version.CURRENT_VERSION);
+        }
     }
     
     public void endApplication() {

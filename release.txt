@@ -26,6 +26,7 @@ scooter-1.2.0 2011xxxx
  + Fixed bug: Failed to load default value of a column.
  + Fixed bug: Redirect does not work for Ajax requests.
  + Fixed bug: Incorrect http link when view path starts with context path.
+ + Fixed bug: Failed to reference Servlet classes in generated app.
 
 
 scooter-1.1.0 20110424

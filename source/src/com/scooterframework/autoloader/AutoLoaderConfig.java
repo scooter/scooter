@@ -87,6 +87,10 @@ public class AutoLoaderConfig implements Observer {
         classpath = appendClassPath(classpath, getAllWebInfLibFiles());
         classpath = appendClassPath(classpath, getAllOtherLibFiles(pluginsLocation));
         classpath = appendClassPath(classpath, getAllOtherLibFiles(referencesLocation));
+        
+        String supportPath = System.getProperty("scooter.home") + File.separatorChar + "support";
+        classpath = appendClassPath(classpath, getAllOtherLibFiles(supportPath));
+        
         //classpath = appendClassPath(classpath, getJDKToolsJar());
         log.debug("class path: " + classpath);
 
