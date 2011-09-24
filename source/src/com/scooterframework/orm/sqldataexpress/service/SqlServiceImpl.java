@@ -833,7 +833,7 @@ public class SqlServiceImpl implements SqlService {
             parentRows == null || parentRows.size() == 0) 
             return query;//nothing need to be changed.
         
-        query = SqlUtil.convertToUpperCase(query);
+        //query = SqlUtil.convertToUpperCase(query);
         String childQuery = query;
         
         //generate a child query as union

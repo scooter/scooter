@@ -581,4 +581,23 @@ public class Converters {
     	}
     	return mapSS;
     }
+    
+    public static String convertObjectArrayToString(Object[] objs, String separator) {
+        if (objs == null) return null;
+        if (objs.length == 0) return "";
+        
+        String returnStr = "";
+        StringBuilder sb = new StringBuilder();
+        for (Object value : objs) {
+        	String s = (value != null)?value.toString():null;
+            sb.append(s).append(separator);
+        }
+        returnStr = sb.toString();
+        
+        //remove the last separator
+        if (returnStr.endsWith(separator)) {
+            returnStr = returnStr.substring(0, returnStr.lastIndexOf(separator));
+        }
+        return returnStr;
+    }
 }

@@ -62,8 +62,8 @@ public class ControllerScaffoldGenerator extends AbstractGenerator {
 	
 		controllerName = controller.toLowerCase();
 		String controllerNameCamel = "";
-		if (StringUtil.startsWithLowerCaseChar(controller)) {
-			controllerNameCamel = WordUtil.camelize(controller);
+		if (StringUtil.startsWithLowerCaseChar(controllerName)) {
+			controllerNameCamel = WordUtil.camelize(controllerName);
 		}
 		else {
 			controllerNameCamel = controller;

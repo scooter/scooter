@@ -601,12 +601,12 @@ public class DatabaseConfig extends Observable implements Observer {
 
     	if (table.indexOf('.') != -1) return table;
 
-        String tablePrefix = getGlobalTableNamingPrefix().toUpperCase();
-        String tableSuffix = getGlobalTableNamingSuffix().toUpperCase();
+        String tablePrefix = getGlobalTableNamingPrefix();
+        String tableSuffix = getGlobalTableNamingSuffix();
 
-        String fullTableName = table.toUpperCase();
-        if (!fullTableName.startsWith(tablePrefix)) fullTableName = tablePrefix + fullTableName;
-        if (!fullTableName.endsWith(tableSuffix)) fullTableName = fullTableName + tableSuffix;
+        String fullTableName = table;
+        if (!fullTableName.toUpperCase().startsWith(tablePrefix.toUpperCase())) fullTableName = tablePrefix + fullTableName;
+        if (!fullTableName.toUpperCase().endsWith(tableSuffix.toUpperCase())) fullTableName = fullTableName + tableSuffix;
 
         return fullTableName;
     }

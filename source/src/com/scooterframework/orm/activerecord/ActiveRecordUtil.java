@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.exception.GenericException;
 import com.scooterframework.common.exception.ObjectCreationException;
+import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.Util;
 import com.scooterframework.common.util.WordUtil;
@@ -29,6 +31,8 @@ import com.scooterframework.orm.sqldataexpress.util.OrmObjectFactory;
  * @author (Fei) John Chen
  */
 public class ActiveRecordUtil {
+	
+	private static LogUtil log = LogUtil.getLogger(ActiveRecordUtil.class.getName());
     
     /**
      * Checks if the two records are actually the same record. 
@@ -310,6 +314,13 @@ public class ActiveRecordUtil {
         	o = OrmObjectFactory.getInstance().newInstance(c.getName(), parameterTypes, initargs);
         }
         catch(Exception nsmEx) {
+        	if (c.getName().equals(ActiveRecord.class.getName())) {
+				String error = "Failed to create an ActiveRecord instance with args ["
+						+ Converters.convertObjectArrayToString(initargs, ", ")
+						+ "].";
+				log.error(error, nsmEx);
+        		throw new Exception(c.getName(), nsmEx);
+        	}
             o = OrmObjectFactory.getInstance().newInstance(c);
         }
         return o;

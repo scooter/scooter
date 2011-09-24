@@ -63,8 +63,8 @@ public class JdbcStatement {
      */
     public void setJdbcStatementString(String jdbcStatementString) {
         if ( jdbcStatementString == null ) return;
-        this.jdbcStatementString = SqlUtil.convertToUpperCase(jdbcStatementString);
-        //this.jdbcStatementString = jdbcStatementString;
+        //this.jdbcStatementString = SqlUtil.convertToUpperCase(jdbcStatementString);
+        this.jdbcStatementString = jdbcStatementString;
     }
     
     /**

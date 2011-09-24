@@ -4,14 +4,7 @@
 Known Issues in This Release
 ============================
 
-Using table name of mixed case in MySQL on Linux
-------------------------------------------------
-Scooter's data browser would not work on Linux platform if a table name 
-consists of both lowercase and uppercase letters. 
-Please refer to the following MySQL document on work around: 
-http://dev.mysql.com/doc/refman/5.5/en/identifier-case-sensitivity.html
-
-Failed to connect to MySQL
+Sometimes failed to connect to MySQL
 --------------------------
 This problem is a MySQL configuration issue. Many people have reported 
 this issue and some has provided workarounds: 
@@ -21,12 +14,13 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 
 Summary of Releases
 ===================
- 
+
 scooter-1.2.0 2011xxxx
  + Fixed bug: Failed to load default value of a column.
  + Fixed bug: Redirect does not work for Ajax requests.
  + Fixed bug: Incorrect http link when view path starts with context path.
  + Fixed bug: Failed to reference Servlet classes in generated app.
+ + Fixed bug: Failed to work with table names of mixed cases in MySQL on Linux.
 
 
 scooter-1.1.0 20110424

@@ -416,14 +416,6 @@ abstract public class DataProcessorImpl implements DataProcessor {
                                      Object parameterObj, int targetSqlType) 
     throws SQLException {
         try {
-        	if (parameterObj instanceof String) {
-            	if ("0000-00-00".equals(parameterObj) ||
-            		"0000-00-00 00:00:00".equals(parameterObj)) {
-            		pstmt.setString(parameterIndex, (String)parameterObj);
-            		return;
-            	}
-        	}
-        	
             switch (targetSqlType) {
             case Types.DATE:
                 java.sql.Date parameterAsSQLDate = null;

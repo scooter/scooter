@@ -68,7 +68,7 @@ public class Table {
         	}
         	
             conn = SqlExpressUtil.getReadonlyConnection(connName);
-            List<TableInfo> tmp = SqlExpressUtil.getDatabaseTables(conn, catalog, schema, null, types, false);
+            List<TableInfo> tmp = SqlExpressUtil.getDatabaseTables(connName, catalog, schema, null, types);
             if (tmp != null) {
             	Iterator<TableInfo> it = tmp.iterator();
             	while(it.hasNext()) {

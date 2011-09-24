@@ -109,14 +109,15 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         if (st == null) return;
         
         String jdbcStatementString = st.getOriginalJdbcStatementString();
+        if (jdbcStatementString == null) return;
         
         //no need to parse if there is no dynamic parameter
         if (jdbcStatementString.indexOf('?') == -1) {
             return;
         }
         
-        if (jdbcStatementString.startsWith("INSERT") && 
-            jdbcStatementString.indexOf("SELECT") == -1) {
+        if (st.isInsertStatement() && 
+            jdbcStatementString.toUpperCase().indexOf("SELECT") == -1) {
             // This is a pure insert statement.
             parseInsertStatement();
             return;
@@ -176,24 +177,24 @@ public class JdbcStatementParser extends JdbcStatementHelper {
                 }
                 
                 String columnNameToken = "";
-                if (j>=2 && "BETWEEN".equals(tokens[j-1])) {
+                if (j>=2 && "BETWEEN".equalsIgnoreCase(tokens[j-1])) {
                     columnNameToken = tokens[j-2];
                 }
-                else if (j>=4 && "BETWEEN".equals(tokens[j-3]) && "AND".equals(tokens[j-1])) {
+                else if (j>=4 && "BETWEEN".equalsIgnoreCase(tokens[j-3]) && "AND".equalsIgnoreCase(tokens[j-1])) {
                     columnNameToken = tokens[j-4];
                 }
-                else if (j>=2 && "COUNT".equals(tokens[j-1])) {
+                else if (j>=2 && "COUNT".equalsIgnoreCase(tokens[j-1])) {
                     columnNameToken = "COUNT(*)";
                     param.setUsedByCount(true);
                 }
-                else if (j>=2 && "COUNT".equals(tokens[j-2])) {
+                else if (j>=2 && "COUNT".equalsIgnoreCase(tokens[j-2])) {
                     columnNameToken = tokens[j-1];
                     param.setUsedByCount(true);
                 }
-                else if (j>=2 && "IN".equals(tokens[j-1])) {
+                else if (j>=2 && "IN".equalsIgnoreCase(tokens[j-1])) {
                     columnNameToken = tokens[j-2];
                 }
-                else if (j>=2 && "LIKE".equals(tokens[j-1])) {
+                else if (j>=2 && "LIKE".equalsIgnoreCase(tokens[j-1])) {
                     columnNameToken = tokens[j-2];
                 }
                 else if (!"?".equals(tokens[j-1])) {
@@ -293,7 +294,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         if (tokens.length <= 3) 
             throw new IllegalArgumentException("Cannot parse sql statement: [" + sql + "]");
         
-        if (tokens[3].equals("VALUES")) 
+        if (tokens[3].toUpperCase().equals("VALUES")) 
             throw new IllegalArgumentException("Parser for insert statement " +
                 "without column names specified has yet to be developed.");
         
@@ -305,14 +306,14 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         List<String> columns = new ArrayList<String>();
         List<String> values = new ArrayList<String>();
         for (int j = 3; j < totalTokens; j++) {
-            if (tokens[j].equals("VALUES")) {
+            if (tokens[j].toUpperCase().equals("VALUES")) {
                 valuesIndex = j;
                 break;
             }
             columns.add(tokens[j]);
         }
         
-        for (int k=valuesIndex+1; k < totalTokens; k++) {
+		for (int k = valuesIndex + 1; k < totalTokens; k++) {
             values.add(tokens[k]);
         }
         
@@ -353,13 +354,13 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         for (int i = qmarkPosition; i >= 0; i--) {
             String token = tokens[i];
             
-            if ("INSERT".equals(token)) {
+            if ("INSERT".equalsIgnoreCase(token)) {
                 tableName = tokens[i+2];
             }
-            else if ("UPDATE".equals(token)) {
+            else if ("UPDATE".equalsIgnoreCase(token)) {
                 tableName = tokens[i+1];
             }
-            else if ("DELETE".equals(token)) {
+            else if ("DELETE".equalsIgnoreCase(token)) {
                 if ("FROM".equalsIgnoreCase(tokens[i+1])) {
                     tableName = tokens[i+2];
                 }
@@ -384,10 +385,10 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         int wherePosition = -1;
         for (int i = qmarkPosition; i >= 0; i--) {
             String token = tokens[i];
-            if ("WHERE".equals(token)) {
+            if ("WHERE".equalsIgnoreCase(token)) {
                 wherePosition = i;
             }
-            else if ("FROM".equals(token)) {
+            else if ("FROM".equalsIgnoreCase(token)) {
                 fromPosition = i;
                 break;
             }
@@ -420,14 +421,14 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         if (fromPosition != -1 && wherePosition == -1) {
             if (qmarkPosition >= fromPosition + 3) {
                 // case: FROM tbl ORDER BY
-                if ("ORDER".equals(tokens[fromPosition + 2]) && 
-                    "BY".equals(tokens[fromPosition + 3])) {
+                if ("ORDER".equalsIgnoreCase(tokens[fromPosition + 2]) && 
+                    "BY".equalsIgnoreCase(tokens[fromPosition + 3])) {
                     tableName = tokens[fromPosition + 1];
                 }
                 else
                 // case: FROM tbl GROUP BY
-                if ("GROUP".equals(tokens[fromPosition + 2]) && 
-                    "BY".equals(tokens[fromPosition + 3])) {
+                if ("GROUP".equalsIgnoreCase(tokens[fromPosition + 2]) && 
+                    "BY".equalsIgnoreCase(tokens[fromPosition + 3])) {
                     tableName = tokens[fromPosition + 1];
                 }
                 

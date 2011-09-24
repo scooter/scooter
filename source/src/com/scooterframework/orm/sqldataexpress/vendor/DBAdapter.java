@@ -277,6 +277,19 @@ public abstract class DBAdapter {
 		}
 		return tableName;
 	}
+	
+	/**
+	 * Checks if table name case can be changed.<br/>
+	 * 
+	 * Some databases such as Oracle must use uppercase of a table name in 
+	 * order to get meta info of the table. Others, like MySQL in Linux 
+	 * platform, would not work properly if table name's case is changed.
+	 * 
+	 * @return true if table name case can be changed.
+	 */
+	public boolean canChangeTableNameCase() {
+		return true;
+	}
     
     /**
      * Returns both catalog and schema of a connection.

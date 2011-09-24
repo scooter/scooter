@@ -62,6 +62,11 @@ public class SqlExpressUtil {
     private static String toUpperCase(String s) {
         return (s == null || "".equals(s))?s:s.toUpperCase();
     }
+    
+    private static String toUpperCaseIfAllowed(DBAdapter dba, String s) {
+    	if (!dba.canChangeTableNameCase()) return s;
+        return (s == null || "".equals(s))?s:s.toUpperCase();
+    }
 
     public static List<String> getConnectionNames() {
         List<String> dbs = new ArrayList<String>();
@@ -363,65 +368,10 @@ public class SqlExpressUtil {
     }
 
 	/**
-	 * Returns a list of TableInfo instances for the database connection.
+	 * Returns a list of TableInfo instances for a database connection name.
 	 * 
-	 * @param conn
-	 *            the database connection
-	 * @param catalog
-	 *            a catalog name; must match the catalog name as it is stored in
-	 *            the database; "" retrieves those without a catalog;
-	 *            <tt>null</tt> means that the catalog name should not be used
-	 *            to narrow the search
-	 * @param schema
-	 *            a schema name; must match the schema name as it is stored in
-	 *            the database; "" retrieves those without a schema;
-	 *            <tt>null</tt> means that the schema name should not be used to
-	 *            narrow the search
-	 * @param tableName
-	 *            a table name; must match the table name as it is stored in the
-	 *            database
-	 * @param types
-	 *            a list of table types to include; <tt>null</tt> returns all
-	 *            types
-	 * @param uppercase
-	 *            <tt>true</tt> to convert <tt>catalog</tt>, <tt>schema</tt> 
-	 *            and <tt>tableName</tt> to upper case.
-	 * @return a list of TableInfo instances
-	 * @throws java.sql.SQLException
-	 */
-    public static List<TableInfo> getDatabaseTables(Connection conn, 
-                                                String catalog, 
-                                                String schema, 
-                                                String tableName, 
-                                                String[] types,
-                                                boolean uppercase) throws SQLException {
-        if (uppercase) {
-        	catalog = toUpperCase(catalog);
-        	schema = toUpperCase(schema);
-        	tableName = toUpperCase(tableName);
-        }
-        
-        List<TableInfo> list = new ArrayList<TableInfo>();
-        DatabaseMetaData dbmd = conn.getMetaData();
-        ResultSet rs = dbmd.getTables(catalog, schema, tableName, types);
-        while (rs.next()) {
-            TableInfo ti = new TableInfo();
-            ti.setCatalog(rs.getString("TABLE_CAT"));
-            ti.setName(rs.getString("TABLE_NAME"));
-            ti.setRemarks(rs.getString("REMARKS"));
-            ti.setSchema(rs.getString("TABLE_SCHEM"));
-            ti.setType(rs.getString("TABLE_TYPE"));
-            list.add(ti);
-        }
-        rs.close();
-        return list;
-    }
-
-	/**
-	 * Returns a list of TableInfo instances for the database connection.
-	 * 
-	 * @param conn
-	 *            the database connection
+	 * @param connName
+	 *            the database connection name
 	 * @param catalog
 	 *            a catalog name; must match the catalog name as it is stored in
 	 *            the database; "" retrieves those without a catalog;
@@ -441,23 +391,53 @@ public class SqlExpressUtil {
 	 * @return a list of TableInfo instances
 	 * @throws java.sql.SQLException
 	 */
-    public static List<TableInfo> getDatabaseTables(Connection conn, 
+    public static List<TableInfo> getDatabaseTables(String connName, 
                                                 String catalog, 
                                                 String schema, 
                                                 String tableName, 
                                                 String[] types) throws SQLException {
-        return getDatabaseTables(conn, catalog, schema, tableName, types, true);
+    	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
+    	catalog = toUpperCaseIfAllowed(dba, catalog);
+    	schema = toUpperCaseIfAllowed(dba, schema);
+    	tableName = toUpperCaseIfAllowed(dba, tableName);
+        
+        List<TableInfo> list = new ArrayList<TableInfo>();
+        Connection conn = null;
+        ResultSet rs = null;
+        try {
+        	conn = getConnection(connName);
+            DatabaseMetaData dbmd = conn.getMetaData();
+            rs = dbmd.getTables(catalog, schema, tableName, types);
+            while (rs.next()) {
+                TableInfo ti = new TableInfo();
+                ti.setCatalog(rs.getString("TABLE_CAT"));
+                ti.setName(rs.getString("TABLE_NAME"));
+                ti.setRemarks(rs.getString("REMARKS"));
+                ti.setSchema(rs.getString("TABLE_SCHEM"));
+                ti.setType(rs.getString("TABLE_TYPE"));
+                list.add(ti);
+            }
+            rs.close();
+        }
+        catch(SQLException ex) {
+        	throw ex;
+        }
+        finally {
+        	DAOUtil.closeResultSet(rs);
+        	DAOUtil.closeConnection(conn);
+        }
+        return list;
     }
     
     /**
-     * Returns a list of TableInfo instances for the database connection.
+     * Returns a list of TableInfo instances for a database connection name.
      * 
-     * @param conn              the database connection
+     * @param connName  the database connection name
      * @return a list of TableInfo instances
      * @throws java.sql.SQLException
      */
-    public static List<TableInfo> getDatabaseTables(Connection conn) throws SQLException {
-        return getDatabaseTables(conn, null, null, null, (String[])null);
+    public static List<TableInfo> getDatabaseTables(String connName) throws SQLException {
+        return getDatabaseTables(connName, (String)null, (String)null, (String)null, (String[])null);
     }
     
     /**
@@ -527,6 +507,7 @@ public class SqlExpressUtil {
             String catalog = sp.getCatalog();
             String schema = sp.getSchema();
             String api = sp.getApi();
+            DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
             
             boolean foundPlSqlRecord = false;//will skip all output columns when a PL/SQL record is found.//TODO: This code is tied to Oracle. Change it.
             boolean startToRecord = false;
@@ -534,8 +515,8 @@ public class SqlExpressUtil {
             
             DatabaseMetaData dbmd = connection.getMetaData();
             String vendor = getDatabaseVendor(dbmd);
-            rs = dbmd.getProcedureColumns(toUpperCase(catalog), 
-            		toUpperCase(schema), toUpperCase(api), null);
+            rs = dbmd.getProcedureColumns(toUpperCaseIfAllowed(dba, catalog), 
+            		toUpperCaseIfAllowed(dba, schema), toUpperCaseIfAllowed(dba, api), null);
             
             while (rs.next()) {
                 catalog = rs.getString("PROCEDURE_CAT");
@@ -645,6 +626,7 @@ public class SqlExpressUtil {
             String catalog = sp.getCatalog();
             String schema = sp.getSchema();
             String api = sp.getApi();
+            DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
             
             boolean foundPlSqlRecord = false;//will skip all output columns when a PL/SQL record is found. //TODO: This code is tied to Oracle. Change it.
             boolean startToRecord = false;
@@ -652,8 +634,8 @@ public class SqlExpressUtil {
             
             DatabaseMetaData dbmd = connection.getMetaData();
             String vendor = getDatabaseVendor(dbmd);
-            rs = dbmd.getProcedureColumns(toUpperCase(catalog), 
-            		toUpperCase(schema), toUpperCase(api), null);
+            rs = dbmd.getProcedureColumns(toUpperCaseIfAllowed(dba, catalog), 
+            		toUpperCaseIfAllowed(dba, schema), toUpperCaseIfAllowed(dba, api), null);
             
             while (rs.next()) {
                 catalog = rs.getString("PROCEDURE_CAT");
@@ -829,7 +811,7 @@ public class SqlExpressUtil {
         
         try {
             String tableType = TableInfo.TYPE_TABLE; //default
-            tableType = getTableType(udc.getConnection(), catalog, schema, table, TableInfo.getSupportedTypes());
+            tableType = getTableType(dba, udc.getConnection(), catalog, schema, table, TableInfo.getSupportedTypes());
             
             if (TableInfo.TYPE_TABLE.equals(tableType)) {
                 ti = lookupTable(dba, udc.getConnection(), catalog, schema, table);
@@ -861,7 +843,7 @@ public class SqlExpressUtil {
     }
     
     // find table type: TABLE or VIEW
-    private static String getTableType(Connection conn, String catalog, 
+    private static String getTableType(DBAdapter dba, Connection conn, String catalog, 
     		String schema, String table, String[] supportedTypes) 
     throws SQLException {
         if (conn == null) 
@@ -877,8 +859,8 @@ public class SqlExpressUtil {
         ResultSet rs = null;
         try {
             DatabaseMetaData dbmd = conn.getMetaData();
-            rs = dbmd.getTables(toUpperCase(catalog), toUpperCase(schema), 
-            		toUpperCase(table), supportedTypes);
+            rs = dbmd.getTables(toUpperCaseIfAllowed(dba, catalog), toUpperCaseIfAllowed(dba, schema), 
+            		toUpperCaseIfAllowed(dba, table), supportedTypes);
             if (rs.next()) {
             	tableType = rs.getString("TABLE_TYPE");
             }
@@ -936,8 +918,9 @@ public class SqlExpressUtil {
 
             //set more properties
             DatabaseMetaData dbmd = conn.getMetaData();
-            rs2 = dbmd.getColumns(toUpperCase(catalog), toUpperCase(schema), 
-            		toUpperCase(table), (String)null);
+            rs2 = dbmd.getColumns(toUpperCaseIfAllowed(dba, catalog), 
+            		toUpperCaseIfAllowed(dba, schema), 
+            		toUpperCaseIfAllowed(dba, table), (String)null);
             header.setResultSetMetaDataForTable(rs2);
             
             // set some table properties
@@ -946,7 +929,7 @@ public class SqlExpressUtil {
             
             // get primary keys
             if (!header.hasPrimaryKey()) {
-                PrimaryKey pk = lookupPrimaryKey(conn, catalog, schema, table);
+                PrimaryKey pk = lookupPrimaryKey(dba, conn, catalog, schema, table);
                 if (pk != null) header.setPrimaryKeyColumns(pk.getColumns());
             }
         }
@@ -977,8 +960,9 @@ public class SqlExpressUtil {
             ti.setName(viewName);
             
             DatabaseMetaData dbmd = conn.getMetaData();
-            rs = dbmd.getColumns(toUpperCase(catalog), toUpperCase(schema), 
-            		toUpperCase(viewName), (String)null);
+            rs = dbmd.getColumns(toUpperCaseIfAllowed(dba, catalog), 
+            		toUpperCaseIfAllowed(dba, schema), 
+            		toUpperCaseIfAllowed(dba, viewName), (String)null);
             
             RowInfo header = ti.getHeader();
             header.setResultSetMetaDataForView(rs);
@@ -1040,7 +1024,7 @@ public class SqlExpressUtil {
         try {
         	connection = SqlExpressUtil.getConnection(connName);
             connection.setReadOnly(false);
-            pk = lookupPrimaryKey(connection, catalog, schema, table);
+            pk = lookupPrimaryKey(dba, connection, catalog, schema, table);
             
             if (pk == null) {
             	log.info(errorMessage);
@@ -1062,7 +1046,7 @@ public class SqlExpressUtil {
         return pk;
     }
     
-    private static PrimaryKey lookupPrimaryKey(Connection conn, String catalog, String schema, String table) {
+    private static PrimaryKey lookupPrimaryKey(DBAdapter dba, Connection conn, String catalog, String schema, String table) {
         if (conn == null) 
             throw new IllegalArgumentException("Connection is null.");
         
@@ -1075,9 +1059,9 @@ public class SqlExpressUtil {
         ResultSet rs = null;
         PrimaryKey pk = null;
         try {
-            catalog = toUpperCase(catalog);
-            schema = toUpperCase(schema);
-            fullTableName = toUpperCase(fullTableName);
+            catalog = toUpperCaseIfAllowed(dba, catalog);
+            schema = toUpperCaseIfAllowed(dba, schema);
+            fullTableName = toUpperCaseIfAllowed(dba, fullTableName);
             DatabaseMetaData dbmd = conn.getMetaData();
             rs = dbmd.getPrimaryKeys(catalog, schema, fullTableName);
             while (rs.next()) {

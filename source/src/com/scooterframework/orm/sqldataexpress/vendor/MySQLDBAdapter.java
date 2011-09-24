@@ -47,6 +47,16 @@ public class MySQLDBAdapter extends DBAdapter {
         return (q == -1)?
         	url.substring(lastSlash + 1):url.substring(lastSlash + 1, q);
     }
+	
+	/**
+	 * Checks if table name case can be changed.
+	 * 
+	 * @return true if table name case can be changed.
+	 */
+    @Override
+	public boolean canChangeTableNameCase() {
+		return false;
+	}
 
     /**
      * Override the super method because MySQL does not use schema.

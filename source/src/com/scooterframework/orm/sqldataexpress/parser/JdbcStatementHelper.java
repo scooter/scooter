@@ -27,11 +27,11 @@ import com.scooterframework.orm.sqldataexpress.util.SqlUtil;
 public class JdbcStatementHelper {
 
     // reset all the alias to original table name
-    protected String resetAlias(String message) {
+	protected String resetAlias(String message) {
         // return if there is no alias
         if ( message.indexOf('.') == -1 ) return message;
 
-        message = message.toUpperCase();
+        //message = message.toUpperCase();
 
         message = resetSpace(message) + " ";
 
@@ -63,7 +63,7 @@ public class JdbcStatementHelper {
             }
             i = i + 1;
         }
-        //log.debug("alias: " + aliasList);
+        //log.debug("aliasList: " + aliasList);
 
         // find the alias ref
         for ( int j = 1; j < totalTokens; j++ ) {
@@ -71,10 +71,10 @@ public class JdbcStatementHelper {
             if ( aliasList.contains(token) &&
                  !aliasMap.containsKey(token)) {
                 if ( !",".equals(tokens[j-1]) &&
-                     !"UPDATE".equals(tokens[j-1]) &&
-                     !"FROM".equals(tokens[j-1]) &&
-                     !"AS".equals(tokens[j-1]) &&
-                     !"JOIN".equals(tokens[j-1]) && //e.g. SELECT USERS.* FROM USERS INNER JOIN PROJECTS_USERS ON USERS.ID=PROJECTS_USERS.USER_ID
+                     !"UPDATE".equalsIgnoreCase(tokens[j-1]) &&
+                     !"FROM".equalsIgnoreCase(tokens[j-1]) &&
+                     !"AS".equalsIgnoreCase(tokens[j-1]) &&
+                     !"JOIN".equalsIgnoreCase(tokens[j-1]) && //e.g. SELECT USERS.* FROM USERS INNER JOIN PROJECTS_USERS ON USERS.ID=PROJECTS_USERS.USER_ID
                      !")".equals(tokens[j-1])) {
                     aliasMap.put(token, tokens[j-1]);
                 }
@@ -84,6 +84,8 @@ public class JdbcStatementHelper {
                 }
             }
         }
+        //log.debug("aliasMap: " + aliasMap);
+        //log.debug("asList: " + asList);
 
         // replace all occurrences of alias in the message string with its ref
         for (Map.Entry<String, String> entry : aliasMap.entrySet()) {
@@ -94,13 +96,13 @@ public class JdbcStatementHelper {
             message = replaceWords(message, alias+".", aliasRef+".");
             message = replaceWords(message, aliasRef + " " + alias, aliasRef);
         }
+        
+        //log.debug("asList: " + asList);
 
         // replace all occurrences of alias in the message string with its ref
         for (String alias : asList) {
             message = replaceWords(message, "AS " + alias, "");
         }
-
-        //log.debug("Leave resetAlias message=" + message);
 
         return message;
     }
@@ -119,13 +121,15 @@ public class JdbcStatementHelper {
     protected String replaceWords(String message, String oldWord, String newWord) {
 
         String validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890";
-        if (message != null) {
+		if (message != null
+				&& !(oldWord.toUpperCase().endsWith("A") && (message
+						.toUpperCase().indexOf((oldWord.toUpperCase() + "S")) != -1))) {
             int strSize = message.length();
             int checkLength = oldWord.length();
             int checkIndex = 0;
             int k = 0;
             while(k<strSize) {
-                checkIndex = message.indexOf(oldWord, k);
+                checkIndex = message.toUpperCase().indexOf(oldWord.toUpperCase(), k);
                 if (checkIndex == -1) break;
 
                 k = checkIndex + checkLength;
