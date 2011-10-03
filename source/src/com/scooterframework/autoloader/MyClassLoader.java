@@ -109,10 +109,12 @@ public class MyClassLoader extends ClassLoader {
     
     private boolean isAllowedToChange(String className) {
     	boolean check = false;
-		if ((FileMonitor.isClassMonitored(className) && !AutoLoaderConfig.getInstance().notAllowedToChange(className)) ||
+		if (((FileMonitor.isClassMonitored(className) || 
+				ClassWorkHelper.isAllowedClassName(className)) && 
+				!AutoLoaderConfig.getInstance().notAllowedToChange(className)) ||
 			(className.startsWith("com.scooterframework") && className.endsWith("Test")) || 
-			(className.startsWith("com.scooterframework.test.model")) || 
-			(ClassWorkHelper.isAllowedClassName(className))) {
+			(className.startsWith("com.scooterframework.test.model"))
+			) {
 			check = true;
 		}
     	return check;

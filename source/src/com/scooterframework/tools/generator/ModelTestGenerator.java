@@ -18,8 +18,9 @@ import java.util.Map;
 public class ModelTestGenerator extends ModelGenerator {
 
 	public ModelTestGenerator(String templateFilePath,
-			Map<String, String> props, String connName, String model) {
-		super(templateFilePath, props, connName, model);
+			Map<String, String> props, String connName, String model,
+			String table, boolean enhance) {
+		super(templateFilePath, props, connName, model, table, enhance);
 	}
 
 	@Override

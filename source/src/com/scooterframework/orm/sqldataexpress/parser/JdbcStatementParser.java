@@ -294,7 +294,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         if (tokens.length <= 3) 
             throw new IllegalArgumentException("Cannot parse sql statement: [" + sql + "]");
         
-        if (tokens[3].toUpperCase().equals("VALUES")) 
+        if (tokens[3].equalsIgnoreCase("VALUES")) 
             throw new IllegalArgumentException("Parser for insert statement " +
                 "without column names specified has yet to be developed.");
         
@@ -306,7 +306,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         List<String> columns = new ArrayList<String>();
         List<String> values = new ArrayList<String>();
         for (int j = 3; j < totalTokens; j++) {
-            if (tokens[j].toUpperCase().equals("VALUES")) {
+            if (tokens[j].equalsIgnoreCase("VALUES")) {
                 valuesIndex = j;
                 break;
             }
@@ -368,7 +368,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
                     tableName = tokens[i+1];
                 }
             }
-            else if ("SELECT".equals(token)) {
+            else if ("SELECT".equalsIgnoreCase(token)) {
                 tableName = getTableNameForSelectStatement(qmarkPosition, tokens, columnName);
             }
         }

@@ -173,7 +173,7 @@ public class CRUDController {
         try {
             record = ActiveRecordUtil.generateActiveRecordInstance(EnvConfig.getInstance().getModelClassName(model), model);
         } catch (Exception ex) {
-            record = ActiveRecordUtil.generateActiveRecordInstance(DEFAULT_RECORD_CLASS, model);
+            record = ActiveRecordUtil.generateActiveRecordInstance(ActiveRecordUtil.DEFAULT_RECORD_CLASS, model);
         }
         return record;
     }
@@ -228,8 +228,6 @@ public class CRUDController {
     protected String getDefaultViewFilesDirectoryName() {
         return EnvConfig.getInstance().getDefaultViewFilesDirectory();
     }
-    
-    public static final String DEFAULT_RECORD_CLASS = "com.scooterframework.orm.activerecord.ActiveRecord";
     
     protected LogUtil log = LogUtil.getLogger(getClass().getName());
 }

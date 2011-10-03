@@ -1,0 +1,280 @@
+$if(package_name)$
+$package_line$
+$endif$
+
+import java.util.List;
+import java.util.Map;
+
+import com.scooterframework.common.util.Converters;
+import com.scooterframework.orm.activerecord.ActiveRecord;
+import com.scooterframework.orm.activerecord.ActiveRecordUtil;
+import com.scooterframework.orm.activerecord.QueryBuilder;
+import com.scooterframework.orm.sqldataexpress.object.ColumnInfo;
+import com.scooterframework.orm.sqldataexpress.object.RowInfo;
+
+/**
+ * This is a generated class. Please do not change. 
+ *
+ * $super_class_name$ class defines helper methods for $model_class_name$ class.
+ * 
+ * Each public method in this class overrides the corresponding method in 
+ * {@link com.scooterframework.orm.activerecord.ActiveRecordClass ActiveRecordClass} class.
+ *
+ */
+public class $super_class_name$ extends ActiveRecord {
+	private static Class<? extends ActiveRecord> getMyClass() {
+		return $model_class_name$.class;
+	}
+
+	//
+	// querybuilder related
+	//
+	public static QueryBuilder where(String conditionsSQL) {
+		return ActiveRecordUtil.getGateway(getMyClass()).where(conditionsSQL);
+	}
+
+	public static QueryBuilder where(String conditionsSQL, Object[] conditionsSQLData) {
+		return ActiveRecordUtil.getGateway(getMyClass()).where(conditionsSQL, conditionsSQLData);
+	}
+
+	public static QueryBuilder where(String conditionsSQL, Map<String, Object> conditionsSQLDataMap) {
+		return ActiveRecordUtil.getGateway(getMyClass()).where(conditionsSQL, conditionsSQLDataMap);
+	}
+
+	public static QueryBuilder includes(String includes) {
+		return ActiveRecordUtil.getGateway(getMyClass()).includes(includes);
+	}
+
+	public static QueryBuilder includes(String includes, String joinType) {
+		return ActiveRecordUtil.getGateway(getMyClass()).includes(includes, joinType);
+	}
+
+	public static QueryBuilder includes(String includes, boolean strict) {
+		return ActiveRecordUtil.getGateway(getMyClass()).includes(includes, strict);
+	}
+
+	public static QueryBuilder groupBy(String groupBy) {
+		return ActiveRecordUtil.getGateway(getMyClass()).groupBy(groupBy);
+	}
+
+	public static QueryBuilder having(String having) {
+		return ActiveRecordUtil.getGateway(getMyClass()).having(having);
+	}
+
+	public static QueryBuilder orderBy(String orderBy) {
+		return ActiveRecordUtil.getGateway(getMyClass()).orderBy(orderBy);
+	}
+
+	public static QueryBuilder limit(int limit) {
+		return ActiveRecordUtil.getGateway(getMyClass()).limit(limit);
+	}
+
+	public static QueryBuilder offset(int offset) {
+		return ActiveRecordUtil.getGateway(getMyClass()).offset(offset);
+	}
+
+	public static QueryBuilder page(int page) {
+		return ActiveRecordUtil.getGateway(getMyClass()).page(page);
+	}
+
+	//
+	// crud related
+	//
+	public static ActiveRecord newRecord() {
+		return new $model_class_name$();
+	}
+
+	public static ActiveRecord findById(long id) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findById(id);
+	}
+
+	public static ActiveRecord findById(Object id) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findById(id);
+	}
+
+	public static ActiveRecord findByRESTfulId(String restfulId) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findByRESTfulId(restfulId);
+	}
+
+	public static ActiveRecord findByPK(String pkString) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findByPK(pkString);
+	}
+
+	public static List<ActiveRecord> findAllBySQL(String sql) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBySQL(sql);
+	}
+
+	public static List<ActiveRecord> findAllBySQL(String sql, Map<String, Object> inputs) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBySQL(sql, inputs);
+	}
+
+	public static List<ActiveRecord> findAllBySQLKey(String sqlKey) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBySQLKey(sqlKey);
+	}
+
+	public static List<ActiveRecord> findAllBySQLKey(String sqlKey, Map<String, Object> inputs) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBySQLKey(sqlKey, inputs);
+	}
+
+	public static ActiveRecord findFirstBy(String columns, Object[] values) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findFirstBy(columns, values);
+	}
+
+	public static ActiveRecord findLastBy(String columns, Object[] values) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findLastBy(columns, values);
+	}
+
+	public static List<ActiveRecord> findAllBy(String columns, Object[] values) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBy(columns, values);
+	}
+
+	public static List<ActiveRecord> findAllBy(String columns, Object[] values, Map<String, String> options) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBy(columns, values, options);
+	}
+
+	public static List<ActiveRecord> findAllBy(String columns, Object[] values, String options) {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAllBy(columns, values, options);
+	}
+
+	public static List<ActiveRecord> findAll() {
+		return ActiveRecordUtil.getGateway(getMyClass()).findAll();
+	}
+
+	public static ActiveRecord findFirst() {
+		return ActiveRecordUtil.getGateway(getMyClass()).findFirst();
+	}
+
+	public static ActiveRecord findLast() {
+		return ActiveRecordUtil.getGateway(getMyClass()).findLast();
+	}
+
+	public static int updateAll(Map<String, Object> fieldData) {
+		return ActiveRecordUtil.getGateway(getMyClass()).updateAll(fieldData);
+	}
+
+	public static int updateAll(Map<String, Object> fieldData, String conditionsSQL) {
+		return ActiveRecordUtil.getGateway(getMyClass()).updateAll(fieldData, conditionsSQL);
+	}
+
+	public static int updateAll(Map<String, Object> fieldData, String conditionsSQL, Map<String, Object> conditionsSQLData) {
+		return ActiveRecordUtil.getGateway(getMyClass()).updateAll(fieldData, conditionsSQL, conditionsSQLData);
+	}
+
+	public static int deleteById(long id) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteById(id);
+	}
+
+	public static int deleteById(Object id) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteById(id);
+	}
+
+	public static int deleteByPK(String pkString) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteByPK(pkString);
+	}
+
+	public static int deleteByPrimaryKeyMap(Map<String, Object> inputs) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteByPrimaryKeyMap(inputs);
+	}
+
+	public static int deleteAll(Map<String, Object> conditions) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditions);
+	}
+
+	public static int deleteAll(String conditionsSQL) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditionsSQL);
+	}
+
+	public static int deleteAll(String conditionsSQL, Map<String, Object> conditionsSQLData) {
+		return ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditionsSQL, conditionsSQLData);
+	}
+
+	//
+	// calculator related
+	//
+	public static long count() {
+		return ActiveRecordUtil.getCalculator(getMyClass()).count();
+	}
+
+	public static long count(String field) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).count(field);
+	}
+
+	public static long count(String field, String options) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).count(field, options);
+	}
+
+	public static Object sum(String field) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).sum(field);
+	}
+
+	public static Object sum(String field, String options) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).sum(field, options);
+	}
+
+	public static Object average(String field) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).average(field);
+	}
+
+	public static Object average(String field, String options) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).average(field, options);
+	}
+
+	public static Object maximum(String field) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).maximum(field);
+	}
+
+	public static Object maximum(String field, String options) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).maximum(field, options);
+	}
+
+	public static Object minium(String field) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).minium(field);
+	}
+
+	public static Object minium(String field, String options) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).minium(field, options);
+	}
+
+	public static Object calculate(String function, String field, String options) {
+		return ActiveRecordUtil.getCalculator(getMyClass()).calculate(function, field, options);
+	}
+
+	//
+	// meta info
+	//
+	public static ActiveRecord homeInstance() {
+		return ActiveRecordUtil.getHomeInstance(getMyClass());
+	}
+
+	public static List<String> primaryKeyNames() {
+		return Converters.convertArrayToList(homeInstance().getPrimaryKeyNames());
+	}
+
+	public static List<String> readOnlyColumnNames() {
+		return homeInstance().getRowInfo().getReadOnlyColumnNames();
+	}
+
+	public static List<String> columnNames() {
+		return Converters.convertArrayToList(homeInstance().getRowInfo().getColumnNames());
+	}
+
+	public static List<ColumnInfo> columns() {
+		return homeInstance().getRowInfo().columns();
+	}
+
+	public static RowInfo rowInfo() {
+		return homeInstance().getRowInfo();
+	}
+
+	public static String connectionName() {
+		return homeInstance().getConnectionName();
+	}
+
+	public static String tableName() {
+		return homeInstance().getTableName();
+	}
+
+	public static String simpleTableName() {
+		return homeInstance().getSimpleTableName();
+	}
+}

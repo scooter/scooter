@@ -59,10 +59,6 @@ public class SqlExpressUtil {
     	return (s == null || "".equals(s))?true:false;
     }
     
-    private static String toUpperCase(String s) {
-        return (s == null || "".equals(s))?s:s.toUpperCase();
-    }
-    
     private static String toUpperCaseIfAllowed(DBAdapter dba, String s) {
     	if (!dba.canChangeTableNameCase()) return s;
         return (s == null || "".equals(s))?s:s.toUpperCase();

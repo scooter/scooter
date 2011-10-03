@@ -162,7 +162,6 @@ public class FileMonitor {
 
 			recompile();
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			log.error("Error in scanAllSources() for " + sourceLocation + ": " + ex);
 		}
     }

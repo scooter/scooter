@@ -38,7 +38,6 @@ import com.scooterframework.orm.sqldataexpress.object.TableData;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessorFactory;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessorTypes;
-import com.scooterframework.orm.sqldataexpress.util.SqlUtil;
 import com.scooterframework.transaction.ImplicitTransactionManager;
 import com.scooterframework.transaction.Transaction;
 import com.scooterframework.transaction.TransactionManager;

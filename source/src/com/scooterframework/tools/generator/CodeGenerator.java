@@ -29,6 +29,10 @@ import com.scooterframework.tools.common.ToolsUtil;
 	    java -jar tools/generate.jar [app_path] scaffold-ajax {model_name_in_singular_form}[@connection_name]
 	    java -jar tools/generate.jar [app_path] controller controller_name_in_plural_form [method] [method] ...
 	    java -jar tools/generate.jar [app_path] model {model_name_in_singular_form}[@connection_name]
+	    
+	Options:
+		-Denhance=n -- Do not allow byte code enhancement. Default is allowed.
+		-Dtable=YourTable -- Explicitly specify a table name for the model.
 	
 	Examples:
 	    This page:
@@ -37,11 +41,17 @@ import com.scooterframework.tools.common.ToolsUtil;
 	    Generate scaffold code for blog app's domain named post:
 	        java -jar tools/generate.jar blog scaffold post
 	
+	    Generate ajax scaffold code for blog app's domain named post:
+	        java -jar tools/generate.jar blog scaffold-ajax post
+	
 	    Generate scaffold code for blog app's domain named post based on blog_oracle database:
 	        java -jar tools/generate.jar blog scaffold post@blog_oracle
 	
-	    Generate ajax scaffold code for blog app's domain named post:
-	        java -jar tools/generate.jar blog scaffold-ajax post
+	    Generate scaffold code for blog app's domain named post which maps to table message:
+	        java -Dtable=message -jar tools/generate.jar blog scaffold post
+	
+	    Generate scaffold code for blog app's domain named post without allowing enhancement:
+	        java -Denhance=n -jar tools/generate.jar blog scaffold post
 	
 	    Generate scaffold code of post model for blog app in user home directory:
 	        java -jar tools/generate.jar /home/john/projects/blog scaffold post
@@ -179,6 +189,10 @@ public class CodeGenerator {
 		String controller = s3[1];
 		String model = s3[2];
 		
+		String enhanceStr = System.getProperty("enhance");
+		boolean enhance = (enhanceStr != null && "n".equalsIgnoreCase(enhanceStr))?false:true;
+		String table = System.getProperty("table");
+		
 		String typeName = getTypeName(useImplicitAppName, args);
 		if ("scaffold".equals(typeName)) {
 			//generate application controller
@@ -192,26 +206,34 @@ public class CodeGenerator {
 	    	String csgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffold.tmpl";
-			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, connName, controller, model);
+			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, connName, controller, model, table);
 			csg.generate();
 			
 	    	String cstgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffoldTest.tmpl";
-			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, connName, controller, model);
+			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, connName, controller, model, table);
 			cstg.generate();
 
 			//generate model
+			if (!enhance) {
+		    	String mgPath = templateRoot + File.separator + 
+									"model" + File.separator + 
+									"ModelHelper.tmpl";
+				Generator mcg = new ModelHelperGenerator(mgPath, allProps, connName, model, table, enhance);
+				mcg.generate();
+			}
+			
 	    	String mgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"Model.tmpl";
-			Generator mg = new ModelGenerator(mgPath, allProps, connName, model);
+			Generator mg = new ModelGenerator(mgPath, allProps, connName, model, table, enhance);
 			mg.generate();
 			
 	    	String mtgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"ModelTest.tmpl";
-			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model);
+			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model, table, enhance);
 			mtg.generate();
 
 			//generate views
@@ -220,35 +242,35 @@ public class CodeGenerator {
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"index.tmpl";
-			Generator vig = new ViewIndexGenerator(vigPath, allProps, connName, controller, model);
+			Generator vig = new ViewIndexGenerator(vigPath, allProps, connName, controller, model, table);
 			vig.generate();
 
 	    	String vsgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"show.tmpl";
-			Generator vsg = new ViewShowGenerator(vsgPath, allProps, connName, controller, model);
+			Generator vsg = new ViewShowGenerator(vsgPath, allProps, connName, controller, model, table);
 			vsg.generate();
 
 	    	String vagPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"add.tmpl";
-			Generator vag = new ViewAddGenerator(vagPath, allProps, connName, controller, model);
+			Generator vag = new ViewAddGenerator(vagPath, allProps, connName, controller, model, table);
 			vag.generate();
 
 	    	String vegPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"edit.tmpl";
-			Generator veg = new ViewEditGenerator(vegPath, allProps, connName, controller, model);
+			Generator veg = new ViewEditGenerator(vegPath, allProps, connName, controller, model, table);
 			veg.generate();
 
 	    	String vpgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold" + File.separator + 
 								"paged_list.tmpl";
-			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, connName, controller, model);
+			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, connName, controller, model, table);
 			vpg.generate();
 
 			//update resources
@@ -266,26 +288,34 @@ public class CodeGenerator {
 	    	String csgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffoldAjax.tmpl";
-			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, connName, controller, model);
+			Generator csg = new ControllerScaffoldGenerator(csgPath, allProps, connName, controller, model, table);
 			csg.generate();
 			
 	    	String cstgPath = templateRoot + File.separator + 
 								"controller" + File.separator + 
 								"ControllerScaffoldTest.tmpl";
-			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, connName, controller, model);
+			Generator cstg = new ControllerScaffoldTestGenerator(cstgPath, allProps, connName, controller, model, table);
 			cstg.generate();
 
 			//generate model
+			if (!enhance) {
+		    	String mgPath = templateRoot + File.separator + 
+									"model" + File.separator + 
+									"ModelHelper.tmpl";
+				Generator mcg = new ModelHelperGenerator(mgPath, allProps, connName, model, table, enhance);
+				mcg.generate();
+			}
+			
 	    	String mgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"Model.tmpl";
-			Generator mg = new ModelGenerator(mgPath, allProps, connName, model);
+			Generator mg = new ModelGenerator(mgPath, allProps, connName, model, table, enhance);
 			mg.generate();
 			
 	    	String mtgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"ModelTest.tmpl";
-			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model);
+			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model, table, enhance);
 			mtg.generate();
 
 			//generate views
@@ -294,35 +324,35 @@ public class CodeGenerator {
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"index.tmpl";
-			Generator vig = new ViewIndexGenerator(vigPath, allProps, connName, controller, model);
+			Generator vig = new ViewIndexGenerator(vigPath, allProps, connName, controller, model, table);
 			vig.generate();
 
 	    	String vsgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"show.tmpl";
-			Generator vsg = new ViewShowGenerator(vsgPath, allProps, connName, controller, model);
+			Generator vsg = new ViewShowGenerator(vsgPath, allProps, connName, controller, model, table);
 			vsg.generate();
 
 	    	String vagPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"add.tmpl";
-			Generator vag = new ViewAddGenerator(vagPath, allProps, connName, controller, model);
+			Generator vag = new ViewAddGenerator(vagPath, allProps, connName, controller, model, table);
 			vag.generate();
 
 	    	String vegPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"edit.tmpl";
-			Generator veg = new ViewEditGenerator(vegPath, allProps, connName, controller, model);
+			Generator veg = new ViewEditGenerator(vegPath, allProps, connName, controller, model, table);
 			veg.generate();
 
 	    	String vpgPath = templateRoot + File.separator + 
 								"view" + File.separator + 
 								"scaffold-ajax" + File.separator + 
 								"paged_list.tmpl";
-			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, connName, controller, model);
+			Generator vpg = new ViewPagedGenerator(vpgPath, allProps, connName, controller, model, table);
 			vpg.generate();
 
 			//update resources
@@ -385,16 +415,24 @@ public class CodeGenerator {
 			}
 		}
 		else if ("model".equals(typeName)) {
+			if (!enhance) {
+		    	String mgPath = templateRoot + File.separator + 
+									"model" + File.separator + 
+									"ModelHelper.tmpl";
+				Generator mcg = new ModelHelperGenerator(mgPath, allProps, connName, model, table, enhance);
+				mcg.generate();
+			}
+			
 	    	String mgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"Model.tmpl";
-			Generator mg = new ModelGenerator(mgPath, allProps, connName, model);
+			Generator mg = new ModelGenerator(mgPath, allProps, connName, model, table, enhance);
 			mg.generate();
 			
 	    	String mtgPath = templateRoot + File.separator + 
 								"model" + File.separator + 
 								"ModelTest.tmpl";
-			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model);
+			Generator mtg = new ModelTestGenerator(mtgPath, allProps, connName, model, table, enhance);
 			mtg.generate();
 		}
 		else {
@@ -484,6 +522,10 @@ public class CodeGenerator {
     	log("    java -jar tools/generate.jar [app_path] controller controller_name_in_plural_form [method] [method] ...");
     	log("    java -jar tools/generate.jar [app_path] model {model_name_in_singular_form}[@connection_name]");
     	log("");
+    	log("Options:");
+    	log("    -Denhance=n       -- Do not allow byte code enhancement. Default is allowed.");
+    	log("    -Dtable=YourTable -- Explicitly specify a table name for the model.");
+    	log("");
     	log("Examples:");
     	log("    This page:");
     	log("        java -jar tools/generate.jar -help");
@@ -491,12 +533,18 @@ public class CodeGenerator {
     	log("    Generate scaffold code for blog app's domain named post based on default db connection:");
     	log("        java -jar tools/generate.jar blog scaffold post");
     	log("");
-    	log("    Generate scaffold code for blog app's domain named post based on blog_oracle database:");
-    	log("        java -jar tools/generate.jar blog scaffold post@blog_oracle");
-    	log("");
     	log("    Generate ajax scaffold code for blog app's domain named post:");
     	log("        java -jar tools/generate.jar blog scaffold-ajax post");
     	log("");
+    	log("    Generate scaffold code for blog app's domain named post based on blog_oracle database:");
+    	log("        java -jar tools/generate.jar blog scaffold post@blog_oracle");
+    	log("");
+    	log("    Generate scaffold code for blog app's domain named post which maps to table message:");
+    	log("        java -Dtable=message -jar tools/generate.jar blog scaffold post");
+    	log("");
+    	log("    Generate scaffold code for blog app's domain named post without allowing enhancement:");
+    	log("        java -Denhance=n -jar tools/generate.jar blog scaffold post");
+	    log("");
     	log("    Generate scaffold code of post model for blog app in user home directory:");
     	log("        java -jar tools/generate.jar /home/john/projects/blog scaffold post");
     	log("");

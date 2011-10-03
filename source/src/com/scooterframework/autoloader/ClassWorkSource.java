@@ -104,15 +104,15 @@ public class ClassWorkSource {
         arMethods.add("public static Object calculate(String function, String field, String options) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getCalculator(getMyClass()).calculate(function, field, options);}");
         
         //meta info
-        arMethods.add("public static com.scooterframework.orm.activerecord.ActiveRecord homeInstance() {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getHomeInstance(getMyClass());}}");
-        arMethods.add("public static java.util.List primaryKeyNames() {return com.scooterframework.common.util.Converters.convertArrayToList(homeInstance().getPrimaryKeyNames());}}");
-        arMethods.add("public static java.util.List readOnlyColumnNames() {return homeInstance().getRowInfo().getReadOnlyColumnNames();}}");
-        arMethods.add("public static java.util.List columnNames() {return com.scooterframework.common.util.Converters.convertArrayToList(homeInstance().getRowInfo().getColumnNames());}}");
-        arMethods.add("public static java.util.List columns() {return homeInstance().getRowInfo().columns();}}");
-        arMethods.add("public static com.scooterframework.orm.sqldataexpress.object.RowInfo rowInfo() {return homeInstance().getRowInfo();}}");
-        arMethods.add("public static String connectionName() {return homeInstance().getConnectionName();}}");
-        arMethods.add("public static String tableName() {return homeInstance().getTableName();}}");
-        arMethods.add("public static String simpleTableName() {return homeInstance().getSimpleTableName();}}");
+        arMethods.add("public static com.scooterframework.orm.activerecord.ActiveRecord homeInstance() {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getHomeInstance(getMyClass());}");
+        arMethods.add("public static java.util.List primaryKeyNames() {return com.scooterframework.common.util.Converters.convertArrayToList(homeInstance().getPrimaryKeyNames());}");
+        arMethods.add("public static java.util.List readOnlyColumnNames() {return homeInstance().getRowInfo().getReadOnlyColumnNames();}");
+        arMethods.add("public static java.util.List columnNames() {return com.scooterframework.common.util.Converters.convertArrayToList(homeInstance().getRowInfo().getColumnNames());}");
+        arMethods.add("public static java.util.List columns() {return homeInstance().getRowInfo().columns();}");
+        arMethods.add("public static com.scooterframework.orm.sqldataexpress.object.RowInfo rowInfo() {return homeInstance().getRowInfo();}");
+        arMethods.add("public static String connectionName() {return homeInstance().getConnectionName();}");
+        arMethods.add("public static String tableName() {return homeInstance().getTableName();}");
+        arMethods.add("public static String simpleTableName() {return homeInstance().getSimpleTableName();}");
         
     }
 }

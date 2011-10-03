@@ -19,8 +19,8 @@ public class ControllerScaffoldTestGenerator extends ControllerScaffoldGenerator
 
 	public ControllerScaffoldTestGenerator(String templateFilePath,
 			Map<String, String> props, String connectionName,
-			String controller, String model) {
-		super(templateFilePath, props, connectionName, controller, model);
+			String controller, String model, String table) {
+		super(templateFilePath, props, connectionName, controller, model, table);
 	}
 
 	@Override

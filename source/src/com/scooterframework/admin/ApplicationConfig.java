@@ -219,9 +219,19 @@ public class ApplicationConfig {
     public void startORMApplication() {
         if (applicationStarted) return;
 		applicationStartTime = System.currentTimeMillis();
+		
+		configInstanceForOrmAlone();
         
 		LogUtil.enableLogger();
-		EnvConfig.getInstance();
+		
+		try {
+			EnvConfig.getInstance();
+		}
+		catch(NoClassDefFoundError er) {
+			if (!"org/apache/commons/fileupload/FileItemFactory".equals(er.getMessage())) {
+				log.error("Error in EnvConfig.getInstance()", er);
+			}
+		}
 		DatabaseConfig dbc = DatabaseConfig.getInstance();
         SqlConfig.getInstance();
         

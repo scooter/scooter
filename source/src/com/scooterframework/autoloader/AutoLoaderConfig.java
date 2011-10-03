@@ -48,6 +48,8 @@ public class AutoLoaderConfig implements Observer {
     private FileMonitor fm = null;
 
     public static final String DATA_PROPERTIES_FILE = "autoloader.properties";
+    public static final String GENERATED_MODEL_CLASS_PREFIX = "_";
+    public static final String GENERATED_MODEL_CLASS_SUFFIX = "ModelHelper";
 
     static {
         me = new AutoLoaderConfig();
@@ -285,6 +287,13 @@ public class AutoLoaderConfig implements Observer {
 
     public boolean notAllowedToChange(String className) {
         if (className == null) return true;
+        
+        if (className.endsWith(GENERATED_MODEL_CLASS_SUFFIX)) {
+        	int lastDot = className.lastIndexOf('.');
+        	String tmp = className;
+        	if (lastDot != -1) tmp = className.substring(lastDot + 1);
+        	if (tmp.startsWith(GENERATED_MODEL_CLASS_PREFIX)) return true;
+        }
 
         boolean result = false;
         Iterator<String> it = forbiddenSet.iterator();

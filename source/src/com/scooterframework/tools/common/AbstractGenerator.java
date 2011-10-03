@@ -68,10 +68,10 @@ public abstract class AbstractGenerator extends GeneratorImpl {
      * @param model      model name of the ActiveRecord class
      * @return an ActiveRecord home instance of the model model
      */
-    protected ActiveRecord generateActiveRecordHomeInstance(String connName, String model) {
+    protected ActiveRecord generateActiveRecordHomeInstance(String connName, String model, String table) {
         ActiveRecord record = (ActiveRecord)modelHomes.get(model);
         if (record == null) {
-	        record = ActiveRecordUtil.generateActiveRecordInstance(CRUDController.DEFAULT_RECORD_CLASS, connName, model);
+	        record = ActiveRecordUtil.generateActiveRecordInstance(ActiveRecordUtil.DEFAULT_RECORD_CLASS, connName, model, table);
 	        if (record != null) record.freeze();
 	        ActiveRecordUtil.setHomeInstance(record);
 	        modelHomes.put(model, record);

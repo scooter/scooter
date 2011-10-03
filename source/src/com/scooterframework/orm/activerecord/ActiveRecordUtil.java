@@ -260,23 +260,49 @@ public class ActiveRecordUtil {
      * is obtained. <tt>model</tt> value is used to deduce the table name 
      * related to the ActiveRecord instance.</p>
      * 
+     * <p>The table name related to this model is going to be derived from 
+     * the model name.</p>
+     * 
      * @param className  class name of the ActiveRecord instance to be created
      * @param connName   db connection name
      * @param model      model name of the ActiveRecord class
      * @return an ActiveRecord instance
      */
     public static ActiveRecord generateActiveRecordInstance(String className, String connName, String model) {
+        return generateActiveRecordInstance(className, connName, model, null);
+    }
+    
+    /**
+     * <p>Generates an instance of ActiveRecord. <tt>connName</tt> is the 
+     * database connection name from where the meta data of the <tt>model</tt> 
+     * is obtained. <tt>model</tt> value is used to deduce the table name 
+     * related to the ActiveRecord instance.</p>
+     * 
+     * @param className  class name of the ActiveRecord instance to be created
+     * @param connName   db connection name
+     * @param model      model name of the ActiveRecord class
+     * @param table      table name related to the ActiveRecord class
+     * @return an ActiveRecord instance
+     */
+    public static ActiveRecord generateActiveRecordInstance(String className, String connName, String model, String table) {
+		if (model == null)
+			throw new IllegalArgumentException(
+					"model cannot be null in generateActiveRecordInstance().");
+    	
         ActiveRecord record = null;
         Class<?> c = null;
         try {
             c = OrmObjectFactory.getInstance().loadClass(className);
             if ( c != null ) {
-                String tableName = model;
-                if (DatabaseConfig.getInstance().usePluralTableName()) {
-                    tableName = WordUtil.pluralize(model);
+                String tableName = table;
+                if (table == null) {
+                    tableName = model;
+                    if (DatabaseConfig.getInstance().usePluralTableName()) {
+                        tableName = WordUtil.pluralize(model);
+                    }
+                    
+                    tableName = DatabaseConfig.getInstance().getFullTableName(tableName);
                 }
-                
-                tableName = DatabaseConfig.getInstance().getFullTableName(tableName);
                 
                 if (connName == null) {
                     Class<?>[] parameterTypes = {String.class};
@@ -290,7 +316,6 @@ public class ActiveRecordUtil {
                 }
             }
         } catch (Exception ex) {
-        	ex.printStackTrace();
             throw new ObjectCreationException(className, ex);
         }
         return record;

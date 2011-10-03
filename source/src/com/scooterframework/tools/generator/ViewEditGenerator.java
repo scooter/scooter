@@ -25,8 +25,8 @@ import com.scooterframework.web.util.O;
 public class ViewEditGenerator extends ViewScaffoldGenerator {
 	public ViewEditGenerator(String templateFilePath,
 			Map<String, String> props, String connName, String controller,
-			String model) {
-		super(templateFilePath, props, connName, controller, model);
+			String model, String table) {
+		super(templateFilePath, props, connName, controller, model, table);
 	}
 
 	protected String getAction() {

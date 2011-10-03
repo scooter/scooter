@@ -49,14 +49,14 @@ public class PropertyReader {
             appProperties = PropertyFileUtil.loadPropertiesFromFile(fullFileName);
         }
         catch(Exception ex) {
-        	ex.printStackTrace();
+        	log.debug("Failed to load properties from file: " + 
+        			ex.getMessage() + ". Will switch to load as resource.");
             try {
                 appProperties = PropertyFileUtil.loadPropertiesFromResource(fullFileName);
             }
             catch(Exception exr) {
-            	ex.printStackTrace();
                 String errorMessage = "ERROR ERROR ERROR -- Error loading " + fullFileName + ": " + exr.getMessage();
-                log.fatal(errorMessage);
+                log.fatal(errorMessage, exr);
             }
         }
         return appProperties;

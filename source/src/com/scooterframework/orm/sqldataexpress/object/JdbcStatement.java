@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.scooterframework.common.logging.LogUtil;
-import com.scooterframework.orm.sqldataexpress.util.SqlUtil;
 
 /**
  * JdbcStatement class.

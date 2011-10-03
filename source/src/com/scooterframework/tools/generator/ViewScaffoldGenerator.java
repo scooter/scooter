@@ -33,7 +33,7 @@ public abstract class ViewScaffoldGenerator extends AbstractGenerator {
 
 	public ViewScaffoldGenerator(String templateFilePath,
 			Map<String, String> props, String connName,
-			String controller, String model) {
+			String controller, String model, String table) {
 		super(templateFilePath, props);
 		
 		this.connectionName = connName;
@@ -59,7 +59,7 @@ public abstract class ViewScaffoldGenerator extends AbstractGenerator {
 		
 		viewFileName = isEmpty(viewExtension)?action:(action + viewExtension);
 		
-		recordHome = generateActiveRecordHomeInstance(connectionName, model);
+		recordHome = generateActiveRecordHomeInstance(connectionName, model, table);
 	}
 
 	protected abstract String getAction();

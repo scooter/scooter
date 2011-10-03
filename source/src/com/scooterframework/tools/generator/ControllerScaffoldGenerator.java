@@ -38,7 +38,7 @@ public class ControllerScaffoldGenerator extends AbstractGenerator {
 
 	public ControllerScaffoldGenerator(String templateFilePath,
 			Map<String, String> props, String connName,
-			String controller, String model) {
+			String controller, String model, String table) {
 		super(templateFilePath, props);
 		
 		this.connectionName = connName;
@@ -77,7 +77,7 @@ public class ControllerScaffoldGenerator extends AbstractGenerator {
 		packageName = classPrefix;
 		controllerClassName = (noSuffix)?controllerNameCamel:(controllerNameCamel + classSuffix);
 		
-		ActiveRecord recordHome = generateActiveRecordHomeInstance(connectionName, model);
+		ActiveRecord recordHome = generateActiveRecordHomeInstance(connectionName, model, table);
 		if (recordHome.hasPrimaryKey()) {
 			hasPrimaryKey = true;
 		}

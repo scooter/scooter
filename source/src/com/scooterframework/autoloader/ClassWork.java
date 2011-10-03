@@ -51,8 +51,8 @@ public class ClassWork {
 
 		try {
 			CtClass cc = pool.get(className);
-			boolean transformed = true;
-			if (cc.subclassOf(pool.get(ActiveRecord.class.getName()))) {
+    		boolean transformed = true;
+			if (cc.subclassOf(pool.get(ActiveRecord.class.getName())) && furtherCheckAllowedToChange(cc)) {
 				addMethods(cc, ClassWorkSource.arMethods);
 			}
 			else {
@@ -69,7 +69,6 @@ public class ClassWork {
 			
 			cc.defrost();
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			throw new ClassNotFoundException("classWork failed on " + className + ": " + ex.getMessage());
 		}
 
@@ -83,7 +82,7 @@ public class ClassWork {
         try {
         	cc = pool.makeClass(new ByteArrayInputStream(bytes));
 			
-			if (cc.subtypeOf(pool.get(ActiveRecord.class.getName()))) {
+			if (cc.subtypeOf(pool.get(ActiveRecord.class.getName())) && furtherCheckAllowedToChange(cc)) {
 				addMethods(cc, ClassWorkSource.arMethods);
 				result = cc.toBytecode();
 			}
@@ -95,6 +94,31 @@ public class ClassWork {
 		}
 		
 		return result;
+    }
+    
+    private boolean furtherCheckAllowedToChange(CtClass cc) throws NotFoundException {
+    	boolean change = true;
+    	String className = cc.getName();
+    	String superClassName = cc.getSuperclass().getName();
+    	int lastDot = className.lastIndexOf('.');
+    	
+    	String tmpHelper = "";
+    	String pkgName = "";
+    	String modelName = className;
+    	if (lastDot != -1) {
+    		pkgName = className.substring(0, lastDot);
+    		modelName = className.substring(lastDot + 1);
+			tmpHelper = pkgName + "."
+					+ AutoLoaderConfig.GENERATED_MODEL_CLASS_PREFIX + modelName
+					+ AutoLoaderConfig.GENERATED_MODEL_CLASS_SUFFIX;
+    	}
+    	else {
+			tmpHelper = AutoLoaderConfig.GENERATED_MODEL_CLASS_PREFIX + modelName
+					+ AutoLoaderConfig.GENERATED_MODEL_CLASS_SUFFIX;
+    	}
+    	
+    	if (superClassName.equals(tmpHelper)) change = false;
+    	return change;
     }
     
 	private void addMethods(CtClass cc, List<String> methods) throws CannotCompileException, IOException {

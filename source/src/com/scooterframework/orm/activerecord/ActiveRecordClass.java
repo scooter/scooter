@@ -34,7 +34,7 @@ public abstract class ActiveRecordClass {
     
 	private static String UO = "This method should be invoked from a " + 
 		"subclass of ActiveRecord which implements the method. Scooter " +
-		"automatically add this method to the compiled subclass of " +
+		"automatically adds this method to the compiled subclass of " +
 		"ActiveRecord class.";
 
     /**
@@ -355,7 +355,7 @@ public abstract class ActiveRecordClass {
      * @param options  a map of options
      * @return  List of ActiveRecord objects
      */
-    public static List<ActiveRecord> findAllBy(String columns, Object[] values, Map<String, Object> options) {
+    public static List<ActiveRecord> findAllBy(String columns, Object[] values, Map<String, String> options) {
         throw new RuntimeException(UO);
     }
 
