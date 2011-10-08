@@ -96,7 +96,7 @@
 		<echo message="clean               --> clean all outputs"/>
 		<echo message="jar                 --> package scooter.jar"/>
 		<echo message="javadoc             --> create Java Doc"/>
-		<echo message="test                --> run test"/>
+		<echo message="test                --> run scooter test code"/>
 		<echo message="tools               --> package all tools jars"/>
 		<echo message="createjar           --> package tools/create.jar"/>
 		<echo message="connectiontestjar   --> package tools/connection-test.jar"/>

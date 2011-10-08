@@ -266,7 +266,7 @@ implements RESTified, Serializable {
      * if there are prefix <tt>CRM_</tt> and suffix <tt>_US</tt> for all
      * tables as specified in configuration file.</p>
      *
-     * See description of {@link #ActiveRecord(String connectionName, String tableName)} constructor.
+     * <p>See description of {@link #ActiveRecord(String connectionName, String tableName)} constructor.</p>
      */
     public ActiveRecord() {
         connectionName = getConnectionName();
@@ -291,7 +291,7 @@ implements RESTified, Serializable {
      * <tt>CRM_</tt> and a suffix <tt>_US</tt>, the slim table name
      * used here can just be <tt>users</tt>. </p>
      *
-     * See description of {@link #ActiveRecord(String connectionName, String tableName)} constructor.
+     * <p>See description of {@link #ActiveRecord(String connectionName, String tableName)} constructor.</p>
      *
      * @param tableName table name of the record.
      */
@@ -343,13 +343,13 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns the database connection name associated with this record.
+     * <p>Returns the database connection name associated with this record.</p>
      *
-     * By default, this method returns the default database
+     * <p>By default, this method returns the default database
      * connection name as defined in <tt>database.properties</tt> file.
      * Subclass can override this method to link this ActiveRecord class to
      * other database connection names defined in the
-     * <tt>database.properties</tt> file.
+     * <tt>database.properties</tt> file.</p>
      *
      * @return database connection name
      */
@@ -359,8 +359,8 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns the primary key string the record. This method is the same as 
-     * the {@link #getRestfulId getRestfulId} method.
+     * <p>Returns the primary key string the record. This method is the same as 
+     * the {@link #getRestfulId getRestfulId} method.</p>
      *
      * @return primary key String
      */
@@ -452,7 +452,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns record meta data
+     * Returns record meta data.
      *
      * @return  RowInfo object of a table row
      * @see     com.scooterframework.orm.sqldataexpress.object.RowInfo
@@ -462,7 +462,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns plain data of a row in a table
+     * Returns plain data of a row in a table.
      *
      * @return  an array of objects
      */
@@ -471,7 +471,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns plain data for a column index
+     * Returns plain data for a column index.
      *
      * @param   index    column index like 0, 1, 2, ...
      * @return  a data object for the column
@@ -481,7 +481,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns plain data for a field
+     * Returns plain data for a field.
      *
      * @param   fieldName name of a model field
      * @return  a data object for the field
@@ -499,7 +499,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns a map of column name and value pairs
+     * Returns a map of column name and value pairs.
      *
      * @param   columnNames names of a database table column
      * @return  a map of column name and value pairs
@@ -515,7 +515,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns table meta data
+     * Returns table meta data.
      *
      * @return  TableInfo object
      * @see     com.scooterframework.orm.sqldataexpress.object.TableInfo
@@ -525,10 +525,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets table name
+     * <p>Sets table name.</p>
      *
-     * If the input table name is different from the current table name,
-     * reset the fields of this record instance.
+     * <p>If the input table name is different from the current table name,
+     * reset the fields of this record instance.</p>
      *
      * @param   table    table name specified
      */
@@ -569,10 +569,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets a column to be readonly
+     * <p>Sets a column to be readonly.</p>
      *
-     * Sometimes columns like "entry_user, entry_dt, update_user, update_dt or xxx_count"
-     * are readonly. They will be updated by other database mechanisms.
+     * <p>Sometimes columns like "entry_user, entry_dt, update_user, update_dt or xxx_count"
+     * are readonly. They will be updated by other database mechanisms.</p>
      */
     public void setReadOnlyColumn(String readOnlyColumnName) {
         TableInfo ti = getTableInfo();
@@ -581,10 +581,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets read-only columns
+     * <p>Sets read-only columns.</p>
      *
-     * Sometimes columns like "entry_user, entry_dt, update_user, update_dt"
-     * are readonly. They will be updated by other database mechanisms.
+     * <p>Sometimes columns like "entry_user, entry_dt, update_user, update_dt"
+     * are readonly. They will be updated by other database mechanisms.</p>
      */
     public void setReadOnlyColumns(Set<String> readOnlyColumnNames) {
         TableInfo ti = getTableInfo();
@@ -619,40 +619,35 @@ implements RESTified, Serializable {
     }
 
     /**
-     * indicates if the current record has been modified and unsaved to database.
-     *
+     * Indicates if the current record has been modified and unsaved to database.
      */
     public boolean isDirty() {
         return dirty;
     }
 
     /**
-     * indicates if the current record is a new record--not in database yet.
-     *
+     * Indicates if the current record is a new record--not in database yet.
      */
     public boolean isNewRecord() {
         return !existInDatabase;
     }
 
     /**
-     * indicates if the current record is freezed
-     *
+     * Indicates if the current record is freezed
      */
     public boolean isFreezed() {
         return freezed;
     }
 
     /**
-     * freezes the current record
-     *
+     * Freezes the current record.
      */
     public void freeze() {
         freezed = true;
     }
 
     /**
-     * indicates if the current instance is a home instance.
-     *
+     * Indicates if the current instance is a home instance.
      */
     public boolean isHomeInstance() {
         return isHomeInstance;
@@ -660,17 +655,33 @@ implements RESTified, Serializable {
 
     /**
      * Sets this instance as a home instance.
-     *
      */
     void setAsHomeInstance() {
         isHomeInstance = true;
     }
 
     /**
-     * creates the record in database and Returns it
-     *
+     * <p>Creates the record in database and returns it.</p>
+     * 
+     * <p>This method is the same as {@link #create(boolean) create(true)}.</p>
      */
     public ActiveRecord create() {
+        return create(true);
+    }
+    
+    /**
+     * <p>Creates the record in database and returns it.</p>
+	 * 
+	 * <p>
+	 * This method calls {@link #beforeCreate() beforeCreate()} before the real
+	 * create, and {@link #afterCreate() afterCreate()} after the create
+	 * execution.
+	 * </p>
+	 * 
+     * @param changedOnly  true if only changed fields are included in SQL query
+     * @return a new ActiveRecord instance.
+     */
+    public ActiveRecord create(boolean changedOnly) {
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         ActiveRecord r = null;
 
@@ -678,7 +689,7 @@ implements RESTified, Serializable {
             tm.beginTransactionImplicit();
 
             beforeCreate();
-            r = internal_create();
+            r = internal_create(changedOnly);
             afterCreate();
 
             tm.commitTransactionImplicit();
@@ -730,6 +741,12 @@ implements RESTified, Serializable {
      *
      * <p>If there is no primary key defined for the model, data from all
      * columns will be used as update conditions.</p>
+	 * 
+	 * <p>
+	 * This method calls {@link #beforeUpdate() beforeUpdate} before the real
+	 * update, and {@link #afterUpdate() afterUpdate} after the update
+	 * execution.
+	 * </p>
      *
      */
     public void update() {
@@ -941,11 +958,20 @@ implements RESTified, Serializable {
         updateCounters(counters);
     }
 
-    /**
-     * Updates changed fields of a record (row) in database.
-     *
-     * @return number of records updated
-     */
+	/**
+	 * <p>
+	 * Updates changed fields of a record (row) in database. In other words, the
+	 * Update SQL only includes changed fields.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method calls {@link #beforeUpdate() beforeUpdate} before the real
+	 * update, and {@link #afterUpdate() afterUpdate} after the update
+	 * execution.
+	 * </p>
+	 * 
+	 * @return number of records updated
+	 */
     public int updateChanged() {
         if (isFreezed()) throw new InvalidOperationException(this, "updateChanged", "freezed");
 
@@ -955,11 +981,11 @@ implements RESTified, Serializable {
         try {
             tm.beginTransactionImplicit();
 
-            beforeUpdateChanged();
+            beforeUpdate();
 
             updateCount = internal_updateChanged();
 
-            afterUpdateChanged();
+            afterUpdate();
 
             tm.commitTransactionImplicit();
         }
@@ -1030,8 +1056,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * reload the current record based on its primary key values.
-     *
+     * Reloads the current record based on its primary key values.
      */
     public void reload() {
         if (isFreezed()) throw new InvalidOperationException(this, "reload", "freezed");
@@ -1044,27 +1069,60 @@ implements RESTified, Serializable {
     }
 
     /**
-     * saves the current record.
-     *
-     * If the record exists , use <tt>update()</tt>; otherwise
-     * <tt>create()</tt>.
+     * <p>Saves the current record.</p>
+     * 
+     * <p>The SQL query includes only those fields that are changed.</p>
+     * 
+     * <p>This method is the same as {@link #save(boolean) save(true)}.</p>
      */
     public void save() {
-        if (isFreezed()) throw new InvalidOperationException(this, "save", "freezed");
+    	save(true);
+    }
+
+    /**
+     * <p>Saves the current record.</p>
+     * 
+     * <p>If <tt>changedOnly</tt> is <tt>true</tt>, the SQL query includes only 
+     * those fields that are changed; otherwise, includes all fields.</p>
+     *
+     * <p>When <tt>changedOnly</tt> is <tt>true</tt>, if the record exists , 
+     * this method uses {@link #updateChanged() updateChanged()}, 
+     * otherwise {@link #create(boolean) create(true)}.</p>
+     *
+     * <p>When <tt>changedOnly</tt> is <tt>false</tt>, if the record exists , 
+     * this method uses {@link #update() update()}, 
+     * otherwise {@link #create(boolean) create(false)}.</p>
+	 * 
+	 * <p>
+	 * This method calls {@link #beforeSave() beforeSave} before the real
+	 * save, and {@link #afterSave() afterSave()} after the save
+	 * execution.
+	 * </p>
+     *
+     * @param changedOnly  true if only changed fields are included in SQL query
+     */
+    public void save(boolean changedOnly) {
+        if (isFreezed()) throw new InvalidOperationException(this, "saveChanged", "freezed");
 
         beforeSave();
-
-        if (isNewRecord()) create();
-        else update();
+        
+        if (changedOnly) {
+            if (isNewRecord()) create(changedOnly);
+            else updateChanged();
+        }
+        else {
+            if (isNewRecord()) create(changedOnly);
+            else update();
+        }
 
         afterSave();
     }
 
     /**
-     * saves the current record and then reloads from database.
-     *
-     * If the record exists , use update(); otherwise create().
-     *
+     * <p>Saves the current record and then reloads from database.</p>
+     * 
+     * <p>This method is useful when other process such as database trigger 
+     * may change the record.</p>
      */
     public void saveAndReload() {
         if (isFreezed()) throw new InvalidOperationException(this, "SaveAndReload", "freezed");
@@ -1073,37 +1131,40 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets column values by parsing input string nameValuePairs
+     * <p>Sets column values by parsing input string nameValuePairs.</p>
      *
-     * String nameValuePairs has the following format for example:
+     * <p>String nameValuePairs has the following format for example:
+     * <pre>
      *          firstName=John, lastName=Doe, age=10,...
      *       or firstName=John|lastName=Doe|age=10|...
      *       or firstName=John&lastName=Doe&age=10&...
+     * </pre>
      * You can use either ',', or '|' or '&' to separate each condition.
+     * </p>
      *
-     * The name of the data entry in the nameValuePairs is corresponding to a
-     * column name in the RowInfo object. If the name is not a column name,
+     * <p>The name of the data entry in the nameValuePairs is corresponding 
+     * to a column name in the RowInfo object. If the name is not a column name,
      * its value is ignored. If the column name is not in the names of
-     * the nameValuePairs, the column data is set to null.
+     * the nameValuePairs, the column data is set to null.</p>
      *
-     * If a column name is protected, its data is unaffected. Use setData
-     * method to set its data.
+     * <p>If a column name is protected, its data is unaffected. Use setData
+     * method to set its data.</p>
      */
     public void clearAndSetData(String nameValuePairs) {
         clearAndSetData(Converters.convertStringToMap(nameValuePairs));
     }
 
     /**
-     * Sets column values by parsing input string nameValuePairs
-     * from a Map
+     * <p>Sets column values by parsing input string nameValuePairs
+     * from a Map.</p>
      *
-     * The key of the data entry in the Map is corresponding to a
+     * <p>The key of the data entry in the Map is corresponding to a
      * column name in the RowInfo object. If the key is not a column name,
      * its value is ignored. If the column name is not in the key set of
-     * the Map, the column data is set to null.
+     * the Map, the column data is set to null.</p>
      *
-     * If a column name is protected, its data is unaffected. Use setData
-     * method to set its data.
+     * <p>If a column name is protected, its data is unaffected. Use setData
+     * method to set its data.</p>
      */
     public void clearAndSetData(Map<String, ?> inputDataMap) {
         if (isFreezed()) throw new InvalidOperationException(this, "clearAndSetData", "freezed");
@@ -1113,9 +1174,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns the record data as map. The keys in the map are field names
+     * <p>Returns the record data as map. The keys in the map are field names
      * in upper case. An empty map is returned if the underline
-     * data is not retrieved or the record is new.
+     * data is not retrieved or the record is new.</p>
      *
      * @return map of record data
      */
@@ -1129,26 +1190,28 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets column values by parsing input string nameValuePairs
+     * <p>Sets column values by parsing input string nameValuePairs
      *
-     * String nameValuePairs has the following format for example:
+     * <p>String nameValuePairs has the following format for example:
+     * <pre>
      *          firstName=John, lastName=Doe, age=10,...
      *       or firstName=John|lastName=Doe|age=10|...
      *       or firstName=John&lastName=Doe&age=10&...
-     * You can use either ',', or '|' or '&' to separate each condition.
+     * </pre>
+     * You can use either ',', or '|' or '&' to separate each condition.</p>
      *
-     * The name of the data entry in the nameValuePairs is corresponding to a
-     * column name in the RowInfo object. If the name is not a column name, its
-     * value is ignored. If the column name is not in the names of the
+     * <p>The name of the data entry in the nameValuePairs is corresponding to 
+     * a column name in the RowInfo object. If the name is not a column name, 
+     * its value is ignored. If the column name is not in the names of the
      * nameValuePairs, the column data is not updated. To set those column data
      * to null when the column name is not in the key set, use the
-     * {@link #clearAndSetData(java.lang.String) clearAndSetData} method.
+     * {@link #clearAndSetData(java.lang.String) clearAndSetData} method.</p>
      *
-     * This method does not save data to database. Use save() or create() or
-     * update() or updateChanged() to save data to database.
+     * <p>This method does not save data to database. Use save() or create() or
+     * update() or updateChanged() to save data to database.</p>
      *
-     * If a column name is protected, its data is unaffected. Use setData
-     * method to set its data.
+     * <p>If a column name is protected, its data is unaffected. Use setData
+     * method to set its data.</p>
      */
     public void setData(String nameValuePairs) {
         if (isFreezed()) throw new InvalidOperationException(this, "setData", "freezed");
@@ -1159,22 +1222,22 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets column values by parsing input string nameValuePairs from a Map.
+     * <p>Sets column values by parsing input string nameValuePairs from a Map.</p>
      *
-     * The key of the data entry in the Map is corresponding to a
+     * <p>The key of the data entry in the Map is corresponding to a
      * column name in the RowInfo object. If the key is not a column name, its
      * value is ignored. If the column name is not in the key set of the
      * Map, or the column is readonly or not writable, or is primary key of an
-     * existing record, the column data is not updated.
+     * existing record, the column data is not updated.</p>
      *
-     * To set those column data to null when the column name is not in the key
+     * <p>To set those column data to null when the column name is not in the key
      * set, use the
-     * {@link #clearAndSetData(java.util.Map) clearAndSetData} method.
+     * {@link #clearAndSetData(java.util.Map) clearAndSetData} method.</p>
      *
-     * This method does not save data to database. Use save() or create() or
-     * update() to save data to database.
+     * <p>This method does not save data to database. Use save() or create() or
+     * update() to save data to database.</p>
      *
-     * If a column name is protected, its data is unaffected.
+     * <p>If a column name is protected, its data is unaffected.</p>
      */
     public void setData(Map<String, ?> inputDataMap) {
         if (isFreezed()) throw new InvalidOperationException(this, "setData", "freezed");
@@ -1205,12 +1268,12 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets column data for a column index
+     * <p>Sets column data for a column index.</p>
      *
-     * index: 0, 1, 2, ...
+     * <p>Index starts from 0: 0, 1, 2, ...</p>
      *
-     * This method does not save data to database. Use save() or create() or
-     * update() to save data to database.
+     * <p>This method does not save data to database. Use save() or create() 
+     * or update() to save data to database.</p>
      */
     public void setData(int index, Object columnData) {
         if (isFreezed()) throw new InvalidOperationException(this, "setData", "freezed");
@@ -1220,13 +1283,13 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets data for a field
+     * <p>Sets data for a field.</p>
      *
-     * If there is no such a field, an InvalidColumnNameException
-     * will be thrown.
+     * <p>If there is no such a field, an InvalidColumnNameException
+     * will be thrown.</p>
      *
-     * This method does not save data to database. Use save() or create() or
-     * update() to save data to database.
+     * <p>This method does not save data to database. Use save() or create() or
+     * update() to save data to database.</p>
      */
     public void setData(String fieldName, Object fieldData) {
         if (isFreezed()) throw new InvalidOperationException(this, "setData", "freezed");
@@ -1243,7 +1306,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Checks if a data map contains primary key
+     * Checks if a data map contains primary key.
      *
      * @param data Map of input data
      * @return boolean state indicates if the data map contains primary field(s)
@@ -1311,7 +1374,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecord instance of a specific class type.
+     * <p>Returns an AssociatedRecord instance of a specific class type.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1324,7 +1387,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecord instance of a specific class type.
+     * <p>Returns an AssociatedRecord instance of a specific class type.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1338,10 +1401,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecord instance.
+     * <p>Returns an AssociatedRecord instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
-     * <tt>has-one</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
+     * <tt>has-one</tt> relation defined in the class.</p>
      *
      * @param associationId association id
      * @return the AssociatedRecord instance
@@ -1351,10 +1414,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecord instance.
+     * <p>Returns an AssociatedRecord instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
-     * <tt>has-one</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
+     * <tt>has-one</tt> relation defined in the class.</p>
      *
      * @param associationId association id
      * @param refresh true if reload database data
@@ -1365,10 +1428,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecord instance.
+     * <p>Returns an AssociatedRecord instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
-     * <tt>has-one</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
+     * <tt>has-one</tt> relation defined in the class.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1381,10 +1444,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecord instance.
+     * <p>Returns an AssociatedRecord instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
-     * <tt>has-one</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>belongs-to</tt> or
+     * <tt>has-one</tt> relation defined in the class.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1419,7 +1482,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecords instance of a specific class type.
+     * <p>Returns an AssociatedRecords instance of a specific class type.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1445,10 +1508,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecords instance.
+     * <p>Returns an AssociatedRecords instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
-     * <tt>has-many-through</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
+     * <tt>has-many-through</tt> relation defined in the class.</p>
      *
      * @param associationId association id
      * @return the AssociatedRecords instance
@@ -1458,10 +1521,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecords instance.
+     * <p>Returns an AssociatedRecords instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
-     * <tt>has-many-through</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
+     * <tt>has-many-through</tt> relation defined in the class.</p>
      *
      * @param associationId association id
      * @param refresh true if reload database data
@@ -1472,10 +1535,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecords instance.
+     * <p>Returns an AssociatedRecords instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
-     * <tt>has-many-through</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
+     * <tt>has-many-through</tt> relation defined in the class.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1488,10 +1551,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an AssociatedRecords instance.
+     * <p>Returns an AssociatedRecords instance.</p>
      *
-     * The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
-     * <tt>has-many-through</tt> relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the <tt>has-many</tt> or
+     * <tt>has-many-through</tt> relation defined in the class.</p>
      *
      * <p>See top of this class for <tt>options</tt> examples.</p>
      *
@@ -1735,9 +1798,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets belongs-to relation.
+     * <p>Sets belongs-to relation.</p>
      *
-     * The association id is the model name of the target class.
+     * <p>The association id is the model name of the target class.</p>
      *
      * @param target the class that is associated with.
      */
@@ -1747,9 +1810,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets belongs-to relation with specified properties.
+     * <p>Sets belongs-to relation with specified properties.</p>
      *
-     * The association id of the relation is the model name of the target class.
+     * <p>The association id of the relation is the model name of the target class.</p>
      *
      * @param target the class that is associated with.
      * @param properties string of association properties.
@@ -1820,10 +1883,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets up a category with default id field and type field.
+     * <p>Sets up a category with default id field and type field.</p>
      *
-     * This method assumes that the id field is ${category}_id and the type
-     * field is ${category}_type.
+     * <p>This method assumes that the id field is ${category}_id and the type
+     * field is ${category}_type.</p>
      *
      * @param category name of the category
      */
@@ -1855,9 +1918,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-one relation with specified properties.
+     * <p>Sets has-one relation with specified properties.</p>
      *
-     * The association id of the relation is the model name of the target class.
+     * <p>The association id of the relation is the model name of the target class.</p>
      *
      * @param target the class that is associated with.
      * @param properties string of association properties.
@@ -1937,9 +2000,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-many relation with specified properties.
+     * <p>Sets has-many relation with specified properties.</p>
      *
-     * The association id of the relation is the plural form of the model name of the target class.
+     * <p>The association id of the relation is the plural form of the model name of the target class.</p>
      *
      * @param target the class that is associated with.
      * @param properties string of association properties.
@@ -2010,7 +2073,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-many-through relation.
+     * <p>Sets has-many-through relation.</p>
      *
      * <p>
      * This is equivalent to {@link #hasManyThrough(java.lang.String, java.lang.String)}
@@ -2018,14 +2081,14 @@ implements RESTified, Serializable {
      * </p>
      *
      * @param target  target class.
-     * @param through middleC classs.
+     * @param through middleC class.
      */
     public void hasManyThrough(Class<? extends ActiveRecord> target, Class<? extends ActiveRecord> through) {
         hasManyThrough(target, through, null);
     }
 
     /**
-     * Sets has-many-through relation.
+     * <p>Sets has-many-through relation.</p>
      *
      * <p>
      * This is equivalent to {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String)}
@@ -2033,7 +2096,7 @@ implements RESTified, Serializable {
      * </p>
      *
      * @param target      target class.
-     * @param through     middleC classs.
+     * @param through     middleC class.
      * @param properties  properties string.
      */
     public void hasManyThrough(Class<? extends ActiveRecord> target, Class<? extends ActiveRecord> through, String properties) {
@@ -2041,7 +2104,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-many-through relation.
+     * <p>Sets has-many-through relation.</p>
      *
      * <p>
      * This is equivalent to {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String, java.util.Map)}
@@ -2049,7 +2112,7 @@ implements RESTified, Serializable {
      * </p>
      *
      * @param target      target class.
-     * @param through     middleC classs.
+     * @param through     middleC class.
      * @param properties  properties string.
      * @param joinInputs data map for the join table.
      */
@@ -2062,7 +2125,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-many-through relation.
+     * <p>Sets has-many-through relation.</p>
      *
      * <p>
      * There are two pre-requisits for setting up a has-many-through relation:
@@ -2082,7 +2145,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-many-through relation with specified properties.
+     * <p>Sets has-many-through relation with specified properties.</p>
      *
      * <p>
      * There are two pre-requisits for setting up a has-many-through relation:
@@ -2094,12 +2157,12 @@ implements RESTified, Serializable {
      * </ul>
      * </p>
      *
-     * Example property string:
+     * <p>Example property string:
      * In a property string, each name-value pair is separated by ';'
      * character, while within each name-value pair, name and value strings
-     * are separated by ':' character.
+     * are separated by ':' character.</p>
      *
-     * For example, a property string like the following
+     * <p>For example, a property string like the following
      * <blockquote><pre>
      *      conditions_sql: id in (1, 2, 3); include: category, user;
      *      order_by: first_name, salary desc; cascade: delete
@@ -2114,7 +2177,7 @@ implements RESTified, Serializable {
      *      order_by        =>  first_name, salary desc
      *      cascade         =>  delete
      * </pre></blockquote>
-     * For a complete list of properties, see top of the class or developer guide.
+     * For a complete list of properties, see top of the class or developer guide.</p>
      *
      * @param targets              plural form of target name of the associated class.
      * @param throughAssociationId the name of the association that is in the middle.
@@ -2125,8 +2188,8 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets has-many-through relation with specified properties and join
-     * through table data.
+     * <p>Sets has-many-through relation with specified properties and join
+     * through table data.</p>
      *
      * <p>
      * There are two pre-requisits for setting up a has-many-through relation:
@@ -2138,8 +2201,8 @@ implements RESTified, Serializable {
      * </ul>
      * </p>
      *
-     * See description of {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String)}
-     * method for details about <tt>properties</tt>.
+     * <p>See description of {@link #hasManyThrough(java.lang.String, java.lang.String, java.lang.String)}
+     * method for details about <tt>properties</tt>.</p>
      *
      * @param targets              plural form of target name of the associated class.
      * @param throughAssociationId the name of the association that is in the middle.
@@ -2566,8 +2629,8 @@ implements RESTified, Serializable {
     /**
      * <p>Sets populating rules for primary keys.
      *
-     * <p>Subclass may override this method to use one of the four following ways
-     * to provide primary key values.
+     * <p>Subclass may override this method to use one of the four following 
+     * ways to provide primary key values.
      *
      * <p>There are four ways to set up the name-rule pair for primary key:
      * <pre>
@@ -2601,16 +2664,16 @@ implements RESTified, Serializable {
     }
 
     /**
-     * prepares initial values for the record's non-null non-primary key
-     * writable or non-readonly fields if they haven't been initialized.
+     * <p>Prepares initial values for the record's non-null non-primary key
+     * writable or non-readonly fields if they haven't been initialized.</p>
      *
-     * For nullable fields(columns), it is up to database to set
-     * the default value.
+     * <p>For nullable fields(columns), it is up to database to set
+     * the default value.</p>
      *
-     * Subclass may either override this method or
+     * <p>Subclass may either override this method or
      * getDefaultDataByClassType(String) method to provide its own specific
      * initial values for non-null fields, or use the setData methods
-     * before calling create();
+     * before calling create();</p>
      */
     protected Map<String, Object> getInitializedValues() {
         Map<String, Object> initMap = new HashMap<String, Object>();
@@ -2632,14 +2695,14 @@ implements RESTified, Serializable {
     }
 
     /**
-     * prepares default value for class type
+     * <p>Prepares default value for a specific class type.</p>
      *
-     * The following class types are handled:
+     * <p>The following class types are handled:
      *      BigDecimal, BigInteger, Byte, Double, Float, Integer, Long, Short
-     *      String, Character, Date, Timestamp, Time
+     *      String, Character, Date, Timestamp, Time</p>
      *
-     * The default values for each class type are:
-     *
+     * <p>The default values for each class type are:
+     * <pre>
      *      java.math.BigInteger: 0
      *      java.math.BigDecimal: 0
      *      java.lang.Integer: 0
@@ -2653,9 +2716,9 @@ implements RESTified, Serializable {
      *      java.sql.Date: current system date (e.g. 2006-05-25)
      *      java.sql.Timestamp: current system timestamp (e.g. 2006-05-25 15:30:17.707)
      *      java.sql.Time: 00:00:00
-     *
+     * </pre>
      * Subclass may override or extend this method to provide desired default
-     * values.
+     * values.</p>
      *
      * @param classTypeName
      * @return Object An object contains default value of a specific class type.
@@ -2712,27 +2775,28 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Data for the protected fields are not affected by massive setData method.
+     * <p>Data for the protected fields are not affected by massive setData 
+     * method.</p>
      *
-     * Subclass need to override this method by calling setProtectedFields
-     * method to declare protected fields.
+     * <p>Subclass need to override this method by calling setProtectedFields
+     * method to declare protected fields.</p>
      */
     protected void declaresProtectedFields() {
         ;
     }
 
     /**
-     * Extra fields are not stored in database.
+     * <p>Extra fields are not stored in database.</p>
      *
-     * Subclass need to override this method by calling setExtraFields
-     * method to declare extra fields.
+     * <p>Subclass need to override this method by calling setExtraFields
+     * method to declare extra fields.</p>
      */
     protected void declaresExtraFields() {
         ;
     }
 
     /**
-     * initializes the record
+     * Initializes the record
      */
     private void initialize(String connectionName, String table) {
         rowInfo = lookupAndRegister(connectionName, table).getHeader();
@@ -2753,11 +2817,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * initializes the record's non-null non-primary key fields if
-     * they haven't been initialized.
+     * <p>Initializes the record's non-null non-primary key fields if
+     * they haven't been initialized.</p>
      *
-     * For nullable fields(columns), it is up to database to set
-     * the default value.
+     * <p>For nullable fields(columns), it is up to database to set
+     * the default value.</p>
      */
     private void initializeFields() {
         Map<String, Object> dataMap = getInitializedValues();
@@ -2842,8 +2906,10 @@ implements RESTified, Serializable {
     /**
      * prepareInsertSQL
      */
-    private int prepareInsertSQL(RowData rd, Map<String, Object> outs, StringBuilder strBuffer, boolean autoPopulatePrimaryKey) {
-        RowInfo ri = rd.getRowInfo();
+	private int prepareInsertSQL(RowData rd, Map<String, Object> outs,
+			StringBuilder strBuffer, boolean autoPopulatePrimaryKey,
+			boolean changedOnly) {
+		RowInfo ri = rd.getRowInfo();
         if (ri == null)
             throw new IllegalArgumentException("Error in prepareInsertSQL: no RowInfo.");
 
@@ -2857,6 +2923,7 @@ implements RESTified, Serializable {
             ci = ri.getColumnInfo(i);
             if (ci.isPrimaryKey() && autoPopulatePrimaryKey) continue;
             if (ci.isReadOnly() || !ci.isWritable()) continue;
+            if (changedOnly && !modifiedColumns.contains(ci.getColumnName())) continue;
 
             names.append(ci.getColumnName()).append(", ");
             values.append("?, ");
@@ -2866,7 +2933,10 @@ implements RESTified, Serializable {
 
         //the last column: i=maxSize-1
         ci = ri.getColumnInfo(i);
-        if (!ci.isReadOnly() && ci.isWritable()) {
+		if (!ci.isReadOnly()
+				&& ci.isWritable()
+				&& (!changedOnly || changedOnly
+						&& modifiedColumns.contains(ci.getColumnName()))) {
             names.append(ci.getColumnName()).append("");
             values.append("?");
             positionIndex = positionIndex + 1;
@@ -2966,9 +3036,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * populates primary key values based on the primary key rules
+     * <p>Populates primary key values based on the primary key rules.</p>
      *
-     * Override getPrimaryKeyRule() to override default rule
+     * <p>Override getPrimaryKeyRule() to override default rule.</p>
      *
      * @return Map representing name and value pairs of primary keys
      */
@@ -3026,7 +3096,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * creates a backup copy of the current record data
+     * Creates a backup copy of the current record data
      */
     protected void beforeSetData() {
         if (hasCopied) return;
@@ -3049,7 +3119,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * records those columns that are modified and sets dirty flag
+     * Records those columns that are modified and sets dirty flag.
      *
      * @param modifiedColumnNames
      */
@@ -3060,7 +3130,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * records the column index that is modified and sets dirty flag
+     * Records the column index that is modified and sets dirty flag
      *
      * @param columnIndex
      */
@@ -3070,7 +3140,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * records the column that is modified and sets dirty flag
+     * Records the column that is modified and sets dirty flag
      *
      * @param columnName
      */
@@ -3081,36 +3151,39 @@ implements RESTified, Serializable {
     }
 
     /**
-     * do something before the record is found in database.
+     * Do something before the record is found in database.
      */
     protected void beforeFind() {
         ;
     }
 
     /**
-     * do something after the record is found in database.
+     * Do something after the record is found in database.
      */
     protected void afterFind() {
         ;
     }
 
     /**
-     * do something before the record is created in database.
+     * Do something before the record is created in database.
      */
     protected void beforeCreate() {
         performValidationBeforeCreate();
     }
 
     /**
-     * do something after the record is created in database.
+     * Do something after the record is created in database.
      */
     protected void afterCreate() {
     }
 
     /**
-     * creates the record in database and returns it.
+     * Creates the record in database and returns it.
      */
-    protected ActiveRecord internal_create() {
+    protected ActiveRecord internal_create(boolean changedOnly) {
+    	if (changedOnly && (modifiedColumns == null || modifiedColumns.size() == 0)) 
+    		changedOnly = false;
+    	
         String createSQL = "INSERT INTO " + getTableName();
 
         Map<String, Object> pkValues = null;
@@ -3133,7 +3206,7 @@ implements RESTified, Serializable {
             StringBuilder strBuffer = new StringBuilder();
             Map<String, Object> inputs = new HashMap<String, Object>();
 
-            prepareInsertSQL(rowData, inputs, strBuffer, autoPopulatePrimaryKey);
+            prepareInsertSQL(rowData, inputs, strBuffer, autoPopulatePrimaryKey, changedOnly);
 
             createSQL += " " + strBuffer.toString();
             log.debug("create sql = " + createSQL);
@@ -3174,9 +3247,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * cleans up something before finishing create.
+     * <p>Cleans up something before finishing create.</p>
      *
-     * This is a fresh record now.
+     * <p>This is a fresh record now.</p>
      */
     private void createClean() {
         //remove backup copy
@@ -3189,25 +3262,25 @@ implements RESTified, Serializable {
     }
 
     /**
-     * do something before the record is deleted in database.
+     * Do something before the record is deleted in database.
      */
     protected void beforeDelete() {
         performValidationBeforeDelete();
     }
 
     /**
-     * do something after the record is deleted in database.
+     * Do something after the record is deleted in database.
      */
     protected void afterDelete() {
         ;
     }
 
     /**
-     * Do something before the internal_delete()
+     * <p>Do something before the internal_delete().</p>
      *
-     * For a has-one or has-many relation, either the foreign key in its
+     * <p>For a has-one or has-many relation, either the foreign key in its
      * associated records should be set to null, or the associated records
-     * should be removed if it is a dependent relation.
+     * should be removed if it is a dependent relation.</p>
      *
      */
     private void before_internal_delete() {
@@ -3245,10 +3318,10 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something after the internal_delete()
+     * <p>Do something after the internal_delete().</p>
      *
-     * For a belongs-to relation, decrement counter field in its parent object
-     * if there is a counter field.
+     * <p>For a belongs-to relation, decrement counter field in its parent object
+     * if there is a counter field.</p>
      */
     private void after_internal_delete() {
         List<Relation> relations = RelationManager.getInstance().getOwnedRelations(getClass());
@@ -3263,44 +3336,30 @@ implements RESTified, Serializable {
     }
 
     /**
-     * do something before the record is saved in database.
+     * Do something before the record is saved in database.
      */
     protected void beforeSave() {
         performValidationBeforeSave();
     }
 
     /**
-     * do something after the record is saved in database.
+     * Do something after the record is saved in database.
      */
     protected void afterSave() {
         ;
     }
 
     /**
-     * do something before the record is updated in database.
+     * Do something before the record is updated in database.
      */
     protected void beforeUpdate() {
         performValidationBeforeUpdate();
     }
 
     /**
-     * do something after the record is updated in database.
+     * Do something after the record is updated in database.
      */
     protected void afterUpdate() {
-        ;
-    }
-
-    /**
-     * do something before the changed portion of the record is updated in database.
-     */
-    protected void beforeUpdateChanged() {
-        performValidationBeforeUpdate();
-    }
-
-    /**
-     * do something after the changed portion of the record is updated in database.
-     */
-    protected void afterUpdateChanged() {
         ;
     }
 
@@ -3367,9 +3426,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * cleans up something before finishing update.
+     * <p>Cleans up something before finishing update.</p>
      *
-     * This is a fresh record now.
+     * <p>This is a fresh record now.</p>
      */
     private void updateClean() {
         //remove backup copy
@@ -3380,11 +3439,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something before the internal_create()
+     * <p>Do something before the internal_create().</p>
      *
-     * For a belongs-to relation, if the parent is new or dirty, the parent
+     * <p>For a belongs-to relation, if the parent is new or dirty, the parent
      * must be saved first. A dirty parent may have an updated foreign-key
-     * value which needs to be updated in child record.
+     * value which needs to be updated in child record.</p>
      */
     private void before_internal_create() {
         processAutoAuditCreate();
@@ -3410,9 +3469,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something for the auto-audit update fields.
+     * <p>Do something for the auto-audit update fields.</p>
      *
-     * Subclass can override this method if needed.
+     * <p>Subclass can override this method if needed.</p>
      */
     protected void processAutoAuditCreate() {
         if (DatabaseConfig.getInstance().allowAutoAuditCreate()) {
@@ -3433,9 +3492,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something for the auto-audit update fields.
+     * <p>Do something for the auto-audit update fields.</p>
      *
-     * Subclass can override this method if needed.
+     * <p>Subclass can override this method if needed.</p>
      */
     protected void processAutoAuditUpdate() {
         if (DatabaseConfig.getInstance().allowAutoAuditUpdate()) {
@@ -3459,14 +3518,14 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something after the internal_create()
+     * <p>Do something after the internal_create().</p>
      *
-     * For a has-one and has-many relation, sets foreign-key of associated
+     * <p>For a has-one and has-many relation, sets foreign-key of associated
      * objects. This is because when the owner object is newly created,
-     * the associated objects may not have the foreign-key column filled.
+     * the associated objects may not have the foreign-key column filled.</p>
      *
-     * For a belongs-to relation, increment counter field in its parent object
-     * if there is a counter field.
+     * <p>For a belongs-to relation, increment counter field in its parent object
+     * if there is a counter field.</p>
      */
     private void after_internal_create() {
         List<Relation> relations = RelationManager.getInstance().getOwnedRelations(getClass());
@@ -3489,10 +3548,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets up foreign-key link in child record. This is equivalent to execute
-     * this sql statement:
+     * <p>Sets up foreign-key link in child record. This is equivalent to 
+     * execute this SQL statement:
      *
      * <blockquote>update items set order_id = 1 where id = 10</blockquote>
+     * </p>
      *
      * @param rel relation
      */
@@ -3519,10 +3579,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Sets up foreign-key link in child records. This is equivalent to execute
-     * this sql statement for each child record:
+     * <p>Sets up foreign-key link in child records. This is equivalent to 
+     * execute this SQL statement for each child record:
      *
      * <blockquote>update items set order_id = 1 where id = 10</blockquote>
+     * </p>
      *
      * @param rel relation
      */
@@ -3586,10 +3647,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Deletes child record without triggering callbacks. The example sql
+     * <p>Deletes child record without triggering callbacks. The example SQL
      * statement:
      *
      * <blockquote>delete from items where order_id = 1</blockquote>
+     * </p>
      *
      * @param rel relation
      */
@@ -3598,10 +3660,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Deletes child records without triggering callbacks. The example sql
+     * <p>Deletes child records without triggering callbacks. The example SQL
      * statement:
      *
      * <blockquote>delete from items where order_id = 1</blockquote>
+     * </p>
      *
      * @param rel relation
      */
@@ -3638,12 +3701,13 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Removes foreign-key link in child records. The example sql
+     * <p>Removes foreign-key link in child records. The example sql
      * statement:
      *
      * <blockquote>update items set order_id = null where order_id = 1</blockquote>
+     * </p>
      *
-     * If foreign-key column is not nullable, an exception will be thrown.
+     * <p>If foreign-key column is not nullable, an exception will be thrown.</p>
      *
      * @param rel relation
      */
@@ -3652,12 +3716,13 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Removes foreign-key link in child records. The example sql
+     * <p>Removes foreign-key link in child records. The example sql
      * statement:
      *
      * <blockquote>update items set order_id = null where order_id = 1</blockquote>
+     * </p>
      *
-     * If foreign-key column is not nullable, an exception will be thrown.
+     * <p>If foreign-key column is not nullable, an exception will be thrown.</p>
      *
      * @param rel relation
      */
@@ -3724,11 +3789,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something before the internal_update()
+     * <p>Do something before the internal_update().</p>
      *
-     * For a belongs-to relation, if the parent is new or dirty, the parent
+     * <p>For a belongs-to relation, if the parent is new or dirty, the parent
      * must be saved first. A dirty parent may have an updated foreign-key
-     * value which needs to be updated in child record.
+     * value which needs to be updated in child record.</p>
      */
     private void before_internal_update() {
         processAutoAuditUpdate();
@@ -3754,11 +3819,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Do something after the internal_update()
+     * <p>Do something after the internal_update().</p>
      *
-     * For a has-one and has-many relation, sets foreign-key of associated
+     * <p>For a has-one and has-many relation, sets foreign-key of associated
      * objects. This is because the associated objects may not have the
-     * foreign-key column filled or the associated objects may be dirty.
+     * foreign-key column filled or the associated objects may be dirty.</p>
      */
     private void after_internal_update() {
 
@@ -3780,7 +3845,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * updates associated record if it has been modified.
+     * Updates associated record if it has been modified.
      *
      * @param rr RecordRelation
      */
@@ -3804,7 +3869,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * updates associated records if they have been modified.
+     * Updates associated records if they have been modified.
      *
      * @param rr RecordRelation
      */
@@ -4018,9 +4083,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns a RecordRelation related to the target model.
+     * <p>Returns a RecordRelation related to the target model.</p>
      *
-     * The <tt>associationId</tt> is the name of the relation defined in the class.
+     * <p>The <tt>associationId</tt> is the name of the relation defined in the class.</p>
      *
      * @param associationId association id
      * @return a RecordRelation related to the target model
@@ -4161,7 +4226,7 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns ture if the record has no error.
+     * Returns <tt>true</tt> if the record has no error.
      */
     public boolean isValid() {
         return !errors.failed();
@@ -4212,11 +4277,11 @@ implements RESTified, Serializable {
     }
 
     /**
-     * This is an empty method. Subclass must override this method in order
-     * to provide meaningful validation.
+     * <p>This is an empty method. Subclass must override this method in order
+     * to provide meaningful validation.</p>
      *
-     * This is the default implmentation of validation related to creating,
-     * updating, and saving a record.
+     * <p>This is the default implmentation of validation related to creating,
+     * updating, and saving a record.</p>
      */
     public void validatesRecord() {
         ;
@@ -4255,9 +4320,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an instance of Calculations.
+     * <p>Returns an instance of Calculations.</p>
      *
-     * Subclass must override this method if a different calculator is used.
+     * <p>Subclass must override this method if a different calculator is used.</p>
      *
      * @return Calculations object
      */
@@ -4266,9 +4331,9 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns an instance of Validators.
+     * <p>Returns an instance of Validators.</p>
      *
-     * Subclass must override this method if a different validator is used.
+     * <p>Subclass must override this method if a different validator is used.</p>
      *
      * @return Validators object
      */
@@ -4449,36 +4514,36 @@ implements RESTified, Serializable {
     private ValidationResults errors = new ValidationResults();
 
     /**
-     * list of protected column names
+     * <p>list of protected column names</p>
      *
-     * Data fields defined in the protectedColumns list are protected from
+     * <p>Data fields defined in the protectedColumns list are protected from
      * being set in massive assignments, such as setData(Map). Instead these
      * fields have to be set directly by using setData(String) or
-     * setData(String, Object).
+     * setData(String, Object).</p>
      */
     private List<String> protectedColumns = Collections.synchronizedList(new ArrayList<String>());
 
     /**
-     * list of extra fields
+     * <p>list of extra fields</p>
      *
-     * Extra fields are fields that are needed by the model during a transaction
-     * process but not recorded in the database table.
+     * <p>Extra fields are fields that are needed by the model during a transaction
+     * process but not recorded in the database table.</p>
      *
-     * For example, password_confirmation.
+     * <p>For example, password_confirmation.</p>
      */
     private List<String> extraFields = Collections.synchronizedList(new ArrayList<String>());
 
     /**
-     * map to store values of extra fields.
+     * <p>map to store values of extra fields.</p>
      *
-     * All keys are in upper case.
+     * <p>All keys are in upper case.</p>
      */
     private Map<String, Object> extraFieldsMap = new ConcurrentHashMap<String, Object>();
 
     /**
-     * contains relation with target entities.
+     * <p>contains relation with target entities.</p>
      *
-     * Key is model name in lower case. Value is a specific RecordRelation object.
+     * <p>Key is model name in lower case. Value is a specific RecordRelation object.</p>
      */
     private Map<String, RecordRelation> recordRelations = new ConcurrentHashMap<String, RecordRelation>();
 
