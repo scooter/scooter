@@ -13,7 +13,7 @@ CREATE TABLE posts (
   name       varchar(255),
   title      varchar(255),
   content    text,
-  created_at timestamp,
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp,
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB;
@@ -24,7 +24,7 @@ CREATE TABLE comments (
   commenter  varchar(255),
   body       text,
   post_id    int(11),
-  created_at timestamp,
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp,
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB;

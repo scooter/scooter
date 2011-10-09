@@ -30,7 +30,6 @@ import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.common.validation.ValidationResults;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.exception.BaseSQLException;
-import com.scooterframework.orm.sqldataexpress.exception.UnexpectedDataException;
 import com.scooterframework.orm.sqldataexpress.object.ColumnInfo;
 import com.scooterframework.orm.sqldataexpress.object.OmniDTO;
 import com.scooterframework.orm.sqldataexpress.object.RESTified;
@@ -671,6 +670,9 @@ implements RESTified, Serializable {
     
     /**
      * <p>Creates the record in database and returns it.</p>
+     * 
+     * <p>If <tt>changedOnly</tt> is <tt>true</tt>, only changed fields are 
+     * included in SQL query.</p>
 	 * 
 	 * <p>
 	 * This method calls {@link #beforeCreate() beforeCreate()} before the real
@@ -737,106 +739,6 @@ implements RESTified, Serializable {
     }
 
     /**
-     * <p>Updates the record based on its primary key values.</p>
-     *
-     * <p>If there is no primary key defined for the model, data from all
-     * columns will be used as update conditions.</p>
-	 * 
-	 * <p>
-	 * This method calls {@link #beforeUpdate() beforeUpdate} before the real
-	 * update, and {@link #afterUpdate() afterUpdate} after the update
-	 * execution.
-	 * </p>
-     *
-     */
-    public void update() {
-        if (isFreezed()) throw new InvalidOperationException(this, "update", "freezed");
-
-        if (rowData == null) return;
-
-        ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
-
-        try {
-            tm.beginTransactionImplicit();
-
-            beforeUpdate();
-
-            Map<String, Object> conditions = null;
-            String[] pkNames = rowInfo.getPrimaryKeyColumnNames();
-            if (pkNames == null || pkNames.length == 0) {
-                conditions = rowData.getDataMap();
-            }
-            else {
-                conditions = rowData.getPrimaryKeyDataMap();
-            }
-
-            int updateCount = internal_update(conditions);
-
-            if (updateCount > 1) throw new UnexpectedDataException("Should only update one, but actually updated " + updateCount + " records.");
-
-            afterUpdate();
-
-            tm.commitTransactionImplicit();
-        }
-        catch(BaseSQLException bdex) {
-            tm.rollbackTransactionImplicit();
-            throw bdex;
-        }
-        finally {
-            tm.releaseResourcesImplicit();
-        }
-    }
-
-
-    /**
-     * Updates the record that satisfies the condition.
-     *
-     * @param Map conditions A Map of column name and value pairs.
-     *
-     * @return count of records updated.
-     */
-    private int internal_update(Map<String, Object> conditions) {
-        int count = 0;
-        String updateSQL = "UPDATE " + getTableName();
-
-        before_internal_update();
-
-        try {
-            Map<String, Object> inputs = new HashMap<String, Object>();
-
-            int position = 1;
-
-            //construct sets
-            StringBuilder sets = new StringBuilder();
-            position = prepareSetSQL(position, rowData, inputs, sets);
-            updateSQL += " SET " + sets.toString();
-
-            //construct where clause
-            if (conditions != null && conditions.size() > 0) {
-                StringBuilder wheres = new StringBuilder();
-                position = prepareWhereClause(position, conditions, inputs, wheres);
-                updateSQL += " WHERE " + wheres.toString();
-            }
-
-            log.debug("updates sql = " + updateSQL);
-            
-            inputs = addMoreProperties(inputs, null);
-
-            OmniDTO returnTO =
-                getSqlService().execute(inputs, DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, updateSQL);
-
-            count = returnTO.getUpdatedRowCount();
-
-            after_internal_update();
-        }
-        catch (Exception ex) {
-            throw new BaseSQLException(ex);
-        }
-
-        return count;
-    }
-
-    /**
      * Updates a single field and saves the record.
      *
      * @param field a field name
@@ -859,7 +761,7 @@ implements RESTified, Serializable {
         if (isFreezed()) throw new InvalidOperationException(this, "updateFields", "freezed");
 
         setData(fieldData);
-        updateChanged();
+        update(true);
     }
 
     /**
@@ -958,10 +860,24 @@ implements RESTified, Serializable {
         updateCounters(counters);
     }
 
+    /**
+     * <p>Updates the record.</p>
+     * 
+     * <p>This method is the same as {@link #update(boolean) update(true)}.</p>
+     */
+    public int update() {
+        return update(true);
+    }
+
 	/**
 	 * <p>
-	 * Updates changed fields of a record (row) in database. In other words, the
-	 * Update SQL only includes changed fields.
+	 * Updates the record. If <tt>changedOnly</tt> is <tt>true</tt>, only
+	 * changed fields are included in SQL query.
+	 * </p>
+	 * 
+	 * <p>
+	 * If there is no primary key defined for the model, data from all columns
+	 * will be used as update conditions.
 	 * </p>
 	 * 
 	 * <p>
@@ -970,10 +886,12 @@ implements RESTified, Serializable {
 	 * execution.
 	 * </p>
 	 * 
+	 * @param changedOnly
+	 *            true if only changed fields are included in SQL query
 	 * @return number of records updated
 	 */
-    public int updateChanged() {
-        if (isFreezed()) throw new InvalidOperationException(this, "updateChanged", "freezed");
+    public int update(boolean changedOnly) {
+        if (isFreezed()) throw new InvalidOperationException(this, "update", "freezed");
 
         ImplicitTransactionManager tm = TransactionManagerUtil.getImplicitTransactionManager();
         int updateCount = -1;
@@ -983,9 +901,13 @@ implements RESTified, Serializable {
 
             beforeUpdate();
 
-            updateCount = internal_updateChanged();
+			updateCount = internal_update(changedOnly);
 
-            afterUpdate();
+			if (updateCount > 1)
+				log.warn("Should only update one, but actually updated "
+						+ updateCount + " records.");
+
+			afterUpdate();
 
             tm.commitTransactionImplicit();
         }
@@ -1079,44 +1001,42 @@ implements RESTified, Serializable {
     	save(true);
     }
 
-    /**
-     * <p>Saves the current record.</p>
-     * 
-     * <p>If <tt>changedOnly</tt> is <tt>true</tt>, the SQL query includes only 
-     * those fields that are changed; otherwise, includes all fields.</p>
-     *
-     * <p>When <tt>changedOnly</tt> is <tt>true</tt>, if the record exists , 
-     * this method uses {@link #updateChanged() updateChanged()}, 
-     * otherwise {@link #create(boolean) create(true)}.</p>
-     *
-     * <p>When <tt>changedOnly</tt> is <tt>false</tt>, if the record exists , 
-     * this method uses {@link #update() update()}, 
-     * otherwise {@link #create(boolean) create(false)}.</p>
+	/**
+	 * <p>
+	 * Saves the current record.
+	 * </p>
 	 * 
 	 * <p>
-	 * This method calls {@link #beforeSave() beforeSave} before the real
-	 * save, and {@link #afterSave() afterSave()} after the save
-	 * execution.
+	 * If <tt>changedOnly</tt> is <tt>true</tt>, the SQL query includes only
+	 * those fields that are changed; otherwise, includes all fields.
 	 * </p>
-     *
-     * @param changedOnly  true if only changed fields are included in SQL query
-     */
-    public void save(boolean changedOnly) {
-        if (isFreezed()) throw new InvalidOperationException(this, "saveChanged", "freezed");
+	 * 
+	 * <p>
+	 * If the record exists , this method uses {@link #update(boolean)
+	 * update(boolean)}, otherwise {@link #create(boolean) create(true)}.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method calls {@link #beforeSave() beforeSave} before the real save,
+	 * and {@link #afterSave() afterSave()} after the save execution.
+	 * </p>
+	 * 
+	 * @param changedOnly
+	 *            true if only changed fields are included in SQL query
+	 */
+	public void save(boolean changedOnly) {
+		if (isFreezed())
+			throw new InvalidOperationException(this, "saveChanged", "freezed");
 
-        beforeSave();
-        
-        if (changedOnly) {
-            if (isNewRecord()) create(changedOnly);
-            else updateChanged();
-        }
-        else {
-            if (isNewRecord()) create(changedOnly);
-            else update();
-        }
+		beforeSave();
 
-        afterSave();
-    }
+		if (isNewRecord())
+			create(changedOnly);
+		else
+			update(changedOnly);
+
+		afterSave();
+	}
 
     /**
      * <p>Saves the current record and then reloads from database.</p>
@@ -1208,7 +1128,7 @@ implements RESTified, Serializable {
      * {@link #clearAndSetData(java.lang.String) clearAndSetData} method.</p>
      *
      * <p>This method does not save data to database. Use save() or create() or
-     * update() or updateChanged() to save data to database.</p>
+     * update() to save data to database.</p>
      *
      * <p>If a column name is protected, its data is unaffected. Use setData
      * method to set its data.</p>
@@ -2663,113 +2583,6 @@ implements RESTified, Serializable {
         return getTableInfo().getHeader().getDeleteSqlInJDBCStyle();
     }
 
-    /**
-     * <p>Prepares initial values for the record's non-null non-primary key
-     * writable or non-readonly fields if they haven't been initialized.</p>
-     *
-     * <p>For nullable fields(columns), it is up to database to set
-     * the default value.</p>
-     *
-     * <p>Subclass may either override this method or
-     * getDefaultDataByClassType(String) method to provide its own specific
-     * initial values for non-null fields, or use the setData methods
-     * before calling create();</p>
-     */
-    protected Map<String, Object> getInitializedValues() {
-        Map<String, Object> initMap = new HashMap<String, Object>();
-        int dimension = rowInfo.getDimension();
-		for (int colIndex = 0; colIndex < dimension; colIndex++) {
-            ColumnInfo ci = rowInfo.getColumnInfo(colIndex);
-            if (!ci.isPrimaryKey() &&
-                ci.isNotNull() &&
-               (ci.isWritable() || !ci.isReadOnly())) {
-                String colName = ci.getColumnName();
-                if(getField(colIndex) == null) {
-                    Object initialData = getDefaultDataByClassType(ci.getColumnClassName());
-                    initMap.put(colName, initialData);
-                }
-            }
-        }
-
-        return initMap;
-    }
-
-    /**
-     * <p>Prepares default value for a specific class type.</p>
-     *
-     * <p>The following class types are handled:
-     *      BigDecimal, BigInteger, Byte, Double, Float, Integer, Long, Short
-     *      String, Character, Date, Timestamp, Time</p>
-     *
-     * <p>The default values for each class type are:
-     * <pre>
-     *      java.math.BigInteger: 0
-     *      java.math.BigDecimal: 0
-     *      java.lang.Integer: 0
-     *      java.lang.Long: 0
-     *      java.lang.Short: 0
-     *      java.lang.Double: 0.0
-     *      java.lang.Float: 0.0
-     *      java.lang.Byte: 0
-     *      java.lang.Character: one char blank space
-     *      java.util.Date: current system date (e.g. Thu May 25 15:30:17 EDT 2006)
-     *      java.sql.Date: current system date (e.g. 2006-05-25)
-     *      java.sql.Timestamp: current system timestamp (e.g. 2006-05-25 15:30:17.707)
-     *      java.sql.Time: 00:00:00
-     * </pre>
-     * Subclass may override or extend this method to provide desired default
-     * values.</p>
-     *
-     * @param classTypeName
-     * @return Object An object contains default value of a specific class type.
-     */
-    protected Object getDefaultDataByClassType(String classTypeName) {
-        if (classTypeName == null)
-            throw new IllegalArgumentException("Invalid class type name is null.");
-
-        Object value = null;
-        if("java.math.BigInteger".equals(classTypeName)) {
-            value = java.math.BigInteger.valueOf(0L);
-        }
-        else if("java.math.BigDecimal".equals(classTypeName)) {
-            value = java.math.BigDecimal.valueOf(0.0d);
-        }
-        else if("java.lang.Integer".equals(classTypeName)) {
-            value = Integer.valueOf(0);
-        }
-        else if("java.lang.Long".equals(classTypeName)) {
-            value = Long.valueOf(0);
-        }
-        else if("java.lang.Short".equals(classTypeName)) {
-            value = Short.valueOf("0");
-        }
-        else if("java.lang.Double".equals(classTypeName)) {
-            value = Double.valueOf(0.0);
-        }
-        else if("java.lang.Float".equals(classTypeName)) {
-            value = Float.valueOf(0.0f);
-        }
-        else if("java.lang.Byte".equals(classTypeName)) {
-            value = Byte.valueOf("0");
-        }
-        else if("java.lang.Character".equals(classTypeName)) {
-            value = Character.valueOf(' ');
-        }
-        else if("java.util.Date".equals(classTypeName)) {
-            value = new java.util.Date();
-        }
-        else if("java.sql.Date".equals(classTypeName)) {
-            value = new java.sql.Date((new java.util.Date()).getTime());
-        }
-        else if("java.sql.Timestamp".equals(classTypeName)) {
-            value = new java.sql.Timestamp((new java.util.Date()).getTime());
-        }
-        else if("java.sql.Time".equals(classTypeName)) {
-            value = java.sql.Time.valueOf("00:00:00");
-        }
-        return value;
-    }
-
     private SqlService getSqlService() {
         return SqlServiceConfig.getSqlService();
     }
@@ -2802,9 +2615,6 @@ implements RESTified, Serializable {
         rowInfo = lookupAndRegister(connectionName, table).getHeader();
         rowData = new RowData(rowInfo, null);
 
-        //initialize other column values
-        //initializeFields();
-
         dirty = false;//reset dirty as it was set in setData()
         existInDatabase = false;
         freezed = false;
@@ -2814,21 +2624,6 @@ implements RESTified, Serializable {
 
         //load extra fields
         declaresExtraFields();
-    }
-
-    /**
-     * <p>Initializes the record's non-null non-primary key fields if
-     * they haven't been initialized.</p>
-     *
-     * <p>For nullable fields(columns), it is up to database to set
-     * the default value.</p>
-     */
-    private void initializeFields() {
-        Map<String, Object> dataMap = getInitializedValues();
-
-        if(dataMap.size() > 0) {
-            setData(dataMap);
-        }
     }
 
     /**
@@ -2982,8 +2777,10 @@ implements RESTified, Serializable {
     /**
      * prepareSetSQL
      */
-    private int prepareSetSQL(int startPosition, RowData rd, Map<String, Object> outs, StringBuilder strBuffer) {
-        RowInfo ri = rd.getRowInfo();
+	private int prepareSetSQL(int startPosition, RowData rd,
+			Map<String, Object> outs, StringBuilder strBuffer,
+			boolean changedOnly) {
+		RowInfo ri = rd.getRowInfo();
         if (ri == null)
             throw new IllegalArgumentException("Error in prepareSetSQL: no RowInfo.");
 
@@ -2991,45 +2788,26 @@ implements RESTified, Serializable {
 
         int i = 0;
         ColumnInfo ci = null;
-        for(i=0; i<maxSize-1; i++) {
+		for (i = 0; i < maxSize - 1; i++) {
             ci = ri.getColumnInfo(i);
             if (ci.isReadOnly() || !ci.isWritable() || ci.isPrimaryKey()) continue;
+            if (changedOnly && !modifiedColumns.contains(ci.getColumnName())) continue;
 
             strBuffer.append(ci.getColumnName()).append(" = ?, ");
-            outs.put(startPosition+"", rd.getField(i));
+            outs.put(startPosition + "", rd.getField(i));
             startPosition = startPosition + 1;
         }
 
         //the last column: i=maxSize-1
         ci = ri.getColumnInfo(i);
-        if (!ci.isReadOnly() && ci.isWritable() && !ci.isPrimaryKey()) {
-            strBuffer.append(ci.getColumnName()).append(" = ? ");
-            outs.put(startPosition+"", rd.getField(i));
-            startPosition = startPosition + 1;
-        }
-
-        return startPosition;
-    }
-
-    /**
-     * prepareSetSQL
-     */
-    private int prepareSetSQL(int startPosition, Map<String, Object> fieldData, Map<String, Object> outs, StringBuilder strBuffer) {
-        RowInfo ri = rowInfo;
-        if (ri == null)
-            throw new IllegalArgumentException("Error in prepareSetSQL: no RowInfo.");
-
-        if (fieldData == null || fieldData.size() == 0) return startPosition;
-
-        ColumnInfo ci = null;
-        for (Map.Entry<String, Object> entry : fieldData.entrySet()) {
-            String field = entry.getKey();
-            ci = ri.getColumnInfo(field);
-            if (ci.isReadOnly() || !ci.isWritable() || ci.isPrimaryKey()) continue;
-
-            strBuffer.append(ci.getColumnName()).append(" = ?, ");
-            outs.put(startPosition+"", entry.getValue());
-            startPosition = startPosition + 1;
+		if (!ci.isReadOnly()
+				&& ci.isWritable()
+				&& !ci.isPrimaryKey()
+				&& (!changedOnly || changedOnly
+						&& modifiedColumns.contains(ci.getColumnName()))) {
+			strBuffer.append(ci.getColumnName()).append(" = ? ");
+			outs.put(startPosition + "", rd.getField(i));
+			startPosition = startPosition + 1;
         }
 
         return startPosition;
@@ -3364,26 +3142,20 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Updates changed fields in database.
+     * Updates the record.
      *
+     * @param changedOnly  true if only changed fields are included in SQL query
      * @return count of records updated.
      */
-    private int internal_updateChanged() {
-        if (modifiedColumns == null || modifiedColumns.size() == 0) return -1;
+	private int internal_update(boolean changedOnly) {
+		if (changedOnly
+				&& (modifiedColumns == null || modifiedColumns.size() == 0))
+			return 0;
 
         before_internal_update();
 
-        //prepare modified data map
-        Map<String, Object> modifiedData = new HashMap<String, Object>();
-        for (String field : modifiedColumns) {
-            if (!isColumnField(field)) continue;
-            Object value = rowData.getField(field);
-            modifiedData.put(field, value);
-        }
-
         int count = 0;
         String updateSQL = "UPDATE " + getTableName();
-
         try {
             Map<String, Object> inputs = new HashMap<String, Object>();
 
@@ -3391,20 +3163,26 @@ implements RESTified, Serializable {
 
             //construct sets
             StringBuilder sets = new StringBuilder();
-            position = prepareSetSQL(position, modifiedData, inputs, sets);
-
-            sets = StringUtil.removeLastToken(sets, ", ");
+            position = prepareSetSQL(position, rowData, inputs, sets, changedOnly);
             updateSQL += " SET " + sets.toString();
 
             //construct where clause
-            Map<String, Object> conditions = rowData.getPrimaryKeyDataMap();
+            Map<String, Object> conditions = null;
+            String[] pkNames = rowInfo.getPrimaryKeyColumnNames();
+            if (pkNames == null || pkNames.length == 0) {
+                conditions = latestDbRowData.getDataMap();
+            }
+            else {
+                conditions = rowData.getPrimaryKeyDataMap();
+            }
+            
             if (conditions != null && conditions.size() > 0) {
                 StringBuilder wheres = new StringBuilder();
                 position = prepareWhereClause(position, conditions, inputs, wheres);
                 updateSQL += " WHERE " + wheres.toString();
             }
 
-            log.debug("updates sql = " + updateSQL);
+            log.debug("update sql = " + updateSQL);
             
             inputs = addMoreProperties(inputs, null);
 
@@ -3412,9 +3190,6 @@ implements RESTified, Serializable {
                 getSqlService().execute(inputs, DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, updateSQL);
 
             count = returnTO.getUpdatedRowCount();
-
-            //do some maintenance works
-            updateClean();
 
             after_internal_update();
         }
@@ -4276,13 +4051,16 @@ implements RESTified, Serializable {
         }
     }
 
-    /**
-     * <p>This is an empty method. Subclass must override this method in order
-     * to provide meaningful validation.</p>
-     *
-     * <p>This is the default implmentation of validation related to creating,
-     * updating, and saving a record.</p>
-     */
+	/**
+	 * <p>
+	 * Subclass must override this method in order to provide a meaningful
+	 * validation.
+	 * </p>
+	 * 
+	 * <p>
+	 * The default implementation of this method is empty.
+	 * </p>
+	 */
     public void validatesRecord() {
         ;
     }

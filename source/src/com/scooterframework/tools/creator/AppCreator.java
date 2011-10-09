@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import com.scooterframework.common.exception.UnsupportFeatureException;
 import com.scooterframework.common.util.FileUtil;
 import com.scooterframework.common.util.Util;
 import com.scooterframework.common.util.WordUtil;
@@ -67,8 +68,13 @@ public class AppCreator {
 			doTheWork(args);
 		}
 		catch(Throwable ex) {
-			log("ERROR ERROR ERROR: " + ex.getMessage());
-			ex.printStackTrace();
+			if (ex instanceof UnsupportFeatureException) {
+				log("ERROR ERROR ERROR: " + ex.getMessage());
+			}
+			else {
+				log("ERROR ERROR ERROR: " + ex.getMessage());
+				ex.printStackTrace();
+			}
 		}
 		
 		System.exit(0);
@@ -115,6 +121,8 @@ public class AppCreator {
     	else if (length == 1) {
     		pkgPrefix = appName;
     	}
+    	
+    	validateDBType(dbType);
     	
     	/*
     	 * Site admin related info
@@ -181,6 +189,7 @@ public class AppCreator {
     	allProps.put("app_name", appName);
     	allProps.put("app_path", webappPath);
     	allProps.put("package_prefix", pkgPrefix);
+    	allProps.put("package_prefix_dir_form", pkgPrefix.replace(".", "/"));
     	allProps.put("site.admin.username", username);
     	allProps.put("site.admin.password", Util.md5(password));
     	allProps.put(Generator.TEMPLATE_PARSER_TYPE, Generator.TEMPLATE_PARSER_Q);
@@ -196,6 +205,21 @@ public class AppCreator {
     	
 		log("");
 	}
+    
+    private static void validateDBType(String dbType) {
+    	boolean check = false;
+    	if ("mysql".equals(dbType) || 
+    			"hsqldb".equals(dbType) || 
+    			"h2".equals(dbType) || 
+    			"oracle".equals(dbType) || 
+    			"postgresql".equals(dbType) || 
+    			"sqlserver".equals(dbType)) {
+    		check = true;
+    	}
+    	
+    	if (!check) 
+    		throw new UnsupportFeatureException("Scooter does not support database type of " + dbType + ".");
+    }
     
     private static void setMoreProperties(Map<String, String> templateProps, String databaseType) {
 		

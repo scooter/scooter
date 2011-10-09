@@ -13,9 +13,13 @@ String username = LoginHelper.loginUserId();
 <div id="admin">
     <div class="left">
         <%=W.labelLink("Site", "/admin/site")%> | 
+        <%=W.labelLink("Routes", "/admin/routes")%> | 
         <%=W.labelLink("Databases", "/admin/databases")%> | 
-        <%=W.labelLink("Files", "/admin/files/list")%> | 
-        <%=W.labelLink("Routes", "/admin/routes")%>
+        <%=W.labelLink("All Files", "/admin/files/list")%> | 
+        <%=W.labelLink("Config", "/admin/files/list?f=/WEB-INF/config")%> | 
+        <%=W.labelLink("Controllers", "/admin/files/list?f=/WEB-INF/src/{package_prefix_dir_form}/controllers")%> | 
+        <%=W.labelLink("Models", "/admin/files/list?f=/WEB-INF/src/{package_prefix_dir_form}/models")%> | 
+        <%=W.labelLink("Views", "/admin/files/list?f=/WEB-INF/views")%> 
     </div>
     <div class="right">
         Welcome <%=W.labelLink(username, "/admin/signon/main")%>! <%=W.labelLink("Logout", "/admin/signon/logout")%>

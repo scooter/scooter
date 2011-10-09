@@ -13,7 +13,6 @@ import java.util.Map;
 
 import com.scooterframework.admin.ApplicationConfig;
 import com.scooterframework.admin.EnvConfig;
-import com.scooterframework.builtin.CRUDController;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ActiveRecordUtil;

@@ -31,7 +31,7 @@ import com.scooterframework.tools.common.ToolsUtil;
 	    java -jar tools/generate.jar [app_path] model {model_name_in_singular_form}[@connection_name]
 	    
 	Options:
-		-Denhance=n -- Do not allow byte code enhancement. Default is allowed.
+		-Dnoenhance       -- Do not allow byte code enhancement. Default is allowed.
 		-Dtable=YourTable -- Explicitly specify a table name for the model.
 	
 	Examples:
@@ -51,7 +51,7 @@ import com.scooterframework.tools.common.ToolsUtil;
 	        java -Dtable=message -jar tools/generate.jar blog scaffold post
 	
 	    Generate scaffold code for blog app's domain named post without allowing enhancement:
-	        java -Denhance=n -jar tools/generate.jar blog scaffold post
+	        java -Dnoenhance -jar tools/generate.jar blog scaffold post
 	
 	    Generate scaffold code of post model for blog app in user home directory:
 	        java -jar tools/generate.jar /home/john/projects/blog scaffold post
@@ -189,8 +189,8 @@ public class CodeGenerator {
 		String controller = s3[1];
 		String model = s3[2];
 		
-		String enhanceStr = System.getProperty("enhance");
-		boolean enhance = (enhanceStr != null && "n".equalsIgnoreCase(enhanceStr))?false:true;
+		String noenhanceStr = System.getProperty("noenhance");
+		boolean enhance = ("".equals(noenhanceStr))?false:true;
 		String table = System.getProperty("table");
 		
 		String typeName = getTypeName(useImplicitAppName, args);
@@ -523,7 +523,7 @@ public class CodeGenerator {
     	log("    java -jar tools/generate.jar [app_path] model {model_name_in_singular_form}[@connection_name]");
     	log("");
     	log("Options:");
-    	log("    -Denhance=n       -- Do not allow byte code enhancement. Default is allowed.");
+    	log("    -Dnoenhance       -- Do not allow byte code enhancement. Default is allowed.");
     	log("    -Dtable=YourTable -- Explicitly specify a table name for the model.");
     	log("");
     	log("Examples:");
@@ -543,7 +543,7 @@ public class CodeGenerator {
     	log("        java -Dtable=message -jar tools/generate.jar blog scaffold post");
     	log("");
     	log("    Generate scaffold code for blog app's domain named post without allowing enhancement:");
-    	log("        java -Denhance=n -jar tools/generate.jar blog scaffold post");
+    	log("        java -Dnoenhance -jar tools/generate.jar blog scaffold post");
 	    log("");
     	log("    Generate scaffold code of post model for blog app in user home directory:");
     	log("        java -jar tools/generate.jar /home/john/projects/blog scaffold post");

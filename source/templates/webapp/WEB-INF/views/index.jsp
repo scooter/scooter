@@ -1,4 +1,4 @@
-﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page language="java" pageEncoding="UTF-8"%>
 <%@ page contentType="text/html; charset=UTF-8"%>
 
 <%@ page import="
@@ -38,7 +38,7 @@
 <b><%=W.labelLink("Site info", "/admin/site")%></b>: view application environment information
 <br/><br/>
 
-<b><%=W.labelLink("Site manager", "/admin/files/list")%></b>: manage deployed files and folders (add/view/edit/replace/copy/delete/rename)
+<b><%=W.labelLink("Browse files", "/admin/files/list")%></b>: manage deployed files and folders (add/view/edit/replace/copy/delete/rename)
 <br/><br/>
 
 <%if (MainActionServlet.isUsingRestfulProcessor()) {%>
