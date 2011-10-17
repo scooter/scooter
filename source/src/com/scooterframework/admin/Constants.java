@@ -34,15 +34,23 @@ public class Constants {
     public static final String SKIP_PATH = "scooter.key.skip.path";
     public static final String REQUEST_HEADER = "scooter.key.request.header";
     public static final String REQUEST_PATH = "scooter.key.request.path";
-    public static final String REQUEST_PATH_REST = "scooter.key.request.path.restful";
+    public static final String REQUEST_PATH_KEY = "scooter.key.request.path.key";
     public static final String REQUEST_URI = "scooter.key.request.uri";
     public static final String LOCAL_REQUEST = "scooter.key.local.request";
     public static final String FILE_UPLOAD_REQUEST = "scooter.key.fileupload.request";
     public static final String FILE_UPLOAD_REQUEST_FILES = "scooter.key.fileupload.request.files";
     
+    //Security related
+    public static final String USER_ID_RETRIEVED = "scooter.key.userid.retrieved";
+    public static final String USER_ID_VALUE = "scooter.key.userid.value";
+    
     //Error related
     public static final String ERROR_MESSAGE = "scooter.key.error.message";
     public static final String ERROR_EXCEPTION = "scooter.key.error.exception";
+    
+    //Flash related
+    public static final String FLASH_TYPE_ERROR = "error";
+    public static final String FLASH_TYPE_NOTICE = "notice";
     
     //configured mode
     public static final String CONFIGURED_MODE_SCOOTER_WEB = "SCOOTER WEB";
@@ -68,6 +76,12 @@ public class Constants {
 //*************************************************************************
     public static final String HTTP_METHOD = "_method";
     public static final String AJAX_REQUEST = "_ajax";
+    
+    /**
+     * The following are keys related to third party library.
+     */
+    public static final String SITEMESH_FILTERAPPLIED = "__sitemesh__filterapplied";
+    public static final String ORG_MORTBAY_JETTY = "org.mortbay.jetty";
     
     /**
      * Http key "<tt>paged</tt>" indicates whether to use paginator to display 

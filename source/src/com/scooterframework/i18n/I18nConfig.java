@@ -24,12 +24,8 @@ import com.scooterframework.web.controller.ActionContext;
  * @author (Fei) John Chen
  */
 public class I18nConfig implements Observer {
-    private static I18nConfig me;
+    private static final I18nConfig me = new I18nConfig();
     static MessageResourcesManager mrm;
-    
-    static {
-        me = new I18nConfig();
-    }
     
     private I18nConfig() {      
         init();
@@ -71,7 +67,7 @@ public class I18nConfig implements Observer {
     }
 
 
-    public static synchronized I18nConfig getInstance() {
+    public static I18nConfig getInstance() {
         return me;
     }
     

@@ -13,16 +13,12 @@ package com.scooterframework.orm.sqldataexpress.object;
  * @author (Fei) John Chen
  */
 public class ParameterFactory {
-    private static ParameterFactory me;
-    
-    static {
-        me = new ParameterFactory();
-    }
+    private static final ParameterFactory me = new ParameterFactory();
 
     private ParameterFactory() {}
     
 
-    public static synchronized ParameterFactory getInstance() {
+    public static ParameterFactory getInstance() {
         return me;
     }
     

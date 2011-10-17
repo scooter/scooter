@@ -7,13 +7,16 @@
  */
 package com.scooterframework.web.controller;
 
+import java.io.IOException;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.web.route.MatchMaker;
 import com.scooterframework.web.route.RequestInfo;
 import com.scooterframework.web.route.RouteConfig;
@@ -40,6 +43,24 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
      */
     public RestfulRequestProcessor() {
     }
+
+    /**
+     * <p>Process an <tt>HttpServletRequest</tt>.</p>
+     * 
+     * @param aps properties of request
+     * @param request The servlet request we are processing
+     * @param response The servlet response we are creating
+     * @return execution result
+     * @throws java.io.IOException
+     * @throws javax.servlet.ServletException
+     */
+    public String executeRequest(ActionProperties aps, 
+                HttpServletRequest request, HttpServletResponse response)
+    throws IOException, ServletException
+    {
+        CurrentThreadCache.set(CACHE_KEY_ROUTE_TYPE, aps.routeType);
+    	return super.executeRequest(aps, request, response);
+    }
     
     /**
      * Sets up action properties for the action execution. The properties are 
@@ -48,36 +69,33 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
      * @param request The servlet request we are processing
      * @return an ActionProperties instance
      */
-    public ActionProperties prepareActionProperties(String requestPath, 
-													HttpServletRequest request) {
-    	ActionProperties saps = super.prepareActionProperties(requestPath, request);
+	public ActionProperties prepareActionProperties(String requestPath,
+			String requestHttpMethod, HttpServletRequest request) {
+    	ActionProperties aps = super.prepareActionProperties(requestPath, requestHttpMethod, request);
     	
-    	String requestHttpMethod = getRequestMethod(request);
         RequestInfo requestInfo = new RequestInfo(requestPath, requestHttpMethod);
         log.debug("  requestInfo: " + requestInfo);
+        
         RouteInfo routeInfo = MatchMaker.getInstance().match(requestInfo);
         log.debug("matched route: " + routeInfo);
-        
-        CurrentThreadCache.set(CACHE_KEY_ROUTE_TYPE, routeInfo.getRouteType());
         
         //setup field values
         Map<String, String> requiredFieldValues = routeInfo.getRequiredFieldValues();
         if (requiredFieldValues != null) {
-            request.setAttribute(RouteConstants.FIELD_VALUES, requiredFieldValues);
+        	CurrentThreadCacheClient.cacheFieldValues(requiredFieldValues);
             
             for(Map.Entry<String, String> entry : requiredFieldValues.entrySet()) {
                 request.setAttribute(entry.getKey(), entry.getValue());
             }
         }
         
-        ActionProperties aps = new ActionProperties();
-        aps.controllerPath = saps.controllerPath;
         aps.controller = routeInfo.getController();
         aps.controllerClassName = routeInfo.getControllerClassName();
         aps.action = routeInfo.getAction();
         aps.model = routeInfo.getModel();
         aps.format = routeInfo.getFormat();
         aps.resource = routeInfo.getResourceName();
+        aps.routeType = routeInfo.getRouteType();
         
         return aps;
     }
@@ -87,21 +105,7 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
      */
     protected void registerActionProperties(HttpServletRequest request, ActionProperties aps) {
         super.registerActionProperties(request, aps);
-        request.setAttribute(Constants.RESOURCE, aps.resource);
-    }
-    
-    /**
-     * Returns the method of the <tt>request</tt>.
-     */
-    protected String getRequestMethod(HttpServletRequest request) {
-        String m = request.getParameter(Constants.HTTP_METHOD);
-        if (m == null) {
-            m = (String)request.getAttribute(Constants.HTTP_METHOD);
-            if (m == null) {
-                m = request.getMethod();
-            }
-        }
-        return m.toUpperCase();
+        CurrentThreadCacheClient.cacheResource(aps.resource);
     }
     
     /**

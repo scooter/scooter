@@ -32,33 +32,19 @@ import com.scooterframework.admin.FilterManagerFactory;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.common.util.DateUtil;
-import com.scooterframework.common.util.ExpandedMessage;
 import com.scooterframework.common.util.Message;
 import com.scooterframework.common.util.Util;
 import com.scooterframework.common.validation.ValidationResults;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.misc.JdbcPageListSource;
 import com.scooterframework.orm.misc.Paginator;
-import com.scooterframework.web.route.RouteConstants;
 
 /**
  * <p>
- * ActionControl class serves as base super class for all controller classes.</p>
- * 
- * <p>
- * Action filters are registered through this class. The order of filters 
- * depends on the order they appear in the filter registration methods:
- * beforeFilter and afterFilter. A subclass may change this order by 
- * implementing either of these methods and placing calls to the same methods 
- * in super class at a different place in their own implemented methods.</p>
- * 
- * <p>
- * A subclass should skip some of its superclass' filters by using 
- * skipBeforeFilter and skipAfterFilter methods.</p>
- * 
- * <p>
- * To use features of this class, you must subclass this class.</p>
+ * ActionControl class serves as a helper class for all controller classes.
+ * </p>
  * 
  * @author (Fei) John Chen
  */
@@ -71,7 +57,7 @@ public class ActionControl {
      * {@link com.scooterframework.admin.Constants#CONTROLLER}.
      */
     public static String getController() {
-        return (String)ACH.getAC().getFromRequestData(Constants.CONTROLLER);
+        return CurrentThreadCacheClient.controller();
     }
     
     /**
@@ -80,20 +66,21 @@ public class ActionControl {
      * {@link com.scooterframework.admin.Constants#ACTION}.
      */
     public static String getAction() {
-        return (String)ACH.getAC().getFromRequestData(Constants.ACTION);
+        return CurrentThreadCacheClient.action();
     }
-    
-    /**
-     * Returns model name. 
-     * 
-     * <p>Model name must be set in request scope in a processor class before 
-     * this method is called. It is mapped to attribute <tt>Constants.MODEL</tt>
-     * (<tt>scooter.key.model</tt>) in HTTP servlet request.</p>
-     * 
-     * @return model name
-     */
+
+	/**
+	 * Returns model name.
+	 * 
+	 * <p>
+	 * Model name must be set in current thread cache before this method is
+	 * called.
+	 * </p>
+	 * 
+	 * @return model name
+	 */
     public static String getModel() {
-        String model = (String) ACH.getAC().getFromRequestData(Constants.MODEL);
+        String model = CurrentThreadCacheClient.model();
         if (model == null) throw new IllegalArgumentException("Model name (Constants.MODEL: key.model) must be set first.");
         return model;
     }
@@ -103,7 +90,7 @@ public class ActionControl {
      * {@link com.scooterframework.admin.Constants#RESOURCE}.
      */
     public static String getResource() {
-        return (String)ACH.getAC().getFromRequestData(Constants.RESOURCE);
+        return CurrentThreadCacheClient.resource();
     }
     
     /**
@@ -122,7 +109,7 @@ public class ActionControl {
      * for response.</p>
      */
     public static String format() {
-    	return (String)ACH.getAC().getFromRequestData(Constants.FORMAT);
+    	return CurrentThreadCacheClient.format();
     }
     
     /**
@@ -402,9 +389,8 @@ public class ActionControl {
      * 
      * @return field values of a route.
      */
-    @SuppressWarnings("unchecked")
 	public static Map<String, String> routeFieldValues() {
-        return (Map<String, String>)ACH.getAC().getFromAllRequestData(RouteConstants.FIELD_VALUES);
+        return CurrentThreadCacheClient.fieldValues();
     }
     
     /**
@@ -535,7 +521,7 @@ public class ActionControl {
      * @param message   the message or message key
      */
     public static void flash(String type, String message) {
-        ACH.getAC().setFlashMessage(type, message);
+    	Flash.flash(type, message);
     }
     
     /**
@@ -547,7 +533,7 @@ public class ActionControl {
      * @param value     a value that can be used in the message
      */
     public static void flash(String type, String message, Object value) {
-        flash(type, new ExpandedMessage(null, message, value));
+    	Flash.flash(type, message, value);
     }
     
     /**
@@ -560,7 +546,7 @@ public class ActionControl {
      * @param value1    a value that can be used in the message
      */
     public static void flash(String type, String message, Object value0, Object value1) {
-        flash(type, new ExpandedMessage(null, message, value0, value1));
+    	Flash.flash(type, message, value0, value1);
     }
     
     /**
@@ -574,7 +560,7 @@ public class ActionControl {
      * @param value2    a value that can be used in the message
      */
     public static void flash(String type, String message, Object value0, Object value1, Object value2) {
-        flash(type, new ExpandedMessage(null, message, value0, value1, value2));
+    	Flash.flash(type, message, value0, value1, value2);
     }
     
     /**
@@ -585,9 +571,120 @@ public class ActionControl {
      * @param message   a {@link com.scooterframework.common.util.Message} object
      */
     public static void flash(String type, Message message) {
-        ACH.getAC().setFlashMessage(type, message);
+        Flash.flash(type, message);
     }
     
+    /**
+     * Records a flash message of <tt>error</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     */
+    public static void flashError(String message) {
+    	Flash.error(message);
+    }
+    
+    /**
+     * Records a flash message of <tt>error</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     * @param value     a value that can be used in the message
+     */
+    public static void flashError(String message, Object value) {
+    	Flash.error(message, value);
+    }
+    
+    /**
+     * Records a flash message of <tt>error</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     * @param value0    a value that can be used in the message
+     * @param value1    a value that can be used in the message
+     */
+    public static void flashError(String message, Object value0, Object value1) {
+    	Flash.error(message, value0, value1);
+    }
+    
+    /**
+     * Records a flash message of <tt>error</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     * @param value0    a value that can be used in the message
+     * @param value1    a value that can be used in the message
+     * @param value2    a value that can be used in the message
+     */
+    public static void flashError(String message, Object value0, Object value1, Object value2) {
+    	Flash.error(message, value0, value1, value2);
+    }
+    
+    /**
+     * Records a flash message of <tt>error</tt> type. The <tt>message</tt> 
+     * is of type {@link com.scooterframework.common.util.Message} or its subclass. 
+     * 
+     * @param message   a {@link com.scooterframework.common.util.Message} object
+     */
+    public static void flashError(Message message) {
+        Flash.error(message);
+    }
+    
+    /**
+     * Records a flash message of <tt>notice</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     */
+    public static void flashNotice(String message) {
+    	Flash.notice(message);
+    }
+    
+    /**
+     * Records a flash message of <tt>notice</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     * @param value     a value that can be used in the message
+     */
+    public static void flashNotice(String message, Object value) {
+    	Flash.notice(message, value);
+    }
+    
+    /**
+     * Records a flash message of <tt>notice</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     * @param value0    a value that can be used in the message
+     * @param value1    a value that can be used in the message
+     */
+    public static void flashNotice(String message, Object value0, Object value1) {
+    	Flash.notice(message, value0, value1);
+    }
+    
+    /**
+     * Records a flash message of <tt>notice</tt> type. The message can be 
+     * either a sentence or a message key in a messages.properties file. 
+     * 
+     * @param message   the message or message key
+     * @param value0    a value that can be used in the message
+     * @param value1    a value that can be used in the message
+     * @param value2    a value that can be used in the message
+     */
+    public static void flashNotice(String message, Object value0, Object value1, Object value2) {
+    	Flash.notice(message, value0, value1, value2);
+    }
+    
+    /**
+     * Records a flash message of <tt>notice</tt> type. The <tt>message</tt> 
+     * is of type {@link com.scooterframework.common.util.Message} or its subclass. 
+     * 
+     * @param message   a {@link com.scooterframework.common.util.Message} object
+     */
+    public static void flashNotice(Message message) {
+    	Flash.notice(message);
+    }
     
     /**
      * Returns an instance of Validators. 

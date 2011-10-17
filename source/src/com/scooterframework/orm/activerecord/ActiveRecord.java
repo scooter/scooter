@@ -10,13 +10,11 @@ package com.scooterframework.orm.activerecord;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
 
@@ -2788,7 +2786,7 @@ implements RESTified, Serializable {
 
         int i = 0;
         ColumnInfo ci = null;
-		for (i = 0; i < maxSize - 1; i++) {
+		for (i = 0; i < maxSize; i++) {
             ci = ri.getColumnInfo(i);
             if (ci.isReadOnly() || !ci.isWritable() || ci.isPrimaryKey()) continue;
             if (changedOnly && !modifiedColumns.contains(ci.getColumnName())) continue;
@@ -2796,18 +2794,6 @@ implements RESTified, Serializable {
             strBuffer.append(ci.getColumnName()).append(" = ?, ");
             outs.put(startPosition + "", rd.getField(i));
             startPosition = startPosition + 1;
-        }
-
-        //the last column: i=maxSize-1
-        ci = ri.getColumnInfo(i);
-		if (!ci.isReadOnly()
-				&& ci.isWritable()
-				&& !ci.isPrimaryKey()
-				&& (!changedOnly || changedOnly
-						&& modifiedColumns.contains(ci.getColumnName()))) {
-			strBuffer.append(ci.getColumnName()).append(" = ? ");
-			outs.put(startPosition + "", rd.getField(i));
-			startPosition = startPosition + 1;
         }
 
         return startPosition;
@@ -3164,6 +3150,7 @@ implements RESTified, Serializable {
             //construct sets
             StringBuilder sets = new StringBuilder();
             position = prepareSetSQL(position, rowData, inputs, sets, changedOnly);
+            sets = StringUtil.removeLastToken(sets, ", ");
             updateSQL += " SET " + sets.toString();
 
             //construct where clause
@@ -4162,15 +4149,13 @@ implements RESTified, Serializable {
         }
         sb = StringUtil.removeLastToken(sb, ", ");
 
-        synchronized(extraFields) {
-        	if (extraFields.size() > 0) {
-                for (String colName : extraFields) {
-                    sb.append(colName.toLowerCase()).append("=");
-                    sb.append(getField(colName)).append(separator);
-                }
-                sb = StringUtil.removeLastToken(sb, ", ");
-        	}
-        }
+    	if (extraFields.size() > 0) {
+            for (String colName : extraFields) {
+                sb.append(colName.toLowerCase()).append("=");
+                sb.append(getField(colName)).append(separator);
+            }
+            sb = StringUtil.removeLastToken(sb, ", ");
+    	}
 
         return sb.toString();
     }
@@ -4191,10 +4176,8 @@ implements RESTified, Serializable {
             map.put(colName.toLowerCase(), getField(colName));
         }
 
-        synchronized(extraFields) {
-            for (String colName : extraFields) {
-                map.put(colName.toLowerCase(), getField(colName));
-            }
+        for (String colName : extraFields) {
+            map.put(colName.toLowerCase(), getField(colName));
         }
 
         return map;
@@ -4226,13 +4209,11 @@ implements RESTified, Serializable {
             xmlSB.append("</").append(colNameInLowerCase).append(">");
         }
 
-        synchronized(extraFields) {
-            for (String extraFldName : extraFields) {
-                String extraFldNameInLowerCase = extraFldName.toLowerCase();
-                xmlSB.append("<").append(extraFldNameInLowerCase).append(">");
-                xmlSB.append(getField(extraFldName));
-                xmlSB.append("</").append(extraFldNameInLowerCase).append(">");
-            }
+        for (String extraFldName : extraFields) {
+            String extraFldNameInLowerCase = extraFldName.toLowerCase();
+            xmlSB.append("<").append(extraFldNameInLowerCase).append(">");
+            xmlSB.append(getField(extraFldName));
+            xmlSB.append("</").append(extraFldNameInLowerCase).append(">");
         }
 
         xmlSB.append("</").append(classNameInLowerCase).append(">");
@@ -4299,7 +4280,7 @@ implements RESTified, Serializable {
      * fields have to be set directly by using setData(String) or
      * setData(String, Object).</p>
      */
-    private List<String> protectedColumns = Collections.synchronizedList(new ArrayList<String>());
+    private List<String> protectedColumns = new ArrayList<String>();
 
     /**
      * <p>list of extra fields</p>
@@ -4309,21 +4290,21 @@ implements RESTified, Serializable {
      *
      * <p>For example, password_confirmation.</p>
      */
-    private List<String> extraFields = Collections.synchronizedList(new ArrayList<String>());
+    private List<String> extraFields = new ArrayList<String>();
 
     /**
      * <p>map to store values of extra fields.</p>
      *
      * <p>All keys are in upper case.</p>
      */
-    private Map<String, Object> extraFieldsMap = new ConcurrentHashMap<String, Object>();
+    private Map<String, Object> extraFieldsMap = new HashMap<String, Object>();
 
     /**
      * <p>contains relation with target entities.</p>
      *
      * <p>Key is model name in lower case. Value is a specific RecordRelation object.</p>
      */
-    private Map<String, RecordRelation> recordRelations = new ConcurrentHashMap<String, RecordRelation>();
+    private Map<String, RecordRelation> recordRelations = new HashMap<String, RecordRelation>();
 
     private transient ModelValidators validators = null;
 

@@ -184,7 +184,7 @@ public class RouteConfig implements Observer {
         log.info("total routes = " + MatchMaker.getInstance().countRoutes());
     }
 
-    public static synchronized RouteConfig getInstance() {
+    public static RouteConfig getInstance() {
         return me;
     }
     

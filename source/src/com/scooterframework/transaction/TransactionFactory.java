@@ -20,18 +20,14 @@ import com.scooterframework.orm.sqldataexpress.exception.TransactionException;
  * @author (Fei) John Chen
  */
 public class TransactionFactory {
-    private static TransactionFactory me;
-    
-    static {
-        me = new TransactionFactory();
-    }
+    private static final TransactionFactory me = new TransactionFactory();
 
     private TransactionFactory() {
     }
     
     public static final String USER_TRANSACTION_JNDI_STRING = "java:comp/UserTransaction";
     
-    public static synchronized TransactionFactory getInstance() {
+    public static TransactionFactory getInstance() {
         return me;
     }
     

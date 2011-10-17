@@ -7,7 +7,6 @@
  */
 package com.scooterframework.autoloader;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +26,7 @@ public class MyClassLoader extends ClassLoader {
     private String initiatingClassName;
     private ClassWork cwh;
     
-    private Map<String, LoadedClass> loadedClasses = Collections.synchronizedMap(new HashMap<String, LoadedClass>());
+    private Map<String, LoadedClass> loadedClasses = new HashMap<String, LoadedClass>();
     
     public MyClassLoader(ClassManager caller) {
         this(MyClassLoader.class.getClassLoader(), caller);
@@ -44,7 +43,7 @@ public class MyClassLoader extends ClassLoader {
         return key;
     }
     
-    public synchronized Class<?> loadMyClass(String className) 
+    public Class<?> loadMyClass(String className) 
     throws ClassNotFoundException {
         initiatingClassName = className;
         return loadClass(className, true);
@@ -109,6 +108,10 @@ public class MyClassLoader extends ClassLoader {
     
     private boolean isAllowedToChange(String className) {
     	boolean check = false;
+    	check = FileMonitor.isClassMonitored(className);
+    	check = ClassWorkHelper.isAllowedClassName(className);
+    	check = AutoLoaderConfig.getInstance().notAllowedToChange(className);
+    	check = false;
 		if (((FileMonitor.isClassMonitored(className) || 
 				ClassWorkHelper.isAllowedClassName(className)) && 
 				!AutoLoaderConfig.getInstance().notAllowedToChange(className)) ||

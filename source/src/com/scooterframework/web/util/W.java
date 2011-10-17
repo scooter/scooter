@@ -30,6 +30,7 @@ import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.common.util.ExpandedMessage;
 import com.scooterframework.common.util.Message;
 import com.scooterframework.common.util.StringUtil;
@@ -1303,7 +1304,7 @@ public class W {
      * @return string current controller path
      */
     public static String getCurrentControllerPath() {
-        return (String)getHttpRequest().getAttribute(Constants.CONTROLLER_PATH);
+        return CurrentThreadCacheClient.controllerPath();
     }
     
     /**

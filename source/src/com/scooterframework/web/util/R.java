@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ActiveRecordUtil;
@@ -19,7 +20,6 @@ import com.scooterframework.orm.sqldataexpress.object.RESTified;
 import com.scooterframework.web.route.MatchMaker;
 import com.scooterframework.web.route.Resource;
 import com.scooterframework.web.route.Route;
-import com.scooterframework.web.route.RouteConstants;
 
 /**
  * <p>R(RestfulHelper) class has helper methods for routes and resources. </p>
@@ -43,10 +43,9 @@ public class R {
         }
         return restfulId;
     }
-
-    @SuppressWarnings("unchecked")
+    
 	private static Map<String, String> getFieldValues() {
-        return (Map<String, String>)W.request(RouteConstants.FIELD_VALUES);
+        return CurrentThreadCacheClient.fieldValues();
     }
 
     /**

@@ -695,13 +695,7 @@ public class SqlServiceImpl implements SqlService {
     
     private void cleanUpInputs(Map<String, Object> inputs) {
     	if (inputs == null) return;
-    	inputs.remove("__sitemesh__filterapplied");
-    	inputs.remove("_method");
-    	inputs.remove("scooter.field_values");
-    	inputs.remove("scooter.key.model");
-    	inputs.remove("scooter.key.resource");
-    	inputs.remove("scooter.key.controller");
-    	inputs.remove("scooter.key.controller.path");
+    	//inputs.remove("__sitemesh__filterapplied");
     }
     
     private Map<String, Object> convertKeyCase(Map<String, Object> map) {

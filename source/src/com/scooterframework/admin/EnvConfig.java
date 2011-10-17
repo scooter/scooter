@@ -9,13 +9,13 @@ package com.scooterframework.admin;
 
 import java.io.File;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -90,7 +90,7 @@ public class EnvConfig implements Observer {
 
     private static EnvConfig me;
     private Properties appProperties = null;
-    private static Map<String, String> defaultMimeTypesMap = new ConcurrentHashMap<String, String>();
+    private static Map<String, String> defaultMimeTypesMap = new HashMap<String, String>();
 
     private String siteAdminUsername = DEFAULT_VALUE_siteAdminUsername;
     private String siteAdminPassword = DEFAULT_VALUE_siteAdminPassword;
@@ -128,8 +128,8 @@ public class EnvConfig implements Observer {
     private DiskFileItemFactory fileFactory;
     private ServletFileUpload fileUpload;
 
-    private Map<String, Object> cacheProvidersMap = new ConcurrentHashMap<String, Object>();
-    private Map<String, String> mimeTypesMap = new ConcurrentHashMap<String, String>();
+    private Map<String, Object> cacheProvidersMap = new HashMap<String, Object>();
+    private Map<String, String> mimeTypesMap = new HashMap<String, String>();
 
     static {
         try {
@@ -288,7 +288,7 @@ public class EnvConfig implements Observer {
 		PluginManager.getInstance().startPlugins();
 	}
 
-    public static synchronized EnvConfig getInstance() {
+    public static EnvConfig getInstance() {
         return me;
     }
 

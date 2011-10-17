@@ -8,6 +8,7 @@
 package com.scooterframework.security;
 
 import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.web.controller.ACH;
 
@@ -25,6 +26,10 @@ public class LoginHelper {
      * @return user id of the current logged-in user.
      */
     public static String loginUserId() {
+    	if (CurrentThreadCacheClient.userIDRetrieved()) {
+    		return CurrentThreadCacheClient.getUserID();
+    	}
+    	
         Object userId = null;
         try {
             userId = ACH.getAC().getFromSessionData(SESSION_KEY_LOGIN_USER_ID);
@@ -40,7 +45,10 @@ public class LoginHelper {
         	userId = null;
         }
         
-        return (userId != null)?userId.toString():null;
+        String id = (userId != null)?userId.toString():null;
+        CurrentThreadCacheClient.cacheUserID(id);
+        
+        return id;
     }
 
     /**
@@ -57,7 +65,7 @@ public class LoginHelper {
                 ActiveRecord user = loginUser();
                 if (user != null) {
                     userPwd = user.getField("password");
-                    if (userPwd != null) cacheLoggedInUserId(userPwd);
+                    if (userPwd != null) cacheLoggedInPassword(userPwd);
                 }
             }
         }

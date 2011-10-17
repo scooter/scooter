@@ -11,12 +11,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.common.logging.LogUtil;
 
@@ -44,8 +44,8 @@ public class FileMonitor {
     private long period = 0L;
     private String sourcePath = "";
     private long lastScanTime = 0L;
-    private static Map<String, SourceFile> sourceMap = new ConcurrentHashMap<String, SourceFile>();
-    private Map<String, SourceFile> modifiedSources = new ConcurrentHashMap<String, SourceFile>();
+    private static Map<String, SourceFile> sourceMap = new HashMap<String, SourceFile>();
+    private Map<String, SourceFile> modifiedSources = new HashMap<String, SourceFile>();
     private long latestChange = 0L;
     
     private static FileMonitor fm;

@@ -7,14 +7,16 @@
  */
 package com.scooterframework.web.controller;
 
-import java.util.Collections;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.scooterframework.admin.ApplicationConfig;
 import com.scooterframework.admin.AutoLoadedObjectFactory;
 import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.common.exception.MethodCreationException;
 import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.common.util.BeanUtil;
 import com.scooterframework.web.route.RouteConfig;
 
 /**
@@ -37,10 +39,10 @@ public class ControllerFactory {
      * @return controller instance object
      */
     public static Object createController(String controllerClassName, String defaultControllerClass) {
-        Object controller = null;
+        Object controller = controllerMap.get(controllerClassName);
         
         if ((ApplicationConfig.getInstance().isInDevelopmentEnvironment()) || 
-            controllerMap.get(controllerClassName) == null) {
+        		controller == null) {
             try {
                 controller = AutoLoadedObjectFactory.getInstance().newInstance(controllerClassName);
             } catch (Exception ex) {
@@ -56,13 +58,46 @@ public class ControllerFactory {
             }
             controllerMap.put(controllerClassName, controller);
         }
-        else {
-            controller = controllerMap.get(controllerClassName);
-        }
+        
         return controller;
     }
+
+    /**
+     * Returns method of an object.
+     * 
+     * @param clz the class type
+     * @param methodName the method name of the object
+     * @return the method object
+     * @exception MethodCreationException if <tt>bean</tt> or
+     *  <tt>method</tt> is null
+     */
+    public static Method getMethod(Class<?> clz, String methodName) {
+        if (clz == null) {
+            throw new IllegalArgumentException("No bean class specified.");
+        }
+        if (methodName == null) {
+            throw new IllegalArgumentException("No method name specified.");
+        }
+        
+        String methodKey = clz.getName() + "." + methodName.toLowerCase();
+        Method method = allMethodsMap.get(methodKey);
+        
+        if (ApplicationConfig.getInstance().isInDevelopmentEnvironment() || 
+        		method == null) {
+        	method = BeanUtil.getMethod(clz, methodName);
+    		
+    		if (method == null) {
+        		throw new MethodCreationException(clz.getName(), methodName);
+        	}
+    		
+    		allMethodsMap.put(methodKey, method);
+        }
+        
+        return method;
+    }
     
-    private static Map<String, Object> controllerMap = Collections.synchronizedMap(new HashMap<String, Object>());
+    private static Map<String, Object> controllerMap = new HashMap<String, Object>();
+	private static Map<String, Method> allMethodsMap = new HashMap<String, Method>();
 
     private static LogUtil log = LogUtil.getLogger(ControllerFactory.class.getName());
 }

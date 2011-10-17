@@ -15,6 +15,7 @@ import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.builtin.AdminSignonController;
 import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.orm.misc.Paginator;
 import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
@@ -209,7 +210,7 @@ public class RecordsController extends ApplicationController {
     }
     
     protected String viewPath(String action) {
-        String controller = p(Constants.CONTROLLER);
+        String controller = CurrentThreadCacheClient.controller();
         return EnvConfig.getViewURI(controller, action);
     }
 }

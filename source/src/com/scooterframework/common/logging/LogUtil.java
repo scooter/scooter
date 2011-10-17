@@ -76,7 +76,7 @@ public class LogUtil {
      * @param instanceName      The instance to log
      * @return this instance
      */
-	public static synchronized LogUtil getLogger(String instanceName) {
+	public static LogUtil getLogger(String instanceName) {
 		return new LogUtil(instanceName);
 	}
 

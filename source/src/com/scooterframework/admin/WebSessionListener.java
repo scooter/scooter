@@ -8,6 +8,7 @@
 package com.scooterframework.admin;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -19,37 +20,33 @@ import javax.servlet.http.HttpSessionListener;
  * @author (Fei) John Chen
  */
 public class WebSessionListener implements HttpSessionListener {
-	private static int sessionCount = 0;
-	private static int sessionCountMax = 0;
+	private static final AtomicLong sessionCount = new AtomicLong(0);
+	private static long sessionCountMax = 0;
 	private static Date sessionCountMaxDate;
 
 	public void sessionCreated(HttpSessionEvent se) {
-		synchronized (this) {
-			sessionCount++;
-			if (sessionCount > sessionCountMax) {
-				sessionCountMax = sessionCount;
-				sessionCountMaxDate = new Date();
-			}
+		sessionCount.incrementAndGet();
+		if (sessionCount.get() > sessionCountMax) {
+			sessionCountMax = sessionCount.get();
+			sessionCountMaxDate = new Date();
 		}
 	}
 
 	public void sessionDestroyed(HttpSessionEvent se) {
-		synchronized (this) {
-			--sessionCount;
-		}
+		sessionCount.decrementAndGet();
 	}
 	
 	/**
 	 * Returns number of current sessions in the container.
 	 */
-	public static int getSessionCount() {
-		return sessionCount;
+	public static long getSessionCount() {
+		return sessionCount.get();
 	}
 	
 	/**
 	 * Returns the maximum number of current sessions.
 	 */
-	public static int getSessionCountMax() {
+	public static long getSessionCountMax() {
 		return sessionCountMax;
 	}
 	

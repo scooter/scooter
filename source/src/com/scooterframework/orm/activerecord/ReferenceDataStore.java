@@ -8,10 +8,10 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ReferenceDataStore class holds static reference data for all users.
@@ -26,7 +26,7 @@ public class ReferenceDataStore implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 5382025995336758728L;
     
-    private static Map<String, List<ReferenceData>> refData = new ConcurrentHashMap<String, List<ReferenceData>>();
+    private static Map<String, List<ReferenceData>> refData = new HashMap<String, List<ReferenceData>>();
     private static Date refDataLoadedTime = null;
 	
 	/**

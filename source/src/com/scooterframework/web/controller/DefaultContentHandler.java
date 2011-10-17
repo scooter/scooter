@@ -22,6 +22,7 @@ import org.json.XML;
 
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.common.util.StringUtil;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 
 /**
@@ -68,21 +69,22 @@ public class DefaultContentHandler implements ContentHandler {
     }
 
     protected String convertObjectToString(Object data, String format) {
+    	String spliter = ", ";
     	StringBuilder sb = new StringBuilder();
     	if (data instanceof Object[]) {
     		for (Object c : (Object[])data) {
-    			sb.append(convertObjectToString(c, format));
+    			sb.append(convertObjectToString(c, format)).append(spliter);
     		}
     	}
     	else if (data instanceof Collection) {
     		for (Object c : (Collection<?>)data) {
-    			sb.append(convertObjectToString(c, format));
+    			sb.append(convertObjectToString(c, format)).append(spliter);
     		}
     	}
     	else if (data instanceof Iterator) {
     		Iterator<?> it = (Iterator<?>)data;
     		while(it.hasNext()) {
-    			sb.append(convertObjectToString(it.next(), format));
+    			sb.append(convertObjectToString(it.next(), format)).append(spliter);
     		}
     	}
     	else if (data instanceof Map) {
@@ -94,7 +96,7 @@ public class DefaultContentHandler implements ContentHandler {
     	else {
     		sb.append(data);
     	}
-    	return sb.toString();
+    	return StringUtil.removeLastToken(sb.toString(), spliter);
     }
 
     protected <K, V> String convertMapToString(Map<K, V> map, String format) {

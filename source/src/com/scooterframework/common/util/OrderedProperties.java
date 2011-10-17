@@ -113,7 +113,7 @@ public class OrderedProperties extends Properties {
      * @throws IOException   if an error occurred when reading from 
      *                       the input stream.
      */
-    public synchronized void load(InputStream inStream) throws IOException {
+    public void load(InputStream inStream) throws IOException {
     	load(inStream, "utf-8");
     }
     
@@ -128,7 +128,7 @@ public class OrderedProperties extends Properties {
      * @throws IOException   if an error occurred when reading from 
      *                       the input stream.
      */
-    public synchronized void load(InputStream is, String encoding) 
+    public void load(InputStream is, String encoding) 
     throws IOException {
     	BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     	String lastLine = "";
@@ -203,7 +203,7 @@ public class OrderedProperties extends Properties {
      * @throws IOException   if an error occurred when writing to  
      *                       the output stream.
      */
-    public synchronized void store(OutputStream os, String header)
+    public void store(OutputStream os, String header)
     throws IOException {
     	store(os, header, "utf-8");
     }
@@ -221,7 +221,7 @@ public class OrderedProperties extends Properties {
      * @throws IOException   if an error occurred when writing to  
      *                       the output stream.
      */
-    public synchronized void store(OutputStream os, String header, String encoding)
+    public void store(OutputStream os, String header, String encoding)
     throws IOException {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, encoding));
         if (header != null) {
@@ -260,7 +260,7 @@ public class OrderedProperties extends Properties {
      * @return     the previous value of the specified key in this property
      *             list, or <tt>null</tt> if it did not have one.
      */
-    public synchronized Object setProperty(String key, String value) {
+    public Object setProperty(String key, String value) {
         return put(key, value);
     }
     
@@ -283,7 +283,7 @@ public class OrderedProperties extends Properties {
      * @see     Object#equals(Object)
      * @see     #get(Object)
      */
-    public synchronized Object put(Object key, Object value) {
+    public Object put(Object key, Object value) {
     	if (!keys.contains(key)) keys.add(key);
     	if (value != null) {
     		value = loadConvert(value.toString());
@@ -308,7 +308,7 @@ public class OrderedProperties extends Properties {
     /**
      * Clears this property so that it contains no keys. 
      */
-    public synchronized void clear() {
+    public void clear() {
     	keys.clear();
     	super.clear();
     }

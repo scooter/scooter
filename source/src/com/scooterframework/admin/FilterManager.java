@@ -9,16 +9,23 @@ package com.scooterframework.admin;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
+ * <p>
  * FilterManager manages all filters of a specific controller class.
+ * </p>
+ * 
+ * <p>
+ * Filters are registered through this class. The order of filters 
+ * depends on the order they appear in the filter declaration methods:
+ * <tt>declareBeforeFilter</tt>, <tt>declareAfterFilter</tt>, 
+ * <tt>declareSkipBeforeFilter</tt> and <tt>declareSkipAfterFilter</tt>.
+ * </p>
  *
  * @author (Fei) John Chen
  */
@@ -31,16 +38,16 @@ public class FilterManager {
     public static final String FILTER_OPTION_EXCEPT = "except";
     public static final String FILTER_OPTION_ONLY = "only";
 
-    private List<ActionFilterData> afterFilterDataList = Collections.synchronizedList(new ArrayList<ActionFilterData>());
-    private List<ActionFilterData> beforeFilterDataList = Collections.synchronizedList(new ArrayList<ActionFilterData>());
-    private List<ActionFilterData> skipAfterFilterDataList = Collections.synchronizedList(new ArrayList<ActionFilterData>());
-    private List<ActionFilterData> skipBeforeFilterDataList = Collections.synchronizedList(new ArrayList<ActionFilterData>());
+    private List<ActionFilterData> afterFilterDataList = new ArrayList<ActionFilterData>();
+    private List<ActionFilterData> beforeFilterDataList = new ArrayList<ActionFilterData>();
+    private List<ActionFilterData> skipAfterFilterDataList = new ArrayList<ActionFilterData>();
+    private List<ActionFilterData> skipBeforeFilterDataList = new ArrayList<ActionFilterData>();
 
     private List<String> actionMethods = null;
-    private Map<String, List<ActionControlFilter>> actionBeforeFiltersMap = new ConcurrentHashMap<String, List<ActionControlFilter>>();
-    private Map<String, List<ActionControlFilter>> actionAfterFiltersMap = new ConcurrentHashMap<String, List<ActionControlFilter>>();
+    private Map<String, List<ActionControlFilter>> actionBeforeFiltersMap = new HashMap<String, List<ActionControlFilter>>();
+    private Map<String, List<ActionControlFilter>> actionAfterFiltersMap = new HashMap<String, List<ActionControlFilter>>();
 
-    private static ConcurrentHashMap<String, ActionFilterData> allFiltersMap = new ConcurrentHashMap<String, ActionFilterData>();
+    private static Map<String, ActionFilterData> allFiltersMap = new HashMap<String, ActionFilterData>();
     private static final String FILTER_KEY_SEPARATOR = "-";
 
 	private Class<?> ownerClass;
@@ -159,13 +166,11 @@ public class FilterManager {
         String ret = null;
         List<ActionControlFilter> filters = getFiltersForAction(action, type);
         if (filters != null) {
-        	synchronized(filters) {
-	            Iterator<ActionControlFilter> it = filters.iterator();
-	            while(it.hasNext() && (ret == null)) {
-	                ActionControlFilter af = it.next();
-	                ret = af.execute();
-	            }
-        	}
+            Iterator<ActionControlFilter> it = filters.iterator();
+            while(it.hasNext() && (ret == null)) {
+                ActionControlFilter af = it.next();
+                ret = af.execute();
+            }
         }
         return ret;
     }
@@ -191,16 +196,10 @@ public class FilterManager {
 
     private void prepareFilter(List<ActionFilterData> filterDataList, String filterType, Class<?> filterClz, String filters) {
     	String key = fileterKey(filterType, filterClz, filters);
-    	ActionFilterData filter = null;
-        if (!allFiltersMap.containsKey(key)) {
-        	ActionFilterData newFilter = new ActionFilterData(filterClz, filterType, filters);
-            filter = allFiltersMap.putIfAbsent(key, newFilter);
-            if (filter == null) {
-            	filter = newFilter;
-            }
-        }
-        else {
-            filter = allFiltersMap.get(key);
+    	ActionFilterData filter = allFiltersMap.get(key);
+        if (filter == null) {
+        	filter = new ActionFilterData(filterClz, filterType, filters);
+            allFiltersMap.put(key, filter);
         }
         filterDataList.add(filter);
 
@@ -210,16 +209,10 @@ public class FilterManager {
 
     private void prepareFilter(List<ActionFilterData> filterDataList, String filterType, Class<?> filterClz, String filters, String option, String actions) {
         String key = fileterKey(filterType, filterClz, filters, option, actions);
-        ActionFilterData filter = null;
+        ActionFilterData filter = allFiltersMap.get(key);
         if (!allFiltersMap.containsKey(key)) {
-        	ActionFilterData newFilter = new ActionFilterData(filterClz, filterType, option, filters, actions);
-            filter = allFiltersMap.putIfAbsent(key, newFilter);
-            if (filter == null) {
-            	filter = newFilter;
-            }
-        }
-        else {
-            filter = allFiltersMap.get(key);
+        	filter = new ActionFilterData(filterClz, filterType, option, filters, actions);
+            allFiltersMap.put(key, filter);
         }
         filterDataList.add(filter);
 
@@ -490,15 +483,13 @@ public class FilterManager {
     //construct a map of actions and their corresponding filter list
     private Map<String, List<ActionControlFilter>> constructActionFiltersMap(List<String> actions, List<ActionFilterData> filterDataList, List<ActionFilterData> skipFilterDataList) {
         Map<String, List<ActionControlFilter>> m = new HashMap<String, List<ActionControlFilter>>();
-        synchronized(actions) {
-	        Iterator<String> it = actions.iterator();
-	        while(it.hasNext()) {
-	            String action = (String)it.next();
-	            List<ActionControlFilter> filters = constructFiltersListForAction(action, filterDataList, skipFilterDataList);
-	            if (filters != null && filters.size() > 0) {
-	                m.put(action, filters);
-	            }
-	        }
+        Iterator<String> it = actions.iterator();
+        while(it.hasNext()) {
+            String action = (String)it.next();
+            List<ActionControlFilter> filters = constructFiltersListForAction(action, filterDataList, skipFilterDataList);
+            if (filters != null && filters.size() > 0) {
+                m.put(action, filters);
+            }
         }
         return m;
     }
@@ -517,19 +508,17 @@ public class FilterManager {
         List<ActionControlFilter> l = new ArrayList<ActionControlFilter>();
         Map<String, ActionControlFilter> m = new HashMap<String, ActionControlFilter>();//contains unique filters
 
-        synchronized(al) {
-	        Iterator<ActionControlFilter> it = al.iterator();
-	        while(it.hasNext()) {
-	            ActionControlFilter acf = (ActionControlFilter)it.next();
+        Iterator<ActionControlFilter> it = al.iterator();
+        while(it.hasNext()) {
+            ActionControlFilter acf = (ActionControlFilter)it.next();
 
-	            if (skipActionControlFilter(sl, acf)) continue;
+            if (skipActionControlFilter(sl, acf)) continue;
 
-	            //make sure that the l list contains non-duplicated filters.
-	            if (!m.containsKey(acf.getACFKey())) {
-	                m.put(acf.getACFKey(), acf);
-	                l.add(acf);
-	            }
-	        }
+            //make sure that the l list contains non-duplicated filters.
+            if (!m.containsKey(acf.getACFKey())) {
+                m.put(acf.getACFKey(), acf);
+                l.add(acf);
+            }
         }
         return l;
     }
@@ -537,30 +526,26 @@ public class FilterManager {
     //construct filter list for a specific action
     private List<ActionControlFilter> _constructFiltersListForAction(String action, List<ActionFilterData> filterDataList) {
         List<ActionControlFilter> l = new ArrayList<ActionControlFilter>();
-        synchronized(filterDataList) {
-	        Iterator<ActionFilterData> it = filterDataList.iterator();
-	        while(it.hasNext()) {
-	            ActionFilterData afd = it.next();
-	            List<ActionControlFilter> acfList = afd.getFilters(action);
-	            if (acfList != null && acfList.size() > 0) {
-	                l.addAll(acfList);
-	            }
-	        }
+        Iterator<ActionFilterData> it = filterDataList.iterator();
+        while(it.hasNext()) {
+            ActionFilterData afd = it.next();
+            List<ActionControlFilter> acfList = afd.getFilters(action);
+            if (acfList != null && acfList.size() > 0) {
+                l.addAll(acfList);
+            }
         }
         return l;
     }
 
     private boolean skipActionControlFilter(List<ActionControlFilter> data, ActionControlFilter acf) {
         boolean check = false;
-        synchronized(data) {
-	        Iterator<ActionControlFilter> it = data.iterator();
-	        while(it.hasNext()) {
-	            ActionControlFilter tmp = it.next();
-	            if (tmp.getACFKey().equals(acf.getACFKey())) {
-	                check = true;
-	                break;
-	            }
-	        }
+        Iterator<ActionControlFilter> it = data.iterator();
+        while(it.hasNext()) {
+            ActionControlFilter tmp = it.next();
+            if (tmp.getACFKey().equals(acf.getACFKey())) {
+                check = true;
+                break;
+            }
         }
         return check;
     }

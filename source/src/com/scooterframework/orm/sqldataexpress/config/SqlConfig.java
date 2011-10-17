@@ -24,15 +24,11 @@ import com.scooterframework.common.logging.LogUtil;
 public class SqlConfig implements Observer {
     private static LogUtil log = LogUtil.getLogger(SqlConfig.class.getName());
     
-    private static SqlConfig me;
+    private static final SqlConfig me = new SqlConfig();
     private Properties appProperties = null;
     private Properties sqlProperties = new Properties();
     
     public static final String DATA_PROPERTIES_FILE = "sql.properties";
-    
-    static {
-        me = new SqlConfig();
-    }
 
     private SqlConfig() {
         init();
@@ -41,7 +37,7 @@ public class SqlConfig implements Observer {
         PropertyFileChangeMonitor.getInstance().registerObserver(this, DATA_PROPERTIES_FILE);
     }
     
-    public static synchronized SqlConfig getInstance() {
+    public static SqlConfig getInstance() {
         return me;
     }
     

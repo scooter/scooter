@@ -22,17 +22,13 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  * @author (Fei) John Chen
  */
 public class DataProcessorFactory {
-    private static DataProcessorFactory me;
-    
-    static {
-        me = new DataProcessorFactory();
-    }
+    private static DataProcessorFactory me = new DataProcessorFactory();
 
     private DataProcessorFactory() {
     }
     
     
-    public static synchronized DataProcessorFactory getInstance() {
+    public static DataProcessorFactory getInstance() {
         return me;
     }
     

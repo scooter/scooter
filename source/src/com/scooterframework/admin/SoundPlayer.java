@@ -68,10 +68,9 @@ public class SoundPlayer implements Listener {
 		audioPlay(soundClips[index]);
 	}
 	
-	@SuppressWarnings("deprecation")
 	private static void audioPlay(File audioFile) {
 		try {
-			AudioClip clip = Applet.newAudioClip(audioFile.toURL());
+			AudioClip clip = Applet.newAudioClip(audioFile.toURI().toURL());
 			clip.play();
 			Thread.sleep(2000);
 		} catch (Exception e) {

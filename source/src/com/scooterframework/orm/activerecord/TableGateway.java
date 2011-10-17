@@ -1298,35 +1298,31 @@ public class TableGateway {
 				limit = Util.getIntValueForKey(options,
 						ActiveRecordConstants.key_limit);
 			}
-			offset = current_page * limit;
+			offset = (current_page - 1 ) * limit;
 		}
 		return offset;
 	}
 
 	private int getLimit(Map<String, String> options) {
 		int limit = DataProcessor.NO_ROW_LIMIT;
-		if (options.containsKey(ActiveRecordConstants.key_page)) {
-			limit = Util.getIntValue(options, ActiveRecordConstants.key_limit,
-					DataProcessor.DEFAULT_PAGINATION_LIMIT);
-		} else if (options.containsKey(ActiveRecordConstants.key_limit)) {
+		if (options.containsKey(ActiveRecordConstants.key_limit)) {
 			limit = Util.getIntValue(options, ActiveRecordConstants.key_limit,
 					DataProcessor.NO_ROW_LIMIT);
 		} else if (options.containsKey(DataProcessor.input_key_records_limit)) {
 			limit = Util.getIntValue(options,
 					DataProcessor.input_key_records_limit,
 					DataProcessor.NO_ROW_LIMIT);
+		} else if (options.containsKey(ActiveRecordConstants.key_page)) {
+			limit = Util.getIntValue(options, ActiveRecordConstants.key_limit,
+					DataProcessor.DEFAULT_PAGINATION_LIMIT);
 		}
 		return limit;
 	}
 
 	Object createNewInstance() throws Exception {
 		Object o = null;
-		Class<?>[] parameterTypes = { String.class, String.class };
-		Object[] initargs = { home.getConnectionName(), home.getTableName() };
-
 		try {
-			o = ActiveRecordUtil.newInstance(home.getClass(), parameterTypes,
-					initargs);
+			o = home.getClass().newInstance();
 		} catch (Exception ex) {
 			throw new ObjectCreationException(home.getClass().getName(), ex);
 		}

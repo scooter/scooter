@@ -356,7 +356,7 @@ public class ApplicationConfig {
     /**
      * Returns number of sessions in the container.
      */
-    public static int getSessionCount() {
+    public static long getSessionCount() {
     	return WebSessionListener.getSessionCount();
     }
     

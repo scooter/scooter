@@ -252,7 +252,7 @@ public class DatabaseConfig extends Observable implements Observer {
     public static final int DEFAULT_VALUE_initial_pool_size = 3;
     public static final int DEFAULT_VALUE_max_idle_time = 0;
 
-    private static DatabaseConfig me;
+    private static final DatabaseConfig me = new DatabaseConfig();
     private Properties appProperties = null;
 
     private String defaultTransactionType = DEFAULT_VALUE_defaultTransactionType;
@@ -274,16 +274,12 @@ public class DatabaseConfig extends Observable implements Observer {
     /**
      * <p>A map of SQL data type name and its corresponding type (Integer).</p>
      */
-    public static final Map<String, Integer> allSQLDataNameTypesMap = new HashMap<String, Integer>();
+    public final Map<String, Integer> allSQLDataNameTypesMap = new HashMap<String, Integer>();
 
     /**
      * <p>A map of SQL data type code and its corresponding java class type name.</p>
      */
-    public static final Map<Integer, String> allSQLTypeJavaNamesMap = new HashMap<Integer, String>();
-
-    static {
-        me = new DatabaseConfig();
-    }
+    public final Map<Integer, String> allSQLTypeJavaNamesMap = new HashMap<Integer, String>();
 
     private DatabaseConfig() {
         init();
@@ -504,7 +500,7 @@ public class DatabaseConfig extends Observable implements Observer {
     }
 
 
-    public static synchronized DatabaseConfig getInstance() {
+    public static DatabaseConfig getInstance() {
         return me;
     }
 

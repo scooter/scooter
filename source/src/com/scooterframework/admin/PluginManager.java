@@ -7,10 +7,10 @@
  */
 package com.scooterframework.admin;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.ObjectFactory;
@@ -22,14 +22,10 @@ import com.scooterframework.common.util.ObjectFactory;
  */
 public class PluginManager {
 	
-	private static PluginManager pm;
-	
-	static {
-		pm = new PluginManager();
-	}
+	private static final PluginManager pm = new PluginManager();
 
-    private Map<String, Properties> pluginConfigMap = new ConcurrentHashMap<String, Properties>();
-    private Map<String, Plugin> pluginMap = new ConcurrentHashMap<String, Plugin> ();
+    private Map<String, Properties> pluginConfigMap = new HashMap<String, Properties>();
+    private Map<String, Plugin> pluginMap = new HashMap<String, Plugin> ();
     private LogUtil log = LogUtil.getLogger(getClass().getName());
 	
 	private PluginManager() {

@@ -21,7 +21,7 @@ import java.util.Properties;
  */
 public class MatchMaker {
 	
-	private static MatchMaker me = new MatchMaker();
+	private static final MatchMaker me = new MatchMaker();
 
 	private RootRoute rootRoute;
 	private List<DefaultRoute> defaultRoutes = new ArrayList<DefaultRoute>();
@@ -37,7 +37,7 @@ public class MatchMaker {
 	private MatchMaker() {
 	}
 	
-	public static synchronized MatchMaker getInstance() {
+	public static MatchMaker getInstance() {
         return me;
     }
     

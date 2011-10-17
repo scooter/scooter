@@ -18,23 +18,20 @@ import com.scooterframework.common.util.ObjectFactory;
  */
 public class OrmObjectFactory extends ObjectFactory
 {
-	private static OrmObjectFactory me;
-	
-	static {
-		me = new OrmObjectFactory();
-    }
+	private static final OrmObjectFactory me = new OrmObjectFactory();
     
     protected OrmObjectFactory() {
     }
 	
-    public static synchronized OrmObjectFactory getInstance() {
+    public static OrmObjectFactory getInstance() {
         return me;
     }
     
     public Class<?> loadClass(String className) 
     throws ClassNotFoundException {
         Class<?> c = null;
-        if (!ApplicationConfig.getInstance().isOrmAlone()) {
+        if (ApplicationConfig.getInstance().isInDevelopmentEnvironment() && 
+        		!ApplicationConfig.getInstance().isOrmAlone()) {
             c = ClassManager.getInstance().loadMyClass(className);
         }
         else {

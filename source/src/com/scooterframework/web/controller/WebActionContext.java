@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.scooterframework.admin.Constants;
 import com.scooterframework.common.exception.GenericException;
 
 /**
@@ -116,6 +117,8 @@ public class WebActionContext extends ActionContext {
 		Enumeration<String> en = getHttpServletRequest().getAttributeNames();
         while (en.hasMoreElements()) {
             String name  = en.nextElement();
+            if (Constants.SITEMESH_FILTERAPPLIED.equals(name) || 
+            		name.startsWith(Constants.ORG_MORTBAY_JETTY)) continue;
             Object value = getHttpServletRequest().getAttribute(name);
             hm.put(name, value);
         }

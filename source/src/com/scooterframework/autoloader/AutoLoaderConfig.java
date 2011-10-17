@@ -31,7 +31,7 @@ import com.scooterframework.common.util.Converters;
 public class AutoLoaderConfig implements Observer {
     private LogUtil log = LogUtil.getLogger(this.getClass().getName());
 
-    private static AutoLoaderConfig me;
+    private static final AutoLoaderConfig me = new AutoLoaderConfig();
     private Properties appProperties = null;
 
     private String outputClassLocation = "";
@@ -50,10 +50,6 @@ public class AutoLoaderConfig implements Observer {
     public static final String DATA_PROPERTIES_FILE = "autoloader.properties";
     public static final String GENERATED_MODEL_CLASS_PREFIX = "_";
     public static final String GENERATED_MODEL_CLASS_SUFFIX = "ModelHelper";
-
-    static {
-        me = new AutoLoaderConfig();
-    }
 
     private AutoLoaderConfig() {
         init();
@@ -227,7 +223,7 @@ public class AutoLoaderConfig implements Observer {
 	}
 
 
-    public static synchronized AutoLoaderConfig getInstance() {
+    public static AutoLoaderConfig getInstance() {
         return me;
     }
 

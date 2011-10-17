@@ -10,12 +10,12 @@ package com.scooterframework.i18n;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.PropertyReader;
 import com.scooterframework.common.logging.LogUtil;
@@ -67,32 +67,32 @@ public class MessageResourcesManager {
 	/*
 	 * map of all loaded locales and keys
 	 */
-	private static Map<String, Locale> loadedLocalesKeyMap = new ConcurrentHashMap<String, Locale>();
+	private static Map<String, Locale> loadedLocalesKeyMap = new HashMap<String, Locale>();
 	
 	/*
 	 * map of all message files.
 	 */
-	private static Map<String, File> allMessageFiles = new ConcurrentHashMap<String, File>();
+	private static Map<String, File> allMessageFiles = new HashMap<String, File>();
 	
 	/*
 	 * map of message file and its messages.
 	 */
-	private static Map<String, Properties> fileMessagesMap = new ConcurrentHashMap<String, Properties>();
+	private static Map<String, Properties> fileMessagesMap = new HashMap<String, Properties>();
 	
 	/*
 	 * map of locale files map in theory.
 	 */
-	private static Map<String, List<String>> localeFilesInTheoryMap = new ConcurrentHashMap<String, List<String>>();
+	private static Map<String, List<String>> localeFilesInTheoryMap = new HashMap<String, List<String>>();
 	
 	/*
 	 * map of locale files map in reality.
 	 */
-	private static Map<String, List<String>> localeFilesInRealityMap = new ConcurrentHashMap<String, List<String>>();
+	private static Map<String, List<String>> localeFilesInRealityMap = new HashMap<String, List<String>>();
 	
 	/*
 	 * map of locale message map.
 	 */
-	private static Map<String, Properties> localeMsgMap = new ConcurrentHashMap<String, Properties>();
+	private static Map<String, Properties> localeMsgMap = new HashMap<String, Properties>();
 	
 	public MessageResourcesManager(String configPath, String baseName) {
 		this.configPath = configPath;

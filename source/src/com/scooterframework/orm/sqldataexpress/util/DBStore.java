@@ -7,8 +7,8 @@
  */
 package com.scooterframework.orm.sqldataexpress.util;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
@@ -27,15 +27,11 @@ import com.scooterframework.orm.sqldataexpress.vendor.DBAdapterFactory;
  */
 public class DBStore {
 
-    private static DBStore me;
-    
-    static {
-        me = new DBStore();
-    }
+    private static final DBStore me = new DBStore();
 
     private DBStore() {}
     
-    public static synchronized DBStore getInstance() {
+    public static DBStore getInstance() {
         return me;
     }
     
@@ -330,10 +326,10 @@ public class DBStore {
         return "dba:" + connName;
     }
 
-    private Map<String, StoredProcedure> storedProcedures = new ConcurrentHashMap<String, StoredProcedure>();
-    private Map<String, Function> functions = new ConcurrentHashMap<String, Function>();
-    private Map<String, JdbcStatement> jdbcStatements = new ConcurrentHashMap<String, JdbcStatement>();
-    private Map<String, TableInfo> tables = new ConcurrentHashMap<String, TableInfo>();
-    private Map<String, PrimaryKey> pkMap = new ConcurrentHashMap<String, PrimaryKey>();
-    private Map<String, DBAdapter> adapterMap = new ConcurrentHashMap<String, DBAdapter>();
+    private Map<String, StoredProcedure> storedProcedures = new HashMap<String, StoredProcedure>();
+    private Map<String, Function> functions = new HashMap<String, Function>();
+    private Map<String, JdbcStatement> jdbcStatements = new HashMap<String, JdbcStatement>();
+    private Map<String, TableInfo> tables = new HashMap<String, TableInfo>();
+    private Map<String, PrimaryKey> pkMap = new HashMap<String, PrimaryKey>();
+    private Map<String, DBAdapter> adapterMap = new HashMap<String, DBAdapter>();
 }

@@ -18,11 +18,7 @@ import com.scooterframework.orm.sqldataexpress.exception.CreateConnectionFailure
  * @author (Fei) John Chen
  */
 public class UserDatabaseConnectionFactory {
-    private static UserDatabaseConnectionFactory me;
-    
-    static {
-        me = new UserDatabaseConnectionFactory();
-    }
+    private static final UserDatabaseConnectionFactory me = new UserDatabaseConnectionFactory();
 
     private UserDatabaseConnectionFactory() {
     }
@@ -30,7 +26,7 @@ public class UserDatabaseConnectionFactory {
     /**
      * Returns self.
      */
-    public static synchronized UserDatabaseConnectionFactory getInstance() {
+    public static UserDatabaseConnectionFactory getInstance() {
         return me;
     }
     

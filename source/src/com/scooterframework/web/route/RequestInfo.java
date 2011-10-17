@@ -7,13 +7,8 @@
  */
 package com.scooterframework.web.route;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
 import com.scooterframework.admin.EnvConfig;
-import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Util;
-
 
 /**
  * RequestInfo class
@@ -22,8 +17,6 @@ import com.scooterframework.common.util.Util;
  *
  */
 public class RequestInfo {
-	private static LogUtil log = LogUtil.getLogger(RequestInfo.class.getName());
-	
 	private String requestPath;
 	private String requestHttpMethod;
 	private String requestKey;
@@ -45,26 +38,6 @@ public class RequestInfo {
 		this.requestKey = generateRequestKey(requestPath, requestHttpMethod);
 		
 		parsePath(requestPath);
-		
-		decode();
-	}
-	
-	private void decode() {
-		requestPath = decode(requestPath);
-		
-		for (int i = 0; i < pathSegments.length; i++) {
-			pathSegments[i] = decode(pathSegments[i]);
-		}
-	}
-	
-	private String decode(String s) {
-		String ss = s;
-		try {
-			ss = URLDecoder.decode(s, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			log.warn("Failed to decode \"" + s + "\" because " + e.getMessage());
-		}
-		return ss;
 	}
 	
 	public String getRequestPath() {
@@ -132,8 +105,7 @@ public class RequestInfo {
 			int lastDot = path.lastIndexOf('.');
 			int lastSlash = path.lastIndexOf('/');
 			if (lastDot > lastSlash) {
-				int lastPKSeparator = path
-						.lastIndexOf(RouteConstants.PRIMARY_KEY_SEPARATOR);
+				int lastPKSeparator = path.lastIndexOf(RouteConstants.PRIMARY_KEY_SEPARATOR);
 				if (lastDot > lastPKSeparator) {
 					format = path.substring(lastDot + 1);
 		            if (!EnvConfig.getInstance().hasMimeTypeFor(format)) {

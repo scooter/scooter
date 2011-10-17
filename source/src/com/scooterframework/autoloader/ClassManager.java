@@ -17,20 +17,18 @@ import com.scooterframework.common.exception.ObjectCreationException;
  */
 public class ClassManager {
     
-    private static ClassManager cm;
     private MyClassLoader xcl;
-    
-    static {
-        cm = new ClassManager();
-    }
     
     private ClassManager() {
         xcl = new MyClassLoader(this);
     }
     
+    private static class SingletonHolder { 
+        public static final ClassManager instance = new ClassManager();
+    }
 
-    public static synchronized ClassManager getInstance() {
-        return cm;
+    public static ClassManager getInstance() {
+        return SingletonHolder.instance;
     }
     
     public Object newInstance(String className) {

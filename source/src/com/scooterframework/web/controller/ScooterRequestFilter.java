@@ -8,6 +8,8 @@
 package com.scooterframework.web.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -32,6 +34,7 @@ import com.scooterframework.common.exception.FileUploadException;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.CurrentThreadCacheClient;
+import com.scooterframework.web.route.RequestInfo;
 
 /**
  * ScooterRequestFilter can be attached to either an individual servlet
@@ -125,11 +128,11 @@ public class ScooterRequestFilter implements Filter {
         }
         
         if (isAjaxRequest((HttpServletRequest)request)) {
-        	request.setAttribute("__sitemesh__filterapplied", Boolean.TRUE);
+        	request.setAttribute(Constants.SITEMESH_FILTERAPPLIED, Boolean.TRUE);
         }
 
-        String requestPathREST = requestInfo(request);
-        log.debug("============>>\"" + requestPathREST + "\"");
+        String requestPathKeyWithQueryString = requestInfo(skip, (HttpServletRequest)request);
+        log.debug("============>>\"" + requestPathKeyWithQueryString + "\"");
         
         try {
         	chain.doFilter(request, response);
@@ -141,7 +144,7 @@ public class ScooterRequestFilter implements Filter {
         long after = System.currentTimeMillis();
         
         if (EnvConfig.getInstance().allowRecordBenchmark()) {
-            log.info("\"" + requestPathREST + "\" takes: " + (after - before) + " ms");
+            log.info("\"" + requestPathKeyWithQueryString + "\" takes: " + (after - before) + " ms");
             if (EnvConfig.getInstance().allowRecordBenchmarkInHeader()) {
                 HttpServletResponseWrapper resw = new HttpServletResponseWrapper((HttpServletResponse)response);
                 resw.addHeader("Exec-Time", (after - before) + " ms");
@@ -158,16 +161,19 @@ public class ScooterRequestFilter implements Filter {
         return (requestURI.startsWith(staticPath))?true:false;
     }
     
-    protected String requestInfo(ServletRequest req) {
-        HttpServletRequest request = (HttpServletRequest)req;
-        String method = request.getMethod();
-        String contextPath = request.getContextPath();
-        String requestURI = request.getRequestURI();
-        String requestPath = requestURI.substring(contextPath.length());
-        if (requestPath.length() > 1 && 
-        		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
-        	requestURI = requestURI.substring(0, requestURI.length()-1);
-        }
+    protected String requestInfo(boolean skipStatic, HttpServletRequest request) {
+        String method = getRequestMethod(request);
+        String requestPath = getRequestPath(request);
+        String requestPathKey = RequestInfo.generateRequestKey(requestPath, method);
+        String s = requestPathKey;
+        String queryString = request.getQueryString();
+        if (queryString != null) s += "?" + queryString;
+        
+        if (skipStatic) return s;
+        
+        CurrentThreadCacheClient.cacheHttpMethod(method);
+        CurrentThreadCacheClient.cacheRequestPath(requestPath);
+        CurrentThreadCacheClient.cacheRequestPathKey(requestPathKey);
         
         //request header
         Properties headers = new Properties();
@@ -177,15 +183,7 @@ public class ScooterRequestFilter implements Filter {
             String value = request.getHeader(name);
             if (value != null) headers.setProperty(name, value);
         }
-        
-        String requestPathRESTful = method + " " + requestPath;
-        String queryString = request.getQueryString();
-        if (queryString != null) requestPathRESTful += "?" + queryString;
-        
         CurrentThreadCache.set(Constants.REQUEST_HEADER, headers);
-        CurrentThreadCache.set(Constants.REQUEST_PATH, requestPath);
-        CurrentThreadCache.set(Constants.REQUEST_PATH_REST, requestPathRESTful);
-        CurrentThreadCache.set(Constants.REQUEST_URI, requestURI);
         
         if (isLocalRequest(request)) {
             CurrentThreadCache.set(Constants.LOCAL_REQUEST, Constants.VALUE_FOR_LOCAL_REQUEST);
@@ -213,7 +211,56 @@ public class ScooterRequestFilter implements Filter {
             }
         }
         
-        return requestPathRESTful;
+        return s;
+    }
+    
+    /**
+     * Returns request path of the HttpServletRequest <tt>request</tt>. A 
+     * request path is a combination of the <tt>request</tt>'s servletPath and pathInfo. 
+     * 
+     * @param request HttpServletRequest
+     * @return request path
+     */
+    protected String getRequestPath(HttpServletRequest request) {
+        String contextPath = request.getContextPath();
+        String requestURI = decode(cleanJsessionid(request.getRequestURI()));
+        CurrentThreadCache.set(Constants.REQUEST_URI, requestURI);
+        
+        String requestPath = requestURI.substring(contextPath.length());
+        if (requestPath.length() > 1 && 
+        		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
+        	requestURI = requestURI.substring(0, requestURI.length()-1);
+        }
+        return requestPath;
+    }
+	
+	private String decode(String s) {
+		String ss = s;
+		try {
+			ss = URLDecoder.decode(s, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.warn("Failed to decode \"" + s + "\" because " + e.getMessage());
+		}
+		return ss;
+	}
+	
+	private static String cleanJsessionid(String requestPath) {
+		String s = requestPath;
+		if (s.indexOf(";jsessionid") != -1) {
+			s = s.substring(0, s.indexOf(";jsessionid"));
+		}
+		return s;
+	}
+    
+    /**
+     * Returns the method of the <tt>request</tt>.
+     */
+    protected String getRequestMethod(HttpServletRequest request) {
+        String m = request.getParameter(Constants.HTTP_METHOD);
+        if (m == null) {
+        	m = request.getMethod();
+        }
+        return m.toUpperCase();
     }
     
     protected boolean isAjaxRequest(HttpServletRequest request) {

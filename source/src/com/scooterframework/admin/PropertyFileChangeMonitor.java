@@ -53,13 +53,9 @@ public class PropertyFileChangeMonitor {
     
     private String propertyFilePath = "";
     
-    private static PropertyFileChangeMonitor fcm;
+    private static final PropertyFileChangeMonitor fcm = new PropertyFileChangeMonitor();
     
     public static final String DEFAULT_RUNNING_ENVIRONMENT = "DEVELOPMENT";
-    
-    static {
-        fcm = new PropertyFileChangeMonitor();
-    }
     
     private PropertyFileChangeMonitor() {
         String runningEnvironment = System.getProperty("running.environment", DEFAULT_RUNNING_ENVIRONMENT);
@@ -91,7 +87,7 @@ public class PropertyFileChangeMonitor {
         }
     }
     
-    public static synchronized PropertyFileChangeMonitor getInstance() {
+    public static PropertyFileChangeMonitor getInstance() {
         return fcm;
     }
     

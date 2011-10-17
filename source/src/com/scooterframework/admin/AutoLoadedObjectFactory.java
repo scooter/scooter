@@ -17,23 +17,20 @@ import com.scooterframework.common.util.ObjectFactory;
  */
 public class AutoLoadedObjectFactory extends ObjectFactory
 {
-	private static AutoLoadedObjectFactory me;
-	
-	static {
-		me = new AutoLoadedObjectFactory();
-    }
+	private static final AutoLoadedObjectFactory me = new AutoLoadedObjectFactory();
     
     protected AutoLoadedObjectFactory() {
     }
 	
-    public static synchronized AutoLoadedObjectFactory getInstance() {
+    public static AutoLoadedObjectFactory getInstance() {
         return me;
     }
     
     public Class<?> loadClass(String className) 
     throws ClassNotFoundException {
         Class<?> c = null;
-        if (!ApplicationConfig.getInstance().isOrmAlone()) {
+        if (ApplicationConfig.getInstance().isInDevelopmentEnvironment() && 
+        		!ApplicationConfig.getInstance().isOrmAlone()) {
             c = ClassManager.getInstance().loadMyClass(className);
         }
         else {

@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.scooterframework.admin.AutoLoadedObjectFactory;
-import com.scooterframework.admin.Constants;
 import com.scooterframework.common.logging.LogUtil;
 
 /**
@@ -96,7 +95,7 @@ public class MainActionServlet extends HttpServlet {
      */
     public void doHead(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException {
-        process(request, response, "HEAD");
+        process(request, response);
     }
 
     /**
@@ -110,7 +109,7 @@ public class MainActionServlet extends HttpServlet {
      */
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException {
-        process(request, response, "GET");
+        process(request, response);
     }
 
     /**
@@ -124,7 +123,7 @@ public class MainActionServlet extends HttpServlet {
      */
     public void doPost(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException {
-        process(request, response, "POST");
+        process(request, response);
     }
 
     /**
@@ -138,7 +137,7 @@ public class MainActionServlet extends HttpServlet {
      */
     public void doPut(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException {
-        process(request, response, "PUT");
+        process(request, response);
     }
 
     /**
@@ -152,7 +151,7 @@ public class MainActionServlet extends HttpServlet {
      */
     public void doDelete(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException {
-        process(request, response, "DELETE");
+        process(request, response);
     }
 
     /**
@@ -166,7 +165,7 @@ public class MainActionServlet extends HttpServlet {
      */
     public void service(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException {
-        process(request, response, request.getMethod().toUpperCase());
+        process(request, response);
     }
 
     /**
@@ -188,19 +187,10 @@ public class MainActionServlet extends HttpServlet {
      * @exception IOException if an input/output error occurs
      * @exception ServletException if a servlet exception is thrown
      */
-    protected void process(HttpServletRequest request, HttpServletResponse response, String httpMethod)
+    protected void process(HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException {
     	ACH.getWAC().setHttpServletRequest(request);
     	ACH.getWAC().setHttpServletResponse(response);
-    	
-        String hm = request.getParameter(Constants.HTTP_METHOD);
-        if (hm == null) {
-            hm = httpMethod;
-        }
-        else {
-            hm = hm.toUpperCase();
-        }
-        request.setAttribute(Constants.HTTP_METHOD, hm);
         
         BaseRequestProcessor processor = (BaseRequestProcessor)getServletContext().getAttribute(KEY_REQUEST_PROCESSOR);
         if (processor == null) {

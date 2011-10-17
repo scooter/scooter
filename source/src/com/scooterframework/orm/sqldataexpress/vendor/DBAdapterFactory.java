@@ -22,20 +22,16 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
  */
 public class DBAdapterFactory {
     protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
-    private static final DBAdapterFactory me;
-    
-    static {
-        me = new DBAdapterFactory();
-    }
+    private static final DBAdapterFactory me = new DBAdapterFactory();
 
     private DBAdapterFactory() {
     }
     
-    public static synchronized DBAdapterFactory getInstance() {
+    public static DBAdapterFactory getInstance() {
         return me;
     }
     
-    public synchronized DBAdapter getAdapter(String connName) {
+    public DBAdapter getAdapter(String connName) {
     	if (connName == null) 
     		throw new IllegalArgumentException("connName cannot be null.");
     	

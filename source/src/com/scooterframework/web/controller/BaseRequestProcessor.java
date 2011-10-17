@@ -11,13 +11,16 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.scooterframework.admin.ApplicationConfig;
 import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.admin.FilterManager;
@@ -26,8 +29,8 @@ import com.scooterframework.autoloader.JavaCompiler;
 import com.scooterframework.common.exception.ExecutionException;
 import com.scooterframework.common.exception.MethodCreationException;
 import com.scooterframework.common.logging.LogUtil;
-import com.scooterframework.common.util.BeanUtil;
 import com.scooterframework.common.util.CurrentThreadCache;
+import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.common.util.StringUtil;
 import com.scooterframework.common.util.WordUtil;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
@@ -44,6 +47,8 @@ import com.scooterframework.web.route.NoRouteFoundException;
  */
 public class BaseRequestProcessor {
     protected LogUtil log = LogUtil.getLogger(getClass().getName());
+    
+    private Map<String, ActionProperties> requestPropertiesMap = new HashMap<String, ActionProperties>();
     
     public static final String DEFAULT_CONTROLLER_CLASS = "com.scooterframework.builtin.CRUDController";
     
@@ -73,7 +78,7 @@ public class BaseRequestProcessor {
         try {
             processLocale(request, response);
             
-            String requestPath = getRequestPath(request);
+            String requestPath = CurrentThreadCacheClient.requestPath();
             
             if (!isAdminRequest(requestPath) && JavaCompiler.hasCompileErrors()) {
             	processCompileError(request, response);
@@ -85,8 +90,16 @@ public class BaseRequestProcessor {
             }
             else {
             	String result = null;
-                ActionProperties aps = prepareActionProperties(requestPath, request);
-                registerActionProperties(request, aps);
+            	
+            	String requstPathKey = CurrentThreadCacheClient.requestPathKey();
+            	ActionProperties aps = requestPropertiesMap.get(requstPathKey);
+            	
+            	if (aps == null || ApplicationConfig.getInstance().isInDevelopmentEnvironment()) {
+                    String requestHttpMethod = CurrentThreadCacheClient.httpMethod();
+                    aps = prepareActionProperties(requestPath, requestHttpMethod, request);
+                    registerActionProperties(request, aps);
+                    requestPropertiesMap.put(requstPathKey, aps);
+            	}
                 log.debug("aps: " + aps);
                 
                 result = executeRequest(aps, request, response);
@@ -112,6 +125,7 @@ public class BaseRequestProcessor {
     /**
      * <p>Process an <tt>HttpServletRequest</tt>.</p>
      * 
+     * @param aps properties of request
      * @param request The servlet request we are processing
      * @param response The servlet response we are creating
      * @return execution result
@@ -122,7 +136,17 @@ public class BaseRequestProcessor {
                 HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException
     {
-        Object controllerInstance = getControllerInstance(aps.controllerClassName);
+    	Object controllerInstance = null;
+    	
+    	if (aps.controllerCreated) {
+    		controllerInstance = aps.controllerInstance;
+    	}
+    	else {
+    		controllerInstance = getControllerInstance(aps.controllerClassName);
+    		aps.controllerInstance = controllerInstance;
+    		aps.controllerCreated = true;
+    	}
+    	
         if (controllerInstance == null) {
             if (EnvConfig.getInstance().allowForwardToControllerNameViewWhenControllerNotExist()) {
                 log.info("Controller instance for \"" + aps.controller + 
@@ -135,7 +159,16 @@ public class BaseRequestProcessor {
             }
         }
         
-        Method actionInstance = getActionMethod(controllerInstance.getClass(), aps.action);
+        Method actionInstance = null;
+        if (aps.methodCreated) {
+        	actionInstance = aps.methodInstance;
+        }
+        else {
+        	actionInstance = getActionMethod(controllerInstance.getClass(), aps.action);
+        	aps.methodInstance = actionInstance;
+        	aps.methodCreated = true;
+        }
+        
         if (actionInstance == null) {
             if (EnvConfig.getInstance().allowForwardToActionNameViewWhenActionNotExist()) {
                 log.debug("Action method \"" + aps.action + 
@@ -157,8 +190,8 @@ public class BaseRequestProcessor {
      * @param request The servlet request we are processing
      * @return an ActionProperties instance
      */
-    public ActionProperties prepareActionProperties(String requestPath, 
-    												HttpServletRequest request) {
+	public ActionProperties prepareActionProperties(String requestPath,
+			String requestHttpMethod, HttpServletRequest request) {
         String path = requestPath;
         String controllerPath = null;
         String controller = null;
@@ -220,12 +253,12 @@ public class BaseRequestProcessor {
      * Puts some action properties in <tt>request</tt> object.
      */
     protected void registerActionProperties(HttpServletRequest request, ActionProperties aps) {
-        request.setAttribute(Constants.CONTROLLER, aps.controller);
-        request.setAttribute(Constants.CONTROLLER_CLASS, aps.controllerClassName);
-        request.setAttribute(Constants.CONTROLLER_PATH, aps.controllerPath);
-        request.setAttribute(Constants.ACTION, aps.action);
-        request.setAttribute(Constants.MODEL, aps.model);
-        request.setAttribute(Constants.FORMAT, aps.format);
+    	CurrentThreadCacheClient.cacheController(aps.controller);
+        CurrentThreadCacheClient.cacheControllerClass(aps.controllerClassName);
+        CurrentThreadCacheClient.cacheControllerPath(aps.controllerPath);
+        CurrentThreadCacheClient.cacheAction(aps.action);
+        CurrentThreadCacheClient.cacheModel(aps.model);
+        CurrentThreadCacheClient.cacheFormat(aps.format);
     }
     
     /**
@@ -242,32 +275,6 @@ public class BaseRequestProcessor {
         }
         return false;
     }
-    
-    /**
-     * Returns request path of the HttpServletRequest <tt>request</tt>. A 
-     * request path is a combination of the <tt>request</tt>'s servletPath and pathInfo. 
-     * 
-     * @param request HttpServletRequest
-     * @return request path
-     */
-    protected String getRequestPath(HttpServletRequest request) {
-        String contextPath = request.getContextPath();
-        String requestURI = cleanJsessionid(request.getRequestURI());
-        String requestPath = requestURI.substring(contextPath.length());
-        if (requestPath.length() > 1 && 
-        		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
-        	requestURI = requestURI.substring(0, requestURI.length()-1);
-        }
-        return requestPath;
-    }
-	
-	private static String cleanJsessionid(String requestPath) {
-		String s = requestPath;
-		if (s.indexOf(";jsessionid") != -1) {
-			s = s.substring(0, s.indexOf(";jsessionid"));
-		}
-		return s;
-	}
     
     protected void processLocale(HttpServletRequest request,
             HttpServletResponse response) {
@@ -343,10 +350,10 @@ public class BaseRequestProcessor {
         
         Method method = null;
         try {
-            method = BeanUtil.getMethod(controllerClass, actionName);
+            method = ControllerFactory.getMethod(controllerClass, actionName);
         }
         catch(Exception ex) {
-            log.warn("Failed to create action method instance: " + ex.getMessage());
+            log.debug("Failed to create action method instance: " + ex.getMessage());
         }
         return method;
     }
@@ -355,7 +362,7 @@ public class BaseRequestProcessor {
      * Invokes an action method of a controller.
      *
      * @param controller The controller instance to be invoked
-     * @param method The method
+     * @param method The action method
      * @return execution result
      */
     protected String executeControllerAction(Object controller, Method method) {
