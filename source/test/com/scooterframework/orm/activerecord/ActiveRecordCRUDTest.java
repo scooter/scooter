@@ -48,12 +48,12 @@ public class ActiveRecordCRUDTest extends ScooterTestHelper {
 	}
 	
 	@Test public void test_findAll_current_page() {
-		List<ActiveRecord> allPets = Pet.page(0).getRecords();
+		List<ActiveRecord> allPets = Pet.page(1).getRecords();
 		assertEquals("total pets", 10, allPets.size());
 	}
 	
 	@Test public void test_findAll_per_page() {
-		List<ActiveRecord> allPets = Pet.page(2).limit(5).getRecords();
+		List<ActiveRecord> allPets = Pet.page(3).limit(5).getRecords();
 		assertEquals("total pets", 3, allPets.size());
 	}
 	

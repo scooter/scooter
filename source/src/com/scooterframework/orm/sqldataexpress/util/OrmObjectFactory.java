@@ -27,16 +27,15 @@ public class OrmObjectFactory extends ObjectFactory
         return me;
     }
     
-    public Class<?> loadClass(String className) 
-    throws ClassNotFoundException {
-        Class<?> c = null;
-        if (ApplicationConfig.getInstance().isInDevelopmentEnvironment() && 
-        		!ApplicationConfig.getInstance().isOrmAlone()) {
-            c = ClassManager.getInstance().loadMyClass(className);
-        }
-        else {
-            c = super.loadClass(className);
-        }
-        return c;
-    }
+	public Class<?> loadClass(String className) throws ClassNotFoundException {
+		Class<?> c = null;
+		if ((ApplicationConfig.getInstance().isInDevelopmentEnvironment() || 
+				ApplicationConfig.getInstance().isInTestEnvironment())
+				&& !ApplicationConfig.getInstance().isOrmAlone()) {
+			c = ClassManager.getInstance().loadMyClass(className);
+		} else {
+			c = super.loadClass(className);
+		}
+		return c;
+	}
 }

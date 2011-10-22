@@ -436,14 +436,14 @@ public class ActiveRecordUtil {
             record.freeze();
             record.setAsHomeInstance();
             
-            //cleanup cached relations
-            RelationManager.getInstance().removeRelationsFor(getModelName(record));
-            
             setGateInstance(record.getClass().getName(), new TableGateway(record));
 
             String modelKey = getHomeInstanceKey(record.getClass().getName());
             if (DatabaseConfig.getInstance().isInDevelopmentEnvironment() || EnvConfig.getInstance().allowAutoCRUD()) {
                 CurrentThreadCache.set(modelKey, record);
+                
+                //cleanup cached relations
+                RelationManager.getInstance().removeRelationsFor(getModelName(record));
                 return;
             }
             

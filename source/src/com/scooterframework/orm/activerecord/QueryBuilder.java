@@ -286,6 +286,8 @@ public class QueryBuilder {
     /**
      * <p>Setup current page number. 
      * All records in previous pages are skipped.</p>
+     * 
+     * <p>The first page is 1, not 0.</p>
      *
      * @param page  current page number
      * @return current <tt>QueryBuilder</tt> instance

@@ -182,7 +182,6 @@ public class MainActionServlet extends HttpServlet {
      *
      * @param request The servlet request we are processing
      * @param response The servlet response we are creating
-     * @param httpMethod standard http method
      *
      * @exception IOException if an input/output error occurs
      * @exception ServletException if a servlet exception is thrown

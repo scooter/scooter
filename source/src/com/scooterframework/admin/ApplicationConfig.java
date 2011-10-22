@@ -421,6 +421,15 @@ public class ApplicationConfig {
     public boolean isInDevelopmentEnvironment() {
         return Constants.RUNNING_ENVIRONMENT_DEVELOPMENT.equals(runningEnvironment);
     }
+
+    /**
+     * Checks if the current running environment is development environment.
+     *
+     * @return true if the current running environment is development.
+     */
+    public boolean isInTestEnvironment() {
+        return Constants.RUNNING_ENVIRONMENT_TEST.equals(runningEnvironment);
+    }
     
     public String getClassFileLocationPath() {
         return classFileLocationPath;

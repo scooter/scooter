@@ -24,6 +24,7 @@ scooter-1.2.0 2011xxxx
  + Fixed bug: Incorrect http link when view path starts with context path.
  + Fixed bug: Failed to reference Servlet classes in generated app.
  + Fixed bug: Failed to work with table names of mixed cases in MySQL on Linux.
+ + Fixed bug: page(index) in QueryBuilder should start from 1, not 0.
 
 
 scooter-1.1.0 20110424
