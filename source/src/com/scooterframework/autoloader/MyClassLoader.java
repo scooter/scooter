@@ -7,8 +7,9 @@
  */
 package com.scooterframework.autoloader;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.scooterframework.common.logging.LogUtil;
 
@@ -26,7 +27,7 @@ public class MyClassLoader extends ClassLoader {
     private String initiatingClassName;
     private ClassWork cwh;
     
-    private Map<String, LoadedClass> loadedClasses = new HashMap<String, LoadedClass>();
+    private ConcurrentMap<String, LoadedClass> loadedClasses = new ConcurrentHashMap<String, LoadedClass>();
     
     public MyClassLoader(ClassManager caller) {
         this(MyClassLoader.class.getClassLoader(), caller);
@@ -108,10 +109,6 @@ public class MyClassLoader extends ClassLoader {
     
     private boolean isAllowedToChange(String className) {
     	boolean check = false;
-    	check = FileMonitor.isClassMonitored(className);
-    	check = ClassWorkHelper.isAllowedClassName(className);
-    	check = AutoLoaderConfig.getInstance().notAllowedToChange(className);
-    	check = false;
 		if (((FileMonitor.isClassMonitored(className) || 
 				ClassWorkHelper.isAllowedClassName(className)) && 
 				!AutoLoaderConfig.getInstance().notAllowedToChange(className)) ||

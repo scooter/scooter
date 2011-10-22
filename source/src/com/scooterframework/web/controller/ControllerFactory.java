@@ -41,8 +41,7 @@ public class ControllerFactory {
     public static Object createController(String controllerClassName, String defaultControllerClass) {
         Object controller = controllerMap.get(controllerClassName);
         
-        if ((ApplicationConfig.getInstance().isInDevelopmentEnvironment()) || 
-        		controller == null) {
+        if (controller == null || ApplicationConfig.getInstance().isInDevelopmentEnvironment()) {
             try {
                 controller = AutoLoadedObjectFactory.getInstance().newInstance(controllerClassName);
             } catch (Exception ex) {
@@ -82,8 +81,7 @@ public class ControllerFactory {
         String methodKey = clz.getName() + "." + methodName.toLowerCase();
         Method method = allMethodsMap.get(methodKey);
         
-        if (ApplicationConfig.getInstance().isInDevelopmentEnvironment() || 
-        		method == null) {
+        if (method == null || ApplicationConfig.getInstance().isInDevelopmentEnvironment()) {
         	method = BeanUtil.getMethod(clz, methodName);
     		
     		if (method == null) {

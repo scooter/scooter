@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -128,8 +130,8 @@ public class EnvConfig implements Observer {
     private DiskFileItemFactory fileFactory;
     private ServletFileUpload fileUpload;
 
-    private Map<String, Object> cacheProvidersMap = new HashMap<String, Object>();
-    private Map<String, String> mimeTypesMap = new HashMap<String, String>();
+    private ConcurrentMap<String, Object> cacheProvidersMap = new ConcurrentHashMap<String, Object>();
+    private ConcurrentMap<String, String> mimeTypesMap = new ConcurrentHashMap<String, String>();
 
     static {
         try {

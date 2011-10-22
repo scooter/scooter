@@ -7,10 +7,11 @@
  */
 package com.scooterframework.admin;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.ObjectFactory;
@@ -24,8 +25,8 @@ public class PluginManager {
 	
 	private static final PluginManager pm = new PluginManager();
 
-    private Map<String, Properties> pluginConfigMap = new HashMap<String, Properties>();
-    private Map<String, Plugin> pluginMap = new HashMap<String, Plugin> ();
+    private ConcurrentMap<String, Properties> pluginConfigMap = new ConcurrentHashMap<String, Properties>();
+    private ConcurrentMap<String, Plugin> pluginMap = new ConcurrentHashMap<String, Plugin> ();
     private LogUtil log = LogUtil.getLogger(getClass().getName());
 	
 	private PluginManager() {
@@ -55,8 +56,8 @@ public class PluginManager {
     /**
      * Returns plugin names
      */
-    public Iterator<String> getPluginNames() {
-        return pluginConfigMap.keySet().iterator();
+    public Set<String> getPluginNames() {
+        return pluginConfigMap.keySet();
     }
 	
 	/**
@@ -89,7 +90,7 @@ public class PluginManager {
 			Properties p = entry.getValue();
 			try {
 				Plugin plugin = createPlugin(pluginName, p);
-				pluginMap.put(pluginName, plugin);
+				pluginMap.putIfAbsent(pluginName, plugin);
 				plugin.start();
 			}
 			catch(Exception ex) {

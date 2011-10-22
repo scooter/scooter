@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
 
@@ -4147,15 +4148,15 @@ implements RESTified, Serializable {
             sb.append(colName.toLowerCase()).append("=");
             sb.append(getField(colName)).append(separator);
         }
-        sb = StringUtil.removeLastToken(sb, ", ");
 
-    	if (extraFields.size() > 0) {
+        if (extraFields.size() > 0) {
             for (String colName : extraFields) {
                 sb.append(colName.toLowerCase()).append("=");
                 sb.append(getField(colName)).append(separator);
             }
-            sb = StringUtil.removeLastToken(sb, ", ");
     	}
+        
+        sb = StringUtil.removeLastToken(sb, ", ");
 
         return sb.toString();
     }
@@ -4304,7 +4305,7 @@ implements RESTified, Serializable {
      *
      * <p>Key is model name in lower case. Value is a specific RecordRelation object.</p>
      */
-    private Map<String, RecordRelation> recordRelations = new HashMap<String, RecordRelation>();
+    private Map<String, RecordRelation> recordRelations = new ConcurrentHashMap<String, RecordRelation>();
 
     private transient ModelValidators validators = null;
 

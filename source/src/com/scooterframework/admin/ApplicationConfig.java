@@ -315,7 +315,8 @@ public class ApplicationConfig {
         
         applicationStarted = true;
         if (log != null) {
-        	log.info("Application started with Scooter version: " + Version.CURRENT_VERSION);
+        	log.info("Application started in " + runningEnvironment + 
+        			" with Scooter version: " + Version.CURRENT_VERSION);
         }
     }
     
@@ -356,7 +357,7 @@ public class ApplicationConfig {
     /**
      * Returns number of sessions in the container.
      */
-    public static long getSessionCount() {
+    public static int getSessionCount() {
     	return WebSessionListener.getSessionCount();
     }
     

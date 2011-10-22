@@ -8,10 +8,10 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.util.Converters;
@@ -847,7 +847,7 @@ public class RelationManager {
      * 
      * See {@link #getRelationKey(String a, String b)} method.
      */
-    private Map<String, Relation> relations = new HashMap<String, Relation>();
+    private Map<String, Relation> relations = new ConcurrentHashMap<String, Relation>();
     
     //List of setup classes. Each entry in the list is a full class name.
     private List<String> completedClasses = new ArrayList<String>();
@@ -856,5 +856,5 @@ public class RelationManager {
      * Map of category name and corresponding category instance, key is 
      * category name and value is the Category instance.
      */
-    private Map<String, Category> categoryMap = new HashMap<String, Category>();
+    private Map<String, Category> categoryMap = new ConcurrentHashMap<String, Category>();
 }

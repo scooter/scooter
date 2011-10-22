@@ -7,8 +7,8 @@
  */
 package com.scooterframework.admin;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -19,7 +19,7 @@ import java.util.Map;
 public class FilterManagerFactory {
 	private static FilterManagerFactory me = new FilterManagerFactory();
 	
-	private Map<Class<?>, FilterManager> filterManagersMap = new HashMap<Class<?>, FilterManager>();
+	private ConcurrentMap<Class<?>, FilterManager> filterManagersMap = new ConcurrentHashMap<Class<?>, FilterManager>();
 	
 	private FilterManagerFactory() {
 	}
@@ -43,7 +43,7 @@ public class FilterManagerFactory {
 		FilterManager fm = filterManagersMap.get(ownerClass);
 		if (fm == null) {
 			fm = new FilterManager(ownerClass);
-			filterManagersMap.put(ownerClass, fm);
+			filterManagersMap.putIfAbsent(ownerClass, fm);
 		}
 		return fm;
 	}

@@ -8,10 +8,10 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.exception.GenericException;
@@ -621,17 +621,17 @@ public class ActiveRecordUtil {
     /**
      * calculatorInstanceMap stores Calculator instances.
      */
-    private static Map<String, Calculator> calculatorInstanceMap = new HashMap<String, Calculator>();
+    private static Map<String, Calculator> calculatorInstanceMap = new ConcurrentHashMap<String, Calculator>();
     
     /**
      * gateInstanceMap stores TableGateway instances.
      */
-    private static Map<String, TableGateway> gateInstanceMap = new HashMap<String, TableGateway>();
+    private static Map<String, TableGateway> gateInstanceMap = new ConcurrentHashMap<String, TableGateway>();
     
     /**
      * homeInstanceMap stores ActiveRecord home instances.
      */
-    private static Map<String, ActiveRecord> homeInstanceMap = new HashMap<String, ActiveRecord>();
+    private static Map<String, ActiveRecord> homeInstanceMap = new ConcurrentHashMap<String, ActiveRecord>();
     
     public static final String DEFAULT_RECORD_CLASS = "com.scooterframework.orm.activerecord.ActiveRecord";
 }

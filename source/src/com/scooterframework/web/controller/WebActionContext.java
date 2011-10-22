@@ -104,7 +104,9 @@ public class WebActionContext extends ActionContext {
     }
     
     /**
-     * Gets data in request scope as a map.
+     * Gets data in request scope as a map. Data values with keys starting 
+     * with "scooter." are excluded. Also excluded are <tt>sitemesh</tt> and 
+     * <tt>Jetty</tt> related keys.
      * 
      * Return guaranteed: An empty map will be returned if there is no data.
      * 
@@ -118,7 +120,9 @@ public class WebActionContext extends ActionContext {
         while (en.hasMoreElements()) {
             String name  = en.nextElement();
             if (Constants.SITEMESH_FILTERAPPLIED.equals(name) || 
-            		name.startsWith(Constants.ORG_MORTBAY_JETTY)) continue;
+            		name.startsWith(Constants.ORG_MORTBAY_JETTY) || 
+            		name.startsWith("scooter.")
+            		) continue;
             Object value = getHttpServletRequest().getAttribute(name);
             hm.put(name, value);
         }
