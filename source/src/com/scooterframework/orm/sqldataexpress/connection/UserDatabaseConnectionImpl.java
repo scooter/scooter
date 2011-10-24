@@ -33,9 +33,6 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
         
         this.dcc = dcc;
         this.connName = connectionName;
-        
-        // really create a connection
-        conn = createConnection();
     }
     
     /**
@@ -49,6 +46,9 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
      * Return the underline connection.
      */
     public Connection getConnection() {
+    	if (conn == null) {
+    		conn = createConnection();
+    	}
         return conn;
     }
     

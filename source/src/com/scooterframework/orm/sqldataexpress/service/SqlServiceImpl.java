@@ -20,6 +20,7 @@ import com.mchange.v2.c3p0.PooledDataSource;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.StringUtil;
 import com.scooterframework.common.util.Util;
+import com.scooterframework.orm.activerecord.ActiveRecordConstants;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.config.SqlConfig;
 import com.scooterframework.orm.sqldataexpress.connection.DatabaseConnectionContext;
@@ -703,6 +704,7 @@ public class SqlServiceImpl implements SqlService {
     	newMap.putAll(map);
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String key = entry.getKey();
+            if (key.equals(ActiveRecordConstants.key_finder_sql)) continue;
             newMap.put(key.toUpperCase(), entry.getValue());
         }
         return newMap;

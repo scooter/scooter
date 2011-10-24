@@ -72,39 +72,23 @@ public class DataProcessorFactory {
             selectedDataProcessor = new FunctionProcessor(function);
         }
         else if (DataProcessorTypes.NAMED_SQL_STATEMENT_PROCESSOR.equals(processorType)) {
-            JdbcStatement statement = DBStore.getInstance().getJdbcStatement(processorName);
-            
-            if (statement == null) {
-                //discovery
-                statement = SqlExpressUtil.createJdbcStatement(processorName);
-                
-                if (statement == null) {
-                    throw new UnsupportedDataProcessorNameException();
-                }
-                else {
-                    DBStore.getInstance().addJdbcStatement(processorName, statement);
-                }
-            }
-            
-            selectedDataProcessor = new JdbcStatementProcessor(statement);
+            selectedDataProcessor = DBStore.getInstance().getJdbcStatementProcessor(processorName);
+        	if (selectedDataProcessor == null) {
+        		JdbcStatement statement = SqlExpressUtil.createJdbcStatement(processorName);
+                selectedDataProcessor = new JdbcStatementProcessor(statement);
+                DBStore.getInstance().addJdbcStatementProcessor(processorName, 
+                		(JdbcStatementProcessor)selectedDataProcessor);
+        	}
             setDatabaseMetaData(udc, selectedDataProcessor);
         }
         else if (DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR.equals(processorType)) {
-            JdbcStatement statement = DBStore.getInstance().getJdbcStatement(processorName);
-            
-            if (statement == null) {
-                //discovery
-                statement = SqlExpressUtil.createJdbcStatementDirect(processorName);
-                
-                if (statement == null) {
-                    throw new UnsupportedDataProcessorNameException();
-                }
-                else {
-                    DBStore.getInstance().addJdbcStatement(processorName, statement);
-                }
-            }
-            
-            selectedDataProcessor = new JdbcStatementProcessor(statement);
+        	selectedDataProcessor = DBStore.getInstance().getJdbcStatementProcessor(processorName);
+        	if (selectedDataProcessor == null) {
+        		JdbcStatement statement = SqlExpressUtil.createJdbcStatementDirect(processorName);
+                selectedDataProcessor = new JdbcStatementProcessor(statement);
+                DBStore.getInstance().addJdbcStatementProcessor(processorName, 
+                		(JdbcStatementProcessor)selectedDataProcessor);
+        	}
             setDatabaseMetaData(udc, selectedDataProcessor);
         }
         else {

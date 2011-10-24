@@ -49,8 +49,13 @@ public abstract class DBAdapter {
     private static LogUtil log = LogUtil.getLogger(DBAdapter.class.getName());
     
     protected static final String IGNORE = "_IGNORE_";
-    
     protected static final String USE_LOGIN_USER_ID_AS_SCHEMA = "useLoginUserId";
+    
+    private String type;
+    
+    protected DBAdapter() {
+    	type = this.getClass().getName();
+    }
     
     /**
      * Checks if using login user id as schema. When the value of 
@@ -276,6 +281,14 @@ public abstract class DBAdapter {
 			tableName = (String) inputs.get(SqlConstants.key_view);
 		}
 		return tableName;
+	}
+	
+	/**
+	 * Returns type which is the class name of this adapter.
+	 * @return class name of this adapter
+	 */
+	public String getType() {
+		return type;
 	}
 	
 	/**

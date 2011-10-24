@@ -295,10 +295,10 @@ implements RESTified, Serializable {
      */
     public ActiveRecord(String tableName) {
         if (tableName == null)
-            throw new IllegalArgumentException("Table name cannot be null in ActiveRecord().");
+            throw new IllegalArgumentException("Table name cannot be null in ActiveRecord(String).");
         this.connectionName = getConnectionName();
-        setTableName(tableName);
-        initialize(connectionName, tableName);
+        this.tableName = DatabaseConfig.getInstance().getFullTableName(tableName);
+        initialize(connectionName, this.tableName);
     }
 
 	/**
@@ -326,18 +326,22 @@ implements RESTified, Serializable {
      * <tt>tableName</tt> is table name of the record. The the prefix and
      * suffix of the database table name may be removed. For example, if a
      * table name is <tt>CRM_users_US</tt> which has a prefix
-     * <tt>CRM_</tt> and a suffix <tt>_US</tt>, the slim table name
-     * used here can just be <tt>users</tt>. </p>
+     * <tt>CRM_</tt> and a suffix <tt>_US</tt>, the table name used here can 
+     * just be <tt>users</tt>. </p>
      *
      * @param connectionName database connection name.
      * @param tableName table name of the record.
      */
     public ActiveRecord(String connectionName, String tableName) {
+        if (connectionName == null)
+            throw new IllegalArgumentException("Connection name cannot be null in ActiveRecord(String, String).");
+        
         if (tableName == null)
-            throw new IllegalArgumentException("Table name cannot be null in ActiveRecord().");
+            throw new IllegalArgumentException("Table name cannot be null in ActiveRecord(String, String).");
+        
         this.connectionName = connectionName;
-        setTableName(tableName);
-        initialize(connectionName, tableName);
+        this.tableName = DatabaseConfig.getInstance().getFullTableName(tableName);
+        initialize(connectionName, this.tableName);
     }
 
     /**
@@ -352,8 +356,7 @@ implements RESTified, Serializable {
      * @return database connection name
      */
     public String getConnectionName() {
-        return (connectionName == null || "".equals(connectionName))?
-        		getDefaultConnectionName():connectionName;
+        return (connectionName != null)?connectionName:getDefaultConnectionName();
     }
 
     /**
@@ -513,57 +516,12 @@ implements RESTified, Serializable {
     }
 
     /**
-     * Returns table meta data.
-     *
-     * @return  TableInfo object
-     * @see     com.scooterframework.orm.sqldataexpress.object.TableInfo
-     */
-    public TableInfo getTableInfo() {
-        return lookupAndRegister(getConnectionName(), getTableName());
-    }
-
-    /**
-     * <p>Sets table name.</p>
-     *
-     * <p>If the input table name is different from the current table name,
-     * reset the fields of this record instance.</p>
-     *
-     * @param   table    table name specified
-     */
-    public void setTableName(String table) {
-        if (isFreezed()) throw new InvalidOperationException(this, "setTableName", "freezed");
-
-        if (table == null || table.equals(""))
-            throw new IllegalArgumentException("Failed to setTableName(): " +
-                                               "Input table name is empty.");
-
-        //add table name convention
-        table = DatabaseConfig.getInstance().getFullTableName(table);
-
-        //compare with the current tableName
-        //if different, do something
-        String currentTableName = getTableName();
-        if (!table.equalsIgnoreCase(currentTableName) || (rowInfo == null)) {
-            TableInfo ti = lookupAndRegister(connectionName, table);
-
-            // clean up existing data
-            rowInfo = ti.getHeader();
-            rowData = new RowData(rowInfo, null);
-            latestDbRowData = new RowData(rowInfo, null);
-            tableName = table;
-        }
-    }
-
-    /**
      * Sets primary key columns for the record
      */
     public void setPrimaryKey(Set<String> primaryKeyNames) {
         if (isFreezed()) throw new InvalidOperationException(this, "setPrimaryKey", "freezed");
 
-        TableInfo ti = getTableInfo();
-        if (ti == null || primaryKeyNames == null ||
-            primaryKeyNames.size()==0) return;
-        ti.getHeader().setPrimaryKeyColumns(primaryKeyNames);
+        rowInfo.setPrimaryKeyColumns(primaryKeyNames);
     }
 
     /**
@@ -573,9 +531,9 @@ implements RESTified, Serializable {
      * are readonly. They will be updated by other database mechanisms.</p>
      */
     public void setReadOnlyColumn(String readOnlyColumnName) {
-        TableInfo ti = getTableInfo();
-        if (ti == null || readOnlyColumnName == null) return;
-        ti.getHeader().setReadOnlyColumn(readOnlyColumnName);
+        if (isFreezed()) throw new InvalidOperationException(this, "setReadOnlyColumn", "freezed");
+        
+        rowInfo.setReadOnlyColumn(readOnlyColumnName);
     }
 
     /**
@@ -585,10 +543,9 @@ implements RESTified, Serializable {
      * are readonly. They will be updated by other database mechanisms.</p>
      */
     public void setReadOnlyColumns(Set<String> readOnlyColumnNames) {
-        TableInfo ti = getTableInfo();
-        if (ti == null || readOnlyColumnNames == null ||
-            readOnlyColumnNames.size() == 0) return;
-        ti.getHeader().setReadOnlyColumns(readOnlyColumnNames);
+        if (isFreezed()) throw new InvalidOperationException(this, "setReadOnlyColumns", "freezed");
+        
+        rowInfo.setReadOnlyColumns(readOnlyColumnNames);
     }
 
     /**
@@ -598,9 +555,7 @@ implements RESTified, Serializable {
      * @return true if the column is readonly
      */
     public boolean isReadOnlyColumn(String colName) {
-        TableInfo ti = getTableInfo();
-        if (ti == null || colName == null) return false;
-        return ti.getHeader().isReadOnlyColumn(colName);
+        return rowInfo.isReadOnlyColumn(colName);
     }
 
     /**
@@ -611,9 +566,7 @@ implements RESTified, Serializable {
      * @return true if the column is required.
      */
     public boolean isRequiredColumn(String colName) {
-        TableInfo ti = getTableInfo();
-        if (ti == null || colName == null) return false;
-        return ti.getHeader().isRequiredColumn(colName);
+        return rowInfo.isRequiredColumn(colName);
     }
 
     /**
@@ -718,9 +671,8 @@ implements RESTified, Serializable {
         if (rowData == null) return;
 
         //populate a Map with primary key values
-        RowInfo ri = getTableInfo().getHeader();
-        String[] pkNames = ri.getPrimaryKeyColumnNames();
-        if (pkNames == null || pkNames.length == 0) pkNames = ri.getColumnNames();
+        String[] pkNames = rowInfo.getPrimaryKeyColumnNames();
+        if (pkNames == null || pkNames.length == 0) pkNames = rowInfo.getColumnNames();
 
         int size = pkNames.length;
         Map<String, Object> inputs = new HashMap<String, Object>();
@@ -943,9 +895,8 @@ implements RESTified, Serializable {
             before_internal_delete();
 
             //populate a Map with primary key values
-            RowInfo ri = getTableInfo().getHeader();
-            String[] pkNames = ri.getPrimaryKeyColumnNames();
-            if (pkNames == null || pkNames.length == 0) pkNames = ri.getColumnNames();
+            String[] pkNames = rowInfo.getPrimaryKeyColumnNames();
+            if (pkNames == null || pkNames.length == 0) pkNames = rowInfo.getColumnNames();
 
             int size = pkNames.length;
             Map<String, Object> inputs = new HashMap<String, Object>();
@@ -2520,12 +2471,8 @@ implements RESTified, Serializable {
      * @return String table name
      */
     public String getTableName() {
-        if (tableName == null || "".equals(tableName)) {
-            tableName = getDefaultTableName();
-        }
-
-        tableName = DatabaseConfig.getInstance().getFullTableName(tableName);
-
+    	if (tableName != null) return tableName;
+        tableName = DatabaseConfig.getInstance().getFullTableName(getDefaultTableName());
         return tableName;
     }
 
@@ -2541,7 +2488,10 @@ implements RESTified, Serializable {
      * @return a simple version of table name.
      */
     public String getSimpleTableName() {
-        return DatabaseConfig.getInstance().getSimpleTableName(tableName);
+    	if (simpleTableName == null) {
+    		simpleTableName =  DatabaseConfig.getInstance().getSimpleTableName(tableName);
+    	}
+        return simpleTableName;
     }
 
 
@@ -2579,7 +2529,7 @@ implements RESTified, Serializable {
     }
 
     protected String getDeleteSQL() {
-        return getTableInfo().getHeader().getDeleteSqlInJDBCStyle();
+        return rowInfo.getDeleteSqlInJDBCStyle();
     }
 
     private SqlService getSqlService() {
@@ -2678,8 +2628,7 @@ implements RESTified, Serializable {
                 rowData.getRowInfo().setPrimaryKeyColumns(pkNames);
                 pkDataMap = rowData.getPrimaryKeyDataMap();
             }
-
-            latestDbRowData = new RowData(rd.getRowInfo(), null);
+            
             existInDatabase = true;
         }
     }
@@ -2693,7 +2642,6 @@ implements RESTified, Serializable {
         	throw new IllegalArgumentException("Failed to look up table '" +
         			table + "' for connection '" + connName + "'.");
         }
-        rowInfo = ti.getHeader();
         return ti;
     }
 
@@ -3019,7 +2967,7 @@ implements RESTified, Serializable {
     private void createClean() {
         //remove backup copy
         hasCopied = false;
-        latestDbRowData.setFields((Object[])null);
+        latestDbRowData = null;
         modifiedColumns.clear();
         dirty = false;
 
@@ -3158,7 +3106,7 @@ implements RESTified, Serializable {
             Map<String, Object> conditions = null;
             String[] pkNames = rowInfo.getPrimaryKeyColumnNames();
             if (pkNames == null || pkNames.length == 0) {
-                conditions = latestDbRowData.getDataMap();
+                conditions = (latestDbRowData != null)?latestDbRowData.getDataMap():null;
             }
             else {
                 conditions = rowData.getPrimaryKeyDataMap();
@@ -3196,7 +3144,7 @@ implements RESTified, Serializable {
     private void updateClean() {
         //remove backup copy
         hasCopied = false;
-        latestDbRowData.setFields((Object[])null);
+        latestDbRowData = null;
         modifiedColumns.clear();
         dirty = false;
     }
@@ -3590,7 +3538,7 @@ implements RESTified, Serializable {
      */
     private void after_internal_update() {
 
-        //do some maintanance works
+        //do some maintenance works
         updateClean();
 
         for (Map.Entry<String, RecordRelation> entry : recordRelations.entrySet()) {
@@ -4240,6 +4188,9 @@ implements RESTified, Serializable {
 
     //table name
     private String tableName = null;
+
+    //simple table name
+    private String simpleTableName = null;
 
     //boolean to indicate whether the record is a new record
     private boolean existInDatabase = false;

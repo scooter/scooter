@@ -472,8 +472,11 @@ public class ActiveRecordUtil {
                 throw new IllegalArgumentException("TableGateway instance for type " + fullModelClassName + " must be created first.");
             }
             ActiveRecord home = getHomeInstance(fullModelClassName);
-            gate = new TableGateway(home);
-            setGateInstance(fullModelClassName, gate);
+            gate = gateMap.get(gateKey);
+            if (gate == null) {
+                gate = new TableGateway(home);
+                setGateInstance(fullModelClassName, gate);
+            }
         }
         
         return gate;

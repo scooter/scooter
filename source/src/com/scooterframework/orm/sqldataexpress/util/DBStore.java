@@ -17,8 +17,8 @@ import com.scooterframework.orm.sqldataexpress.object.JdbcStatement;
 import com.scooterframework.orm.sqldataexpress.object.PrimaryKey;
 import com.scooterframework.orm.sqldataexpress.object.StoredProcedure;
 import com.scooterframework.orm.sqldataexpress.object.TableInfo;
+import com.scooterframework.orm.sqldataexpress.processor.JdbcStatementProcessor;
 import com.scooterframework.orm.sqldataexpress.vendor.DBAdapter;
-import com.scooterframework.orm.sqldataexpress.vendor.DBAdapterFactory;
 
 /**
  * DBStore class serves as an in-memory cache for some frequently used objects.
@@ -136,6 +136,39 @@ public class DBStore {
         jdbcStatements.put(jdbcKey, jdbcStmt);
     }
     
+    public Map<String, JdbcStatementProcessor> getJdbcStatementProcessors() {
+        return jdbcStatementProcessors;
+    }
+    
+    public JdbcStatementProcessor getJdbcStatementProcessor(String name) {
+        if (name == null) return null;
+
+        String jdbcKey = getJdbcKey(name);
+        JdbcStatementProcessor stmt = null;
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+            stmt = (JdbcStatementProcessor)CurrentThreadCache.get(jdbcKey);
+            return stmt;
+        }
+        
+        stmt = (JdbcStatementProcessor)jdbcStatementProcessors.get(jdbcKey);
+        return stmt;
+    }
+    
+    public void addJdbcStatementProcessor(String name, JdbcStatementProcessor jdbcProcessor) {
+        if (name == null || jdbcProcessor == null) 
+            throw new IllegalArgumentException("addJdbcStatementProcessor: Neither name nor jdbcProcessor can be null: " + 
+                                               "name is " + name + "; " + 
+                                               "jdbcProcessor is " + jdbcProcessor + ".");
+
+        String jdbcKey = getJdbcKey(name);
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+            CurrentThreadCache.set(jdbcKey, jdbcProcessor);
+            return;
+        }
+        
+        jdbcStatementProcessors.put(jdbcKey, jdbcProcessor);
+    }
+    
     public Map<String, TableInfo> getTableInfos() {
         return tables;
     }
@@ -149,8 +182,7 @@ public class DBStore {
      * @param tableName  table name
      * @return instance of <tt>TableInfo</tt>
      */
-    public TableInfo getTableInfo(String connName, String catalog, 
-    		String schema, String tableName) {
+    public TableInfo getTableInfo(String connName, String catalog, String schema, String tableName) {
     	if (connName == null) {
     		throw new IllegalArgumentException("getTableInfo: connName cannot be null");
     	}
@@ -178,8 +210,7 @@ public class DBStore {
      * @param tableName  table name
      * @param ti         instance of <tt>TableInfo</tt>
      */
-    public void addTableInfo(String connName, String catalog, String schema, 
-    		String tableName, TableInfo ti) {
+    public void addTableInfo(String connName, String catalog, String schema, String tableName, TableInfo ti) {
     	if (connName == null) {
     		throw new IllegalArgumentException("addTableInfo: connName cannot be null");
     	}
@@ -201,6 +232,58 @@ public class DBStore {
     }
     
     /**
+     * Retrieves a stored <tt>TableInfo</tt> instance.
+     * 
+     * @param connName   database connection name
+     * @param tableName  table name
+     * @return instance of <tt>TableInfo</tt>
+     */
+    public TableInfo getTableInfo(String connName, String tableName) {
+    	if (connName == null) {
+    		throw new IllegalArgumentException("getTableInfo: connName cannot be null");
+    	}
+    	
+        if (tableName == null) return null;
+        
+        String tableKey = getTableKey(connName, tableName);
+        TableInfo ti = null;
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+        	ti = (TableInfo)CurrentThreadCache.get(tableKey);
+            return ti;
+        }
+        
+        ti = (TableInfo) tables.get(tableKey);
+        return ti;
+    }
+    
+    /**
+     * Adds an instance of <tt>TableInfo</tt>
+     * 
+     * @param connName   database connection name
+     * @param tableName  table name
+     * @param ti         instance of <tt>TableInfo</tt>
+     */
+    public void addTableInfo(String connName, String tableName, TableInfo ti) {
+    	if (connName == null) {
+    		throw new IllegalArgumentException("addTableInfo: connName cannot be null");
+    	}
+    	
+        if (tableName == null || ti == null) {
+            throw new IllegalArgumentException("addTableInfo: Neither TableName nor TableInfo can be null: " + 
+                                               "tableName is '" + tableName + "'; " + 
+                                               "tableInfo is '" + ti + "'.");
+        }
+        
+        String tableKey = getTableKey(connName, tableName);
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+            CurrentThreadCache.set(tableKey, ti);
+            return;
+        }
+        
+        tables.put(tableKey, ti);
+    }
+    
+    /**
      * Retrieves a stored <tt>PrimaryKey</tt> instance.
      * 
      * @param connName   database connection name
@@ -209,8 +292,7 @@ public class DBStore {
      * @param tableName  table name
      * @return instance of <tt>PrimaryKey</tt>
      */
-    public PrimaryKey getPrimaryKey(String connName, String catalog, 
-    		String schema, String tableName) {
+    public PrimaryKey getPrimaryKey(String connName, String catalog, String schema, String tableName) {
     	if (connName == null) {
     		throw new IllegalArgumentException("getPrimaryKey: connName cannot be null");
     	}
@@ -238,8 +320,7 @@ public class DBStore {
      * @param tableName  table name
      * @param pk         instance of <tt>PrimaryKey</tt>
      */
-    public void addPrimaryKey(String connName, String catalog, String schema, 
-    		String tableName, PrimaryKey pk) {
+    public void addPrimaryKey(String connName, String catalog, String schema, String tableName, PrimaryKey pk) {
     	if (connName == null) {
     		throw new IllegalArgumentException("addPrimaryKey: connName cannot be null");
     	}
@@ -252,6 +333,58 @@ public class DBStore {
         
         String fullTableName = getFullTableName(connName, catalog, schema, tableName);
         String pkKey = getPKKey(connName, fullTableName);
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+            CurrentThreadCache.set(pkKey, pk);
+            return;
+        }
+        
+        pkMap.put(pkKey, pk);
+    }
+    
+    /**
+     * Retrieves a stored <tt>PrimaryKey</tt> instance.
+     * 
+     * @param connName   database connection name
+     * @param tableName  table name
+     * @return instance of <tt>PrimaryKey</tt>
+     */
+    public PrimaryKey getPrimaryKey(String connName, String tableName) {
+    	if (connName == null) {
+    		throw new IllegalArgumentException("getPrimaryKey: connName cannot be null");
+    	}
+    	
+        if (tableName == null) return null;
+        
+        String pkKey = getPKKey(connName, tableName);
+        PrimaryKey pk = null;
+        if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
+        	pk = (PrimaryKey)CurrentThreadCache.get(pkKey);
+            return pk;
+        }
+        
+        pk = (PrimaryKey) pkMap.get(pkKey);
+        return pk;
+    }
+    
+    /**
+     * Adds an instance of <tt>PrimaryKey</tt>
+     * 
+     * @param connName   database connection name
+     * @param tableName  table name
+     * @param pk         instance of <tt>PrimaryKey</tt>
+     */
+    public void addPrimaryKey(String connName, String tableName, PrimaryKey pk) {
+    	if (connName == null) {
+    		throw new IllegalArgumentException("addPrimaryKey: connName cannot be null");
+    	}
+    	
+        if (tableName == null || pk == null) {
+            throw new IllegalArgumentException("addPrimaryKey: Neither TableName nor PrimaryKey can be null: " + 
+                                               "tableName is '" + tableName + "'; " + 
+                                               "pk is '" + pk + "'.");
+        }
+        
+        String pkKey = getPKKey(connName, tableName);
         if (DatabaseConfig.getInstance().isInDevelopmentEnvironment()) {
             CurrentThreadCache.set(pkKey, pk);
             return;
@@ -295,11 +428,12 @@ public class DBStore {
         adapterMap.put(dbaKey, dba);
     }
     
-    private String getFullTableName(String connName, String catalog, 
-    		String schema, String tableName) {
-    	DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
-        String[] s3 = dba.resolveCatalogAndSchemaAndTable(connName, catalog, schema, tableName);
-        return dba.getExpandedTableName(s3[0], s3[1], s3[2]);
+    private String getFullTableName(String connName, String catalog, String schema, String tableName) {
+    	StringBuilder sb = new StringBuilder();
+    	if (catalog != null) sb.append(catalog).append(".");
+    	if (schema != null) sb.append(schema).append(".");
+    	sb.append(tableName);
+    	return sb.toString();
     }
 
     private String getSpocKey(String name) {
@@ -329,6 +463,7 @@ public class DBStore {
     private Map<String, StoredProcedure> storedProcedures = new HashMap<String, StoredProcedure>();
     private Map<String, Function> functions = new HashMap<String, Function>();
     private Map<String, JdbcStatement> jdbcStatements = new HashMap<String, JdbcStatement>();
+    private Map<String, JdbcStatementProcessor> jdbcStatementProcessors = new HashMap<String, JdbcStatementProcessor>();
     private Map<String, TableInfo> tables = new HashMap<String, TableInfo>();
     private Map<String, PrimaryKey> pkMap = new HashMap<String, PrimaryKey>();
     private Map<String, DBAdapter> adapterMap = new HashMap<String, DBAdapter>();

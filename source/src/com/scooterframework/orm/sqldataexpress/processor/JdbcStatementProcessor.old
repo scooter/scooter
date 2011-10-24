@@ -8,6 +8,7 @@
 package com.scooterframework.orm.sqldataexpress.processor;
 
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +36,9 @@ import com.scooterframework.orm.sqldataexpress.object.RowData;
 import com.scooterframework.orm.sqldataexpress.object.RowInfo;
 import com.scooterframework.orm.sqldataexpress.object.TableData;
 import com.scooterframework.orm.sqldataexpress.parser.JdbcStatementParser;
+import com.scooterframework.orm.sqldataexpress.parser.ParameterMetaDataLoader;
 import com.scooterframework.orm.sqldataexpress.util.DAOUtil;
+import com.scooterframework.orm.sqldataexpress.util.DBStore;
 import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 import com.scooterframework.orm.sqldataexpress.util.SqlUtil;
 import com.scooterframework.orm.sqldataexpress.vendor.DBAdapter;
@@ -49,7 +52,6 @@ import com.scooterframework.orm.sqldataexpress.vendor.DBAdapterFactory;
  */
 public class JdbcStatementProcessor extends DataProcessorImpl {
     private JdbcStatement st = null;
-    private JdbcStatement stPaged = null;
     
     public JdbcStatementProcessor(JdbcStatement st) {
         this.st = st;
@@ -68,23 +70,22 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         
+        //log.debug("execute - inputs: " + inputs);
+        //log.debug("execute - outputFilters: " + outputFilters);
+        
         if (outputFilters == null) outputFilters = new HashMap<String, String>();
         
         try {
             String stName = st.getName();
             autoFill(udc, inputs);
             
-            JdbcStatement jstat = st;
             String originalSql = st.getOriginalJdbcStatementString();
             if(checkPagination(inputs)) {
-            	if (stPaged == null) {
-            		String pagedSql = dba.preparePaginationSql(originalSql, inputs, outputFilters);
-            		stPaged = SqlExpressUtil.createJdbcStatementDirect(pagedSql);
-            	}
-        		jstat = stPaged;
+                String updatedOriginalSql = dba.preparePaginationSql(originalSql, inputs, outputFilters);
+                st = updateStatement(updatedOriginalSql);
             }
             
-            String executableSql = jstat.getExecutableJdbcStatementString();
+            String executableSql = st.getExecutableJdbcStatementString();
             executableSql = autoReplace(executableSql, inputs);
             
             log.debug("execute - parsed expecutable sql: " + executableSql);
@@ -92,7 +93,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             log.debug("execute - outputFilters: " + outputFilters);
             
             boolean supportsGetGeneratedKeys = supportsGetGeneratedKeys();
-            if (supportsGetGeneratedKeys && !jstat.isSelectStatement()) {
+            if (supportsGetGeneratedKeys && !st.isSelectStatement()) {
                 pstmt = connection.prepareStatement(executableSql, Statement.RETURN_GENERATED_KEYS);
             }
             else {
@@ -100,22 +101,22 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             }
             
             // check if need to load parameter properties
-//            if (supportParameterMetaData()) {
-//                if (!jstat.hasLoadedParameterMetaData()) {
-//                    //get parameter meta data if it has not been loaded
-//                    ParameterMetaData pmd = pstmt.getParameterMetaData();
-//                    ParameterMetaDataLoader pmdl = new ParameterMetaDataLoader(pmd, jstat);
-//                    pmdl.loadParameterMetaData();
-//                }
-//            }
-//            else {
-                if (!jstat.hasLoadedParameterProperties()) {
-                    JdbcStatementParser parser = new JdbcStatementParser(udc, jstat);
+            if (supportParameterMetaData()) {
+                if (!st.hasLoadedParameterMetaData()) {
+                    //get parameter meta data if it has not been loaded
+                    ParameterMetaData pmd = pstmt.getParameterMetaData();
+                    ParameterMetaDataLoader pmdl = new ParameterMetaDataLoader(pmd, st);
+                    pmdl.loadParameterMetaData();
+                }
+            }
+            else {
+                if (!st.hasLoadedParameterProperties()) {
+                    JdbcStatementParser parser = new JdbcStatementParser(udc, st);
                     parser.parse();
                 }
-//            }
+            }
             
-            Collection<Parameter> parameters = jstat.getParameters();
+            Collection<Parameter> parameters = st.getParameters();
             log.debug("execute - parameters: " + parameters);
             Iterator<Parameter> pit = parameters.iterator();
             while(pit.hasNext()) {
@@ -154,16 +155,16 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
                 }
             }
             
-            if (jstat.isSelectStatement()) {
+            if (st.isSelectStatement()) {
                 rs = pstmt.executeQuery();
                 
                 // handle out cursors or other outputs if there is any
                 if (rs != null) {
                     if (outputFilters == null || outputFilters.size() == 0) {
-                        handleResultSet(jstat, dba, stName, returnTO, rs, inputs);
+                        handleResultSet(dba, stName, returnTO, rs, inputs);
                     }
                     else {
-                        handleFilteredResultSet(jstat, dba, stName, returnTO, rs, inputs, outputFilters);
+                        handleFilteredResultSet(dba, stName, returnTO, rs, inputs, outputFilters);
                     }
                 }
             }
@@ -248,7 +249,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
      * 
      * @param original
      * @param inputs
-     * @return an updated SQL String with no replacement part
+     * @return 
      */
     private String autoReplace(String original, Map<String, Object> inputs) {
         if (original.indexOf(SqlUtil.REPLACE_PART_START) == -1 &&
@@ -273,10 +274,10 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         return replaced;
     }
 
-	private void handleResultSet(JdbcStatement jstat, DBAdapter dba,
-			String stName, OmniDTO returnTO, ResultSet rs, Map<String, ?> inputs)
+    private void handleResultSet(DBAdapter dba, String stName, 
+    		OmniDTO returnTO, ResultSet rs, Map<String, ?> inputs) 
     throws SQLException {
-        Cursor cursor = jstat.getCursor(stName, rs);
+        Cursor cursor = st.getCursor(stName, rs);
         int cursorWidth = cursor.getDimension();
         
         TableData rt = new TableData();
@@ -286,20 +287,21 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         while(rs.next()) {
             Object[] cellValues = new Object[cursorWidth];
             for (int i = 0; i < cursorWidth; i++) {
-				cellValues[i] = dba.getObjectFromResultSetByType(rs,
-						cursor.getColumnJavaClassName(i),
-						cursor.getColumnSqlDataType(i), i + 1);
+                cellValues[i] = dba.getObjectFromResultSetByType(rs, 
+                                                             cursor.getColumnJavaClassName(i), 
+                                                             cursor.getColumnSqlDataType(i),
+                                                             i+1);
             }
             rt.addRow(new RowData(cursor, cellValues));
         }
         rs.close();
     }
     
-	private void handleFilteredResultSet(JdbcStatement jstat, DBAdapter dba,
-			String stName, OmniDTO returnTO, ResultSet rs,
-			Map<String, Object> inputs, Map<String, String> outputs)
+    private void handleFilteredResultSet(DBAdapter dba, String stName, 
+    		OmniDTO returnTO, ResultSet rs, Map<String, Object> inputs, 
+    		Map<String, String> outputs) 
     throws SQLException {
-        Cursor cursor = jstat.getCursor(stName, rs);
+        Cursor cursor = st.getCursor(stName, rs);
         int cursorWidth = cursor.getDimension();
         
         Set<String> allowedColumns = getAllowedColumns(outputs, cursor);
@@ -312,9 +314,10 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             ArrayList<Object> cellValues = new ArrayList<Object>();
             for (int i = 0; i < cursorWidth; i++) {
                 if (allowedColumns.contains(cursor.getColumnName(i))) {
-					cellValues.add(dba.getObjectFromResultSetByType(rs,
-							cursor.getColumnJavaClassName(i),
-							cursor.getColumnSqlDataType(i), i + 1));
+                    cellValues.add(dba.getObjectFromResultSetByType(rs, 
+                                                                cursor.getColumnJavaClassName(i), 
+                                                                cursor.getColumnSqlDataType(i),
+                                                                i+1));
                 }
             }
             
@@ -322,6 +325,18 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
                 rt.addRow(new RowData(newHeader, cellValues.toArray()));
         }
         rs.close();
+    }
+    
+    private JdbcStatement updateStatement(String processorName) {
+        JdbcStatement statement = DBStore.getInstance().getJdbcStatement(processorName);
+        
+        if (statement == null) {
+            //discovery
+            statement = SqlExpressUtil.createJdbcStatementDirect(processorName);
+            DBStore.getInstance().addJdbcStatement(processorName, statement);
+        }
+        
+        return statement;
     }
     
     /**

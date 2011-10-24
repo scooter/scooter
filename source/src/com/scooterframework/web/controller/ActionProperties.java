@@ -8,6 +8,7 @@
 package com.scooterframework.web.controller;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * ActionProperties contains infomation for action execution.
@@ -29,6 +30,8 @@ public class ActionProperties {
     public Method methodInstance;
     
     public String routeType;
+    
+    public Map<String, String> requiredFieldValues;
 
 	/**
      * Returns a string representation of the object.
@@ -47,7 +50,8 @@ public class ActionProperties {
         returnString.append("resource = " + resource).append(SEPARATOR);
         returnString.append("routeType = " + routeType).append(SEPARATOR);
         returnString.append("controllerCreated = " + controllerCreated).append(SEPARATOR);
-        returnString.append("methodCreated = " + methodCreated);
+        returnString.append("methodCreated = " + methodCreated).append(SEPARATOR);
+        returnString.append("requiredFieldValues = " + requiredFieldValues);
 
         return returnString.toString();
     }

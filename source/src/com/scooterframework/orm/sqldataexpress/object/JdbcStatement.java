@@ -24,46 +24,34 @@ import com.scooterframework.common.logging.LogUtil;
 public class JdbcStatement {
     public JdbcStatement() {}
     
-    public JdbcStatement(String name) {
+    public JdbcStatement(String name, String jdbcStatementString) {
         this.name = name;
+        this.jdbcStatementString = jdbcStatementString;
     }
     
     
     /**
-     * returns name
+     * Returns name
      */
     public String getName() {
         return name;
     }
-    
-    /**
-     * sets name
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
 
     /**
-     * returns the original jdbcStatementString
+     * Returns the original SQL statement string
      */
     public String getOriginalJdbcStatementString() {
         return jdbcStatementString;
     }
 
     /**
-     * returns executable jdbcStatementString
+     * Returns executable SQL statement string
      */
     public String getExecutableJdbcStatementString() {
-        return convertToExecutable(jdbcStatementString);
-    }
-    
-    /**
-     * sets javaAPIString
-     */
-    public void setJdbcStatementString(String jdbcStatementString) {
-        if ( jdbcStatementString == null ) return;
-        //this.jdbcStatementString = SqlUtil.convertToUpperCase(jdbcStatementString);
-        this.jdbcStatementString = jdbcStatementString;
+    	if (executableJdbcString == null) {
+    		executableJdbcString = convertToExecutable(jdbcStatementString);
+    	}
+        return executableJdbcString;
     }
     
     /**
@@ -109,31 +97,31 @@ public class JdbcStatement {
     }
     
     /**
-     * returns count of parameters
+     * Returns count of parameters
      */
     public int getParameterCount() {
         return parameters.size();
     }
     
     /**
-     * returns parameters
+     * Returns parameters
      */
     public List<Parameter> getParameters() {
         return parameters;
     }
     
     /**
-     * adds a parameter
+     * Adds a parameter
      */
     public void addParameter(Parameter param) {
         parameters.add(param);
     }
     
     /**
-     * returns cursor
+     * Returns cursor
      */
     public Cursor getCursor(String cursorName, ResultSet rs) {
-        Cursor cursor = (Cursor)coursors.get(cursorName);
+        Cursor cursor = (Cursor)cursors.get(cursorName);
         
         if ( cursor == null ) {
             cursor = new Cursor(cursorName, rs);
@@ -169,6 +157,8 @@ public class JdbcStatement {
         String LINE_BREAK = "\r\n";
         
         sb.append("name = " + name).append(LINE_BREAK);
+        sb.append("jdbcStatementString = " + jdbcStatementString).append(LINE_BREAK);
+        sb.append("executableJdbcString = " + executableJdbcString).append(LINE_BREAK);
         
         if (parameters != null) {
             int psize = parameters.size();
@@ -181,10 +171,10 @@ public class JdbcStatement {
             }
         }
         
-        if (coursors != null) {
-            int csize = coursors.size();
+        if (cursors != null) {
+            int csize = cursors.size();
             sb.append("coursors size = " + csize).append(LINE_BREAK);
-            for (Map.Entry<String, Cursor> entry : coursors.entrySet()) {
+            for (Map.Entry<String, Cursor> entry : cursors.entrySet()) {
                 sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(LINE_BREAK);
             }
         }
@@ -194,14 +184,14 @@ public class JdbcStatement {
     
     
     /**
-     * adds a cursor
+     * Adds a cursor
      */
     private void addCursor(String cursorName, Cursor cursor) {
-        coursors.put(cursorName, cursor);
+        cursors.put(cursorName, cursor);
     }
     
     /**
-     * converts the original jdbc statement string to executable.
+     * Converts the original jdbc statement string to executable.
      * 
      * <pre>
      * The original jdbc statement string may be like :
@@ -244,8 +234,10 @@ public class JdbcStatement {
     private String name = null;
     private String jdbcStatementString = null;
     private List<Parameter> parameters = new ArrayList<Parameter>();
-    private Map<String, Cursor> coursors = new HashMap<String, Cursor>();
+    private Map<String, Cursor> cursors = new HashMap<String, Cursor>();
     private boolean loadedParameterMetaData = false;
+    
+    private String executableJdbcString;
     
     protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
 }

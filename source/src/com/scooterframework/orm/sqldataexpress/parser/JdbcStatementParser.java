@@ -30,25 +30,32 @@ import com.scooterframework.orm.sqldataexpress.util.SqlExpressUtil;
 public class JdbcStatementParser extends JdbcStatementHelper {
     public JdbcStatementParser(UserDatabaseConnection udc, JdbcStatement st) {
         if (st == null) 
-            throw new IllegalArgumentException("JdbcStatement input is null.");
+            throw new IllegalArgumentException("JdbcStatement input cannot be null.");
         
         this.udc = udc;
         this.st = st;
-        
-        parseJdbcStatementString();
     }
     
 
     public void parse() {
-        //get parameter property data if it has not been loaded
-        st = furtherLookupJdbcStatement(udc, st);
+    	String jdbcStatementString = st.getOriginalJdbcStatementString();
+    	
+        //no need to parse if there is no dynamic parameter
+        if (jdbcStatementString.indexOf('?') != -1) {
+	        if (st.isInsertStatement() && 
+	            jdbcStatementString.toUpperCase().indexOf("SELECT") == -1) {
+	            // This is a pure insert statement.
+	            parseInsertStatement(jdbcStatementString);
+	        }
+	        else {
+	            parseJdbcStatementString(jdbcStatementString);
+	        }
+	        
+	        //get parameter property data if it has not been loaded
+	        st = furtherLookupJdbcStatement(udc, st);
+        }
         
         st.setLoadedParameterProperties(true);
-        
-        //display the parsed statement
-        if (log.isDebugEnabled()) {
-            log.debug(st);
-        }
     }
     
     // populate more parameter properties for the JdbcStatement
@@ -105,24 +112,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
     /**
      * counts parameters (? marks)
      */
-    private void parseJdbcStatementString() {
-        if (st == null) return;
-        
-        String jdbcStatementString = st.getOriginalJdbcStatementString();
-        if (jdbcStatementString == null) return;
-        
-        //no need to parse if there is no dynamic parameter
-        if (jdbcStatementString.indexOf('?') == -1) {
-            return;
-        }
-        
-        if (st.isInsertStatement() && 
-            jdbcStatementString.toUpperCase().indexOf("SELECT") == -1) {
-            // This is a pure insert statement.
-            parseInsertStatement();
-            return;
-        }
-        
+    private void parseJdbcStatementString(String jdbcStatementString) {
         //
         // find columnName/tableName pair map
         //
@@ -265,16 +255,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
     //      SELECT "column3", "column4", ...
     //      FROM "table_name2"
     //
-    private void parseInsertStatement() {
-        if (st == null) return;
-        
-        String jdbcStatementString = st.getOriginalJdbcStatementString();
-        
-        //no need to parse if there is no dynamic parameter
-        if (jdbcStatementString.indexOf('?') == -1) {
-            return;
-        }
-        
+    private void parseInsertStatement(String jdbcStatementString) {
         //
         // find columnName/tableName pair map
         //

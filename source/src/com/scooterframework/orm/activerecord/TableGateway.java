@@ -303,14 +303,12 @@ public class TableGateway {
 	 * @return the ActiveRecord associated with the <tt>id</tt>
 	 */
 	public ActiveRecord findById(Object id) {
-		if (!home.getTableInfo().getHeader().isValidColumnName("ID")) {
+		if (!home.getRowInfo().isValidColumnName("ID")) {
 			throw new IllegalArgumentException("There is no column name as ID");
 		}
 
 		ActiveRecord ar = null;
-
-		String findSQL = "SELECT * FROM " + home.getTableName()
-				+ " WHERE id = ?";
+		String findSQL = "SELECT * FROM " + home.getTableName()	+ " WHERE id = ?";
 
 		try {
 			Map<String, Object> inputs = new HashMap<String, Object>();
@@ -393,13 +391,12 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return a list of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAllBySQL(String sql,
-			Map<String, Object> inputs) {
+	public List<ActiveRecord> findAllBySQL(String sql, Map<String, Object> inputs) {
 		List<ActiveRecord> list = null;
 		inputs = addMoreProperties(inputs, null);
 
 		try {
-			OmniDTO returnTO = getSqlService().execute(inputs,
+			OmniDTO returnTO = getSqlService().execute(inputs, 
 					DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, sql);
 
 			if (returnTO != null) {
@@ -445,13 +442,13 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return a list of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAllBySQLKey(String sqlKey,
+	public List<ActiveRecord> findAllBySQLKey(String sqlKey, 
 			Map<String, Object> inputs) {
 		List<ActiveRecord> list = null;
 		inputs = addMoreProperties(inputs, null);
 
 		try {
-			OmniDTO returnTO = getSqlService().execute(inputs,
+			OmniDTO returnTO = getSqlService().execute(inputs, 
 					DataProcessorTypes.NAMED_SQL_STATEMENT_PROCESSOR, sqlKey);
 
 			if (returnTO != null) {
@@ -602,9 +599,8 @@ public class TableGateway {
 	 *            a string of options
 	 * @return List of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAllBy(String columns, Object[] values,
-			String options) {
-		return findAllBy(columns, values,
+	public List<ActiveRecord> findAllBy(String columns, Object[] values, String options) {
+		return findAllBy(columns, values, 
 				Converters.convertSqlOptionStringToMap(options));
 	}
 
@@ -654,15 +650,14 @@ public class TableGateway {
 	 *            a map of options
 	 * @return a list of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAll(Map<String, Object> conditions,
+	public List<ActiveRecord> findAll(Map<String, Object> conditions, 
 			Map<String, String> options) {
-		if (options == null)
-			options = new HashMap<String, String>();
+		if (options == null) options = new HashMap<String, String>();
 		List<ActiveRecord> list = null;
 
 		if (options.size() > 0
-				&& (options.containsKey(ActiveRecordConstants.key_include) || options
-						.containsKey(ActiveRecordConstants.key_strict_include))) {
+				&& (options.containsKey(ActiveRecordConstants.key_include) || 
+					options.containsKey(ActiveRecordConstants.key_strict_include))) {
 			list = internal_findAll_include(conditions, options);
 		} else {
 			list = internal_findAll(conditions, options);
@@ -688,10 +683,8 @@ public class TableGateway {
 	 *            a string of options
 	 * @return a list of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAll(Map<String, Object> conditions,
-			String options) {
-		return findAll(conditions,
-				Converters.convertSqlOptionStringToMap(options));
+	public List<ActiveRecord> findAll(Map<String, Object> conditions, String options) {
+		return findAll(conditions, Converters.convertSqlOptionStringToMap(options));
 	}
 
 	/**
@@ -730,7 +723,7 @@ public class TableGateway {
 	 * @return a list of ActiveRecord objects
 	 */
 	public List<ActiveRecord> findAll(String conditionsSQL, String options) {
-		return findAll(conditionsSQL, (Map<String, Object>) null,
+		return findAll(conditionsSQL, (Map<String, Object>) null, 
 				Converters.convertSqlOptionStringToMap(options));
 	}
 
@@ -751,10 +744,9 @@ public class TableGateway {
 	 *            a data map for dynamic attributes in <tt>conditionsSQL</tt>
 	 * @return a list of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAll(String conditionsSQL,
+	public List<ActiveRecord> findAll(String conditionsSQL, 
 			Map<String, Object> conditionsSQLData) {
-		return findAll(conditionsSQL, conditionsSQLData,
-				(Map<String, String>) null);
+		return findAll(conditionsSQL, conditionsSQLData, (Map<String, String>) null);
 	}
 
 	/**
@@ -783,10 +775,9 @@ public class TableGateway {
 		List<ActiveRecord> list = null;
 
 		if (options.size() > 0
-				&& (options.containsKey(ActiveRecordConstants.key_include) || options
-						.containsKey(ActiveRecordConstants.key_strict_include))) {
-			list = internal_findAll_include(conditionsSQL, conditionsSQLData,
-					options);
+				&& (options.containsKey(ActiveRecordConstants.key_include) || 
+					options.containsKey(ActiveRecordConstants.key_strict_include))) {
+			list = internal_findAll_include(conditionsSQL, conditionsSQLData, options);
 		} else {
 			list = internal_findAll(conditionsSQL, conditionsSQLData, options);
 		}
@@ -813,9 +804,9 @@ public class TableGateway {
 	 *            a string of options.
 	 * @return a list of ActiveRecord objects
 	 */
-	public List<ActiveRecord> findAll(String conditionsSQL,
+	public List<ActiveRecord> findAll(String conditionsSQL, 
 			Map<String, Object> conditionsSQLData, String options) {
-		return findAll(conditionsSQL, conditionsSQLData,
+		return findAll(conditionsSQL, conditionsSQLData, 
 				Converters.convertSqlOptionStringToMap(options));
 	}
 
@@ -865,10 +856,10 @@ public class TableGateway {
 	 *            a map of options
 	 * @return the first ActiveRecord found
 	 */
-	public ActiveRecord findFirst(Map<String, Object> conditions,
+	public ActiveRecord findFirst(Map<String, Object> conditions, 
 			Map<String, String> options) {
-		if (options == null)
-			options = new HashMap<String, String>();
+		if (options == null) options = new HashMap<String, String>();
+		
 		options.put(DataProcessor.input_key_records_offset, "0");
 		options.put(DataProcessor.input_key_records_limit, "1");
 		List<ActiveRecord> list = findAll(conditions, options);
@@ -893,8 +884,7 @@ public class TableGateway {
 	 * @return the first ActiveRecord found
 	 */
 	public ActiveRecord findFirst(Map<String, Object> conditions, String options) {
-		return findFirst(conditions,
-				Converters.convertSqlOptionStringToMap(options));
+		return findFirst(conditions, Converters.convertSqlOptionStringToMap(options));
 	}
 
 	/**
@@ -933,7 +923,7 @@ public class TableGateway {
 	 * @return the first ActiveRecord found
 	 */
 	public ActiveRecord findFirst(String conditionsSQL, String options) {
-		return findFirst(conditionsSQL, (Map<String, Object>) null,
+		return findFirst(conditionsSQL, (Map<String, Object>) null, 
 				Converters.convertSqlOptionStringToMap(options));
 	}
 
@@ -954,10 +944,9 @@ public class TableGateway {
 	 *            a data map for dynamic attributes in <tt>conditionsSQL</tt>
 	 * @return the first ActiveRecord found
 	 */
-	public ActiveRecord findFirst(String conditionsSQL,
+	public ActiveRecord findFirst(String conditionsSQL,	
 			Map<String, Object> conditionsSQLData) {
-		return findFirst(conditionsSQL, conditionsSQLData,
-				(Map<String, String>) null);
+		return findFirst(conditionsSQL, conditionsSQLData, (Map<String, String>) null);
 	}
 
 	/**
@@ -979,20 +968,16 @@ public class TableGateway {
 	 *            a map of options.
 	 * @return the first ActiveRecord found
 	 */
-	public ActiveRecord findFirst(String conditionsSQL,
+	public ActiveRecord findFirst(String conditionsSQL,	
 			Map<String, Object> conditionsSQLData, Map<String, String> options) {
-		if (options == null)
-			options = new HashMap<String, String>();
-		if (!options.containsKey(ActiveRecordConstants.key_include)
-				&& !options
-						.containsKey(ActiveRecordConstants.key_strict_include)) {
+		if (options == null) options = new HashMap<String, String>();
+		if (!options.containsKey(ActiveRecordConstants.key_include) && 
+			!options.containsKey(ActiveRecordConstants.key_strict_include)) {
 			options.put(DataProcessor.input_key_records_offset, "0");
 			options.put(DataProcessor.input_key_records_limit, "1");
 		}
-		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,
-				options);
-		return (list != null && list.size() > 0) ? ((ActiveRecord) list.get(0))
-				: null;
+		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,	options);
+		return (list != null && list.size() > 0) ? ((ActiveRecord) list.get(0)): null;
 	}
 
 	/**
@@ -1091,8 +1076,7 @@ public class TableGateway {
 	 * @return the last ActiveRecord found
 	 */
 	public ActiveRecord findLast(Map<String, Object> conditions, String options) {
-		return findLast(conditions,
-				Converters.convertSqlOptionStringToMap(options));
+		return findLast(conditions,	Converters.convertSqlOptionStringToMap(options));
 	}
 
 	/**
@@ -1152,10 +1136,9 @@ public class TableGateway {
 	 *            a data map for dynamic attributes in <tt>conditionsSQL</tt>
 	 * @return the last ActiveRecord found
 	 */
-	public ActiveRecord findLast(String conditionsSQL,
+	public ActiveRecord findLast(String conditionsSQL, 
 			Map<String, Object> conditionsSQLData) {
-		return findLast(conditionsSQL, conditionsSQLData,
-				(Map<String, String>) null);
+		return findLast(conditionsSQL, conditionsSQLData, (Map<String, String>) null);
 	}
 
 	/**
@@ -1179,8 +1162,7 @@ public class TableGateway {
 	 */
 	public ActiveRecord findLast(String conditionsSQL,
 			Map<String, Object> conditionsSQLData, Map<String, String> options) {
-		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,
-				options);
+		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,	options);
 		int size = list.size();
 		return (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
 	}
@@ -1206,7 +1188,7 @@ public class TableGateway {
 	 */
 	public ActiveRecord findLast(String conditionsSQL,
 			Map<String, Object> conditionsSQLData, String options) {
-		return findLast(conditionsSQL, conditionsSQLData,
+		return findLast(conditionsSQL, conditionsSQLData, 
 				Converters.convertSqlOptionStringToMap(options));
 	}
 
@@ -1219,8 +1201,7 @@ public class TableGateway {
 
 		try {
 			Map<String, Object> inputs = constructFindSQL(conditions, options);
-			String findSQL = (String) inputs
-					.get(ActiveRecordConstants.key_finder_sql);
+			String findSQL = (String) inputs.get(ActiveRecordConstants.key_finder_sql);
 			int offset = getOffset(options);
 			int limit = getLimit(options);
 
@@ -1252,10 +1233,9 @@ public class TableGateway {
 		List<ActiveRecord> list = null;
 
 		try {
-			Map<String, Object> inputs = constructFindSQL(conditionsSQL,
-					conditionsSQLData, options);
-			String findSQL = (String) inputs
-					.get(ActiveRecordConstants.key_finder_sql);
+			Map<String, Object> inputs = 
+				constructFindSQL(conditionsSQL, conditionsSQLData, options);
+			String findSQL = (String) inputs.get(ActiveRecordConstants.key_finder_sql);
 			int offset = getOffset(options);
 			int limit = getLimit(options);
 
@@ -1339,8 +1319,7 @@ public class TableGateway {
 
 		String conditionSql = null;
 		if (options != null && options.size() > 0) {
-			conditionSql = options
-					.get(ActiveRecordConstants.key_conditions_sql);
+			conditionSql = options.get(ActiveRecordConstants.key_conditions_sql);
 		}
 
 		// construct where clause
@@ -1577,8 +1556,7 @@ public class TableGateway {
 
 		try {
 			Map<String, Object> inputs = sqlHelper.getConstructedSqlQuery();
-			String findSQL = (String) inputs
-					.get(ActiveRecordConstants.key_finder_sql);
+			String findSQL = (String) inputs.get(ActiveRecordConstants.key_finder_sql);
 			int offset = getOffset(options);
 			int limit = getLimit(options);
 
@@ -1630,15 +1608,14 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteById(Object id) {
-		if (!home.getTableInfo().getHeader().isValidColumnName("ID")) {
+		if (!home.getRowInfo().isValidColumnName("ID")) {
 			throw new IllegalArgumentException("There is no column name as ID");
 		}
 
 		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs = addMoreProperties(inputs, null);
 
-		String deleteSQL = "DELETE FROM " + home.getTableName()
-				+ " WHERE id = ?";
+		String deleteSQL = "DELETE FROM " + home.getTableName() + " WHERE id = ?";
 		return SqlServiceClient.executeSQL(deleteSQL, inputs);
 	}
 
@@ -1793,8 +1770,7 @@ public class TableGateway {
 	 *            a data map for dynamic attributes in <tt>conditionsSQL</tt>
 	 * @return int number of records deleted
 	 */
-	public int deleteAll(String conditionsSQL,
-			Map<String, Object> conditionsSQLData) {
+	public int deleteAll(String conditionsSQL, Map<String, Object> conditionsSQLData) {
 		return internal_deleteAll(conditionsSQL, conditionsSQLData);
 	}
 
@@ -1834,8 +1810,7 @@ public class TableGateway {
 		return count;
 	}
 
-	private int internal_deleteAll(String conditionsSQL,
-			Map<String, Object> conditionsSQLData) {
+	private int internal_deleteAll(String conditionsSQL, Map<String, Object> conditionsSQLData) {
 		int count = -1;
 		String deleteSQL = "DELETE FROM " + home.getTableName();
 
@@ -1938,8 +1913,7 @@ public class TableGateway {
 	 *            a data map for dynamic attributes in <tt>conditionsSQL</tt>
 	 * @return int number of records updated
 	 */
-	public int updateAll(Map<String, Object> fieldData, String conditionsSQL,
-			Map<String, Object> conditionsSQLData) {
+	public int updateAll(Map<String, Object> fieldData, String conditionsSQL, Map<String, Object> conditionsSQLData) {
 		if (fieldData == null || fieldData.size() == 0)
 			throw new IllegalArgumentException(
 					"fieldData cannot be empty for updateAll()");
@@ -1988,8 +1962,7 @@ public class TableGateway {
 		return count;
 	}
 
-	private String getUniqueToken(String field,
-			Map<String, Object> conditionsSQLData, boolean convertToUpper) {
+	private String getUniqueToken(String field,	Map<String, Object> conditionsSQLData, boolean convertToUpper) {
 		if (conditionsSQLData == null || conditionsSQLData.size() == 0)
 			return field;
 

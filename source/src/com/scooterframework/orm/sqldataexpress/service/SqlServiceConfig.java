@@ -13,11 +13,7 @@ package com.scooterframework.orm.sqldataexpress.service;
  * @author (Fei) John Chen
  */
 public class SqlServiceConfig {
-    private static SqlService sqlSvc;
-    
-    static {
-        sqlSvc = new SqlServiceImpl();
-    }
+    private static final SqlService sqlSvc = new SqlServiceImpl();
     
     public static SqlService getSqlService() {
         return sqlSvc;

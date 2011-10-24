@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.CurrentThreadCacheClient;
@@ -96,6 +97,7 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
         aps.format = routeInfo.getFormat();
         aps.resource = routeInfo.getResourceName();
         aps.routeType = routeInfo.getRouteType();
+        aps.requiredFieldValues = requiredFieldValues;
         
         return aps;
     }
@@ -106,6 +108,15 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
     protected void registerActionProperties(HttpServletRequest request, ActionProperties aps) {
         super.registerActionProperties(request, aps);
         CurrentThreadCacheClient.cacheResource(aps.resource);
+        request.setAttribute(Constants.RESOURCE, aps.resource);
+        Map<String, String> requiredFieldValues = aps.requiredFieldValues;
+        if (requiredFieldValues != null) {
+        	CurrentThreadCacheClient.cacheFieldValues(requiredFieldValues);
+            
+            for(Map.Entry<String, String> entry : requiredFieldValues.entrySet()) {
+                request.setAttribute(entry.getKey(), entry.getValue());
+            }
+        }
     }
     
     /**

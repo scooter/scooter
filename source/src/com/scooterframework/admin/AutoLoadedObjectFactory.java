@@ -25,11 +25,10 @@ public class AutoLoadedObjectFactory extends ObjectFactory {
 	public static AutoLoadedObjectFactory getInstance() {
 		return me;
 	}
-
+    
 	public Class<?> loadClass(String className) throws ClassNotFoundException {
 		Class<?> c = null;
-		if ((ApplicationConfig.getInstance().isInDevelopmentEnvironment() || 
-				ApplicationConfig.getInstance().isInTestEnvironment())
+		if (!ApplicationConfig.getInstance().isInProductionEnvironment()
 				&& !ApplicationConfig.getInstance().isOrmAlone()) {
 			c = ClassManager.getInstance().loadMyClass(className);
 		} else {

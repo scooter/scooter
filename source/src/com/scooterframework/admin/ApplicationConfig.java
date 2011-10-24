@@ -423,12 +423,21 @@ public class ApplicationConfig {
     }
 
     /**
-     * Checks if the current running environment is development environment.
+     * Checks if the current running environment is test environment.
      *
-     * @return true if the current running environment is development.
+     * @return true if the current running environment is test.
      */
     public boolean isInTestEnvironment() {
         return Constants.RUNNING_ENVIRONMENT_TEST.equals(runningEnvironment);
+    }
+
+    /**
+     * Checks if the current running environment is production environment.
+     *
+     * @return true if the current running environment is production.
+     */
+    public boolean isInProductionEnvironment() {
+        return Constants.RUNNING_ENVIRONMENT_PRODUCTION.equals(runningEnvironment);
     }
     
     public String getClassFileLocationPath() {

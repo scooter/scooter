@@ -260,7 +260,7 @@ public class SqlExpressUtil {
      * Returns a UserDatabaseConnection instance for default database 
      * connection name.
      */
-    public static UserDatabaseConnection getUserDatabaseConnection() throws SQLException {
+    public static UserDatabaseConnection getUserDatabaseConnection() {
         return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection();
     }
     
@@ -270,7 +270,7 @@ public class SqlExpressUtil {
      * 
      * @param dcc  a DatabaseConnectionContext instance
      */
-    public static UserDatabaseConnection getUserDatabaseConnection(DatabaseConnectionContext dcc) throws SQLException {
+    public static UserDatabaseConnection getUserDatabaseConnection(DatabaseConnectionContext dcc) {
         return UserDatabaseConnectionFactory.getInstance().createUserDatabaseConnection(dcc);
     }
     
@@ -280,7 +280,7 @@ public class SqlExpressUtil {
      * 
      * @param connName  name of a connection
      */
-    public static UserDatabaseConnection getUserDatabaseConnection(String connName) throws SQLException {
+    public static UserDatabaseConnection getUserDatabaseConnection(String connName) {
     	if (connName == null) 
     		throw new IllegalArgumentException("connName cannot be null.");
     	
@@ -707,10 +707,7 @@ public class SqlExpressUtil {
         if (jdbcStatementString == null || "".equals(jdbcStatementString.trim())) 
             throw new LookupFailureException("There is no sql statement for " + name + ".");
         
-        JdbcStatement st = new JdbcStatement(name);
-        st.setJdbcStatementString(jdbcStatementString);
-        
-        return st;
+        return new JdbcStatement(name, jdbcStatementString);
     }
     
     // find the jdbc statement from cache
@@ -718,11 +715,7 @@ public class SqlExpressUtil {
         if (jdbcStatementString == null) 
             throw new IllegalArgumentException("SQL statement string is empty.");
         
-        // Use the input sqlStatementString as name key
-        JdbcStatement st = new JdbcStatement(jdbcStatementString);
-        st.setJdbcStatementString(jdbcStatementString);
-        
-        return st;
+        return new JdbcStatement(jdbcStatementString, jdbcStatementString);
     }
     
     /**
@@ -749,23 +742,16 @@ public class SqlExpressUtil {
         if (tableName == null) 
             throw new IllegalArgumentException("tableName cannot be null.");
         
-        TableInfo ti = null;
-    	UserDatabaseConnection udc = null;
+        TableInfo ti = DBStore.getInstance().getTableInfo(connName, tableName);
+        if (ti != null) return ti;
+        
+        UserDatabaseConnection udc = null;
         try {
-            udc = SqlExpressUtil.getUserDatabaseConnection(connName);
-            ti = lookupTableInfo(udc, tableName);
-        }
-        catch(LookupFailureException lfEx) {
-        	throw lfEx;
-        }
-        catch(Exception ex) {
-            String errorMessage = "Failed to get meta data info of '" + tableName + 
-            		"' with database connection '" + connName + "'";
-            errorMessage += ". Reason: " + ex.getMessage() + ".";
-            throw new LookupFailureException(errorMessage, ex);
+        	udc = SqlExpressUtil.getUserDatabaseConnection(connName);
+        	ti = _lookupAndRegisterTableInfo(udc, tableName);
         }
         finally {
-            DAOUtil.closeConnection(udc);
+        	DAOUtil.closeConnection(udc);
         }
         
         return ti;
@@ -796,14 +782,52 @@ public class SqlExpressUtil {
             throw new IllegalArgumentException("Table name is empty.");
         
         String connName = udc.getConnectionName();
+        TableInfo ti = DBStore.getInstance().getTableInfo(connName, tableName);
+        if (ti != null) return ti;
+        
+        return _lookupAndRegisterTableInfo(udc, tableName);
+    }
+    
+    private static TableInfo _lookupAndRegisterTableInfo(UserDatabaseConnection udc, String tableName) {
+        if (udc == null) 
+            throw new IllegalArgumentException("UserDatabaseConnection udc is null.");
+        
+        if (tableName == null) 
+            throw new IllegalArgumentException("Table name is empty.");
+        
+        String connName = udc.getConnectionName();
         DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(connName);
         String[] s3 = dba.resolveCatalogAndSchemaAndTable(connName, tableName);
         String catalog = s3[0];
         String schema = s3[1];
         String table = s3[2];
         
-        TableInfo ti = DBStore.getInstance().getTableInfo(connName, catalog, schema, table);
-        if (ti != null) return ti;
+        TableInfo ti = null;
+        
+        try {
+            ti = createTableInfo(dba, udc, catalog, schema, table);
+            DBStore.getInstance().addTableInfo(connName, tableName, ti);
+        }
+        catch(LookupFailureException lfEx) {
+        	throw lfEx;
+        }
+        catch (Exception ex) {
+            String errorMessage = "Failed to get meta data info of '" + tableName + 
+    					"' with database connection '" + connName + "'" + 
+    					" catalog '" + catalog + "', schema '" + schema + "'.";
+            errorMessage += " Reason: " + ex.getMessage() + ".";
+            
+            log.error("Exception in lookupTableInfo(): " + errorMessage);
+            throw new LookupFailureException(errorMessage, ex);
+        }
+        
+        return ti;
+    }
+    
+    private static TableInfo createTableInfo(DBAdapter dba, UserDatabaseConnection udc, String catalog, String schema, String table) {
+        String connName = udc.getConnectionName();
+        
+        TableInfo ti = null;
         
         try {
             String tableType = TableInfo.TYPE_TABLE; //default
@@ -821,17 +845,15 @@ public class SqlExpressUtil {
             }
             
             if (ti == null) 
-                throw new LookupFailureException("Failed to find table info for '" + tableName + "'.");
-            
-            DBStore.getInstance().addTableInfo(connName, catalog, schema, table, ti);
+                throw new LookupFailureException("Failed to find table info for '" + table + "'.");
         }
         catch (SQLException ex) {
-            String errorMessage = "Failed to get meta data info of '" + tableName + 
+            String errorMessage = "Failed to get meta data info of '" + table + 
     					"' with database connection '" + connName + "'" + 
     					" catalog '" + catalog + "', schema '" + schema + "'.";
             errorMessage += " Reason: " + ex.getMessage() + ".";
             
-            log.error("Exception in lookupTableInfo(): " + errorMessage);
+            log.error("Exception in createTableInfo(): " + errorMessage);
             throw new LookupFailureException(errorMessage, ex);
         }
         

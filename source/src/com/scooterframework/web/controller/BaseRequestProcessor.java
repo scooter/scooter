@@ -100,6 +100,9 @@ public class BaseRequestProcessor {
                     registerActionProperties(request, aps);
                     requestPropertiesMap.put(requstPathKey, aps);
             	}
+            	else {
+            		registerActionProperties(request, aps);
+            	}
                 log.debug("aps: " + aps);
                 
                 result = executeRequest(aps, request, response);
@@ -259,6 +262,12 @@ public class BaseRequestProcessor {
         CurrentThreadCacheClient.cacheAction(aps.action);
         CurrentThreadCacheClient.cacheModel(aps.model);
         CurrentThreadCacheClient.cacheFormat(aps.format);
+        request.setAttribute(Constants.CONTROLLER, aps.controller);
+        request.setAttribute(Constants.CONTROLLER_CLASS, aps.controllerClassName);
+        request.setAttribute(Constants.CONTROLLER_PATH, aps.controllerPath);
+        request.setAttribute(Constants.ACTION, aps.action);
+        request.setAttribute(Constants.MODEL, aps.model);
+        request.setAttribute(Constants.FORMAT, aps.format);
     }
     
     /**

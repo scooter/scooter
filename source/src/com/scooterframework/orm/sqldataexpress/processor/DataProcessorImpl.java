@@ -45,6 +45,8 @@ import com.scooterframework.orm.sqldataexpress.util.SqlUtil;
 abstract public class DataProcessorImpl implements DataProcessor {
 
     protected DatabaseMetaData dbmd;
+    private boolean hasCheckedSupportsGetGeneratedKeys;
+    private boolean supportsGetGeneratedKeys;
     
     /**
      * execute
@@ -81,14 +83,16 @@ abstract public class DataProcessorImpl implements DataProcessor {
      * @return true if supports.
      */
     protected boolean supportsGetGeneratedKeys() {
-        boolean b = false;
+    	if (hasCheckedSupportsGetGeneratedKeys) return supportsGetGeneratedKeys;
+    	
         try {
-            b = dbmd.supportsGetGeneratedKeys();
+        	supportsGetGeneratedKeys = dbmd.supportsGetGeneratedKeys();
+            hasCheckedSupportsGetGeneratedKeys = true;
         }
         catch(Exception ex) {
             ;
         }
-        return b;
+        return supportsGetGeneratedKeys;
     }
     
     protected Set<String> getAllowedColumns(Map<String, String> outputFilter, Cursor cursor) {
