@@ -270,6 +270,16 @@
 		</copy>
 	</target>
 
+	<target name="app.enhancer" depends="app.compile">
+		<java classname="com.scooterframework.autoloader.Enhancer" fork="true">
+			<jvmarg value="-DappPath=${appPath}"/>
+			<classpath>
+				<path refid="app.classpath"/>
+				<pathelement path="${app.compile.outdir}" />
+			</classpath>
+		</java>
+	</target>
+
 	<target name="app_test_unit" depends="app.compile">
 		<delete dir="${app.unittests.outdir}"/>
 		<mkdir dir="${app.unittests.outdir}"/>
@@ -367,7 +377,7 @@
         ]]> </script>
     </target>
     
-    <target name="war" depends="get_app_name">
+    <target name="war" depends="get_app_name, app.enhancer">
         <echo>creating war file for application "${appName}"</echo>
     	
         <delete dir="${build.outdir}/tmp"/>

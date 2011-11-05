@@ -7,7 +7,6 @@
  */
 package com.scooterframework.transaction;
 
-import javax.naming.InitialContext;
 import javax.transaction.UserTransaction;
 
 import com.scooterframework.common.logging.LogUtil;
@@ -25,8 +24,6 @@ public class TransactionFactory {
     private TransactionFactory() {
     }
     
-    public static final String USER_TRANSACTION_JNDI_STRING = "java:comp/UserTransaction";
-    
     public static TransactionFactory getInstance() {
         return me;
     }
@@ -41,10 +38,15 @@ public class TransactionFactory {
         UserTransaction ut = null;
         
         if (type == null) {
-            ut = lookupUserTransaction();
+        	try {
+                ut = TransactionUtil.lookupUserTransaction();
+        	}
+        	catch(Exception ex) {
+        		;
+        	}
             
             if (TransactionUtil.isUserTransactionActive(ut)) {
-                log.info("UserTransaction has started: Use JtaTransaction");
+                log.debug("UserTransaction has started: Use JtaTransaction");
                 type = Transaction.JTA_TRANSACTION_TYPE;
                 userTransactionAlreadyStarted = true;
             }
@@ -53,7 +55,7 @@ public class TransactionFactory {
                 //check if there is any default connection name specified in property file
                 type = DatabaseConfig.getInstance().getDefaultTransactionType();
                 if (type == null || type.equals("")) {
-                    log.warn("No default transaction type specified in " + 
+                    log.debug("No default transaction type specified in " + 
                              "property file. Use JdbcTransaction as default.");
                     type = Transaction.JDBC_TRANSACTION_TYPE;
                 }
@@ -79,20 +81,6 @@ public class TransactionFactory {
         }
         
         return ts;
-    }
-    
-    private UserTransaction lookupUserTransaction() {
-        UserTransaction ut = null;
-        
-        try {
-            InitialContext ctx = new InitialContext();
-            ut = (UserTransaction) ctx.lookup(USER_TRANSACTION_JNDI_STRING);
-        }
-        catch(Exception ex) {
-            ;
-        }
-
-        return ut;
     }
     
     private LogUtil log = LogUtil.getLogger(this.getClass().getName());

@@ -862,6 +862,7 @@ public class TableGateway {
 		
 		options.put(DataProcessor.input_key_records_offset, "0");
 		options.put(DataProcessor.input_key_records_limit, "1");
+		options.put(DataProcessor.input_key_records_fixed, "true");
 		List<ActiveRecord> list = findAll(conditions, options);
 		return (list != null && list.size() > 0) ? (list.get(0)) : null;
 	}
@@ -975,6 +976,7 @@ public class TableGateway {
 			!options.containsKey(ActiveRecordConstants.key_strict_include)) {
 			options.put(DataProcessor.input_key_records_offset, "0");
 			options.put(DataProcessor.input_key_records_limit, "1");
+			options.put(DataProcessor.input_key_records_fixed, "true");
 		}
 		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,	options);
 		return (list != null && list.size() > 0) ? ((ActiveRecord) list.get(0)): null;

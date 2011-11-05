@@ -15,7 +15,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +66,6 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
         OmniDTO returnTO = new OmniDTO();
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        
-        if (outputFilters == null) outputFilters = new HashMap<String, String>();
         
         try {
             String stName = st.getName();

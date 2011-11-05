@@ -66,7 +66,7 @@ public class ConnectionUtil {
 							+ dcc.getConnectionName());
 
 		checkReadonly(connection, dcc);
-		
+		checkAutoCommit(connection, dcc);
 		checkTransactionIsolationLevel(connection, dcc);
 
 		afterConnection(connection, dcc);
@@ -94,12 +94,6 @@ public class ConnectionUtil {
 				ds.setLoginTimeout(loginTimeout.intValue());
 
 			connection = ds.getConnection();
-
-			if (connection != null) {
-				connection.setAutoCommit(false);
-			} else {
-				throw new IllegalArgumentException("No connection is returned from ds.getConnection().");
-			}
 		} catch (Exception ex) {
             String errorMessage = "ConnectionUtil.createConnection " + 
                     "failed for dataSourceName \"" + jndiDataSourceName + "\"";
@@ -131,12 +125,6 @@ public class ConnectionUtil {
 				ds.setLoginTimeout(loginTimeout.intValue());
 
 			connection = ds.getConnection(username, password);
-
-			if (connection != null) {
-				connection.setAutoCommit(false);
-			} else {
-				throw new IllegalArgumentException("No connection is returned from ds.getConnection(username, password).");
-			}
 		} catch (Exception ex) {
             String errorMessage = "ConnectionUtil.createConnection " + 
                     "failed for dataSourceName \"" + jndiDataSourceName + 
@@ -185,7 +173,7 @@ public class ConnectionUtil {
 							+ dcc.getConnectionName());
 
 		checkReadonly(connection, dcc);
-		
+		checkAutoCommit(connection, dcc);
 		checkTransactionIsolationLevel(connection, dcc);
 
 		afterConnection(connection, dcc);
@@ -216,12 +204,6 @@ public class ConnectionUtil {
 				DriverManager.setLoginTimeout(loginTimeout.intValue());
 
 			connection = DriverManager.getConnection(url);
-
-			if (connection != null) {
-				connection.setAutoCommit(false);
-			} else {
-				throw new IllegalArgumentException("No connection is returned from DriverManager.getConnection(url).");
-			}
 		} catch (Exception ex) {
 			throw new CreateConnectionFailureException(
 					"ConnectionUtil.createConnection failed for url \"" + url
@@ -255,12 +237,6 @@ public class ConnectionUtil {
 				DriverManager.setLoginTimeout(loginTimeout.intValue());
 
 			connection = DriverManager.getConnection(url, username, password);
-
-			if (connection != null) {
-				connection.setAutoCommit(false);
-			} else {
-				throw new IllegalArgumentException("No connection is returned from DriverManager.getConnection(url).");
-			}
 		} catch (Exception ex) {
 			throw new CreateConnectionFailureException(
 					"ConnectionUtil.createConnection failed for url \"" + url
@@ -306,7 +282,7 @@ public class ConnectionUtil {
 							+ dcc.getConnectionName());
 
 		checkReadonly(connection, dcc);
-		
+		checkAutoCommit(connection, dcc);
 		checkTransactionIsolationLevel(connection, dcc);
 
 		afterConnection(connection, dcc);
@@ -333,12 +309,6 @@ public class ConnectionUtil {
 				ds.setLoginTimeout(loginTimeout.intValue());
 
 			connection = ds.getConnection();
-
-			if (connection != null) {
-				connection.setAutoCommit(false);
-			} else {
-				throw new IllegalArgumentException("No connection is returned from ds.getConnection().");
-			}
 		} catch (SQLException ex) {
 			throw new CreateConnectionFailureException(
 					"ConnectionUtil.createPooledConnection failed for conectionName \"" + connectionName
@@ -368,12 +338,6 @@ public class ConnectionUtil {
 				ds.setLoginTimeout(loginTimeout.intValue());
 
 			connection = ds.getConnection(username, password);
-
-			if (connection != null) {
-				connection.setAutoCommit(false);
-			} else {
-				throw new IllegalArgumentException("No connection is returned from ds.getConnection(username, password).");
-			}
 		} catch (SQLException ex) {
 			throw new CreateConnectionFailureException(
 					"ConnectionUtil.createPooledConnection failed for conectionName \"" + connectionName
@@ -398,7 +362,14 @@ public class ConnectionUtil {
 		roleStr = roleStr.substring(0, roleStr.length() - 1);
 		return "SET ROLE " + roleStr;
 	}
-
+	
+	/**
+	 * If the database connection context specifies <tt>readonly</tt>, set the 
+	 * <tt>connection</tt> to be read only.
+	 * 
+	 * @param connection  a database connection instance
+	 * @param dcc         a <tt>DatabaseConnectionContext</tt> instance
+	 */
 	public static void checkReadonly(Connection connection,
 			DatabaseConnectionContext dcc) {
 		try {
@@ -410,7 +381,33 @@ public class ConnectionUtil {
 							+ dcc.getConnectionName() + "\" because " + ex.getMessage(), ex);
 		}
 	}
+	
+	/**
+	 * If the database connection context specifies <tt>autocommit</tt> to be 
+	 * true, set the <tt>connection</tt> to be auto commit.
+	 * 
+	 * @param connection  a database connection instance
+	 * @param dcc         a <tt>DatabaseConnectionContext</tt> instance
+	 */
+	public static void checkAutoCommit(Connection connection,
+			DatabaseConnectionContext dcc) {
+		try {
+			if (!dcc.isAutoCommit())
+				connection.setAutoCommit(false);
+		} catch (SQLException ex) {
+			throw new CreateConnectionFailureException(
+					"Faied to set readonly property for connection \""
+							+ dcc.getConnectionName() + "\" because " + ex.getMessage(), ex);
+		}
+	}
 
+	/**
+	 * If the database connection context specifies <tt>transaction_isolation_level</tt>, 
+	 * set the transaction isolation level of the <tt>connection</tt>.
+	 * 
+	 * @param connection  a database connection instance
+	 * @param dcc         a <tt>DatabaseConnectionContext</tt> instance
+	 */
 	public static void checkTransactionIsolationLevel(Connection connection,
 			DatabaseConnectionContext dcc) {
 		try {
@@ -423,6 +420,12 @@ public class ConnectionUtil {
 		}
 	}
 
+	/**
+	 * If the database connection context specifies <tt>beforeConnection</tt>
+	 * class name, execute the <tt>beforeConnectionMethodName</tt>.
+	 * 
+	 * @param dcc  a <tt>DatabaseConnectionContext</tt> instance
+	 */
 	public static void beforeConnection(DatabaseConnectionContext dcc) {
 		String beforeClassName = dcc.getBeforeConnectionClassName();
 		if (beforeClassName != null) {
@@ -431,6 +434,12 @@ public class ConnectionUtil {
 		}
 	}
 
+	/**
+	 * If the database connection context specifies <tt>afterConnection</tt>
+	 * class name, execute the <tt>afterConnectionMethodName</tt>.
+	 * 
+	 * @param dcc  a <tt>DatabaseConnectionContext</tt> instance
+	 */
 	public static void afterConnection(Connection connection,
 			DatabaseConnectionContext dcc) {
 		String afterClassName = dcc.getAfterConnectionClassName();

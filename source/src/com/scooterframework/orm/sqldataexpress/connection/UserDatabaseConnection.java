@@ -8,6 +8,7 @@
 package com.scooterframework.orm.sqldataexpress.connection;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 
 /**
@@ -42,4 +43,21 @@ public interface UserDatabaseConnection
      * Return the underline DatabaseConnectionContext. 
      */
     public DatabaseConnectionContext getDatabaseConnectionContext();
+    
+    /**
+     * Retrieves the current auto-commit mode for this <tt>Connection</tt> object.
+     * 
+     * @return the current state of this <tt>Connection</tt> object's auto-commit mode 
+     */
+    public boolean getAutoCommit();
+    
+    /**
+     * Sets this connection's auto-commit mode to the given state. 
+     * 
+     * @param autoCommit <code>true</code> to enable auto-commit mode; 
+     *         <code>false</code> to disable it
+     * @exception SQLException if a database access error occurs
+     * @see #getAutoCommit
+     */
+    public void setAutoCommit(boolean autoCommit) throws SQLException;
 }

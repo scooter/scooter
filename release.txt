@@ -19,6 +19,7 @@ scooter-1.2.0 2011xxxx
  + New feature: Generate scaffold code by specifying a table name with "-Dtable=YourTableName"
  + New feature: Generate model code without relying on byte code enhancement with "-Denhance=n".
  + New feature: Added save(boolean) method. Original save() method is now for changed fields only.
+ + New feature: Ant war task automatically enhance classes.
  + Fixed bug: Failed to load default value of a column.
  + Fixed bug: Redirect does not work for Ajax requests.
  + Fixed bug: Incorrect http link when view path starts with context path.

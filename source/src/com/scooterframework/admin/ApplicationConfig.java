@@ -307,7 +307,7 @@ public class ApplicationConfig {
             try {
                 ClassWorkHelper.preloadClasses(sourceFileLocationPath);
 			} catch (Exception ex) {
-				log.error("Error in preloadClasses: " + ex.getMessage());
+				log.error("Error in preloadClasses", ex);
 			}
         }
         

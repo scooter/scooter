@@ -7,7 +7,6 @@
  */
 package com.scooterframework.transaction;
 
-import javax.naming.InitialContext;
 import javax.transaction.UserTransaction;
 
 import com.scooterframework.orm.sqldataexpress.connection.UserDatabaseConnection;
@@ -27,8 +26,7 @@ public class JtaTransaction extends AbstractTransactionImpl {
         super();
         transactionType = Transaction.JTA_TRANSACTION_TYPE;
         
-        UserTransaction ut = createUserTransaction();
-        this.ut = ut;
+        this.ut = TransactionUtil.lookupUserTransaction();
     }
     
     /**
@@ -109,21 +107,6 @@ public class JtaTransaction extends AbstractTransactionImpl {
         catch(Exception ex) {
             throw new TransactionException("eroror in rollback()", ex);
         }
-    }
-
-    private UserTransaction createUserTransaction() {
-        UserTransaction ut = null;
-        
-        try {
-            InitialContext ctx = new InitialContext();
-            ut = (UserTransaction) ctx.lookup(TransactionFactory.USER_TRANSACTION_JNDI_STRING);
-        }
-        catch(Exception ex) {
-            throw new TransactionException("Failed to create UserTransaction by using " + 
-            TransactionFactory.USER_TRANSACTION_JNDI_STRING + ".", ex);
-        }
-
-        return ut;
     }
 
     private UserTransaction ut;

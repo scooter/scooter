@@ -8,10 +8,9 @@
 package com.scooterframework.transaction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 import com.scooterframework.orm.sqldataexpress.connection.DatabaseConnectionContext;
@@ -40,27 +39,6 @@ abstract public class AbstractTransactionImpl implements Transaction {
      */
     public String getTransactionType() {
         return transactionType;
-    }
-
-    /**
-     * Register a resource which is to be managed by this transaction.
-     */
-    public void registerResource(String name, UserDatabaseConnection resource) {
-        if (nameConnMap.containsKey(name)) return;
-        
-        nameConnMap.put(name, resource);
-        connList.add(resource);
-    }
-    
-    /**
-     * Deregister a resource from a transaction.
-     */
-    public void deregisterResource(String name, UserDatabaseConnection resource) {
-        if (nameConnMap.containsKey(name)) {
-            Object udc = nameConnMap.get(name);
-            connList.remove(udc);
-            nameConnMap.remove(name);
-        }
     }
     
     /**
@@ -130,15 +108,6 @@ abstract public class AbstractTransactionImpl implements Transaction {
     }
     
     /**
-     * Return the UserDatabaseConnection of the database
-     *
-     * @return DataSourceConnection
-     */
-    public UserDatabaseConnection getCachedUserDatabaseConnection(String name) {
-        return (UserDatabaseConnection)nameConnMap.get(name);
-    }
-    
-    /**
      * Return a connection to the database
      *
      * @return UserDatabaseConnection
@@ -186,8 +155,22 @@ abstract public class AbstractTransactionImpl implements Transaction {
         
         return udc;
     }
+    
+    private UserDatabaseConnection getCachedUserDatabaseConnection(String name) {
+        return (UserDatabaseConnection)nameConnMap.get(name);
+    }
 
-    protected Map<String, UserDatabaseConnection> nameConnMap = new HashMap<String, UserDatabaseConnection>();
+    /**
+     * Register a resource which is to be managed by this transaction.
+     */
+    private void registerResource(String name, UserDatabaseConnection resource) {
+        if (nameConnMap.containsKey(name)) return;
+        
+        nameConnMap.putIfAbsent(name, resource);
+        connList.add(resource);
+    }
+
+    protected ConcurrentHashMap<String, UserDatabaseConnection> nameConnMap = new ConcurrentHashMap<String, UserDatabaseConnection>();
     protected List<UserDatabaseConnection> connList = new ArrayList<UserDatabaseConnection>();
     protected String transactionType = null;
     protected boolean bTransactionHasStarted = false;

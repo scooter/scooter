@@ -8,6 +8,10 @@
 package com.scooterframework.orm.sqldataexpress.connection;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+
+import com.scooterframework.common.logging.LogUtil;
+import com.scooterframework.orm.sqldataexpress.exception.CreateConnectionFailureException;
 
 /**
  * Abstract UserDatabaseConnectionImpl class 
@@ -15,6 +19,8 @@ import java.sql.Connection;
  * @author (Fei) John Chen
  */
 abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnection {
+    private LogUtil log = LogUtil.getLogger(this.getClass().getName());
+    
     public UserDatabaseConnectionImpl(DatabaseConnectionContext dcc) {
         this(null, dcc);
     }
@@ -43,7 +49,8 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
     }
     
     /**
-     * Return the underline connection.
+     * Return the underneath connection.
+     * @throws SQLException 
      */
     public Connection getConnection() {
     	if (conn == null) {
@@ -73,6 +80,50 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
     public DatabaseConnectionContext getDatabaseConnectionContext() {
         return dcc;
     }
+    
+    /**
+     * Retrieves the current auto-commit mode for this <tt>Connection</tt> object.
+     * 
+     * @return the current state of this <tt>Connection</tt> object's auto-commit mode 
+     */
+    public boolean getAutoCommit() {
+    	if (conn == null) return autoCommit;
+    	
+		try {
+			autoCommit = conn.getAutoCommit();
+		}
+		catch(Exception ex) {
+			String errorMessage = "Failed to get auto commit for the underline connection.";
+			log.error(errorMessage, ex);
+			throw new CreateConnectionFailureException(errorMessage, ex);
+		}
+    	
+    	return autoCommit;
+    }
+    
+    /**
+     * Sets this connection's auto-commit mode to the given state. 
+     * 
+     * @param autoCommit <code>true</code> to enable auto-commit mode; 
+     *         <code>false</code> to disable it
+     * @see #getAutoCommit
+     */
+    public void setAutoCommit(boolean autoCommit) {
+    	this.autoCommit = autoCommit;
+    	if (conn == null) return;
+    	
+		try {
+			boolean ac = conn.getAutoCommit();
+			if (ac != autoCommit) {
+				conn.setAutoCommit(autoCommit);
+			}
+		}
+		catch(Exception ex) {
+			String errorMessage = "Failed to set auto commit for the underline connection.";
+			log.error(errorMessage, ex);
+			throw new CreateConnectionFailureException(errorMessage, ex);
+		}
+    }
 
     /**
      * Create a connection based on specific database connection context.
@@ -84,4 +135,5 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
     private String connName;
     private DatabaseConnectionContext dcc;
     private Connection conn;
+    private boolean autoCommit;
 }

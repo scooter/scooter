@@ -19,19 +19,12 @@ public interface Transaction {
     public static final String CMT_TRANSACTION_TYPE  = "CMT";
     public static final String JDBC_TRANSACTION_TYPE = "JDBC";
     public static final String JTA_TRANSACTION_TYPE  = "JTA";
-
-    /**
-     * Register a resource which is to be managed by this transaction.
-     */
-    public void registerResource(String name, UserDatabaseConnection resource);
     
-    /**
-     * Deregister a resource from a transaction.
-     */
-    public void deregisterResource(String name, UserDatabaseConnection resource);
+    public static final String USER_TRANSACTION_JNDI_STRING = "java:comp/UserTransaction";
 
     /**
      * Release all resources managed by this transaction.
+     * 
      * This method should always be called at the end of a transaction block.
      */
     public void releaseResources();
@@ -60,13 +53,6 @@ public interface Transaction {
      * Check if transaction has ended.
      */
     public boolean isTransactionEnded();
-    
-    /**
-     * Return the UserDatabaseConnection of the database
-     *
-     * @return UserDatabaseConnection
-     */
-    public UserDatabaseConnection getCachedUserDatabaseConnection(String name);
     
     /**
      * Return a connection to the database

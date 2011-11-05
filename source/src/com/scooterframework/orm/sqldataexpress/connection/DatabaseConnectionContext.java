@@ -77,6 +77,20 @@ public interface DatabaseConnectionContext extends Serializable
     public void setReadonly(boolean readonly);
     
     /**
+     * Checks if the connection is auto-commit.
+     *
+     * @return true if auto-commit connection
+     */
+    public boolean isAutoCommit();
+    
+    /**
+     * Sets auto-commit connection
+     *
+     * @param autoCommit <tt>true</tt> if auto-commit connection is desired
+     */
+    public void setAutoCommit(boolean autoCommit);
+    
+    /**
      * Returns the vendor name of the database
      *
      * @return String
@@ -153,6 +167,7 @@ public interface DatabaseConnectionContext extends Serializable
     public static final String KEY_PASSWORD = DatabaseConfig.KEY_DB_CONNECTION_PASSWORD;
     public static final String KEY_LOGINTIMEOUT = DatabaseConfig.KEY_DB_CONNECTION_TIMEOUT;
     public static final String KEY_READONLY = DatabaseConfig.KEY_DB_CONNECTION_READONLY;
+    public static final String KEY_AUTOCOMMIT = DatabaseConfig.KEY_DB_CONNECTION_AUTOCOMMIT;
     public static final String KEY_TRANSACTION_ISOLATION_LEVEL = DatabaseConfig.KEY_DB_CONNECTION_TRANSACTION_ISOLATION_LEVEL;
     public static final String KEY_VENDOR = DatabaseConfig.KEY_DB_CONNECTION_VENDOR;
     public static final String KEY_SCHEMA = DatabaseConfig.KEY_DB_CONNECTION_SCHEMA;

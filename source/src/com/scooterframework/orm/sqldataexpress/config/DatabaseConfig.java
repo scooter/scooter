@@ -32,6 +32,7 @@ import com.scooterframework.common.util.Converters;
 import com.scooterframework.common.util.NamedProperties;
 import com.scooterframework.common.util.PropertyFileUtil;
 import com.scooterframework.common.util.Util;
+import com.scooterframework.orm.sqldataexpress.connection.DatabaseConnectionContext;
 import com.scooterframework.transaction.Transaction;
 
 /**
@@ -170,6 +171,11 @@ public class DatabaseConfig extends Observable implements Observer {
      * Key to represent <tt>readonly</tt> property in database connection properties.
      */
     public static final String KEY_DB_CONNECTION_READONLY = "readonly";
+
+    /**
+     * Key to represent <tt>readonly</tt> property in database connection properties.
+     */
+    public static final String KEY_DB_CONNECTION_AUTOCOMMIT = "autocommit";
 
     /**
      * Key to represent <tt>transactionIsolationLevel</tt> property in database connection properties.
@@ -434,6 +440,9 @@ public class DatabaseConfig extends Observable implements Observer {
     }
 
     private void checkConnectionPoolProperties(String connectionName, Properties p) {
+    	boolean autoCommit = ("true".equalsIgnoreCase(p.getProperty(DatabaseConnectionContext.KEY_AUTOCOMMIT)))?true:false;
+        
+    	
         String maxPoolSize = p.getProperty(KEY_DB_CONNECTION_MAX_POOL_SIZE, "" + DEFAULT_VALUE_max_pool_size);
         if (Integer.parseInt(maxPoolSize) == 0) {
             p.setProperty(KEY_DB_CONNECTION_MAX_POOL_SIZE, maxPoolSize);
@@ -477,7 +486,9 @@ public class DatabaseConfig extends Observable implements Observer {
             cpds.setJdbcUrl(url);
 			cpds.setUser(username);
 			cpds.setPassword(password);
-
+			
+			cpds.setAutoCommitOnClose(autoCommit);
+			
 			cpds.setMaxPoolSize(Integer.parseInt(maxPoolSize));
 			cpds.setMinPoolSize(Integer.parseInt(minPoolSize));
 			cpds.setAcquireIncrement(Integer.parseInt(acquireIncrement));

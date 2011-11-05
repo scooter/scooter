@@ -119,6 +119,24 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
     }
     
     /**
+     * Checks if the connection is auto-commit.
+     *
+     * @return true if auto-commit connection
+     */
+    public boolean isAutoCommit() {
+        return autoCommit;
+    }
+    
+    /**
+     * Sets auto-commit connection
+     *
+     * @param autoCommit <tt>true</tt> if auto-commit connection is desired
+     */
+    public void setAutoCommit(boolean autoCommit) {
+        this.autoCommit = autoCommit;
+    }
+    
+    /**
      * Returns the vendor name of the database
      *
      * @return String
@@ -240,6 +258,7 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
         useLoginAsSchema = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_USE_LOGIN_AS_SCHEMA)))?true:false;
         useLoginForConnection = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_USE_LOGIN_FOR_CONNECTION)))?true:false;
         readonly = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_READONLY)))?true:false;
+        autoCommit = ("true".equalsIgnoreCase(prop.getProperty(DatabaseConnectionContext.KEY_AUTOCOMMIT)))?true:false;
         
         String til = prop.getProperty(DatabaseConnectionContext.KEY_TRANSACTION_ISOLATION_LEVEL);
         if (til != null) {
@@ -304,6 +323,7 @@ abstract public class DatabaseConnectionContextImpl implements DatabaseConnectio
     protected String password = null;
     protected Integer loginTimeout = null;
     protected boolean readonly = false;
+    protected boolean autoCommit = false;
     protected int transactionIsolationLevel = NO_SPECIFIED_TRANSACTION_ISOLATION;
     protected String vendor = null;
     protected String schema = null;
