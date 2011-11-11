@@ -454,16 +454,12 @@ public class StringUtil {
         return new StringBuilder(newWord);
     }
     
-    public static String removeLastToken(String word, String token) {
-        if (word == null || token == null || "".equals(token)) return word;
-        
-        String newWord = word;
-        int pos = word.lastIndexOf(token);
-        if (pos != -1) {
-            newWord = word.substring(0, pos);
-        }
-        return newWord;
-    }
+	public static String removeLastToken(String word, String token) {
+		return (word == null || token == null || "".equals(token) || 
+				!word.endsWith(token)) ? 
+					word : 
+					word.substring(0, word.length()- token.length());
+	}
     
     public static String reverseMapping(String mapping) {
         if (mapping == null) return null;
