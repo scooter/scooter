@@ -42,7 +42,8 @@ public class AdminSignonController {
     public String index() {
     	return (LoginHelper.isAdminLoggedIn())?
     			redirectTo("/admin/signon/main")
-    			:forwardTo("/admin/signon/login");
+    			//:redirectTo("/admin/signon/login");
+    			:forwardTo(viewPath("/login.jsp"));
     }
     
     /**

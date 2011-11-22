@@ -67,7 +67,7 @@ public class SqlUtil {
      *  java.lang.String       public static final int CHAR 1
      *  java.sql.Clob          public static final int CLOB 2005
      *  java.lang.Object       public static final int DATALINK 70
-     *  java.sql.TimeStamp     public static final int DATE 91
+     *  java.sql.Timestamp     public static final int DATE 91
      *  java.lang.BigDecimal   public static final int DECIMAL 3
      *  java.lang.Object       public static final int DISTINCT 2001
      *  java.lang.Double       public static final int DOUBLE 8
@@ -90,7 +90,7 @@ public class SqlUtil {
      *  java.sql.String        public static final int SQLXML 2009
      *  java.sql.Struct        public static final int STRUCT 2002
      *  java.sql.Time          public static final int TIME 92
-     *  java.sql.TimeStamp     public static final int TIMESTAMP 93
+     *  java.sql.Timestamp     public static final int TIMESTAMP 93
      *  java.lang.Integer      public static final int TINYINT -6
      *  byte[]                 public static final int VARBINARY -3
      *  java.lang.String       public static final int VARCHAR 12

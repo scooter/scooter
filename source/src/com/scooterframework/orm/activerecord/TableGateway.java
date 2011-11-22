@@ -8,12 +8,18 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.cache.Cache;
+import com.scooterframework.cache.CacheProvider;
+import com.scooterframework.cache.CacheProviderUtil;
+import com.scooterframework.cache.NamedCurrentThreadCache;
 import com.scooterframework.common.exception.ObjectCreationException;
 import com.scooterframework.common.exception.RequiredDataMissingException;
 import com.scooterframework.common.util.Converters;
@@ -55,6 +61,13 @@ public class TableGateway {
 
 	private ActiveRecord home;
 
+	private boolean useThreadCache = true;
+	private boolean useSecondLevelCache = false;
+	private boolean flushCacheOnChange = true;
+	private Collection<String> localUseCacheExceptions;
+	private Collection<String> localFlushCacheExceptions;
+	private Cache modelCache;
+
 	// /**
 	// * Constructs an instance of TableGateway.
 	// *
@@ -75,11 +88,17 @@ public class TableGateway {
 		if (modelHome == null)
 			throw new IllegalArgumentException("modelHome is null.");
 		if (!modelHome.isHomeInstance())
-			throw new IllegalArgumentException(
-					"modelHome must be a home instance.");
+			throw new IllegalArgumentException("modelHome must be a home instance.");
 
 		this.clazz = modelHome.getClass();
 		this.home = modelHome;
+		
+		useThreadCache = EnvConfig.getInstance().getUseThreadCache();
+		useSecondLevelCache = EnvConfig.getInstance().getUseSecondLevelCache();
+		flushCacheOnChange = EnvConfig.getInstance().getFlushCacheOnChange();
+		
+		localUseCacheExceptions = EnvConfig.getInstance().getLocalUseCacheExceptions(clazz.getName());
+		localFlushCacheExceptions = EnvConfig.getInstance().getLocalFlushCacheExceptions(clazz.getName());
 	}
 
 	/**
@@ -308,24 +327,37 @@ public class TableGateway {
 		}
 
 		ActiveRecord ar = null;
+		
+		Map<String, Object> inputs = new HashMap<String, Object>();
+		inputs.put("1", id);
+		inputs = addMoreProperties(inputs, null);
+		
+		String cacheKey = null;
+		if (useCache("findById")) {
+			cacheKey = getCacheKey("findById", inputs);
+			ar = (ActiveRecord) getCache().get(cacheKey);
+			if (ar != null) return ar;
+		}
+		
 		String findSQL = "SELECT * FROM " + home.getTableName()	+ " WHERE id = ?";
 
 		try {
-			Map<String, Object> inputs = new HashMap<String, Object>();
-			inputs.put("1", id);
-			inputs = addMoreProperties(inputs, null);
-
 			OmniDTO returnTO = getSqlService().execute(inputs,
 					DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, findSQL);
 
 			RowData tmpRd = returnTO.getTableData(findSQL).getRow(0);
-			ar = (ActiveRecord) createNewInstance();
-
-			ar.populateDataFromDatabase(tmpRd);
+			if (tmpRd != null) {
+				ar = (ActiveRecord) createNewInstance();
+				ar.populateDataFromDatabase(tmpRd);
+				
+				if (useCache("findById")) {
+					getCache().put(cacheKey, ar);
+				}
+			}
 		} catch (Exception ex) {
 			throw new BaseSQLException(ex);
 		}
-
+		
 		return ar;
 	}
 
@@ -344,9 +376,25 @@ public class TableGateway {
 	 */
 	public ActiveRecord findByRESTfulId(String restfulId) {
 		Map<String, Object> pkMap = convertToPrimaryKeyDataMap(restfulId);
-		if (pkMap == null)
-			return null;
-		return findFirst(pkMap);
+		if (pkMap == null) return null;
+		
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findByRESTfulId")) {
+			cacheKey = getCacheKey("findByRESTfulId", restfulId);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+		
+		record = findFirst(pkMap);
+		if (record != null) {
+			if (useCache("findByRESTfulId")) {
+				getCache().put(cacheKey, record);
+			}
+		}
+		
+		return record;
 	}
 
 	/**
@@ -364,7 +412,23 @@ public class TableGateway {
 	 * @return the ActiveRecord associated with the <tt>restfulId</tt>
 	 */
 	public ActiveRecord findByPK(String pkString) {
-		return findByRESTfulId(pkString);
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findByPK")) {
+			cacheKey = getCacheKey("findByPK", pkString);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+		
+		record = findByRESTfulId(pkString);
+		if (record != null) {
+			if (useCache("findByPK")) {
+				getCache().put(cacheKey, record);
+			}
+		}
+		
+		return record;
 	}
 
 	/**
@@ -391,9 +455,17 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return a list of ActiveRecord objects
 	 */
+	@SuppressWarnings("unchecked")
 	public List<ActiveRecord> findAllBySQL(String sql, Map<String, Object> inputs) {
 		List<ActiveRecord> list = null;
 		inputs = addMoreProperties(inputs, null);
+		
+		String cacheKey = null;
+		if (useCache("findAllBySQL")) {
+			cacheKey = getCacheKey("findAllBySQL", sql, inputs);
+			list = (List<ActiveRecord>) getCache().get(cacheKey);
+			if (list != null) return list;
+		}
 
 		try {
 			OmniDTO returnTO = getSqlService().execute(inputs, 
@@ -402,12 +474,18 @@ public class TableGateway {
 			if (returnTO != null) {
 				TableData rt = returnTO.getTableData(sql);
 				if (rt != null) {
-					list = new ArrayList<ActiveRecord>();
 					int records = rt.getTableSize();
-					for (int i = 0; i < records; i++) {
-						ActiveRecord newRecord = (ActiveRecord) createNewInstance();
-						newRecord.populateDataFromDatabase(rt.getRow(i));
-						list.add(newRecord);
+					if (records > 0) {
+						list = new ArrayList<ActiveRecord>();
+						for (int i = 0; i < records; i++) {
+							ActiveRecord newRecord = (ActiveRecord) createNewInstance();
+							newRecord.populateDataFromDatabase(rt.getRow(i));
+							list.add(newRecord);
+						}
+						
+						if (useCache("findAllBySQL")) {
+							getCache().put(cacheKey, list);
+						}
 					}
 				}
 			}
@@ -442,10 +520,18 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return a list of ActiveRecord objects
 	 */
+	@SuppressWarnings("unchecked")
 	public List<ActiveRecord> findAllBySQLKey(String sqlKey, 
 			Map<String, Object> inputs) {
 		List<ActiveRecord> list = null;
 		inputs = addMoreProperties(inputs, null);
+		
+		String cacheKey = null;
+		if (useCache("findAllBySQLKey")) {
+			cacheKey = getCacheKey("findAllBySQLKey", sqlKey, inputs);
+			list = (List<ActiveRecord>) getCache().get(cacheKey);
+			if (list != null) return list;
+		}
 
 		try {
 			OmniDTO returnTO = getSqlService().execute(inputs, 
@@ -454,12 +540,18 @@ public class TableGateway {
 			if (returnTO != null) {
 				TableData rt = returnTO.getTableData(sqlKey);
 				if (rt != null) {
-					list = new ArrayList<ActiveRecord>();
 					int records = rt.getTableSize();
-					for (int i = 0; i < records; i++) {
-						ActiveRecord newRecord = (ActiveRecord) createNewInstance();
-						newRecord.populateDataFromDatabase(rt.getRow(i));
-						list.add(newRecord);
+					if (records > 0) {
+						list = new ArrayList<ActiveRecord>();
+						for (int i = 0; i < records; i++) {
+							ActiveRecord newRecord = (ActiveRecord) createNewInstance();
+							newRecord.populateDataFromDatabase(rt.getRow(i));
+							list.add(newRecord);
+						}
+						
+						if (useCache("findAllBySQLKey")) {
+							getCache().put(cacheKey, list);
+						}
 					}
 				}
 			}
@@ -488,13 +580,26 @@ public class TableGateway {
 	 * @return ActiveRecord
 	 */
 	public ActiveRecord findFirstBy(String columns, Object[] values) {
-		ActiveRecord theRecord = null;
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findFirstBy")) {
+			cacheKey = getCacheKey("findFirstBy", columns, values);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+		
 		List<ActiveRecord> all = findAllBy(columns, values);
 		if (all != null && all.size() > 0) {
-			theRecord = (ActiveRecord) all.get(0);
+			record = (ActiveRecord) all.get(0);
+			if (record != null) {
+				if (useCache("findFirstBy")) {
+					getCache().put(cacheKey, record);
+				}
+			}
 		}
 
-		return theRecord;
+		return record;
 	}
 
 	/**
@@ -515,13 +620,26 @@ public class TableGateway {
 	 * @return ActiveRecord
 	 */
 	public ActiveRecord findLastBy(String columns, Object[] values) {
-		ActiveRecord theRecord = null;
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findLastBy")) {
+			cacheKey = getCacheKey("findLastBy", columns, values);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+		
 		List<ActiveRecord> all = findAllBy(columns, values);
 		if (all != null && all.size() > 0) {
-			theRecord = (ActiveRecord) all.get(all.size() - 1);
+			record = (ActiveRecord) all.get(all.size() - 1);
+			if (record != null) {
+				if (useCache("findLastBy")) {
+					getCache().put(cacheKey, record);
+				}
+			}
 		}
 
-		return theRecord;
+		return record;
 	}
 
 	/**
@@ -564,6 +682,7 @@ public class TableGateway {
 	 *            a map of options
 	 * @return List of ActiveRecord objects
 	 */
+	@SuppressWarnings("unchecked")
 	public List<ActiveRecord> findAllBy(String columns, Object[] values,
 			Map<String, String> options) {
 		List<String> names = StringUtil.splitString(columns, "_and_");
@@ -576,8 +695,23 @@ public class TableGateway {
 		for (int i = 0; i < size; i++) {
 			map.put(names.get(i), values[i]);
 		}
+		
+		List<ActiveRecord> list = null;
+		
+		String cacheKey = null;
+		if (useCache("findAllBy")) {
+			cacheKey = getCacheKey("findAllBy", map, options);
+			list = (List<ActiveRecord>) getCache().get(cacheKey);
+			if (list != null) return list;
+		}
+		
+		list = findAll(map, options);
+		if (useCache("findAllBy")) {
+			if (list != null && list.size() > 0)
+				getCache().put(cacheKey, list);
+		}
 
-		return findAll(map, options);
+		return list;
 	}
 
 	/**
@@ -600,8 +734,7 @@ public class TableGateway {
 	 * @return List of ActiveRecord objects
 	 */
 	public List<ActiveRecord> findAllBy(String columns, Object[] values, String options) {
-		return findAllBy(columns, values, 
-				Converters.convertSqlOptionStringToMap(options));
+		return findAllBy(columns, values, Converters.convertSqlOptionStringToMap(options));
 	}
 
 	/**
@@ -863,8 +996,26 @@ public class TableGateway {
 		options.put(DataProcessor.input_key_records_offset, "0");
 		options.put(DataProcessor.input_key_records_limit, "1");
 		options.put(DataProcessor.input_key_records_fixed, "true");
+		
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findFirst")) {
+			cacheKey = getCacheKey("findFirst", conditions, options);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+		
 		List<ActiveRecord> list = findAll(conditions, options);
-		return (list != null && list.size() > 0) ? (list.get(0)) : null;
+		record = (list != null && list.size() > 0) ? (list.get(0)) : null;
+		
+		if (record != null) {
+			if (useCache("findFirst")) {
+				getCache().put(cacheKey, record);
+			}
+		}
+		
+		return record;
 	}
 
 	/**
@@ -978,8 +1129,26 @@ public class TableGateway {
 			options.put(DataProcessor.input_key_records_limit, "1");
 			options.put(DataProcessor.input_key_records_fixed, "true");
 		}
-		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,	options);
-		return (list != null && list.size() > 0) ? ((ActiveRecord) list.get(0)): null;
+		
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findFirst")) {
+			cacheKey = getCacheKey("findFirst", conditionsSQL, conditionsSQLData, options);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+
+		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData, options);
+		record = (list != null && list.size() > 0) ? (list.get(0)) : null;
+		
+		if (record != null) {
+			if (useCache("findFirst")) {
+				getCache().put(cacheKey, record);
+			}
+		}
+		
+		return record;
 	}
 
 	/**
@@ -1053,11 +1222,27 @@ public class TableGateway {
 	 *            a map of options
 	 * @return the last ActiveRecord found
 	 */
-	public ActiveRecord findLast(Map<String, Object> conditions,
-			Map<String, String> options) {
+	public ActiveRecord findLast(Map<String, Object> conditions, Map<String, String> options) {
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findLast")) {
+			cacheKey = getCacheKey("findLast", conditions, options);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+		
 		List<ActiveRecord> list = findAll(conditions, options);
 		int size = list.size();
-		return (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
+		record = (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
+		
+		if (record != null) {
+			if (useCache("findLast")) {
+				getCache().put(cacheKey, record);
+			}
+		}
+		
+		return record;
 	}
 
 	/**
@@ -1164,9 +1349,26 @@ public class TableGateway {
 	 */
 	public ActiveRecord findLast(String conditionsSQL,
 			Map<String, Object> conditionsSQLData, Map<String, String> options) {
-		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData,	options);
+		ActiveRecord record = null;
+		
+		String cacheKey = null;
+		if (useCache("findLast")) {
+			cacheKey = getCacheKey("findLast", conditionsSQL, conditionsSQLData, options);
+			record = (ActiveRecord) getCache().get(cacheKey);
+			if (record != null) return record;
+		}
+
+		List<ActiveRecord> list = findAll(conditionsSQL, conditionsSQLData, options);
 		int size = list.size();
-		return (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
+		record = (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
+		
+		if (record != null) {
+			if (useCache("findLast")) {
+				getCache().put(cacheKey, record);
+			}
+		}
+		
+		return record;
 	}
 
 	/**
@@ -1197,6 +1399,7 @@ public class TableGateway {
 	/**
 	 * Finds a list of records that satisfy the conditions and options.
 	 */
+	@SuppressWarnings("unchecked")
 	private List<ActiveRecord> internal_findAll(Map<String, Object> conditions,
 			Map<String, String> options) {
 		List<ActiveRecord> list = null;
@@ -1208,18 +1411,31 @@ public class TableGateway {
 			int limit = getLimit(options);
 
 			inputs = addMoreProperties(inputs, options);
+			
+			String cacheKey = null;
+			if (useCache("findAll")) {
+				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
+				list = (List<ActiveRecord>) getCache().get(cacheKey);
+				if (list != null) return list;
+			}
 
 			TableData td = getSqlService().retrieveRows(inputs,
 					DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, findSQL,
 					limit, offset);
 
 			if (td != null) {
-				list = new ArrayList<ActiveRecord>();
 				int records = td.getTableSize();
-				for (int i = 0; i < records; i++) {
-					ActiveRecord newRecord = (ActiveRecord) createNewInstance();
-					newRecord.populateDataFromDatabase(td.getRow(i));
-					list.add(newRecord);
+				if (records > 0) {
+					list = new ArrayList<ActiveRecord>();
+					for (int i = 0; i < records; i++) {
+						ActiveRecord newRecord = (ActiveRecord) createNewInstance();
+						newRecord.populateDataFromDatabase(td.getRow(i));
+						list.add(newRecord);
+					}
+					
+					if (useCache("findAll")) {
+						getCache().put(cacheKey, list);
+					}
 				}
 			}
 		} catch (Exception ex) {
@@ -1230,6 +1446,7 @@ public class TableGateway {
 		return (list != null) ? list : (new ArrayList<ActiveRecord>());
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<ActiveRecord> internal_findAll(String conditionsSQL,
 			Map<String, Object> conditionsSQLData, Map<String, String> options) {
 		List<ActiveRecord> list = null;
@@ -1242,18 +1459,31 @@ public class TableGateway {
 			int limit = getLimit(options);
 
 			inputs = addMoreProperties(inputs, options);
+			
+			String cacheKey = null;
+			if (useCache("findAll")) {
+				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
+				list = (List<ActiveRecord>) getCache().get(cacheKey);
+				if (list != null) return list;
+			}
 
 			TableData td = getSqlService().retrieveRows(inputs,
 					DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, findSQL,
 					limit, offset);
 
 			if (td != null) {
-				list = new ArrayList<ActiveRecord>();
 				int records = td.getTableSize();
-				for (int i = 0; i < records; i++) {
-					ActiveRecord newRecord = (ActiveRecord) createNewInstance();
-					newRecord.populateDataFromDatabase(td.getRow(i));
-					list.add(newRecord);
+				if (records > 0) {
+					list = new ArrayList<ActiveRecord>();
+					for (int i = 0; i < records; i++) {
+						ActiveRecord newRecord = (ActiveRecord) createNewInstance();
+						newRecord.populateDataFromDatabase(td.getRow(i));
+						list.add(newRecord);
+					}
+					
+					if (useCache("findAll")) {
+						getCache().put(cacheKey, list);
+					}
 				}
 			}
 		} catch (Exception ex) {
@@ -1552,6 +1782,7 @@ public class TableGateway {
 		return internal_findAll_include_fetch(sqlHelper, options);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<ActiveRecord> internal_findAll_include_fetch(
 			IncludeHelper sqlHelper, Map<String, String> options) {
 		List<ActiveRecord> list = null;
@@ -1563,6 +1794,13 @@ public class TableGateway {
 			int limit = getLimit(options);
 
 			inputs = addMoreProperties(inputs, options);
+			
+			String cacheKey = null;
+			if (useCache("findAll") && allowCacheAssociatedObjects()) {
+				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
+				list = (List<ActiveRecord>) getCache().get(cacheKey);
+				if (list != null) return list;
+			}
 
 			TableData td = getSqlService().retrieveRows(inputs,
 					DataProcessorTypes.DIRECT_SQL_STATEMENT_PROCESSOR, findSQL,
@@ -1570,6 +1808,10 @@ public class TableGateway {
 
 			if (td != null) {
 				list = sqlHelper.organizeData(td);
+				
+				if (useCache("findAll") && allowCacheAssociatedObjects()) {
+					getCache().put(cacheKey, list);
+				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -1613,6 +1855,8 @@ public class TableGateway {
 		if (!home.getRowInfo().isValidColumnName("ID")) {
 			throw new IllegalArgumentException("There is no column name as ID");
 		}
+		
+		clearCache("deleteById");
 
 		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs = addMoreProperties(inputs, null);
@@ -1633,6 +1877,8 @@ public class TableGateway {
 	public int deleteByPK(String pkString) {
 		Map<String, Object> pkMap = convertToPrimaryKeyDataMap(pkString);
 		if (pkMap == null) return 0;
+		
+		clearCache("deleteByPK");
 		return deleteByPrimaryKeyMap(pkMap);
 	}
 
@@ -1644,8 +1890,9 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteByPrimaryKeyMap(Map<String, Object> dataMap) {
-		if (dataMap == null || dataMap.size() == 0)
-			return -1;
+		if (dataMap == null || dataMap.size() == 0)	return -1;
+		
+		clearCache("deleteByPrimaryKeyMap");
 
 		// construct a map of primary keys
 		Map<String, Object> pkMap = new HashMap<String, Object>();
@@ -1672,7 +1919,7 @@ public class TableGateway {
 	 *            a key to a SQL string
 	 * @return int number of records deleted
 	 */
-	public static int deleteBySQL(String sql) {
+	public int deleteBySQL(String sql) {
 		return deleteBySQL(sql, null);
 	}
 
@@ -1687,7 +1934,8 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return int number of records deleted
 	 */
-	public static int deleteBySQL(String sql, Map<String, Object> inputs) {
+	public int deleteBySQL(String sql, Map<String, Object> inputs) {
+		clearCache("deleteBySQL");
 		return SqlServiceClient.executeSQL(sql, inputs);
 	}
 
@@ -1699,7 +1947,7 @@ public class TableGateway {
 	 *            a key to a SQL string
 	 * @return int number of records deleted
 	 */
-	public static int deleteBySQLKey(String sqlKey) {
+	public int deleteBySQLKey(String sqlKey) {
 		return deleteBySQLKey(sqlKey, null);
 	}
 
@@ -1715,7 +1963,8 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return int number of records deleted
 	 */
-	public static int deleteBySQLKey(String sqlKey, Map<String, Object> inputs) {
+	public int deleteBySQLKey(String sqlKey, Map<String, Object> inputs) {
+		clearCache("deleteBySQLKey");
 		return SqlServiceClient.executeSQLByKey(sqlKey, inputs);
 	}
 
@@ -1734,6 +1983,7 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteAll(Map<String, Object> conditions) {
+		clearCache("deleteAll");
 		return internal_deleteAll(conditions);
 	}
 
@@ -1773,6 +2023,7 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteAll(String conditionsSQL, Map<String, Object> conditionsSQLData) {
+		clearCache("deleteAll");
 		return internal_deleteAll(conditionsSQL, conditionsSQLData);
 	}
 
@@ -1919,6 +2170,8 @@ public class TableGateway {
 		if (fieldData == null || fieldData.size() == 0)
 			throw new IllegalArgumentException(
 					"fieldData cannot be empty for updateAll()");
+		
+		clearCache("updateAll");
 
 		int count = -1;
 		String updateSQL = "UPDATE " + home.getTableName();
@@ -1930,8 +2183,7 @@ public class TableGateway {
 			RowInfo ri = home.getRowInfo();
 			for (Map.Entry<String, Object> entry : fieldData.entrySet()) {
 				String field = entry.getKey();
-				if (field == null)
-					continue;
+				if (field == null) continue;
 
 				ci = ri.getColumnInfo(field);
 				if (!ri.isValidColumnName(field) || ci.isReadOnly()
@@ -1939,8 +2191,7 @@ public class TableGateway {
 					continue;
 
 				String token = getUniqueToken(field, conditionsSQLData, true);
-				strBuffer.append(field).append(" = ?").append(token)
-						.append(", ");
+				strBuffer.append(field).append(" = ?").append(token).append(", ");
 				inputs.put(token, entry.getValue());
 			}
 
@@ -1965,8 +2216,7 @@ public class TableGateway {
 	}
 
 	private String getUniqueToken(String field,	Map<String, Object> conditionsSQLData, boolean convertToUpper) {
-		if (conditionsSQLData == null || conditionsSQLData.size() == 0)
-			return field;
+		if (conditionsSQLData == null || conditionsSQLData.size() == 0)	return field;
 
 		Map<String, Object> conditionsSQLDataCopy = conditionsSQLData;
 		if (convertToUpper) {
@@ -1974,8 +2224,8 @@ public class TableGateway {
 					conditionsSQLData.size());
 			for (Map.Entry<String, Object> entry : conditionsSQLData.entrySet()) {
 				String key = entry.getKey();
-				if (key == null)
-					continue;
+				if (key == null) continue;
+				
 				conditionsSQLDataCopy.put(key.toUpperCase(), entry.getValue());
 			}
 		}
@@ -1994,7 +2244,7 @@ public class TableGateway {
 	 *            A valid SQL string
 	 * @return int number of records updated
 	 */
-	public static int updateBySQL(String sql) {
+	public int updateBySQL(String sql) {
 		return updateBySQL(sql, new HashMap<String, Object>());
 	}
 
@@ -2007,7 +2257,8 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return int number of records updated
 	 */
-	public static int updateBySQL(String sql, Map<String, Object> inputs) {
+	public int updateBySQL(String sql, Map<String, Object> inputs) {
+		clearCache("updateBySQL");
 		return SqlServiceClient.executeSQL(sql, inputs);
 	}
 
@@ -2019,7 +2270,7 @@ public class TableGateway {
 	 *            a key to a SQL string.
 	 * @return int number of records updated
 	 */
-	public static int updateBySQLKey(String sqlKey) {
+	public int updateBySQLKey(String sqlKey) {
 		return updateBySQLKey(sqlKey, new HashMap<String, Object>());
 	}
 
@@ -2033,7 +2284,8 @@ public class TableGateway {
 	 *            a map of name and value pairs
 	 * @return int number of records updated
 	 */
-	public static int updateBySQLKey(String sqlKey, Map<String, Object> inputs) {
+	public int updateBySQLKey(String sqlKey, Map<String, Object> inputs) {
+		clearCache("updateBySQLKey");
 		return SqlServiceClient.executeSQLByKey(sqlKey, inputs);
 	}
 
@@ -2076,5 +2328,63 @@ public class TableGateway {
 
 	private static SqlService getSqlService() {
 		return SqlServiceConfig.getSqlService();
+	}
+	
+	private String getCacheKey(String request, Object... elements) {
+		return CacheProviderUtil.getCacheKey(clazz.getName(), request, elements);
+	}
+	
+	private boolean useCache(String method) {
+		boolean useCheck = useThreadCache || useSecondLevelCache;
+		if (useCheck) {
+			if (localUseCacheExceptions != null && localUseCacheExceptions.contains(method)) {
+				useCheck = false;
+			}
+		}
+		else {
+			if (localUseCacheExceptions != null && localUseCacheExceptions.contains(method)) {
+				useCheck = true;
+			}
+		}
+		return useCheck;
+	}
+	
+	void clearCache(String method) {
+		if (flushCache(method)) getCache().clear();
+	}
+	
+	private boolean flushCache(String method) {
+		boolean flushCheck = flushCacheOnChange;
+		if (flushCheck) {
+			if (localFlushCacheExceptions != null && localFlushCacheExceptions.contains(method)) {
+				flushCheck = false;
+			}
+		}
+		else {
+			if (localFlushCacheExceptions != null && localFlushCacheExceptions.contains(method)) {
+				flushCheck = true;
+			}
+		}
+		return flushCheck;
+	}
+	
+	private boolean allowCacheAssociatedObjects() {
+		return EnvConfig.getInstance().allowCacheAssociatedObjects(clazz.getName());
+	}
+	
+	private Cache getCache() {
+		if (modelCache != null) return modelCache;
+		
+		if (useSecondLevelCache) {
+			CacheProvider dcp = CacheProviderUtil.getDefaultCacheProvider();
+			if (dcp != null) {
+				modelCache = dcp.getCache(clazz.getName());
+			}
+		}
+		else if (useThreadCache) {
+			modelCache = new NamedCurrentThreadCache(clazz.getName());
+		}
+		
+		return modelCache;
 	}
 }

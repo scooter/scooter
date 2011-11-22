@@ -9,8 +9,9 @@
     <property name="compile.outdir"         value="build/classes"/>
     <property name="jar.outdir"             value="."/>
     <property name="lib.dir"                value="lib"/>
+    <property name="scootersupport.dir"     value="../../support"/>
     <property name="scooterlib.dir"         value="../../lib"/>
-    <property name="jar.name"               value="plugin-scooter-xmemcached.jar"/>
+    <property name="jar.name"               value="plugin-${ant.project.name}.jar"/>
 
     <!--Set the classpath-->
     <path id="classpath">

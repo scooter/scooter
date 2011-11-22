@@ -647,6 +647,8 @@ implements RESTified, Serializable {
             afterCreate();
 
             tm.commitTransactionImplicit();
+            
+            ActiveRecordUtil.getGateway(getClass()).clearCache("create");
         }
         catch(BaseSQLException bdex) {
             tm.rollbackTransactionImplicit();
@@ -861,6 +863,8 @@ implements RESTified, Serializable {
 			afterUpdate();
 
             tm.commitTransactionImplicit();
+            
+            ActiveRecordUtil.getGateway(getClass()).clearCache("update");
         }
         catch(BaseSQLException bdex) {
             tm.rollbackTransactionImplicit();
@@ -3408,7 +3412,7 @@ implements RESTified, Serializable {
         log.debug("deleteHasManySimply deleteSQL: " + deleteSQL);
         
         inputs = addMoreProperties(inputs, null);
-        TableGateway.deleteBySQL(deleteSQL, inputs);
+        ActiveRecordUtil.getGateway(getClass()).deleteBySQL(deleteSQL, inputs);
     }
 
     /**
@@ -3474,7 +3478,7 @@ implements RESTified, Serializable {
         String updateSQL = sb.append(setStr).append(" WHERE ").append(whereStr).toString();
         
         inputs = addMoreProperties(inputs, null);
-        TableGateway.updateBySQL(updateSQL, inputs);
+        ActiveRecordUtil.getGateway(getClass()).updateBySQL(updateSQL, inputs);
     }
 
     void incrementCounterInParent(BelongsToRelation btr) {

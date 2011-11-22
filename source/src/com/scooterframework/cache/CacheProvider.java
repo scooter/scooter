@@ -7,19 +7,22 @@
  */
 package com.scooterframework.cache;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
-import com.scooterframework.admin.Plugin;
 
 /**
- * CacheProvider class defines common methods of a cache provider.
- * 
- * CacheProvier acts as a singleton instance if it is created by
- * <tt>CacheObjectFactory</tt> class.
+ * CacheProvider interface defines common methods of a cache provider.
  * 
  * @author (Fei) John Chen
  */
-public abstract class CacheProvider extends Plugin implements Cache {
+public interface CacheProvider {
+
+	/**
+	 * Key to represent cache provider <tt>configFile</tt> property.
+	 */
+	public static final String KEY_CACHE_PROVIDER_CONFIGFILE = "configFile";
 
 	/**
 	 * Key to represent cache provider <tt>namespace</tt> property.
@@ -42,145 +45,69 @@ public abstract class CacheProvider extends Plugin implements Cache {
 	 */
 	public static final String KEY_CACHE_PROVIDER_REQUESTTIMEOUTINSECONDS = "requestTimeoutInSeconds";
 
-	private String namespace;
-	private String urls;
-	private int expiresInSeconds;
-	private int requestTimeoutInSeconds;
-
-	protected CacheProvider(Properties p) {
-		super(p);
-		init();
-	}
-
-	private void init() {
-		namespace = getProperty(KEY_CACHE_PROVIDER_NAMESPACE, "");
-		urls = getProperty(KEY_CACHE_PROVIDER_URLS);
-
-		String sExpiresInSeconds = getProperty(KEY_CACHE_PROVIDER_EXPIRESINSECONDS);
-		if (sExpiresInSeconds != null) {
-			expiresInSeconds = Integer.parseInt(sExpiresInSeconds);
-		}
-
-		String sRequestTimeoutInSeconds = getProperty(KEY_CACHE_PROVIDER_REQUESTTIMEOUTINSECONDS);
-		if (sRequestTimeoutInSeconds != null) {
-			requestTimeoutInSeconds = Integer
-					.parseInt(sRequestTimeoutInSeconds);
-		}
-	}
-
 	/**
-	 * @return the providerClassName
+	 * Returns the cache provider name.
 	 */
-	public String getProviderClassName() {
-		return super.getPluginClassName();
-	}
+	public String getName();
 
 	/**
-	 * @return the namespace
+	 * Returns the implementation cache provider class name.
 	 */
-	public String getNamespace() {
-		return namespace;
-	}
+	public String getProviderClassName();
 
 	/**
-	 * @return the urls
+	 * Returns the namespace
 	 */
-	public String getUrls() {
-		return urls;
-	}
-
+	public String getNamespaceProperty();
+	
 	/**
-	 * @return the expiresInSeconds
+	 * Returns the urls if defined
 	 */
-	public int expiresInSeconds() {
-		return expiresInSeconds;
-	}
+	public String getUrlsProperty();
 
 	/**
-	 * @return the requestTimeoutInSeconds
+	 * Returns the expiresInSeconds
 	 */
-	public int requestTimeoutInSeconds() {
-		return requestTimeoutInSeconds;
-	}
-
-	private String getFullKey(String key) {
-		return (namespace != null && !"".equals(namespace)) ? (namespace + "@" + key)
-				: key;
-	}
+	public int getExpiresInSecondsProperty();
 
 	/**
-	 * Returns object from cache based on <tt>key</tt>.
+	 * Returns the requestTimeoutInSeconds
+	 */
+	public int getRequestTimeoutInSecondsProperty();
+	
+	/**
+	 * Returns properties defined for the cache provider.
+	 */
+	public Properties getProperties();
+	
+	/**
+	 * Returns value of a property.
 	 * 
-	 * @return the value to which this cache maps the specified key, or null if
-	 *         the cache contains no mapping for this key.
+	 * @param name  property name
+	 * @return value of the property.
 	 */
-	public Object get(String key) {
-		return getObject(getFullKey(key));
-	}
-
+	public String getProperty(String name);
+	
 	/**
-	 * Stores object into cache based on <tt>key</tt>.
+	 * Returns the cache for the name.
 	 * 
-	 * @return true if successful
+	 * @param name  name of the cache
+	 * @return the cache associated with the name
 	 */
-	public boolean put(String key, Object value) {
-		return putObject(getFullKey(key), value);
-	}
-
+	public Cache getCache(String name);
+	
 	/**
-	 * Removes the mapping for this key from the cache if present.
-	 * 
-	 * @return true if successful
+	 * Returns a list of cache names.
 	 */
-	public boolean remove(String key) {
-		return removeObject(getFullKey(key));
-	}
-
+	public Collection<String> getCacheNames();
+	
 	/**
-	 * Removes all key/value pairs from cache.
+	 * Returns statistics of a cache.
 	 */
-	public void clear() {
-		clearObjects();
-	}
-
+	public Properties getStatistics(String name);
+	
 	/**
-	 * Retrieves object from cache based on <tt>key</tt>. The <tt>key</tt> here
-	 * is a combination of <tt>namespace</tt> and key from request.
-	 * 
-	 * Subclass must implement this method.
-	 * 
-	 * @param key
-	 * @return object
+	 * Returns statistics of all caches.
 	 */
-	protected abstract Object getObject(String key);
-
-	/**
-	 * Puts object into cache based on <tt>key</tt>. The <tt>key</tt> here is a
-	 * combination of <tt>namespace</tt> and key from request.
-	 * 
-	 * Subclass must implement this method.
-	 * 
-	 * @param key
-	 *            the key of the corresponding value
-	 * @param value
-	 *            the object to be cached
-	 * @return true if successfully stored
-	 */
-	protected abstract boolean putObject(String key, Object value);
-
-	/**
-	 * Removes object from cache based on <tt>key</tt>. The <tt>key</tt> here is
-	 * a combination of <tt>namespace</tt> and key from request.
-	 * 
-	 * Subclass must implement this method.
-	 * 
-	 * @param key
-	 * @return object
-	 */
-	protected abstract boolean removeObject(String key);
-
-	/**
-	 * Removes all objects from cache
-	 */
-	protected abstract void clearObjects();
+	public Map<String, Properties> getStatistics();
 }

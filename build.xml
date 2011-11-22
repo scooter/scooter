@@ -371,6 +371,7 @@
     <target name="get_app_name">
         <script language="javascript" classpathref="ant.classpath" manager="bsf"> <![CDATA[
             appPath = scooter.getProperty("appPath");
+        	appPath = appPath.replace('\\', '/');
             lastSlash = appPath.lastIndexOf('/');
             appName = appPath.substring(lastSlash + 1);
             scooter.setProperty("appName", appName);

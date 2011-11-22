@@ -229,7 +229,7 @@ public class ScooterRequestFilter implements Filter {
         String requestPath = requestURI.substring(contextPath.length());
         if (requestPath.length() > 1 && 
         		(requestURI.endsWith("/") || requestURI.endsWith("\\"))) {
-        	requestURI = requestURI.substring(0, requestURI.length()-1);
+        	requestPath = requestPath.substring(0, requestPath.length()-1);
         }
         return requestPath;
     }

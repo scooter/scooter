@@ -51,13 +51,13 @@ import com.scooterframework.transaction.Transaction;
  *   ARRAY:2003:java.sql.Array           //Types.ARRAY
  *   BIGINT:-5:java.lang.Long            //Types.BIGINT
  *   BINARY:-2:byte[]                    //Types.BINARY
- *   BIT:-7:java.lang.Object             //Types.BIT
+ *   BIT:-7:java.lang.Boolean            //Types.BIT
  *   BLOB:2004:java.sql.Blob             //Types.BLOB
  *   BOOLEAN:16:java.lang.Boolean        //Types.BOOLEAN
  *   CHAR:1:java.lang.String             //Types.CHAR
  *   CLOB:2005:java.sql.Clob             //Types.CLOB
  *   DATALINK:70:java.lang.Object        //Types.DATALINK
- *   DATE:91:java.sql.TimeStamp          //Types.DATE
+ *   DATE:91:java.sql.Timestamp          //Types.DATE
  *   DECIMAL:3:java.lang.BigDecimal      //Types.DECIMAL
  *   DISTINCT:2001:java.lang.Object      //Types.DISTINCT
  *   DOUBLE:8:java.lang.Double           //Types.DOUBLE
@@ -79,7 +79,7 @@ import com.scooterframework.transaction.Transaction;
  *   SQLXML:2009:java.lang.String        //Types.SQLXML
  *   STRUCT:2002:java.sql.Struct         //Types.STRUCT
  *   TIME:92:java.sql.Time               //Types.TIME
- *   TIMESTAMP:93:java.sql.TimeStamp     //Types.TIMESTAMP
+ *   TIMESTAMP:93:java.sql.Timestamp     //Types.TIMESTAMP
  *   TINYINT:-6:java.lang.Integer        //Types.TINYINT
  *   VARBINARY:-3:byte[]                 //Types.VARBINARY
  *   VARCHAR:12:java.lang.String         //Types.VARCHAR
@@ -318,13 +318,13 @@ public class DatabaseConfig extends Observable implements Observer {
         allSQLTypesList.add("ARRAY:2003:java.sql.Array");           //Types.ARRAY
         allSQLTypesList.add("BIGINT:-5:java.lang.Long");            //Types.BIGINT
         allSQLTypesList.add("BINARY:-2:byte[]");                    //Types.BINARY
-        allSQLTypesList.add("BIT:-7:java.lang.Object");             //Types.BIT
+        allSQLTypesList.add("BIT:-7:java.lang.Boolean");            //Types.BIT
         allSQLTypesList.add("BLOB:2004:java.sql.Blob");             //Types.BLOB
         allSQLTypesList.add("BOOLEAN:16:java.lang.Boolean");        //Types.BOOLEAN
         allSQLTypesList.add("CHAR:1:java.lang.String");             //Types.CHAR
         allSQLTypesList.add("CLOB:2005:java.sql.Clob");             //Types.CLOB
         allSQLTypesList.add("DATALINK:70:java.lang.Object");        //Types.DATALINK
-        allSQLTypesList.add("DATE:91:java.sql.TimeStamp");          //Types.DATE
+        allSQLTypesList.add("DATE:91:java.sql.Timestamp");          //Types.DATE
         allSQLTypesList.add("DECIMAL:3:java.lang.BigDecimal");      //Types.DECIMAL
         allSQLTypesList.add("DISTINCT:2001:java.lang.Object");      //Types.DISTINCT
         allSQLTypesList.add("DOUBLE:8:java.lang.Double");           //Types.DOUBLE
@@ -347,7 +347,7 @@ public class DatabaseConfig extends Observable implements Observer {
         allSQLTypesList.add("SQLXML:2009:java.lang.String");        //Types.SQLXML
         allSQLTypesList.add("STRUCT:2002:java.sql.Struct");         //Types.STRUCT
         allSQLTypesList.add("TIME:92:java.sql.Time");               //Types.TIME
-        allSQLTypesList.add("TIMESTAMP:93:java.sql.TimeStamp");     //Types.TIMESTAMP
+        allSQLTypesList.add("TIMESTAMP:93:java.sql.Timestamp");     //Types.TIMESTAMP
         allSQLTypesList.add("TINYINT:-6:java.lang.Integer");        //Types.TINYINT
         allSQLTypesList.add("VARBINARY:-3:byte[]");                 //Types.VARBINARY
         allSQLTypesList.add("VARCHAR:12:java.lang.String");         //Types.VARCHAR

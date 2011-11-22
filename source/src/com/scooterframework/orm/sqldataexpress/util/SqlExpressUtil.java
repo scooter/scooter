@@ -624,7 +624,6 @@ public class SqlExpressUtil {
             String api = sp.getApi();
             DBAdapter dba = DBAdapterFactory.getInstance().getAdapter(udc.getConnectionName());
             
-            boolean foundPlSqlRecord = false;//will skip all output columns when a PL/SQL record is found. //TODO: This code is tied to Oracle. Change it.
             boolean startToRecord = false;
             int previousIndex = -1;
             
@@ -641,28 +640,6 @@ public class SqlExpressUtil {
                 String mode = rs.getString("COLUMN_TYPE");
                 int sqlDataType = rs.getInt("DATA_TYPE");
                 String sqlDataTypeName = rs.getString("TYPE_NAME");
-                
-                // turn on foundPlSqlRecord
-                if (Parameter.MODE_OUT.equals(mode) && 
-                     Types.OTHER == sqlDataType && //cursor type
-                     columnName == null && 
-                     "PL/SQL RECORD".equals(sqlDataTypeName)) {//TODO: This code is tied to Oracle. Change it.
-                    foundPlSqlRecord = true;
-                }
-                
-                // The next few rows are definition of this ref cursor
-                // ignore it as there is no way to detect the end of this 
-                // cursor columns exactly. 
-                // will get the output cursor info in other place. 
-                if (foundPlSqlRecord) {
-                    if (Parameter.MODE_OUT.equals(mode)) {
-                        continue;
-                    }
-                    else {
-                        // turn off foundPlSqlRecord
-                        foundPlSqlRecord = false;
-                    }
-                }
                 
                 //check if start to record
                 if (index == 1 && !Parameter.MODE_RETURN.equals(mode)) {

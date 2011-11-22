@@ -8,14 +8,18 @@
 package com.scooterframework.admin;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -84,6 +88,13 @@ public class EnvConfig implements Observer {
     public static final String DEFAULT_VALUE_additionalMimeTypes = "";
     public static final String DEFAULT_VALUE_additionalSinglePlural = "";
     public static final String DEFAULT_VALUE_defaultCacheProvider = null;
+    public static final String DEFAULT_VALUE_defaultCacheName = ApplicationConfig.getInstance().getContextName();
+    public static final String DEFAULT_VALUE_useThreadCache = "true";
+    public static final String DEFAULT_VALUE_useSecondLevelCache = "false";
+    public static final String DEFAULT_VALUE_flushCacheOnChange = "true";
+    public static final String DEFAULT_VALUE_localUseCacheExceptions = null;
+    public static final String DEFAULT_VALUE_localFlushCacheExceptions = null;
+    public static final String DEFAULT_VALUE_allowCacheAssociatedObjects = "false";
     public static final String DEFAULT_VALUE_upload_file_repository = null;
     public static final String DEFAULT_VALUE_maximum_bytes_per_uploaded_file_in_memory = "10240";
     public static final String DEFAULT_VALUE_maximum_total_bytes_per_upload_request = "-1";
@@ -122,7 +133,14 @@ public class EnvConfig implements Observer {
     private String additionalMimeTypes = DEFAULT_VALUE_additionalMimeTypes;
     private String additionalSinglePlural = DEFAULT_VALUE_additionalSinglePlural;
     private String defaultCacheProvider = DEFAULT_VALUE_defaultCacheProvider;
+    private String defaultCacheName = DEFAULT_VALUE_defaultCacheName;
     private String uploadFileRepository = DEFAULT_VALUE_upload_file_repository;
+    private String useThreadCache = DEFAULT_VALUE_useThreadCache;
+    private String useSecondLevelCache = DEFAULT_VALUE_useSecondLevelCache;
+    private String flushCacheOnChange = DEFAULT_VALUE_flushCacheOnChange;
+    private String localUseCacheExceptions = DEFAULT_VALUE_localUseCacheExceptions;
+    private String localFlushCacheExceptions = DEFAULT_VALUE_localFlushCacheExceptions;
+    private String allowCacheAssociatedObjects = DEFAULT_VALUE_allowCacheAssociatedObjects;
     private String maximumBytesPerUploadedFileInMemory = DEFAULT_VALUE_maximum_bytes_per_uploaded_file_in_memory;
     private String maximumTotalBytesPerUploadRequest = DEFAULT_VALUE_maximum_total_bytes_per_upload_request;
     private String maximumBytesPerUploadedFile = DEFAULT_VALUE_maximum_bytes_per_uploaded_file;
@@ -253,6 +271,14 @@ public class EnvConfig implements Observer {
         	!cacheProvidersMap.keySet().contains(defaultCacheProvider)) {
         	log.error("There is no definition for default cache provider " + defaultCacheProvider);
         }
+
+        defaultCacheName = getProperty("default.cache.name", DEFAULT_VALUE_defaultCacheName);
+        useThreadCache = getProperty("useThreadCache", DEFAULT_VALUE_useThreadCache);
+        useSecondLevelCache = getProperty("useSecondLevelCache", DEFAULT_VALUE_useSecondLevelCache);
+        flushCacheOnChange = getProperty("flushCacheOnChange", DEFAULT_VALUE_flushCacheOnChange);
+        localUseCacheExceptions = getProperty("localUseCacheExceptions", DEFAULT_VALUE_localUseCacheExceptions);
+        localFlushCacheExceptions = getProperty("localFlushCacheExceptions", DEFAULT_VALUE_localFlushCacheExceptions);
+        allowCacheAssociatedObjects = getProperty("allowCacheAssociatedObjects", DEFAULT_VALUE_allowCacheAssociatedObjects);
         
         uploadFileRepository = getProperty("upload.file.repository", DEFAULT_VALUE_upload_file_repository);
         maximumBytesPerUploadedFileInMemory = getProperty("maximum.bytes.per.uploaded.file.in.memory", DEFAULT_VALUE_maximum_bytes_per_uploaded_file_in_memory);
@@ -831,12 +857,10 @@ public class EnvConfig implements Observer {
     }
 
     /**
-     * Checks if cache is ready.
-     *
-     * @return true if cache is ready
+     * Returns default cache name
      */
-    public boolean useDefaultCache() {
-    	return (defaultCacheProvider != null)?true:false;
+    public String getDefaultCacheName() {
+        return defaultCacheName;
     }
 
     /**
@@ -844,6 +868,76 @@ public class EnvConfig implements Observer {
      */
     public Properties getDefaultCacheProviderProperties() {
         return getPredefinedCacheProviderProperties(getDefaultCacheProviderName());
+    }
+
+    /**
+     * Checks if using thread cache for all model classes.
+     *
+     * @return true if using thread cache
+     */
+    public boolean getUseThreadCache() {
+    	return "true".equals(useThreadCache);
+    }
+
+    /**
+     * Checks if using second-level cache for all model classes.
+     *
+     * @return true if using second-level cache
+     */
+    public boolean getUseSecondLevelCache() {
+    	return "true".equals(useSecondLevelCache);
+    }
+
+    /**
+     * Checks if using second-level cache for all model classes.
+     *
+     * @return true if using second-level cache
+     */
+    public boolean getFlushCacheOnChange() {
+    	return "true".equals(flushCacheOnChange);
+    }
+
+    /**
+     * Returns a collection methods that are exceptional to the setting of 
+     * <tt>useThreadCache</tt> and <tt>useSecondLevelCache</tt>.
+     *
+     * @return true if using thread cache
+     */
+    public Collection<String> getLocalUseCacheExceptions(String modelClassName) {
+    	if (localUseCacheExceptions == null) return null;
+    	Set<String> localUseCacheExceptionsSet = new HashSet<String>();
+    	StringTokenizer st = new StringTokenizer(localUseCacheExceptions, ",");
+    	while(st.hasMoreTokens()) {
+    		String token = st.nextToken().trim();
+    		if (token.startsWith(modelClassName)) localUseCacheExceptionsSet.add(token);
+    	}
+    	return localUseCacheExceptionsSet;
+    }
+
+    /**
+     * Returns a collection methods that are exceptional to the setting of 
+     * <tt>useThreadCache</tt> and <tt>useSecondLevelCache</tt>.
+     *
+     * @return a collection of exceptional method names
+     */
+    public Collection<String> getLocalFlushCacheExceptions(String modelClassName) {
+    	if (localFlushCacheExceptions == null) return null;
+    	Set<String> localFlushCacheExceptionsSet = new HashSet<String>();
+    	StringTokenizer st = new StringTokenizer(localFlushCacheExceptions, ",");
+    	while(st.hasMoreTokens()) {
+    		String token = st.nextToken().trim();
+    		if (token.startsWith(modelClassName)) localFlushCacheExceptionsSet.add(token);
+    	}
+    	return localFlushCacheExceptionsSet;
+    }
+
+    /**
+     * Checks if using second-level cache.
+     *
+     * @return true if using second-level cache
+     */
+    public boolean allowCacheAssociatedObjects(String modelClassName) {
+    	return "true".equals(allowCacheAssociatedObjects);
     }
 
     /**

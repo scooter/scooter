@@ -21,5 +21,5 @@ public class Version {
      * Format of the version number: {major}.{minor}.{tiny} (build #)
      * </p>
      */
-    static final String CURRENT_VERSION = "1.2.x (build 1211) 2011-11-05";
+    static final String CURRENT_VERSION = "1.2.x (build 1212) 2011-11-22";
 }
