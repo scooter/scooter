@@ -90,10 +90,13 @@ public abstract class PageListSource {
         if (inputOptions != null) {
     		for (Map.Entry<String, String> entry : inputs.entrySet()) {
     			String key = entry.getKey();
-    			if (Paginator.key_limit.equals(key) ||
-    					Paginator.key_offset.equals(key) ||
-    					Paginator.key_npage.equals(key)) continue;
-    			inputOptions.put(key, entry.getValue());
+    			if (Paginator.key_group_by.equals(key) ||
+    					Paginator.key_having.equals(key) ||
+    					Paginator.key_order_by.equals(key) ||
+    					Paginator.key_sort.equals(key) ||
+    					Paginator.key_order.equals(key)) {
+        			inputOptions.put(key, entry.getValue());
+    			}
     		}
         }
     }

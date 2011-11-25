@@ -168,7 +168,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
                 int rowCount = pstmt.executeUpdate();
                 returnTO.setUpdatedRowCount(rowCount);
                 
-                //get generated key if the underline database permitted
+                //get generated key if the underlying database permitted
                 if (supportsGetGeneratedKeys) {
                     ResultSet rsg = null;
                     try {

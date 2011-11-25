@@ -48,6 +48,15 @@ public class NamedCurrentThreadCache implements Cache {
 	}
 	
 	/**
+	 * Returns the underlying cache.
+	 * 
+	 * @return the cache instance from vendor
+	 */
+	public Map<Object, Object> getDelegateCache() {
+		return getCache();
+	}
+	
+	/**
 	 * Returns the cache name.
 	 * 
 	 * @return name of the cache

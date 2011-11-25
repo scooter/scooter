@@ -78,6 +78,10 @@ public class ClassWorkSource {
 //        arMethods.add("public static com.scooterframework.orm.activerecord.ActiveRecord findLast(String conditionsSQL, java.util.Map conditionsSQLData) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).findLast(conditionsSQL, conditionsSQLData);}");
 //        arMethods.add("public static com.scooterframework.orm.activerecord.ActiveRecord findLast(String conditionsSQL, java.util.Map conditionsSQLData, java.util.Map options) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).findLast(conditionsSQL, conditionsSQLData, options);}");
 //        arMethods.add("public static com.scooterframework.orm.activerecord.ActiveRecord findLast(String conditionsSQL, java.util.Map conditionsSQLData, String options) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).findLast(conditionsSQL, conditionsSQLData, options);}");
+    	arMethods.add("public static int updateBySQL(String sql) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateBySQL(sql);}");
+    	arMethods.add("public static int updateBySQL(String sql, java.util.Map inputs) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateBySQL(sql, inputs);}");
+    	arMethods.add("public static int updateBySQLKey(String sqlKey) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateBySQLKey(sqlKey);}");
+    	arMethods.add("public static int updateBySQLKey(String sqlKey, java.util.Map inputs) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateBySQLKey(sqlKey, inputs);}");
         arMethods.add("public static int updateAll(java.util.Map fieldData) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateAll(fieldData);}");
         arMethods.add("public static int updateAll(java.util.Map fieldData, String conditionsSQL) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateAll(fieldData, conditionsSQL);}");
         arMethods.add("public static int updateAll(java.util.Map fieldData, String conditionsSQL, java.util.Map conditionsSQLData) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).updateAll(fieldData, conditionsSQL, conditionsSQLData);}");
@@ -85,7 +89,11 @@ public class ClassWorkSource {
         arMethods.add("public static int deleteById(Object id) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteById(id);}");
         arMethods.add("public static int deleteByPK(String pkString) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteByPK(pkString);}");
         arMethods.add("public static int deleteByPrimaryKeyMap(java.util.Map inputs) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteByPrimaryKeyMap(inputs);}");
-        arMethods.add("public static int deleteAll(java.util.Map conditions) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditions);}");
+        arMethods.add("public static int deleteBySQL(String sql) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteBySQL(sql);}");
+    	arMethods.add("public static int deleteBySQL(String sql, java.util.Map inputs) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteBySQL(sql, inputs);}");
+    	arMethods.add("public static int deleteBySQLKey(String sqlKey) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteBySQLKey(sqlKey);}");
+    	arMethods.add("public static int deleteBySQLKey(String sqlKey, java.util.Map inputs) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteBySQLKey(sqlKey, inputs);}");
+    	arMethods.add("public static int deleteAll(java.util.Map conditions) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditions);}");
         arMethods.add("public static int deleteAll(String conditionsSQL) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditionsSQL);}");
         arMethods.add("public static int deleteAll(String conditionsSQL, java.util.Map conditionsSQLData) {return com.scooterframework.orm.activerecord.ActiveRecordUtil.getGateway(getMyClass()).deleteAll(conditionsSQL, conditionsSQLData);}");
         

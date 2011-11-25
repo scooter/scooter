@@ -1,6 +1,6 @@
 /*
- *   This software is distributed under the terms of the FSF 
- *   Gnu Lesser General Public License (see lgpl.txt). 
+ *   This software is distributed under the terms of the FSF
+ *   Gnu Lesser General Public License (see lgpl.txt).
  *
  *   This program is distributed WITHOUT ANY WARRANTY. See the
  *   GNU General Public License for more details.
@@ -22,26 +22,29 @@ import com.scooterframework.common.logging.LogUtil;
 
 /**
  * SpyMemcachedCache
- * 
+ *
  * @author (Fei) John Chen
  */
 public class SpyMemcachedCache implements Cache {
     private LogUtil log = LogUtil.getLogger(this.getClass().getName());
-    
+
 	private SpyMemcachedCacheProvider cacheProvider;
 	private MemcachedClient delegate;
 	private long timeout; //seconds
-	
+
 	public SpyMemcachedCache(SpyMemcachedCacheProvider cacheProvider, MemcachedClient delegate) {
 		this.cacheProvider = cacheProvider;
 		this.delegate = delegate;
-		timeout = cacheProvider.getTimeout();
+	}
+
+	public MemcachedClient getDelegateCache() {
+		return delegate;
 	}
 
 	public String getName() {
 		return cacheProvider.getName();
 	}
-	
+
 	public Collection<Object> getKeys() {
 		throw new UnsupportedOperationException("getKeys() is not supported.");
 	}
@@ -58,7 +61,7 @@ public class SpyMemcachedCache implements Cache {
 		}
 		return obj;
 	}
-	
+
 	public boolean put(Object key, Object value) {
 		boolean status = false;
 		try {
@@ -70,7 +73,7 @@ public class SpyMemcachedCache implements Cache {
 		}
 		return status;
 	}
-	
+
 	public boolean remove(Object key) {
 		boolean status = false;
 		try {
@@ -81,11 +84,11 @@ public class SpyMemcachedCache implements Cache {
 		}
 		return status;
 	}
-	
+
 	public void clear() {
 		delegate.flush();
 	}
-	
+
 	private String toString(Object obj) {
 		return (obj != null)?obj.toString():null;
 	}

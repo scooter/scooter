@@ -34,6 +34,8 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 
 	private final ConcurrentHashMap<String, Cache> chm = new ConcurrentHashMap<String, Cache>();
 	private CacheManager cacheManager;
+	private boolean useDefaultCacheNameIfAbsent;
+	private boolean useSerialization;
 
 	public EhCacheCacheProvider(Properties p) {
 		super(p);
@@ -47,10 +49,7 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 					f = new File(appPath + File.separatorChar + "WEB-INF/config"
 							+ File.separatorChar + propertyFileName);
 					if (!f.exists()) {
-						if (!propertyFileName.startsWith(File.separator)) {
-							propertyFileName = File.separator + propertyFileName;
-						}
-						cacheManager = CacheManager.create(new FileInputStream(f));
+						cacheManager = CacheManager.create(CacheManager.class.getResourceAsStream(propertyFileName));
 					}
 					else {
 						cacheManager = CacheManager.create(new FileInputStream(f));
@@ -67,6 +66,14 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 		else {
 			cacheManager = CacheManager.create(CacheManager.class.getResourceAsStream("/ehcache.xml"));
 		}
+
+		if ("true".equals(super.getProperty("useDefaultCacheNameIfAbsent"))) {
+			useDefaultCacheNameIfAbsent = true;
+		}
+
+		if ("true".equals(super.getProperty("useSerialization"))) {
+			useSerialization = true;
+		}
 	}
 
 	/**
@@ -82,10 +89,9 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 			if (ehcache == null) {
 				log.warn("There is no cache registered with name '" + name
 					+ "' in ehcache.xml. Will create a default cache.");
-				String useDefaultCacheNameIfAbsent = super.getProperty("useDefaultCacheNameIfAbsent");
-				if ("true".equals(useDefaultCacheNameIfAbsent)) {
+				if (useDefaultCacheNameIfAbsent) {
 					String defaultCacheName = super.getProperty("defaultCacheName", EnvConfig.getInstance().getDefaultCacheName());
-				    log.warn("Default cache name: " + defaultCacheName);
+				    log.debug("Default cache name: " + defaultCacheName);
 					ehcache = cacheManager.addCacheIfAbsent(defaultCacheName);
 				}
 
@@ -95,7 +101,7 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 					throw new IllegalArgumentException(error);
 				}
 			}
-			cache = new EhCacheCache(ehcache);
+			cache = new EhCacheCache(ehcache, useSerialization);
 			chm.put(name, cache);
 		}
 		return cache;

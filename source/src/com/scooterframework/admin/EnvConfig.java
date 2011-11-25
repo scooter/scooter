@@ -89,7 +89,7 @@ public class EnvConfig implements Observer {
     public static final String DEFAULT_VALUE_additionalSinglePlural = "";
     public static final String DEFAULT_VALUE_defaultCacheProvider = null;
     public static final String DEFAULT_VALUE_defaultCacheName = ApplicationConfig.getInstance().getContextName();
-    public static final String DEFAULT_VALUE_useThreadCache = "true";
+    public static final String DEFAULT_VALUE_useRequestCache = "true";
     public static final String DEFAULT_VALUE_useSecondLevelCache = "false";
     public static final String DEFAULT_VALUE_flushCacheOnChange = "true";
     public static final String DEFAULT_VALUE_localUseCacheExceptions = null;
@@ -135,7 +135,7 @@ public class EnvConfig implements Observer {
     private String defaultCacheProvider = DEFAULT_VALUE_defaultCacheProvider;
     private String defaultCacheName = DEFAULT_VALUE_defaultCacheName;
     private String uploadFileRepository = DEFAULT_VALUE_upload_file_repository;
-    private String useThreadCache = DEFAULT_VALUE_useThreadCache;
+    private String useRequestCache = DEFAULT_VALUE_useRequestCache;
     private String useSecondLevelCache = DEFAULT_VALUE_useSecondLevelCache;
     private String flushCacheOnChange = DEFAULT_VALUE_flushCacheOnChange;
     private String localUseCacheExceptions = DEFAULT_VALUE_localUseCacheExceptions;
@@ -273,7 +273,7 @@ public class EnvConfig implements Observer {
         }
 
         defaultCacheName = getProperty("default.cache.name", DEFAULT_VALUE_defaultCacheName);
-        useThreadCache = getProperty("useThreadCache", DEFAULT_VALUE_useThreadCache);
+        useRequestCache = getProperty("useRequestCache", DEFAULT_VALUE_useRequestCache);
         useSecondLevelCache = getProperty("useSecondLevelCache", DEFAULT_VALUE_useSecondLevelCache);
         flushCacheOnChange = getProperty("flushCacheOnChange", DEFAULT_VALUE_flushCacheOnChange);
         localUseCacheExceptions = getProperty("localUseCacheExceptions", DEFAULT_VALUE_localUseCacheExceptions);
@@ -876,7 +876,7 @@ public class EnvConfig implements Observer {
      * @return true if using thread cache
      */
     public boolean getUseThreadCache() {
-    	return "true".equals(useThreadCache);
+    	return "true".equals(useRequestCache);
     }
 
     /**
@@ -899,7 +899,7 @@ public class EnvConfig implements Observer {
 
     /**
      * Returns a collection methods that are exceptional to the setting of 
-     * <tt>useThreadCache</tt> and <tt>useSecondLevelCache</tt>.
+     * <tt>useRequestCache</tt> and <tt>useSecondLevelCache</tt>.
      *
      * @return true if using thread cache
      */
@@ -916,7 +916,7 @@ public class EnvConfig implements Observer {
 
     /**
      * Returns a collection methods that are exceptional to the setting of 
-     * <tt>useThreadCache</tt> and <tt>useSecondLevelCache</tt>.
+     * <tt>useRequestCache</tt> and <tt>useSecondLevelCache</tt>.
      *
      * @return a collection of exceptional method names
      */

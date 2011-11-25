@@ -409,6 +409,56 @@ public abstract class ActiveRecordClass {
      *
      */
     
+	/**
+	 * Updates all the records that satisfy the SQL statement.
+	 *
+	 * @param sql
+	 *            A valid SQL string
+	 * @return int number of records updated
+	 */
+	public static int updateBySQL(String sql) {
+        throw new RuntimeException(UO);
+    }
+
+	/**
+	 * Updates all the records that satisfy the SQL statement.
+	 *
+	 * @param sql
+	 *            A valid SQL string
+	 * @param inputs
+	 *            a map of name and value pairs
+	 * @return int number of records updated
+	 */
+	public static int updateBySQL(String sql, Map<String, Object> inputs) {
+        throw new RuntimeException(UO);
+    }
+
+	/**
+	 * Updates all the records that satisfy the SQL specified by <tt>sqlKey</tt>
+	 * .
+	 *
+	 * @param sqlKey
+	 *            a key to a SQL string.
+	 * @return int number of records updated
+	 */
+	public static int updateBySQLKey(String sqlKey) {
+        throw new RuntimeException(UO);
+    }
+
+	/**
+	 * Updates all the records that satisfy the SQL specified by <tt>sqlKey</tt>
+	 * .
+	 *
+	 * @param sqlKey
+	 *            a key to a SQL string
+	 * @param inputs
+	 *            a map of name and value pairs
+	 * @return int number of records updated
+	 */
+	public static int updateBySQLKey(String sqlKey, Map<String, Object> inputs) {
+        throw new RuntimeException(UO);
+    }
+    
     /**
      * <p>Updates all the records of a table.</p>
      *
@@ -531,6 +581,60 @@ public abstract class ActiveRecordClass {
      * @return int number of records deleted
      */
     public static int deleteByPrimaryKeyMap(Map<String, Object> inputs) {
+        throw new RuntimeException(UO);
+    }
+    
+	/**
+	 * Deletes all the records that satisfy the SQL statement.
+	 *
+	 * @param sql
+	 *            a key to a SQL string
+	 * @return int number of records deleted
+	 */
+	public static int deleteBySQL(String sql) {
+        throw new RuntimeException(UO);
+    }
+
+	/**
+	 * Deletes all the records that satisfy the SQL statement.
+	 *
+	 * The inputs is a map of name and value pairs related to the SQL statement.
+	 *
+	 * @param sql
+	 *            a key to a SQL string
+	 * @param inputs
+	 *            a map of name and value pairs
+	 * @return int number of records deleted
+	 */
+	public static int deleteBySQL(String sql, Map<String, Object> inputs) {
+        throw new RuntimeException(UO);
+    }
+
+	/**
+	 * Deletes all the records that satisfy the SQL specified by the
+	 * <tt>sqlKey</tt>.
+	 *
+	 * @param sqlKey
+	 *            a key to a SQL string
+	 * @return int number of records deleted
+	 */
+	public static int deleteBySQLKey(String sqlKey) {
+        throw new RuntimeException(UO);
+    }
+
+	/**
+	 * Deletes all the records that satisfy the SQL specified by the
+	 * <tt>sqlKey</tt>.
+	 *
+	 * The inputs is a map of name and value pairs related to the SQL statement.
+	 *
+	 * @param sqlKey
+	 *            a key to a SQL string
+	 * @param inputs
+	 *            a map of name and value pairs
+	 * @return int number of records deleted
+	 */
+	public static int deleteBySQLKey(String sqlKey, Map<String, Object> inputs) {
         throw new RuntimeException(UO);
     }
 

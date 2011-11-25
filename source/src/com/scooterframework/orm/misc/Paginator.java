@@ -22,17 +22,19 @@ import com.scooterframework.orm.sqldataexpress.util.SqlConstants;
  *
  * <p>Any information on a URL link can be passed to this object through
  * controlOptions parameter. </p>
+ * 
+ * <h3>Specifying Paging <tt>controlOptions</tt></h3>
  *
  * <p>The following keys have an impact on the result of pagination:</p>
  *
  * <ul>
  * <li>key_limit "<tt>limit</tt>": specifies limit of a page. Default is 10.</li>
+ * <li>key_offset "<tt>offset</tt>": specifies offset of a page. Default is 0.</li>
  * <li>key_npage "<tt>npage</tt>": specifies the number of the page to be opened by this click. Default is 1.</li>
  * <li>key_order_by "<tt>order_by</tt>": order by clause.</li>
  * <li>key_sort "<tt>sort</tt>": column to be sorted.</li>
  * <li>key_order "<tt>order</tt>": sort direction, either "up" (default) or "down".</li>
  * </ul>
- * <p>Note: Either use key_order_by or use key_sort and key_order together.</p>
  *
  * <p>The following keys are for information only:
  * <ul>
@@ -40,17 +42,28 @@ import com.scooterframework.orm.sqldataexpress.util.SqlConstants;
  * <li>key_link "<tt>r</tt>": specifies the origin place of the current click.</li>
  * </ul>
  * </p>
- *
- * <p>If a key/value pair is not used by the paginator, it will reappear in
- * query string outputs. </p>
- *
- * <p>In addition, all SQL related information can be passed to the paginator
- * through its PageListSource instance.</p>
+ * 
+ * <p>Notes: 
+ * <ol>
+ *   <li>When both <tt>npage</tt> and <tt>offset</tt> exists, the latter is 
+ *       ignored as it will be derived from <tt>npage</tt>.</li>
+ *   <li>Either use key_order_by or use key_sort and key_order together.</li>
+ *   <li>If a key/value pair is not used by the paginator, it will reappear in
+ *       query string outputs.</li>
+ *   <li>In addition, all SQL related information can be passed to the 
+ *       paginator through its PageListSource instance.</li>
+ * </ol></p>
+ * 
+ * <p>It is easier to specify paging <tt>controlOptions</tt> as a string:</p>
+ * <pre>
+ *    //Skip the first 250 records and returns the next 50 records.
+ *    String controlOptions = "limit=50, offset=250";
+ * </pre>
  *
  * <p>Usage example:</p>
  * <pre>
- * Paginator page = new Paginator(new JdbcPageListSource(modelClass), controlOptions);
- * List pagedRecords = page.getRecordList();
+ *    Paginator page = new Paginator(new JdbcPageListSource(modelClass), controlOptions);
+ *    List pagedRecords = page.getRecordList();
  * </pre>
  *
  * @author (Fei) John Chen
@@ -365,8 +378,8 @@ public class Paginator
         
         opage = Util.getIntValue(options, key_cpage, 1);
         ref   = Util.getStringValue(options, key_link, "");
-
-        pls.setInputs(options);//in case some other conditions are passed into options
+        
+        pls.setInputs(options);//in case some other SQL conditions such as order_by, sort, order
         pls.setLimit(limit);
         pls.setOffset(offset);
         pls.execute();

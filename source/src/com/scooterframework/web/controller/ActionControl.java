@@ -143,7 +143,7 @@ public class ActionControl {
     }
     
     /**
-     * Returns model class name related to the underline controller class name 
+     * Returns model class name related to the underlying controller class name 
      * based on naming convention.
      * 
      * @return string model class name
@@ -153,28 +153,137 @@ public class ActionControl {
     }
     
     /**
-     * Returns a paginator for the underline model.
+     * Returns a paginator for the underlying model. 
+     * 
+     * <p>
+     * Paging control options are constructed based on URL parameters. 
+     * Therefore in URL, there must be parameters like <tt>limit</tt>, 
+     * <tt>offset</tt>, <tt>npage</tt>, etc.</p>
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
      * 
      * @param modelClass the model class
-     * @param sqlOptions SQL options string
      * @return Paginator instance
      */
-    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, String sqlOptions) {
-    	Map<String, Object> map = new HashMap<String, Object>();
-    	map.putAll(Converters.convertSqlOptionStringToMap(sqlOptions));
-        return jdbcPaginator(modelClass, map);
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass) {
+    	Map<String, String> pagingOptions = Converters.convertMapToMapSS(ACH.getAC().getParameterDataAsMap());
+        return jdbcPaginator(modelClass, pagingOptions, (Map<String, String>)null);
     }
     
     /**
-     * Returns a paginator for the underline model.
+     * Returns a paginator for the underlying model.
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
      * 
      * @param modelClass the model class
-     * @param sqlOptions SQL options map
+     * @param pagingOptions  paging control options string
      * @return Paginator instance
      */
-    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, Map<String, Object> sqlOptions) {
-        Map<String, String> pagingControl = Converters.convertMapToMapSS(ACH.getAC().getParameterDataAsMap());
-        return new Paginator(new JdbcPageListSource(modelClass, Converters.convertMapToMapSS(sqlOptions)), pagingControl);
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, String pagingOptions) {
+        return jdbcPaginator(modelClass, Converters.convertStringToMap(pagingOptions), (Map<String, String>)null);
+    }
+    
+    /**
+     * Returns a paginator for the underlying model.
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
+     * 
+     * <p>
+     * For a complete list of SQL options, see description of <tt>options</tt>
+     * in {@link com.scooterframework.orm.activerecord.ActiveRecord} 
+     * class.</p>
+     * 
+     * @param modelClass     the model class
+     * @param pagingOptions  paging control options string
+     * @param sqlOptions     SQL options string
+     * @return Paginator instance
+     */
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, String pagingOptions, String sqlOptions) {
+        return jdbcPaginator(modelClass, Converters.convertStringToMap(pagingOptions), Converters.convertSqlOptionStringToMap(sqlOptions));
+    }
+    
+    /**
+     * Returns a paginator for the underlying model.
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
+     * 
+     * <p>
+     * For a complete list of SQL options, see description of <tt>options</tt>
+     * in {@link com.scooterframework.orm.activerecord.ActiveRecord} 
+     * class.</p>
+     * 
+     * @param modelClass     the model class
+     * @param pagingOptions  paging control options string
+     * @param sqlOptions     SQL options Map
+     * @return Paginator instance
+     */
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, String pagingOptions, Map<String, String> sqlOptions) {
+        return jdbcPaginator(modelClass, Converters.convertStringToMap(pagingOptions), sqlOptions);
+    }
+    
+    /**
+     * Returns a paginator for the underlying model.
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
+     * 
+     * @param modelClass     the model class
+     * @param pagingOptions  paging control options Map
+     * @return Paginator instance
+     */
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, Map<String, ?> pagingOptions) {
+        return jdbcPaginator(modelClass, Converters.convertMapToMapSS(pagingOptions), (Map<String, String>)null);
+    }
+    
+    /**
+     * Returns a paginator for the underlying model.
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
+     * 
+     * <p>
+     * For a complete list of SQL options, see description of <tt>options</tt>
+     * in {@link com.scooterframework.orm.activerecord.ActiveRecord} 
+     * class.</p>
+     * 
+     * @param modelClass     the model class
+     * @param pagingOptions  paging control options Map
+     * @param sqlOptions     SQL options string
+     * @return Paginator instance
+     */
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, Map<String, String> pagingOptions, String sqlOptions) {
+        return jdbcPaginator(modelClass, pagingOptions, Converters.convertSqlOptionStringToMap(sqlOptions));
+    }
+    
+    /**
+     * Returns a paginator for the underlying model.
+     * 
+     * <p>
+     * For a complete list of paging options, see description of 
+     * {@link com.scooterframework.orm.misc.Paginator} class.</p>
+     * 
+     * <p>
+     * For a complete list of SQL options, see description of <tt>options</tt>
+     * in {@link com.scooterframework.orm.activerecord.ActiveRecord} 
+     * class.</p>
+     * 
+     * @param modelClass     the model class
+     * @param pagingOptions  paging control options Map
+     * @param sqlOptions     SQL options Map
+     * @return Paginator instance
+     */
+    public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, Map<String, String> pagingOptions, Map<String, String> sqlOptions) {
+        return new Paginator(new JdbcPageListSource(modelClass, sqlOptions), pagingOptions);
     }
     
     /**

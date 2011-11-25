@@ -63,7 +63,7 @@ public class RowData implements RESTified, Serializable {
      * primary key is defined by the {@link #getRestfulIdNames getRestfulIdNames} method.
      * </p>
      *
-     * <p>If the underline data does not have primary key, <tt>null</tt> is
+     * <p>If the underlying data does not have primary key, <tt>null</tt> is
      * returned.</p>
      *
      * <p>Subclass may override this method if a customized string format is

@@ -191,7 +191,7 @@ abstract public class DataProcessorImpl implements DataProcessor {
                setBigData(pstmt, obj, p);
            }
             else {
-                //delegate to the underline jdbc-driver implementation
+                //delegate to the underlying jdbc-driver implementation
                 pstmt.setObject(parameterIndex, obj, targetSqlType);
             }
         }

@@ -75,7 +75,7 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
     }
     
     /**
-     * Return the underline DatabaseConnectionContext. 
+     * Return the underlying DatabaseConnectionContext. 
      */
     public DatabaseConnectionContext getDatabaseConnectionContext() {
         return dcc;
@@ -93,7 +93,7 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
 			autoCommit = conn.getAutoCommit();
 		}
 		catch(Exception ex) {
-			String errorMessage = "Failed to get auto commit for the underline connection.";
+			String errorMessage = "Failed to get auto commit for the underlying connection.";
 			log.error(errorMessage, ex);
 			throw new CreateConnectionFailureException(errorMessage, ex);
 		}
@@ -119,7 +119,7 @@ abstract public class UserDatabaseConnectionImpl implements UserDatabaseConnecti
 			}
 		}
 		catch(Exception ex) {
-			String errorMessage = "Failed to set auto commit for the underline connection.";
+			String errorMessage = "Failed to set auto commit for the underlying connection.";
 			log.error(errorMessage, ex);
 			throw new CreateConnectionFailureException(errorMessage, ex);
 		}

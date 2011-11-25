@@ -34,6 +34,15 @@ public class XMemcachedCache implements Cache {
 		this.delegate = delegate;
 		timeout = cacheProvider.getTimeout();
 	}
+	
+	/**
+	 * Returns the underlying cache.
+	 * 
+	 * @return the cache instance from vendor
+	 */
+	public MemcachedClient getDelegateCache() {
+		return delegate;
+	}
 
 	public String getName() {
 		return cacheProvider.getName();

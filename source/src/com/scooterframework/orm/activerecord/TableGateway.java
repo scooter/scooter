@@ -17,6 +17,7 @@ import java.util.StringTokenizer;
 
 import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.cache.Cache;
+import com.scooterframework.cache.CacheKey;
 import com.scooterframework.cache.CacheProvider;
 import com.scooterframework.cache.CacheProviderUtil;
 import com.scooterframework.cache.NamedCurrentThreadCache;
@@ -61,7 +62,7 @@ public class TableGateway {
 
 	private ActiveRecord home;
 
-	private boolean useThreadCache = true;
+	private boolean useRequestCache = true;
 	private boolean useSecondLevelCache = false;
 	private boolean flushCacheOnChange = true;
 	private Collection<String> localUseCacheExceptions;
@@ -93,7 +94,7 @@ public class TableGateway {
 		this.clazz = modelHome.getClass();
 		this.home = modelHome;
 		
-		useThreadCache = EnvConfig.getInstance().getUseThreadCache();
+		useRequestCache = EnvConfig.getInstance().getUseThreadCache();
 		useSecondLevelCache = EnvConfig.getInstance().getUseSecondLevelCache();
 		flushCacheOnChange = EnvConfig.getInstance().getFlushCacheOnChange();
 		
@@ -332,7 +333,7 @@ public class TableGateway {
 		inputs.put("1", id);
 		inputs = addMoreProperties(inputs, null);
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findById")) {
 			cacheKey = getCacheKey("findById", inputs);
 			ar = (ActiveRecord) getCache().get(cacheKey);
@@ -380,7 +381,7 @@ public class TableGateway {
 		
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findByRESTfulId")) {
 			cacheKey = getCacheKey("findByRESTfulId", restfulId);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -414,7 +415,7 @@ public class TableGateway {
 	public ActiveRecord findByPK(String pkString) {
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findByPK")) {
 			cacheKey = getCacheKey("findByPK", pkString);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -460,7 +461,7 @@ public class TableGateway {
 		List<ActiveRecord> list = null;
 		inputs = addMoreProperties(inputs, null);
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findAllBySQL")) {
 			cacheKey = getCacheKey("findAllBySQL", sql, inputs);
 			list = (List<ActiveRecord>) getCache().get(cacheKey);
@@ -526,7 +527,7 @@ public class TableGateway {
 		List<ActiveRecord> list = null;
 		inputs = addMoreProperties(inputs, null);
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findAllBySQLKey")) {
 			cacheKey = getCacheKey("findAllBySQLKey", sqlKey, inputs);
 			list = (List<ActiveRecord>) getCache().get(cacheKey);
@@ -582,7 +583,7 @@ public class TableGateway {
 	public ActiveRecord findFirstBy(String columns, Object[] values) {
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findFirstBy")) {
 			cacheKey = getCacheKey("findFirstBy", columns, values);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -622,7 +623,7 @@ public class TableGateway {
 	public ActiveRecord findLastBy(String columns, Object[] values) {
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findLastBy")) {
 			cacheKey = getCacheKey("findLastBy", columns, values);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -698,7 +699,7 @@ public class TableGateway {
 		
 		List<ActiveRecord> list = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findAllBy")) {
 			cacheKey = getCacheKey("findAllBy", map, options);
 			list = (List<ActiveRecord>) getCache().get(cacheKey);
@@ -999,7 +1000,7 @@ public class TableGateway {
 		
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findFirst")) {
 			cacheKey = getCacheKey("findFirst", conditions, options);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -1132,7 +1133,7 @@ public class TableGateway {
 		
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findFirst")) {
 			cacheKey = getCacheKey("findFirst", conditionsSQL, conditionsSQLData, options);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -1225,7 +1226,7 @@ public class TableGateway {
 	public ActiveRecord findLast(Map<String, Object> conditions, Map<String, String> options) {
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findLast")) {
 			cacheKey = getCacheKey("findLast", conditions, options);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -1351,7 +1352,7 @@ public class TableGateway {
 			Map<String, Object> conditionsSQLData, Map<String, String> options) {
 		ActiveRecord record = null;
 		
-		String cacheKey = null;
+		Object cacheKey = null;
 		if (useCache("findLast")) {
 			cacheKey = getCacheKey("findLast", conditionsSQL, conditionsSQLData, options);
 			record = (ActiveRecord) getCache().get(cacheKey);
@@ -1412,7 +1413,7 @@ public class TableGateway {
 
 			inputs = addMoreProperties(inputs, options);
 			
-			String cacheKey = null;
+			Object cacheKey = null;
 			if (useCache("findAll")) {
 				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
 				list = (List<ActiveRecord>) getCache().get(cacheKey);
@@ -1460,7 +1461,7 @@ public class TableGateway {
 
 			inputs = addMoreProperties(inputs, options);
 			
-			String cacheKey = null;
+			Object cacheKey = null;
 			if (useCache("findAll")) {
 				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
 				list = (List<ActiveRecord>) getCache().get(cacheKey);
@@ -1541,8 +1542,7 @@ public class TableGateway {
 		return o;
 	}
 
-	// This method is mostly used by internal and JdbcPageListSource
-	public Map<String, Object> constructFindSQL(Map<String, Object> conditions,
+	Map<String, Object> constructFindSQL(Map<String, Object> conditions,
 			Map<String, String> options) {
 		Map<String, Object> inputsAndSql = new HashMap<String, Object>();
 
@@ -1622,7 +1622,8 @@ public class TableGateway {
 		return inputsAndSql;
 	}
 
-	private Map<String, Object> constructFindSQL(String conditionsSQL,
+	// This method is mostly used by internal and JdbcPageListSource
+	public Map<String, Object> constructFindSQL(String conditionsSQL,
 			Map<String, Object> conditionsSQLData, Map<String, String> options) {
 		Map<String, Object> inputsAndSql = new HashMap<String, Object>();
 
@@ -1795,7 +1796,7 @@ public class TableGateway {
 
 			inputs = addMoreProperties(inputs, options);
 			
-			String cacheKey = null;
+			Object cacheKey = null;
 			if (useCache("findAll") && allowCacheAssociatedObjects()) {
 				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
 				list = (List<ActiveRecord>) getCache().get(cacheKey);
@@ -2330,12 +2331,12 @@ public class TableGateway {
 		return SqlServiceConfig.getSqlService();
 	}
 	
-	private String getCacheKey(String request, Object... elements) {
-		return CacheProviderUtil.getCacheKey(clazz.getName(), request, elements);
+	private Object getCacheKey(String request, Object... elements) {
+		return CacheKey.getCacheKey(clazz.getName(), request, elements);
 	}
 	
 	private boolean useCache(String method) {
-		boolean useCheck = useThreadCache || useSecondLevelCache;
+		boolean useCheck = useRequestCache || useSecondLevelCache;
 		if (useCheck) {
 			if (localUseCacheExceptions != null && localUseCacheExceptions.contains(method)) {
 				useCheck = false;
@@ -2381,7 +2382,7 @@ public class TableGateway {
 				modelCache = dcp.getCache(clazz.getName());
 			}
 		}
-		else if (useThreadCache) {
+		else if (useRequestCache) {
 			modelCache = new NamedCurrentThreadCache(clazz.getName());
 		}
 		

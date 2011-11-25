@@ -193,7 +193,7 @@ public class JdbcStatementParser extends JdbcStatementHelper {
                 else {
                     log.warn("Failed to detect column name for ? with index " + qmarkIndex + 
                              ", suggest to use inline sql type declaration if " + 
-                             "the underline database doesn't support ParameterMetaData.");
+                             "the underlying database doesn't support ParameterMetaData.");
                     continue;
                 }
                 

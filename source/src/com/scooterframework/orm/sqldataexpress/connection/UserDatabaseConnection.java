@@ -35,12 +35,12 @@ public interface UserDatabaseConnection
     public String getConnectionType();
     
     /**
-     * Return the underline connection.
+     * Return the underlying connection.
      */
     public Connection getConnection();
     
     /**
-     * Return the underline DatabaseConnectionContext. 
+     * Return the underlying DatabaseConnectionContext. 
      */
     public DatabaseConnectionContext getDatabaseConnectionContext();
     

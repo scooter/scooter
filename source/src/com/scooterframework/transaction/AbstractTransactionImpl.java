@@ -76,14 +76,24 @@ abstract public class AbstractTransactionImpl implements Transaction {
      * Commit a transaction.
      */
     public void commit() {
-        ;
+        if (bTransactionHasCommitted) {
+        	throw new TransactionException("Transaciton has already been committed.");
+        }
+        else {
+        	bTransactionHasCommitted = true;
+        }
     }
     
     /**
      * Rollback a transaction.
      */
     public void rollback() {
-        ;
+        if (bTransactionHasRollbacked) {
+        	throw new TransactionException("Transaciton has already been rollbacked.");
+        }
+        else {
+        	bTransactionHasRollbacked = true;
+        }
     }
     
     /**
@@ -175,5 +185,7 @@ abstract public class AbstractTransactionImpl implements Transaction {
     protected String transactionType = null;
     protected boolean bTransactionHasStarted = false;
     protected boolean bTransactionHasEnded = false;
+    protected boolean bTransactionHasCommitted = false;
+    protected boolean bTransactionHasRollbacked = false;
     protected boolean bAllResourcesReleased = false;
 }

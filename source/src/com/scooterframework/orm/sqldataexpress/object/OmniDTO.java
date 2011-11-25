@@ -80,7 +80,7 @@ public class OmniDTO implements OmniDTOJdbcStatement, OmniDTOStoredProcedure, Om
      *
      * Note: Only one primary key column is allowed to be auto generated.
      *
-     * return -1 if the underline database does not support generatedKeys
+     * return -1 if the underlying database does not support generatedKeys
      * feature or if the sql statement is not a ddl statement.
      */
     public long getGeneratedKey() {
@@ -231,7 +231,7 @@ public class OmniDTO implements OmniDTOJdbcStatement, OmniDTOStoredProcedure, Om
     }
 
     /**
-     * Returns method names that are only useful when the underline processor
+     * Returns method names that are only useful when the underlying processor
      * is a StoredProcedureProcessor.
      */
     public String getMethodNamesSupportingStoredProcedureProcessorOnly() {
@@ -239,7 +239,7 @@ public class OmniDTO implements OmniDTOJdbcStatement, OmniDTOStoredProcedure, Om
     }
 
     /**
-     * Returns method names that are only useful when the underline processor
+     * Returns method names that are only useful when the underlying processor
      * is a FunctionProcessor.
      */
     public String getMethodNamesSupportingFunctionProcessorOnly() {
@@ -247,7 +247,7 @@ public class OmniDTO implements OmniDTOJdbcStatement, OmniDTOStoredProcedure, Om
     }
 
     /**
-     * Returns method names that are only useful when the underline processor
+     * Returns method names that are only useful when the underlying processor
      * is a JdbcStatementProcessor.
      */
     public String getMethodNamesSupportingJdbcStatementProcessorOnly() {

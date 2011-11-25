@@ -93,7 +93,7 @@ public class IncludeNode {
     }
 
     /**
-     * Sets alias name of the underline table.
+     * Sets alias name of the underlying table.
      */
     public void setTableAlias(String tableAlias) {
         this.tableAlias = tableAlias;
@@ -136,7 +136,7 @@ public class IncludeNode {
     }
 
     /**
-     * Returns mapping name of the underline table.
+     * Returns mapping name of the underlying table.
      *
      * @return mapping name
      */

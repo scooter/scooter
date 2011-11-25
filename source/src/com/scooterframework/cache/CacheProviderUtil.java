@@ -51,23 +51,6 @@ public class CacheProviderUtil {
     }
     
     /**
-     * Returns default cache instance. If the default cache name is undefined, 
-     * "<tt>default</tt>" will be used as the name.
-     * 
-     * @return a single cache instance
-     */
-    public static Cache getDefaultCache() {
-    	CacheProvider cp = getDefaultCacheProvider();
-    	if (cp == null) return null;
-    	
-    	String name = EnvConfig.getInstance().getDefaultCacheName();
-    	if (name == null) 
-    		throw new IllegalArgumentException("Default cache name is null. " + 
-    				"Set 'default.cache.name' property in environment.properties file.");
-    	return cp.getCache(name);
-    }
-    
-    /**
      * Returns properties of a cache provider.
      * 
      * @param providerName cache provider name
@@ -81,23 +64,4 @@ public class CacheProviderUtil {
     	Properties p = PluginManager.getInstance().getPluginProperties(pluginName);
     	return p;
     }
-	
-	/**
-	 * Returns cache key
-	 * 
-	 * @param name
-	 * @param elements
-	 * @return cache key
-	 */
-	public static String getCacheKey(String namespace, String name, Object... elements) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(namespace).append('.').append(name);
-		if (elements != null && elements.length > 0) {
-			sb.append(" - ");
-			for (Object object : elements) {
-				sb.append(object).append("|");
-			}
-		}
-		return sb.toString();
-	}
 }

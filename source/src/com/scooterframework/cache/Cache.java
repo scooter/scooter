@@ -17,18 +17,25 @@ import java.util.Properties;
  */
 public interface Cache {
 	/**
+	 * Returns the underlying cache.
+	 * 
+	 * @return the cache instance from vendor
+	 */
+	Object getDelegateCache();
+	
+	/**
 	 * Returns the cache name.
 	 * 
 	 * @return name of the cache
 	 */
-	public String getName();
+	String getName();
 	
 	/**
 	 * Returns keys in the cache
 	 * 
 	 * @return a collection of all keys
 	 */
-	public Collection<Object> getKeys();
+	Collection<Object> getKeys();
     
     /**
      * Returns object from cache based on <tt>key</tt>.
@@ -36,29 +43,29 @@ public interface Cache {
 	 * @return the value to which this cache maps the specified key, or null 
 	 * if the cache contains no mapping for this key.
      */
-	public Object get(Object key);
+	Object get(Object key);
 	
 	/**
 	 * Stores object into cache based on <tt>key</tt>.
 	 * 
 	 * @return true if successful
 	 */
-	public boolean put(Object key, Object value);
+	boolean put(Object key, Object value);
 	
 	/**
 	 * Removes the mapping for this key from the cache if present.
 	 * 
 	 * @return true if successful
 	 */
-	public boolean remove(Object key);
+	boolean remove(Object key);
 	
 	/**
 	 * Removes all key/value pairs from cache.
 	 */
-	public void clear();
+	void clear();
 	
 	/**
 	 * Returns the Cache statistics.
 	 */
-	public Properties getStatistics();
+	Properties getStatistics();
 }

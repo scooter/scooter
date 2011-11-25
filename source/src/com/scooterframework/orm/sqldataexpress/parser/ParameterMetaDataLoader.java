@@ -33,7 +33,7 @@ public class ParameterMetaDataLoader extends JdbcStatementHelper {
     /**
      * load some parameter properties from ParameterMetaData. 
      * 
-     * Do not use this method if the underline database driver does not support 
+     * Do not use this method if the underlying database driver does not support 
      * ParameterMetaData feature, such as Oracle.
      */
     public void loadParameterMetaData() {

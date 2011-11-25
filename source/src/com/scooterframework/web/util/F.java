@@ -504,7 +504,7 @@ public class F {
     }
     
     /**
-     * Returns label string for a field of the underline object.
+     * Returns label string for a field of the underlying object.
      * 
      * This method should not be used without using <tt>formFor</tt> 
      * method first.
@@ -522,7 +522,7 @@ public class F {
     }
     
     /**
-     * Returns label string for a field of the underline object.
+     * Returns label string for a field of the underlying object.
      * 
      * This method should not be used without using <tt>formFor</tt> 
      * method first.

@@ -381,7 +381,7 @@ implements RESTified, Serializable {
      * primary key is defined by the {@link #getRestfulIdNames getRestfulIdNames} method.
      * </p>
      *
-     * <p>If the underline data does not have primary key, then all columns of
+     * <p>If the underlying data does not have primary key, then all columns of
      * the data are used to compute the <tt>id</tt>.</p>
      *
      * <p>Subclass may override this method if a customized string format is

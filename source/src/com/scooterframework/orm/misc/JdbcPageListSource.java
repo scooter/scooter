@@ -74,19 +74,16 @@ public class JdbcPageListSource extends PageListSource {
     	
         this.modelClass = modelClass;
         
-		inputOptions.put(DataProcessor.input_key_database_connection_name,
+		super.inputOptions.put(DataProcessor.input_key_database_connection_name,
 			ActiveRecordUtil.getHomeInstance(modelClass).getConnectionName());
 	}
 
     protected int countTotalRecords() {
-    	Map<String, String> options = inputOptions;
         int totalRecords = 0;
         
         try {
             // count records
-        	Map<String, Object> conditions = new HashMap<String, Object>(options.size());
-        	conditions.putAll(options);
-            Map<String, Object> inputs = ActiveRecordUtil.getGateway(modelClass).constructFindSQL(conditions, options);
+            Map<String, Object> inputs = ActiveRecordUtil.getGateway(modelClass).constructFindSQL((String)null, (Map<String, Object>)null, inputOptions);
             String findSQL = (String)inputs.get(ActiveRecordConstants.key_finder_sql);
             String selectCountSQL = "SELECT count(*) total FROM (" + findSQL + ") xxx";
             
@@ -101,10 +98,7 @@ public class JdbcPageListSource extends PageListSource {
     }
     
     protected List<ActiveRecord> retrieveList() {
-        Map<String, String> options = inputOptions;
-    	Map<String, Object> conditions = new HashMap<String, Object>(options.size());
-    	conditions.putAll(options);
-        return ActiveRecordUtil.getGateway(modelClass).findAll(conditions, options);
+        return ActiveRecordUtil.getGateway(modelClass).findAll((String)null, (Map<String, Object>)null, inputOptions);
     }
 
     private Class<? extends ActiveRecord> modelClass;

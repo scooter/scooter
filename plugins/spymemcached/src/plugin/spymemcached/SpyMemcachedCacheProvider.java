@@ -42,10 +42,6 @@ public class SpyMemcachedCacheProvider extends AbstractCacheProvider {
 			log.error("Error initiating memcached client: " + ex.getMessage());
 		}
 	}
-	
-	long getTimeout() {
-		return timeout;
-	}
     
     public void onStop() {
     	client.shutdown(timeout, TimeUnit.SECONDS);

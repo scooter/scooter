@@ -154,7 +154,7 @@ public class SqlExpressUtil {
     }
     
     /**
-     * Checks if the underline connection is for Oracle database.
+     * Checks if the underlying connection is for Oracle database.
      * 
      * @param connName database connection name
      * @return true if it is Oracle

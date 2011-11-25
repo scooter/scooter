@@ -7,21 +7,33 @@
  */
 package plugin.ehcache;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Properties;
 
 import com.scooterframework.cache.Cache;
 import com.scooterframework.cache.CacheStatisticsConstats;
+import com.scooterframework.common.logging.LogUtil;
 
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Statistics;
 
 public class EhCacheCache implements Cache {
+    private LogUtil log = LogUtil.getLogger(this.getClass().getName());
 	private Ehcache delegate;
+	private boolean useSerialization;
 
-	public EhCacheCache(Ehcache delegate) {
+	public EhCacheCache(Ehcache delegate, boolean useSerialization) {
 		this.delegate = delegate;
+	}
+
+	public Object getDelegateCache() {
+		return delegate;
 	}
 
 	public String getName() {
@@ -35,10 +47,26 @@ public class EhCacheCache implements Cache {
 
 	public Object get(Object key) {
 		Element element = delegate.get(key);
-		return (element != null) ? element.getObjectValue() : null;
+		Object obj = null;
+		if (element != null) {
+			obj = element.getObjectValue();
+			if (useSerialization) {
+				obj = deserialize((byte[]) obj);
+			}
+		}
+		return obj;
 	}
 
 	public boolean put(Object key, Object value) {
+		if (useSerialization) {
+			if (value instanceof Serializable) {
+				value = serialize((Serializable) value);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Cannot store a non-serializable object when useSerialization is true.");
+			}
+		}
 		Element element = new Element(key, value);
 		delegate.put(element);
 		return true;
@@ -50,6 +78,34 @@ public class EhCacheCache implements Cache {
 
 	public void clear() {
 		delegate.removeAll();
+	}
+
+	private byte[] serialize(Serializable obj) {
+		byte[] bytes = null;
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeObject(obj);
+			oos.flush();
+			oos.close();
+			bytes = bos.toByteArray();
+		} catch (Exception ex) {
+			log.error("Error in serializing object " + obj, ex);
+		}
+		return bytes;
+	}
+
+	private Serializable deserialize(byte[] bytes) {
+		Serializable obj = null;
+		try {
+			ByteArrayInputStream bis = new ByteArrayInputStream((byte[]) bytes);
+			ObjectInputStream ois = new ObjectInputStream(bis);
+			obj = (Serializable) ois.readObject();
+			ois.close();
+		} catch (Exception ex) {
+			log.error("Error in deserializing byte array " + bytes, ex);
+		}
+		return obj;
 	}
 
 	/**

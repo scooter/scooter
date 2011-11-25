@@ -244,7 +244,7 @@ public class Resource {
     }
 
     /**
-     * Returns a rest route of the underline resource. The <tt>target</tt>
+     * Returns a rest route of the underlying resource. The <tt>target</tt>
      * must a model name if a member route is desired, or a resource name if a
      * collection route is wanted.
      *

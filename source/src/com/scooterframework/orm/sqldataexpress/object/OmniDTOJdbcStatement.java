@@ -31,7 +31,7 @@ public interface OmniDTOJdbcStatement extends OmniDTOBasic
      * 
      * Note: Only one primary key column is allowed to be auto generated.
      * 
-     * return -1 if the underline database does not support generatedKeys 
+     * return -1 if the underlying database does not support generatedKeys 
      * feature or if the sql statement is not a ddl statement.
      */
     public long getGeneratedKey();

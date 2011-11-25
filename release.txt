@@ -14,15 +14,16 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 
 Summary of Releases
 ===================
-scooter-1.2.0 2011xxxx
- + Upgrade: spymemcached plugin updated to spymemcached-2.7.3.jar
- + Upgrade: xmemcached   plugin updated to xmemcached-1.3.5.jar
+
+scooter-1.2.0 2011-11-24
+ + New feature: Added support for request scope cache for Active Record.
+ + New feature: Added support for pluggable second-level cache.
  + New feature: Added EhCache Plugin.
- + New feature: Added request thread scope cache for Active Record.
  + New feature: Generate scaffold code by specifying a table name with "-Dtable=YourTableName"
  + New feature: Generate model code without relying on byte code enhancement with "-Denhance=n".
  + New feature: Added save(boolean) method. Original save() method is now for changed fields only.
  + New feature: Ant war task automatically enhance classes.
+ + New feature: Added more jdbcPaginator in ActionControl class.
  + Fixed bug: "java.sql.TimeStamp" should be "java.sql.Timestamp" in DatabaseConfig.
  + Fixed bug: Failed to load default value of a column.
  + Fixed bug: Redirect does not work for Ajax requests.
@@ -30,9 +31,11 @@ scooter-1.2.0 2011xxxx
  + Fixed bug: Failed to reference Servlet classes in generated app.
  + Fixed bug: Failed to work with table names of mixed cases in MySQL on Linux.
  + Fixed bug: page(index) in QueryBuilder should start from 1, not 0.
+ + Upgrade: spymemcached plugin updated to spymemcached-2.7.3.jar
+ + Upgrade: xmemcached   plugin updated to xmemcached-1.3.5.jar
 
 
-scooter-1.1.0 20110424
+scooter-1.1.0 2011-04-24
  + New feature: Auto compilation audio & visual notification
  + New feature: Query interface for Active Record.
  + New feature: Allowing non-default databases for Active Record.
@@ -48,7 +51,7 @@ scooter-1.1.0 20110424
  + Updated JavaDoc of some classes.
  + Many small improvements.
 
-scooter-1.0.2 20101220
+scooter-1.0.2 2010-12-20
  + Converted all view templates to UTF-8 encoding.
  + Improved file upload error handling.
  + Route/url mapping is case sensitive.
@@ -56,13 +59,13 @@ scooter-1.0.2 20101220
  + Updated JavaDoc of some classes.
  + Password was not recorded for admin.
  
-scooter-1.0.1 20101213
+scooter-1.0.1 2010-12-13
  + Fixed bug: create.jar failed to preserve utf-8 encoding of template files.
  + Fixed bug: wrong api name for window style pagination.
  + Fixed bug: failed to show Chinese text.
  + Fixed bug: oracle schema was not detected properly.
 
-scooter-1.0.0 20101210
+scooter-1.0.0 2010-12-10
  + New feature: Password protected Site Administration.
  + New feature: jQuery integration.
  + New feature: jQuery-UI integration.
@@ -94,7 +97,7 @@ scooter-1.0.0 20101210
  + Required to use JDK1.5 or higher.
 
 
-scooter-1.0.RC3 20100509
+scooter-1.0.RC3 2010-05-09
  + Fixed bug: auto compiler would not work if application name starts with java
  + Fixed bug: failed to retrieve primary key of a table in Oracle database
  + Fixed bug: failed to display Oracle timestamp data type
@@ -115,13 +118,13 @@ scooter-1.0.RC3 20100509
  + New feature: Data browser will not display url link on show/edit/delete,
                 if the underline table has no primary key.
 
-scooter-1.0.RC2 20100310
+scooter-1.0.RC2 2010-03-10
  + Added shell scripts of shared Jetty/Tomcat installations on Linux/Mac platforms
  + Fixed auto compiler error related to Linux/Mac
  + Changed messages when using routes and data browser from non-localhost
  + Changed locale processing
 
-scooter-1.0.RC1 20100214
+scooter-1.0.RC1 2010-02-14
  + First public release
 
 
