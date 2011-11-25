@@ -8,6 +8,7 @@
 package com.scooterframework.common.logging;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
 
 import com.scooterframework.security.LoginHelper;
 
@@ -119,6 +120,10 @@ public class LogUtil {
 		if (loggerEnabled) {
 			logger = Logger.getLogger(m_instanceName);
 		}
+	}
+	
+	public boolean isLogLevelGreaterThanInfo() {
+		return (logger != null)? logger.getEffectiveLevel().toInt() > Priority.INFO_INT : false;
 	}
 
 	/**

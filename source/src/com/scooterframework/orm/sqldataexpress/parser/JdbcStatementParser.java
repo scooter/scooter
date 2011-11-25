@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import com.scooterframework.orm.sqldataexpress.connection.UserDatabaseConnection;
+import com.scooterframework.orm.sqldataexpress.exception.LookupFailureException;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatement;
 import com.scooterframework.orm.sqldataexpress.object.JdbcStatementParameter;
 import com.scooterframework.orm.sqldataexpress.object.Parameter;
@@ -58,55 +59,52 @@ public class JdbcStatementParser extends JdbcStatementHelper {
         st.setLoadedParameterProperties(true);
     }
     
-    // populate more parameter properties for the JdbcStatement
-    private JdbcStatement furtherLookupJdbcStatement(UserDatabaseConnection udc, JdbcStatement st) {
-        try {
-            Collection<Parameter> parameters = st.getParameters();
-            Iterator<Parameter> it = parameters.iterator();
-            while(it.hasNext()) {
-                JdbcStatementParameter jdbcParam = (JdbcStatementParameter)it.next();
-                if (jdbcParam.isUsedByCount()) continue;
-                if (jdbcParam.getSqlDataType() != Parameter.UNKNOWN_SQL_DATA_TYPE) {
-                    //do not furtherLookup if the sql data type is already known.
-                    continue;
-                }
-                
-                String tableName = jdbcParam.getTableName();
-                String columnName = jdbcParam.getColumnName();
-                
-                int sqlDataType = 0;
-                String sqlDataTypeName = null;
-                String javaClassName = null;
-                
-                if (tableName != null && columnName != null) {
-                    // find more properties of this column
-                    TableInfo ti = SqlExpressUtil.lookupTableInfo(udc, tableName);
-                    
-                    // add more properties for this column
-                    RowInfo header = ti.getHeader();
-                    int columnIndex = header.getColumnPositionIndex(columnName);
-                    
-                    sqlDataType = header.getColumnSqlDataType(columnIndex);
-                    sqlDataTypeName = header.getColmnDataTypeName(columnIndex);
-                    javaClassName = header.getColumnJavaClassName(columnIndex);
-                    
-                    jdbcParam.setSqlDataType(sqlDataType);
-                    jdbcParam.setSqlDataTypeName(sqlDataTypeName);
-                    jdbcParam.setJavaClassName(javaClassName);
-                }
-                else {
-                    log.error("Can not detecting parameter properties because " + 
-                              "either table name or column name is null for the " + 
-                              "parameter with index " + jdbcParam.getIndex());
-                }
-            }
-        }
-        catch(Exception ex) {
-            log.error("Error in furtherLookupJdbcStatement() because of " + ex.getMessage());
-        }
-        
-        return st;
-    }
+	// populate more parameter properties for the JdbcStatement
+	private JdbcStatement furtherLookupJdbcStatement(
+			UserDatabaseConnection udc, JdbcStatement st) {
+		Collection<Parameter> parameters = st.getParameters();
+		Iterator<Parameter> it = parameters.iterator();
+		while (it.hasNext()) {
+			JdbcStatementParameter jdbcParam = (JdbcStatementParameter) it
+					.next();
+			if (jdbcParam.isUsedByCount())
+				continue;
+			if (jdbcParam.getSqlDataType() != Parameter.UNKNOWN_SQL_DATA_TYPE) {
+				// do not furtherLookup if the sql data type is already known.
+				continue;
+			}
+
+			String tableName = jdbcParam.getTableName();
+			String columnName = jdbcParam.getColumnName();
+
+			int sqlDataType = 0;
+			String sqlDataTypeName = null;
+			String javaClassName = null;
+
+			if (tableName != null && columnName != null) {
+				// find more properties of this column
+				TableInfo ti = SqlExpressUtil.lookupTableInfo(udc, tableName);
+
+				// add more properties for this column
+				RowInfo header = ti.getHeader();
+				int columnIndex = header.getColumnPositionIndex(columnName);
+
+				sqlDataType = header.getColumnSqlDataType(columnIndex);
+				sqlDataTypeName = header.getColmnDataTypeName(columnIndex);
+				javaClassName = header.getColumnJavaClassName(columnIndex);
+
+				jdbcParam.setSqlDataType(sqlDataType);
+				jdbcParam.setSqlDataTypeName(sqlDataTypeName);
+				jdbcParam.setJavaClassName(javaClassName);
+			} else {
+				log.error("Can not detecting parameter properties because "
+						+ "either table name or column name is null for the "
+						+ "parameter with index " + jdbcParam.getIndex());
+			}
+		}
+
+		return st;
+	}
     
     
     /**
@@ -430,9 +428,11 @@ public class JdbcStatementParser extends JdbcStatementHelper {
             bMatch = ti.getHeader().isValidColumnName(columnName);
         }
         catch(Exception ex) {
-            log.error("Failed in isColumnInTable method for column \"" + 
-            		columnName + "\" and table \"" + potentialTableName + 
-            		"\" because " + ex.getMessage());
+        	String error = "Failed in isColumnInTable method for column \"" + 
+    		columnName + "\" and table \"" + potentialTableName + 
+    		"\" because " + ex.getMessage();
+            log.error(error, ex);
+            throw new LookupFailureException(error, ex);
         }
         
         return bMatch;

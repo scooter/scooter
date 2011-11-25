@@ -107,8 +107,12 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
 //            }
 //            else {
                 if (!jstat.hasLoadedParameterProperties()) {
-                    JdbcStatementParser parser = new JdbcStatementParser(udc, jstat);
-                    parser.parse();
+                	synchronized(jstat) {
+                		if (!jstat.hasLoadedParameterProperties()) {
+                            JdbcStatementParser parser = new JdbcStatementParser(udc, jstat);
+                            parser.parse();
+                		}
+                	}
                 }
 //            }
             
@@ -184,6 +188,7 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             }
         }
         catch (Exception ex) {
+        	log.error("Error in execute(): " + ex.getMessage(), ex);
             throw new BaseSQLException(ex);
         }
         finally {

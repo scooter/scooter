@@ -111,6 +111,7 @@
 		<echo message=""/>
 		<echo message="app_test_unit     -DappPath=[app path] --> run unit test for an app"/>
 		<echo message="app_test_fun      -DappPath=[app path] --> run functional test for an app"/>
+		<echo message="app_enhancer      -DappPath=[app path] --> add enhancement for an app"/>
 		<echo message="war               -DappPath=[app path] --> create WAR file for an app"/>
 		<echo message=""/>
 	</target>
@@ -270,7 +271,7 @@
 		</copy>
 	</target>
 
-	<target name="app.enhancer" depends="app.compile">
+	<target name="app_enhancer" depends="app.compile">
 		<java classname="com.scooterframework.autoloader.Enhancer" fork="true">
 			<jvmarg value="-DappPath=${appPath}"/>
 			<classpath>
@@ -378,7 +379,7 @@
         ]]> </script>
     </target>
     
-    <target name="war" depends="get_app_name, app.enhancer">
+    <target name="war" depends="get_app_name, app_enhancer">
         <echo>creating war file for application "${appName}"</echo>
     	
         <delete dir="${build.outdir}/tmp"/>

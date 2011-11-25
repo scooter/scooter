@@ -168,8 +168,7 @@ public class ActionControl {
      * @return Paginator instance
      */
     public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass) {
-    	Map<String, String> pagingOptions = Converters.convertMapToMapSS(ACH.getAC().getParameterDataAsMap());
-        return jdbcPaginator(modelClass, pagingOptions, (Map<String, String>)null);
+        return jdbcPaginator(modelClass, (Map<String, String>)null, (Map<String, String>)null);
     }
     
     /**
@@ -283,7 +282,11 @@ public class ActionControl {
      * @return Paginator instance
      */
     public static Paginator jdbcPaginator(Class<? extends ActiveRecord> modelClass, Map<String, String> pagingOptions, Map<String, String> sqlOptions) {
-        return new Paginator(new JdbcPageListSource(modelClass, sqlOptions), pagingOptions);
+    	Map<String, String> pagingOptionsMerged = Converters.convertMapToMapSS(ACH.getAC().getParameterDataAsMap());
+    	if (pagingOptions != null) {
+    		pagingOptionsMerged.putAll(pagingOptions);
+    	}
+    	return new Paginator(new JdbcPageListSource(modelClass, sqlOptions), pagingOptionsMerged);
     }
     
     /**

@@ -15,7 +15,7 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 Summary of Releases
 ===================
 
-scooter-1.2.0 2011-11-24
+scooter-1.2.0 2011-11-25
  + New feature: Added support for request scope cache for Active Record.
  + New feature: Added support for pluggable second-level cache.
  + New feature: Added EhCache Plugin.
@@ -126,5 +126,3 @@ scooter-1.0.RC2 2010-03-10
 
 scooter-1.0.RC1 2010-02-14
  + First public release
-
-

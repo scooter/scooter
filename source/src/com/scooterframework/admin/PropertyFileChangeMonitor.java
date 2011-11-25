@@ -55,11 +55,7 @@ public class PropertyFileChangeMonitor {
     
     private static final PropertyFileChangeMonitor fcm = new PropertyFileChangeMonitor();
     
-    public static final String DEFAULT_RUNNING_ENVIRONMENT = "DEVELOPMENT";
-    
     private PropertyFileChangeMonitor() {
-        String runningEnvironment = System.getProperty("running.environment", DEFAULT_RUNNING_ENVIRONMENT);
-        
         propertyFilePath = ApplicationConfig.getInstance().getPropertyFileLocationPath();
         
         String loadDelay = System.getProperty("property.load.interval");
@@ -72,18 +68,10 @@ public class PropertyFileChangeMonitor {
             }
         }
         
-        if (DEFAULT_RUNNING_ENVIRONMENT.equals(runningEnvironment) && 
-            loadInterval > 0 && 
-            ApplicationConfig.getInstance().isWebApp()) {
+        if (ApplicationConfig.getInstance().isWebApp() && 
+        		ApplicationConfig.getInstance().isInDevelopmentEnvironment() && 
+        		loadInterval > 0) {
             periodicReading = true;
-        }
-        
-        if (periodicReading) {
-            oldDate = new Date();
-            oldDate.setTime(oldDate.getTime()-oneHundredDays);
-            
-            timer = new Timer();
-            start();
         }
     }
     
@@ -92,9 +80,16 @@ public class PropertyFileChangeMonitor {
     }
     
     public void start() {
-        PropertyFileChangeMonitorTimerTask task = 
-            new PropertyFileChangeMonitorTimerTask();
-        schedule(task, loadInterval);
+        if (periodicReading) {
+            oldDate = new Date();
+            oldDate.setTime(oldDate.getTime()-oneHundredDays);
+            
+            timer = new Timer();
+            
+            PropertyFileChangeMonitorTimerTask task = 
+                new PropertyFileChangeMonitorTimerTask();
+            schedule(task, loadInterval);
+        }
     }
     
     public void stop() {
@@ -109,7 +104,8 @@ public class PropertyFileChangeMonitor {
     }
     
     public void registerObserver(Observer observer, File file) {
-        if (!ApplicationConfig.getInstance().isWebApp()) return;
+        if (!(ApplicationConfig.getInstance().isWebApp() && 
+        		ApplicationConfig.getInstance().isInDevelopmentEnvironment())) return;
         
         if (file == null) {
             log.error("Can not watch the file, because the input file is null.");

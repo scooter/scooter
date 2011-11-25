@@ -261,12 +261,18 @@ public class ApplicationConfig {
         
 		applicationStartTime = System.currentTimeMillis();
         
-        PropertyFileChangeMonitor.getInstance();
+        if (isWebApp()) {
+            PropertyFileChangeMonitor.getInstance();
+        }
         
         //need to do the following:
         logConfig.enableMonitoring();
         
         EnvConfig.getInstance();
+        
+        if (isInDevelopmentEnvironment() && isWebApp()) {
+            PropertyFileChangeMonitor.getInstance().start();
+        }
         
         AutoLoaderConfig.getInstance();
         
@@ -286,6 +292,10 @@ public class ApplicationConfig {
         }
         
         I18nConfig.getInstance();
+        
+        if (isInDevelopmentEnvironment() && isWebApp()) {
+        	DirChangeMonitor.getInstance().start();
+        }
         
         //
         //store some important information about the server
@@ -315,8 +325,12 @@ public class ApplicationConfig {
         
         applicationStarted = true;
         if (log != null) {
-        	log.info("Application started in " + runningEnvironment + 
-        			" with Scooter version: " + Version.CURRENT_VERSION);
+        	String startMsg = "Application started in " + runningEnvironment + 
+			" with Scooter version: " + Version.CURRENT_VERSION;
+        	log.info(startMsg);
+        	if (log.isLogLevelGreaterThanInfo()) {
+        		System.out.println(startMsg);
+        	}
         }
     }
     
@@ -347,6 +361,7 @@ public class ApplicationConfig {
             path = (new File("")).getCanonicalPath();
         }
         catch(Exception ex) {
+        	ex.printStackTrace();
             String errorMessage = "Failed to detect root path from current directory: " + ex.getMessage();
             System.err.println(errorMessage);
             System.out.println("Stop initializtion process. Exit now ...");

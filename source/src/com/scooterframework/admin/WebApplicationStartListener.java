@@ -54,6 +54,7 @@ public class WebApplicationStartListener implements ServletContextListener	{
         	}
         }
         catch(Exception ex) {
+        	ex.printStackTrace();
         	String errorMessage = "Failed to detect root path and " +
         	"context name from \"" + realPath + "\": " + ex.getMessage();
         	System.err.println(errorMessage);
@@ -76,6 +77,7 @@ public class WebApplicationStartListener implements ServletContextListener	{
         	}
         }
         catch(Exception ex) {
+        	ex.printStackTrace();
         	String errorMessage = "Failed to detect root path and " +
         	"context name from \"" + realPath + "\": " + ex.getMessage();
         	System.err.println(errorMessage);

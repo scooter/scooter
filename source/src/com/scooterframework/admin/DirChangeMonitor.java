@@ -49,11 +49,7 @@ public class DirChangeMonitor {
     
     private static final DirChangeMonitor fcm = new DirChangeMonitor();
     
-    public static final String DEFAULT_RUNNING_ENVIRONMENT = "DEVELOPMENT";
-    
     private DirChangeMonitor() {
-        String runningEnvironment = System.getProperty("running.environment", DEFAULT_RUNNING_ENVIRONMENT);
-        
         String loadDelay = System.getProperty("property.load.interval");
         if (loadDelay != null) {
             try {
@@ -64,18 +60,10 @@ public class DirChangeMonitor {
             }
         }
         
-        if (DEFAULT_RUNNING_ENVIRONMENT.equals(runningEnvironment) && 
-            loadInterval > 0 && 
-            ApplicationConfig.getInstance().isWebApp()) {
+        if (ApplicationConfig.getInstance().isWebApp() && 
+        		ApplicationConfig.getInstance().isInDevelopmentEnvironment() && 
+        		loadInterval > 0) {
             periodicReading = true;
-        }
-        
-        if (periodicReading) {
-            oldDate = new Date();
-            oldDate.setTime(oldDate.getTime()-oneHundredDays);
-            
-            timer = new Timer();
-            start();
         }
     }
     
@@ -84,9 +72,16 @@ public class DirChangeMonitor {
     }
     
     public void start() {
-        DirChangeMonitorTimerTask task = 
-            new DirChangeMonitorTimerTask();
-        schedule(task, loadInterval);
+        if (periodicReading) {
+            oldDate = new Date();
+            oldDate.setTime(oldDate.getTime()-oneHundredDays);
+            
+            timer = new Timer();
+            
+            DirChangeMonitorTimerTask task = 
+                new DirChangeMonitorTimerTask();
+            schedule(task, loadInterval);
+        }
     }
     
     public void stop() {
@@ -150,7 +145,8 @@ public class DirChangeMonitor {
      * @param filter file filter
      */
     public void registerObserver(Observer observer, String path, FileFilter filter) {
-        if (!ApplicationConfig.getInstance().isWebApp()) return;
+        if (!(ApplicationConfig.getInstance().isWebApp() && 
+        		ApplicationConfig.getInstance().isInDevelopmentEnvironment())) return;
         
         if (path == null) {
             log.error("Can not watch the directory, because the input path is null.");
