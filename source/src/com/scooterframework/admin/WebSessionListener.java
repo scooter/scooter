@@ -22,7 +22,7 @@ import javax.servlet.http.HttpSessionListener;
 public class WebSessionListener implements HttpSessionListener {
 	private static final AtomicInteger sessionCount = new AtomicInteger(0);
 	private static int sessionCountMax = 0;
-	private static Date sessionCountMaxDate;
+	private static Date sessionCountMaxDate = new Date();
 
 	public void sessionCreated(HttpSessionEvent se) {
 		sessionCount.incrementAndGet();

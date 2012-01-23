@@ -94,6 +94,9 @@ public class D {
 	}
 	
     private static String diffFromNow(Date d) {
+    	if (d == null) 
+    		throw new IllegalArgumentException("Date cannot be null.");
+    	
     	long count = 0L;
     	String key = "";
     	

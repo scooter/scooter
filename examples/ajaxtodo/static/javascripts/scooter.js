@@ -13,6 +13,10 @@ $(document).ready(function(){
 		event.preventDefault();
 	});
 
+	$('select[data-ajax]').live('change', function (event) {
+		$(this).closest('form').trigger('submit');
+	});
+
 	$('form[data-ajax]').live('submit', function (event) {
 		ajax_call(this);
 		event.preventDefault();
@@ -34,7 +38,7 @@ $(document).ready(function(){
 		if (isForm) data += "&" + jsrc.serialize();
 
 		var method = (isForm)?jsrc.attr("method"):jsrc.attr("data-method");
-		if (method == null) method = "GET";
+		if (method == null || method == "") method = "GET";
 		method = method.toUpperCase();
 		if (method != "GET" && method != "POST") {
 			data += "&" + "_method=" + method;

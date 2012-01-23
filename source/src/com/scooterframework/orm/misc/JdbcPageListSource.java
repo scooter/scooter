@@ -15,6 +15,7 @@ import com.scooterframework.common.util.Util;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.orm.activerecord.ActiveRecordConstants;
 import com.scooterframework.orm.activerecord.ActiveRecordUtil;
+import com.scooterframework.orm.activerecord.TableGateway;
 import com.scooterframework.orm.sqldataexpress.exception.BaseSQLException;
 import com.scooterframework.orm.sqldataexpress.processor.DataProcessor;
 import com.scooterframework.orm.sqldataexpress.service.SqlServiceClient;
@@ -87,8 +88,22 @@ public class JdbcPageListSource extends PageListSource {
             String findSQL = (String)inputs.get(ActiveRecordConstants.key_finder_sql);
             String selectCountSQL = "SELECT count(*) total FROM (" + findSQL + ") xxx";
             
-            Object Total = SqlServiceClient.retrieveObjectBySQL(selectCountSQL, inputs);
-            totalRecords = Util.getSafeIntValue(Total);
+            TableGateway tg = ActiveRecordUtil.getGateway(modelClass);
+            Object total = null;
+            Object cacheKey = null;
+            if (tg.getModelCacheClient().useCache("countTotalRecords")) {
+            	cacheKey = tg.getModelCacheClient().getCacheKey("countTotalRecords", selectCountSQL);
+            	total = tg.getModelCacheClient().getCache().get(cacheKey);
+            	if (total != null) return Util.getSafeIntValue(total);
+            }
+            
+            total = SqlServiceClient.retrieveObjectBySQL(selectCountSQL, inputs);
+            
+            if (tg.getModelCacheClient().useCache("countTotalRecords")) {
+            	tg.getModelCacheClient().getCache().put(cacheKey, total);
+			}
+            
+            totalRecords = Util.getSafeIntValue(total);
         }
         catch (Exception ex) {
             throw new BaseSQLException(ex);

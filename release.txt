@@ -15,6 +15,12 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 Summary of Releases
 ===================
 
+scooter-1.2.1 2012-01-22
+ + Fixed bug: Cannot run multiple apps in one container.
+ + Fixed bug: Fixed bug in assigning useSerialization value in ehcache plugin.
+ + Fixed bug: Reference to log4j in .class file of each example app.
+ + Upgrade: Added slf4j jars.
+
 scooter-1.2.0 2011-11-25
  + New feature: Added support for request scope cache for Active Record.
  + New feature: Added support for pluggable second-level cache.
@@ -33,7 +39,6 @@ scooter-1.2.0 2011-11-25
  + Fixed bug: page(index) in QueryBuilder should start from 1, not 0.
  + Upgrade: spymemcached plugin updated to spymemcached-2.7.3.jar
  + Upgrade: xmemcached   plugin updated to xmemcached-1.3.5.jar
-
 
 scooter-1.1.0 2011-04-24
  + New feature: Auto compilation audio & visual notification

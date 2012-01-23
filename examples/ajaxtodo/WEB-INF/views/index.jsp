@@ -18,52 +18,49 @@
 <br/><br/>
 
 <b>Example 3: A complete sample app</b><br/>
+<p>You need to first turn on the database as specified by ajaxtodo_development in <tt>ajaxtodo/WEB-INF/config/database.properties</tt> and then install the database with <tt>ajaxtodo/static/docs/ajaxtodo_development.sql</tt>.</p>
 <a href="http://localhost:8080/ajaxtodo/entries">My AJAX-Backed Wiki-Powered TODO List</a> 
 (using <a href="http://daringfireball.net/projects/markdown/basics" target="markdown">MarkDown</a> wiki syntax)
 
-<h2 class="sectionTitle">Getting started</h2>
-
-<h4>Create your database (if you use database)</h4>
-<ul style="margin-top: -10px;">
-    <li>Edit config/database.properties with your own database properties</li>
-    <li>Type <tt>java -jar tools/connection-test.jar app_name</tt> to test connections</li>
-    <li>Enter data to database</li>
-</ul>
-
-<h4>Generate complete AJAX-based CRUD app</h4>
-<ul style="margin-top: -10px;">
-    <li>Type <tt>java -jar tools/generate.jar -help</tt> for examples</li>
-</ul>
-
-<h4>Generate controllers, models and views</h4>
-<ul style="margin-top: -10px;">
-    <li>Type <tt>java -jar tools/generate.jar -help</tt> for examples</li>
-</ul>
-
-<h4>Generate signon classes and views</h4>
-<ul style="margin-top: -10px;">
-    <li>Type <tt>java -jar tools/generate-signon.jar -help</tt> for examples</li>
-</ul>
-
-<h2 class="sectionTitle">More fun</h2>
-
-<b><%=W.labelLink("Site info", "/admin/site")%></b>: view application environment information
 <br/><br/>
 
-<b><%=W.labelLink("Site manager", "/admin/files/list")%></b>: manage deployed files and folders (add/view/edit/replace/copy/delete/rename)
-<br/><br/>
+<b>Example 4: Select change example</b><br/>
+<p>Select an item from List A and watch changes in List B: the selected item disappeared</p>
 
-<%if (MainActionServlet.isUsingRestfulProcessor()) {%>
-<b><%=W.labelLink("Browse routes", "/admin/routes")%></b>: view all routes supported by this site
-<%} else {%>
-<b>Browse routes</b>: You need to choose <tt>com.scooterframework.web.controller.RestfulRequestProcessor</tt> 
-as the processor in <tt>web.xml</tt>
-<%}%>
-<br/><br/>
-
-<%if (MainActionServlet.isUsingRestfulProcessor() && EnvConfig.getInstance().allowDataBrowser()) {%>
-<b><%=W.labelLink("Browse databases", "/admin/databases")%></b>: see what you have in your data store
-<%} else {%>
-<b>Browse databases</b>: You need to choose <tt>com.scooterframework.web.controller.RestfulRequestProcessor</tt> 
-as the processor in <tt>web.xml</tt> and also set <tt>allow.databrowser=true</tt> in environment.properties file.
-<%}%>
+<form data-target="#filtered_list" data-handler="html" data-ajax="true" action="/ajaxtodo/list/filter">
+<table width="50%">
+<tr><th align="left"><b>List A:</b></th><th align="left"><b>List B:</b></th></tr>
+<tr>
+  <td>
+<select name="number" size="10" data-ajax="true">
+    <option value="0">0</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+</select>
+  </td>
+  <td>
+<div id="filtered_list">
+<select name="number" size="10">
+    <option value="0">0</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+</select>
+</div>
+  </td>
+</tr>
+</table>
+</form>

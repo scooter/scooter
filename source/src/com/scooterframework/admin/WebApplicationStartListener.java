@@ -19,8 +19,6 @@ import javax.servlet.ServletContextListener;
  * @author (Fei) John Chen
  */
 public class WebApplicationStartListener implements ServletContextListener	{
-	private boolean acInitialized = false;
-
     /**
      * <p>Initializes context. Specifically it starts up the application
      * through <tt>ApplicationConfig.configInstanceForWeb(rootPath, contextName).startApplication()</tt>.</p>
@@ -31,8 +29,6 @@ public class WebApplicationStartListener implements ServletContextListener	{
      * @param ce ServletContextEvent
      */
 	public void	contextInitialized(ServletContextEvent ce) {
-		if (acInitialized) return;
-		
 		ServletContext servletContext = ce.getServletContext();
         String contextName = "";
         String realPath = null;
@@ -41,16 +37,11 @@ public class WebApplicationStartListener implements ServletContextListener	{
             realPath = rp.getCanonicalPath();
         	contextName = getContextName(realPath);
         	String appName = System.getProperty("app.name");
-        	if (appName == null) {
-        		throw new IllegalArgumentException(
-        				"ERROR ERROR ERROR: You need to add -Dapp.name=" + 
-        				contextName + " on command line.");
-        	}
-        	
-        	if (contextName.equals(appName)) {
+        	String jettyHome = System.getProperty("jetty.home");
+
+        	if (jettyHome == null || (jettyHome != null && contextName.equals(appName))) {
 	        	ApplicationConfig ac = ApplicationConfig.configInstanceForWeb(realPath, contextName);
 	        	ac.startApplication();
-	        	acInitialized = true;
         	}
         }
         catch(Exception ex) {
@@ -71,9 +62,10 @@ public class WebApplicationStartListener implements ServletContextListener	{
             realPath = rp.getCanonicalPath();
         	contextName = getContextName(realPath);
         	String appName = System.getProperty("app.name");
-        	if (contextName.equals(appName)) {
+        	String jettyHome = System.getProperty("jetty.home");
+        	
+        	if (jettyHome == null || (jettyHome != null && contextName.equals(appName))) {
         		ApplicationConfig.getInstance().endApplication();
-	        	acInitialized = false;
         	}
         }
         catch(Exception ex) {

@@ -16,7 +16,7 @@
 	<classpathentry kind="lib" path="SCOOTER_LIB/jdbc-clients/c3p0-oracle-thin-extras-0.9.1.2.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/json/json.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/junit/junit-4.8.2.jar"/>
-	<classpathentry kind="lib" path="SCOOTER_LIB/log4j/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="SCOOTER_LIB/logging/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/markdown/markdownj-1.0.2b4-0.3.0.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/sitemesh/sitemesh-2.3.jar"/>
 	<classpathentry kind="lib" path="SCOOTER_LIB/stringtemplate/antlr-2.7.7.jar"/>

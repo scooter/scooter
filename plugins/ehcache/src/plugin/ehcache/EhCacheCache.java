@@ -30,6 +30,7 @@ public class EhCacheCache implements Cache {
 
 	public EhCacheCache(Ehcache delegate, boolean useSerialization) {
 		this.delegate = delegate;
+		this.useSerialization = useSerialization;
 	}
 
 	public Object getDelegateCache() {

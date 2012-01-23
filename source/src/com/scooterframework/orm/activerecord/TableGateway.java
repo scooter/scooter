@@ -8,19 +8,12 @@
 package com.scooterframework.orm.activerecord;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.scooterframework.admin.EnvConfig;
-import com.scooterframework.cache.Cache;
-import com.scooterframework.cache.CacheKey;
-import com.scooterframework.cache.CacheProvider;
-import com.scooterframework.cache.CacheProviderUtil;
-import com.scooterframework.cache.NamedCurrentThreadCache;
 import com.scooterframework.common.exception.ObjectCreationException;
 import com.scooterframework.common.exception.RequiredDataMissingException;
 import com.scooterframework.common.util.Converters;
@@ -61,13 +54,7 @@ public class TableGateway {
 	private Class<? extends ActiveRecord> clazz;
 
 	private ActiveRecord home;
-
-	private boolean useRequestCache = true;
-	private boolean useSecondLevelCache = false;
-	private boolean flushCacheOnChange = true;
-	private Collection<String> localUseCacheExceptions;
-	private Collection<String> localFlushCacheExceptions;
-	private Cache modelCache;
+	private ModelCacheClient modelCacheClient;
 
 	// /**
 	// * Constructs an instance of TableGateway.
@@ -94,12 +81,7 @@ public class TableGateway {
 		this.clazz = modelHome.getClass();
 		this.home = modelHome;
 		
-		useRequestCache = EnvConfig.getInstance().getUseThreadCache();
-		useSecondLevelCache = EnvConfig.getInstance().getUseSecondLevelCache();
-		flushCacheOnChange = EnvConfig.getInstance().getFlushCacheOnChange();
-		
-		localUseCacheExceptions = EnvConfig.getInstance().getLocalUseCacheExceptions(clazz.getName());
-		localFlushCacheExceptions = EnvConfig.getInstance().getLocalFlushCacheExceptions(clazz.getName());
+		modelCacheClient = new ModelCacheClient(modelHome);
 	}
 
 	/**
@@ -114,6 +96,13 @@ public class TableGateway {
 	 */
 	public Class<? extends ActiveRecord> getModelClass() {
 		return clazz;
+	}
+	
+	/**
+	 * Returns the ModelCacheClient instance
+	 */
+	public ModelCacheClient getModelCacheClient() {
+		return modelCacheClient;
 	}
 
 	/**
@@ -333,14 +322,14 @@ public class TableGateway {
 		inputs.put("1", id);
 		inputs = addMoreProperties(inputs, null);
 		
+		String findSQL = "SELECT * FROM " + home.getTableName()	+ " WHERE id = ?";
+		
 		Object cacheKey = null;
-		if (useCache("findById")) {
-			cacheKey = getCacheKey("findById", inputs);
-			ar = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findById")) {
+			cacheKey = modelCacheClient.getCacheKey("findById", findSQL, inputs);
+			ar = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (ar != null) return ar;
 		}
-		
-		String findSQL = "SELECT * FROM " + home.getTableName()	+ " WHERE id = ?";
 
 		try {
 			OmniDTO returnTO = getSqlService().execute(inputs,
@@ -351,8 +340,8 @@ public class TableGateway {
 				ar = (ActiveRecord) createNewInstance();
 				ar.populateDataFromDatabase(tmpRd);
 				
-				if (useCache("findById")) {
-					getCache().put(cacheKey, ar);
+				if (modelCacheClient.useCache("findById")) {
+					modelCacheClient.getCache().put(cacheKey, ar);
 				}
 			}
 		} catch (Exception ex) {
@@ -382,16 +371,16 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findByRESTfulId")) {
-			cacheKey = getCacheKey("findByRESTfulId", restfulId);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findByRESTfulId")) {
+			cacheKey = modelCacheClient.getCacheKey("findByRESTfulId", restfulId);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 		
 		record = findFirst(pkMap);
 		if (record != null) {
-			if (useCache("findByRESTfulId")) {
-				getCache().put(cacheKey, record);
+			if (modelCacheClient.useCache("findByRESTfulId")) {
+				modelCacheClient.getCache().put(cacheKey, record);
 			}
 		}
 		
@@ -416,16 +405,16 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findByPK")) {
-			cacheKey = getCacheKey("findByPK", pkString);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findByPK")) {
+			cacheKey = modelCacheClient.getCacheKey("findByPK", pkString);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 		
 		record = findByRESTfulId(pkString);
 		if (record != null) {
-			if (useCache("findByPK")) {
-				getCache().put(cacheKey, record);
+			if (modelCacheClient.useCache("findByPK")) {
+				modelCacheClient.getCache().put(cacheKey, record);
 			}
 		}
 		
@@ -462,9 +451,9 @@ public class TableGateway {
 		inputs = addMoreProperties(inputs, null);
 		
 		Object cacheKey = null;
-		if (useCache("findAllBySQL")) {
-			cacheKey = getCacheKey("findAllBySQL", sql, inputs);
-			list = (List<ActiveRecord>) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findAllBySQL")) {
+			cacheKey = modelCacheClient.getCacheKey("findAllBySQL", sql, inputs);
+			list = (List<ActiveRecord>) modelCacheClient.getCache().get(cacheKey);
 			if (list != null) return list;
 		}
 
@@ -484,8 +473,8 @@ public class TableGateway {
 							list.add(newRecord);
 						}
 						
-						if (useCache("findAllBySQL")) {
-							getCache().put(cacheKey, list);
+						if (modelCacheClient.useCache("findAllBySQL")) {
+							modelCacheClient.getCache().put(cacheKey, list);
 						}
 					}
 				}
@@ -528,9 +517,9 @@ public class TableGateway {
 		inputs = addMoreProperties(inputs, null);
 		
 		Object cacheKey = null;
-		if (useCache("findAllBySQLKey")) {
-			cacheKey = getCacheKey("findAllBySQLKey", sqlKey, inputs);
-			list = (List<ActiveRecord>) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findAllBySQLKey")) {
+			cacheKey = modelCacheClient.getCacheKey("findAllBySQLKey", sqlKey, inputs);
+			list = (List<ActiveRecord>) modelCacheClient.getCache().get(cacheKey);
 			if (list != null) return list;
 		}
 
@@ -550,8 +539,8 @@ public class TableGateway {
 							list.add(newRecord);
 						}
 						
-						if (useCache("findAllBySQLKey")) {
-							getCache().put(cacheKey, list);
+						if (modelCacheClient.useCache("findAllBySQLKey")) {
+							modelCacheClient.getCache().put(cacheKey, list);
 						}
 					}
 				}
@@ -584,9 +573,9 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findFirstBy")) {
-			cacheKey = getCacheKey("findFirstBy", columns, values);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findFirstBy")) {
+			cacheKey = modelCacheClient.getCacheKey("findFirstBy", columns, values);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 		
@@ -594,8 +583,8 @@ public class TableGateway {
 		if (all != null && all.size() > 0) {
 			record = (ActiveRecord) all.get(0);
 			if (record != null) {
-				if (useCache("findFirstBy")) {
-					getCache().put(cacheKey, record);
+				if (modelCacheClient.useCache("findFirstBy")) {
+					modelCacheClient.getCache().put(cacheKey, record);
 				}
 			}
 		}
@@ -624,9 +613,9 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findLastBy")) {
-			cacheKey = getCacheKey("findLastBy", columns, values);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findLastBy")) {
+			cacheKey = modelCacheClient.getCacheKey("findLastBy", columns, values);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 		
@@ -634,8 +623,8 @@ public class TableGateway {
 		if (all != null && all.size() > 0) {
 			record = (ActiveRecord) all.get(all.size() - 1);
 			if (record != null) {
-				if (useCache("findLastBy")) {
-					getCache().put(cacheKey, record);
+				if (modelCacheClient.useCache("findLastBy")) {
+					modelCacheClient.getCache().put(cacheKey, record);
 				}
 			}
 		}
@@ -700,16 +689,16 @@ public class TableGateway {
 		List<ActiveRecord> list = null;
 		
 		Object cacheKey = null;
-		if (useCache("findAllBy")) {
-			cacheKey = getCacheKey("findAllBy", map, options);
-			list = (List<ActiveRecord>) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findAllBy")) {
+			cacheKey = modelCacheClient.getCacheKey("findAllBy", map, options);
+			list = (List<ActiveRecord>) modelCacheClient.getCache().get(cacheKey);
 			if (list != null) return list;
 		}
 		
 		list = findAll(map, options);
-		if (useCache("findAllBy")) {
+		if (modelCacheClient.useCache("findAllBy")) {
 			if (list != null && list.size() > 0)
-				getCache().put(cacheKey, list);
+				modelCacheClient.getCache().put(cacheKey, list);
 		}
 
 		return list;
@@ -1001,9 +990,9 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findFirst")) {
-			cacheKey = getCacheKey("findFirst", conditions, options);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findFirst")) {
+			cacheKey = modelCacheClient.getCacheKey("findFirst", conditions, options);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 		
@@ -1011,8 +1000,8 @@ public class TableGateway {
 		record = (list != null && list.size() > 0) ? (list.get(0)) : null;
 		
 		if (record != null) {
-			if (useCache("findFirst")) {
-				getCache().put(cacheKey, record);
+			if (modelCacheClient.useCache("findFirst")) {
+				modelCacheClient.getCache().put(cacheKey, record);
 			}
 		}
 		
@@ -1134,9 +1123,9 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findFirst")) {
-			cacheKey = getCacheKey("findFirst", conditionsSQL, conditionsSQLData, options);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findFirst")) {
+			cacheKey = modelCacheClient.getCacheKey("findFirst", conditionsSQL, conditionsSQLData, options);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 
@@ -1144,8 +1133,8 @@ public class TableGateway {
 		record = (list != null && list.size() > 0) ? (list.get(0)) : null;
 		
 		if (record != null) {
-			if (useCache("findFirst")) {
-				getCache().put(cacheKey, record);
+			if (modelCacheClient.useCache("findFirst")) {
+				modelCacheClient.getCache().put(cacheKey, record);
 			}
 		}
 		
@@ -1227,9 +1216,9 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findLast")) {
-			cacheKey = getCacheKey("findLast", conditions, options);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findLast")) {
+			cacheKey = modelCacheClient.getCacheKey("findLast", conditions, options);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 		
@@ -1238,8 +1227,8 @@ public class TableGateway {
 		record = (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
 		
 		if (record != null) {
-			if (useCache("findLast")) {
-				getCache().put(cacheKey, record);
+			if (modelCacheClient.useCache("findLast")) {
+				modelCacheClient.getCache().put(cacheKey, record);
 			}
 		}
 		
@@ -1353,9 +1342,9 @@ public class TableGateway {
 		ActiveRecord record = null;
 		
 		Object cacheKey = null;
-		if (useCache("findLast")) {
-			cacheKey = getCacheKey("findLast", conditionsSQL, conditionsSQLData, options);
-			record = (ActiveRecord) getCache().get(cacheKey);
+		if (modelCacheClient.useCache("findLast")) {
+			cacheKey = modelCacheClient.getCacheKey("findLast", conditionsSQL, conditionsSQLData, options);
+			record = (ActiveRecord) modelCacheClient.getCache().get(cacheKey);
 			if (record != null) return record;
 		}
 
@@ -1364,8 +1353,8 @@ public class TableGateway {
 		record = (size > 0) ? ((ActiveRecord) list.get(size - 1)) : null;
 		
 		if (record != null) {
-			if (useCache("findLast")) {
-				getCache().put(cacheKey, record);
+			if (modelCacheClient.useCache("findLast")) {
+				modelCacheClient.getCache().put(cacheKey, record);
 			}
 		}
 		
@@ -1414,9 +1403,9 @@ public class TableGateway {
 			inputs = addMoreProperties(inputs, options);
 			
 			Object cacheKey = null;
-			if (useCache("findAll")) {
-				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
-				list = (List<ActiveRecord>) getCache().get(cacheKey);
+			if (modelCacheClient.useCache("findAll")) {
+				cacheKey = modelCacheClient.getCacheKey("findAll", findSQL, inputs, limit, offset);
+				list = (List<ActiveRecord>) modelCacheClient.getCache().get(cacheKey);
 				if (list != null) return list;
 			}
 
@@ -1434,8 +1423,8 @@ public class TableGateway {
 						list.add(newRecord);
 					}
 					
-					if (useCache("findAll")) {
-						getCache().put(cacheKey, list);
+					if (modelCacheClient.useCache("findAll")) {
+						modelCacheClient.getCache().put(cacheKey, list);
 					}
 				}
 			}
@@ -1462,9 +1451,9 @@ public class TableGateway {
 			inputs = addMoreProperties(inputs, options);
 			
 			Object cacheKey = null;
-			if (useCache("findAll")) {
-				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
-				list = (List<ActiveRecord>) getCache().get(cacheKey);
+			if (modelCacheClient.useCache("findAll")) {
+				cacheKey = modelCacheClient.getCacheKey("findAll", findSQL, inputs, limit, offset);
+				list = (List<ActiveRecord>) modelCacheClient.getCache().get(cacheKey);
 				if (list != null) return list;
 			}
 
@@ -1482,8 +1471,8 @@ public class TableGateway {
 						list.add(newRecord);
 					}
 					
-					if (useCache("findAll")) {
-						getCache().put(cacheKey, list);
+					if (modelCacheClient.useCache("findAll")) {
+						modelCacheClient.getCache().put(cacheKey, list);
 					}
 				}
 			}
@@ -1797,9 +1786,9 @@ public class TableGateway {
 			inputs = addMoreProperties(inputs, options);
 			
 			Object cacheKey = null;
-			if (useCache("findAll") && allowCacheAssociatedObjects()) {
-				cacheKey = getCacheKey("findAll", findSQL, inputs, limit, offset);
-				list = (List<ActiveRecord>) getCache().get(cacheKey);
+			if (modelCacheClient.useCache("findAll") && modelCacheClient.allowCacheAssociatedObjects()) {
+				cacheKey = modelCacheClient.getCacheKey("findAll", findSQL, inputs, limit, offset);
+				list = (List<ActiveRecord>) modelCacheClient.getCache().get(cacheKey);
 				if (list != null) return list;
 			}
 
@@ -1810,8 +1799,8 @@ public class TableGateway {
 			if (td != null) {
 				list = sqlHelper.organizeData(td);
 				
-				if (useCache("findAll") && allowCacheAssociatedObjects()) {
-					getCache().put(cacheKey, list);
+				if (modelCacheClient.useCache("findAll") && modelCacheClient.allowCacheAssociatedObjects()) {
+					modelCacheClient.getCache().put(cacheKey, list);
 				}
 			}
 		} catch (Exception ex) {
@@ -1857,7 +1846,7 @@ public class TableGateway {
 			throw new IllegalArgumentException("There is no column name as ID");
 		}
 		
-		clearCache("deleteById");
+		modelCacheClient.clearCache("deleteById");
 
 		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs = addMoreProperties(inputs, null);
@@ -1879,7 +1868,7 @@ public class TableGateway {
 		Map<String, Object> pkMap = convertToPrimaryKeyDataMap(pkString);
 		if (pkMap == null) return 0;
 		
-		clearCache("deleteByPK");
+		modelCacheClient.clearCache("deleteByPK");
 		return deleteByPrimaryKeyMap(pkMap);
 	}
 
@@ -1893,7 +1882,7 @@ public class TableGateway {
 	public int deleteByPrimaryKeyMap(Map<String, Object> dataMap) {
 		if (dataMap == null || dataMap.size() == 0)	return -1;
 		
-		clearCache("deleteByPrimaryKeyMap");
+		modelCacheClient.clearCache("deleteByPrimaryKeyMap");
 
 		// construct a map of primary keys
 		Map<String, Object> pkMap = new HashMap<String, Object>();
@@ -1936,7 +1925,7 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteBySQL(String sql, Map<String, Object> inputs) {
-		clearCache("deleteBySQL");
+		modelCacheClient.clearCache("deleteBySQL");
 		return SqlServiceClient.executeSQL(sql, inputs);
 	}
 
@@ -1965,7 +1954,7 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteBySQLKey(String sqlKey, Map<String, Object> inputs) {
-		clearCache("deleteBySQLKey");
+		modelCacheClient.clearCache("deleteBySQLKey");
 		return SqlServiceClient.executeSQLByKey(sqlKey, inputs);
 	}
 
@@ -1984,7 +1973,7 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteAll(Map<String, Object> conditions) {
-		clearCache("deleteAll");
+		modelCacheClient.clearCache("deleteAll");
 		return internal_deleteAll(conditions);
 	}
 
@@ -2024,7 +2013,7 @@ public class TableGateway {
 	 * @return int number of records deleted
 	 */
 	public int deleteAll(String conditionsSQL, Map<String, Object> conditionsSQLData) {
-		clearCache("deleteAll");
+		modelCacheClient.clearCache("deleteAll");
 		return internal_deleteAll(conditionsSQL, conditionsSQLData);
 	}
 
@@ -2172,7 +2161,7 @@ public class TableGateway {
 			throw new IllegalArgumentException(
 					"fieldData cannot be empty for updateAll()");
 		
-		clearCache("updateAll");
+		modelCacheClient.clearCache("updateAll");
 
 		int count = -1;
 		String updateSQL = "UPDATE " + home.getTableName();
@@ -2259,7 +2248,7 @@ public class TableGateway {
 	 * @return int number of records updated
 	 */
 	public int updateBySQL(String sql, Map<String, Object> inputs) {
-		clearCache("updateBySQL");
+		modelCacheClient.clearCache("updateBySQL");
 		return SqlServiceClient.executeSQL(sql, inputs);
 	}
 
@@ -2286,7 +2275,7 @@ public class TableGateway {
 	 * @return int number of records updated
 	 */
 	public int updateBySQLKey(String sqlKey, Map<String, Object> inputs) {
-		clearCache("updateBySQLKey");
+		modelCacheClient.clearCache("updateBySQLKey");
 		return SqlServiceClient.executeSQLByKey(sqlKey, inputs);
 	}
 
@@ -2329,63 +2318,5 @@ public class TableGateway {
 
 	private static SqlService getSqlService() {
 		return SqlServiceConfig.getSqlService();
-	}
-	
-	private Object getCacheKey(String request, Object... elements) {
-		return CacheKey.getCacheKey(clazz.getName(), request, elements);
-	}
-	
-	private boolean useCache(String method) {
-		boolean useCheck = useRequestCache || useSecondLevelCache;
-		if (useCheck) {
-			if (localUseCacheExceptions != null && localUseCacheExceptions.contains(method)) {
-				useCheck = false;
-			}
-		}
-		else {
-			if (localUseCacheExceptions != null && localUseCacheExceptions.contains(method)) {
-				useCheck = true;
-			}
-		}
-		return useCheck;
-	}
-	
-	void clearCache(String method) {
-		if (flushCache(method)) getCache().clear();
-	}
-	
-	private boolean flushCache(String method) {
-		boolean flushCheck = flushCacheOnChange;
-		if (flushCheck) {
-			if (localFlushCacheExceptions != null && localFlushCacheExceptions.contains(method)) {
-				flushCheck = false;
-			}
-		}
-		else {
-			if (localFlushCacheExceptions != null && localFlushCacheExceptions.contains(method)) {
-				flushCheck = true;
-			}
-		}
-		return flushCheck;
-	}
-	
-	private boolean allowCacheAssociatedObjects() {
-		return EnvConfig.getInstance().allowCacheAssociatedObjects(clazz.getName());
-	}
-	
-	private Cache getCache() {
-		if (modelCache != null) return modelCache;
-		
-		if (useSecondLevelCache) {
-			CacheProvider dcp = CacheProviderUtil.getDefaultCacheProvider();
-			if (dcp != null) {
-				modelCache = dcp.getCache(clazz.getName());
-			}
-		}
-		else if (useRequestCache) {
-			modelCache = new NamedCurrentThreadCache(clazz.getName());
-		}
-		
-		return modelCache;
 	}
 }

@@ -648,7 +648,7 @@ implements RESTified, Serializable {
 
             tm.commitTransactionImplicit();
             
-            ActiveRecordUtil.getGateway(getClass()).clearCache("create");
+            ActiveRecordUtil.getGateway(getClass()).getModelCacheClient().clearCache("create");
         }
         catch(BaseSQLException bdex) {
             tm.rollbackTransactionImplicit();
@@ -864,7 +864,7 @@ implements RESTified, Serializable {
 
             tm.commitTransactionImplicit();
             
-            ActiveRecordUtil.getGateway(getClass()).clearCache("update");
+            ActiveRecordUtil.getGateway(getClass()).getModelCacheClient().clearCache("update");
         }
         catch(BaseSQLException bdex) {
             tm.rollbackTransactionImplicit();
