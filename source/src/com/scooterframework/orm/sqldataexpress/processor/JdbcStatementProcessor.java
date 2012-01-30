@@ -48,7 +48,6 @@ import com.scooterframework.orm.sqldataexpress.vendor.DBAdapterFactory;
  */
 public class JdbcStatementProcessor extends DataProcessorImpl {
     private JdbcStatement st = null;
-    private JdbcStatement stPaged = null;
     
     public JdbcStatementProcessor(JdbcStatement st) {
         this.st = st;
@@ -74,11 +73,8 @@ public class JdbcStatementProcessor extends DataProcessorImpl {
             JdbcStatement jstat = st;
             String originalSql = st.getOriginalJdbcStatementString();
             if(checkPagination(inputs)) {
-            	if (stPaged == null) {
-            		String pagedSql = dba.preparePaginationSql(originalSql, inputs, outputFilters);
-            		stPaged = SqlExpressUtil.createJdbcStatementDirect(pagedSql);
-            	}
-        		jstat = stPaged;
+            	String pagedSql = dba.preparePaginationSql(originalSql, inputs, outputFilters);
+            	jstat = SqlExpressUtil.createJdbcStatementDirect(pagedSql);
             }
             
             String executableSql = jstat.getExecutableJdbcStatementString();

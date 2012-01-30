@@ -100,7 +100,7 @@ public class SqlServiceImpl implements SqlService {
      */
     public OmniDTO execute(Map<String, Object> inputs, String processorType, String processorName)
     throws BaseSQLException {
-        return execute(inputs, processorType, processorName, null);
+        return execute(inputs, processorType, processorName, new HashMap<String, String>());
     }
 
     /**

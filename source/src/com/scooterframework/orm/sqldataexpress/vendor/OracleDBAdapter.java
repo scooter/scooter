@@ -16,7 +16,6 @@ import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -117,7 +116,8 @@ public class OracleDBAdapter extends DBAdapter {
             inputs.put(DataProcessor.input_key_max_row_index, Integer.valueOf(maxRowIndex));
 		}
 
-        if (outputFilters == null) outputFilters = new HashMap<String, String>();
+        if (outputFilters == null) 
+        	throw new IllegalArgumentException("outputFilters cannot be null.");
         outputFilters.put(SqlServiceConstants.OUTPUT_FILTER_EXCEPT, "RNUM");
 
         return newSelectSqlBF.toString();

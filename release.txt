@@ -11,9 +11,17 @@ this issue and some has provided workarounds:
 http://stackoverflow.com/questions/2102912/cant-make-jdbc-connection-to-mysql-using-java-intellij-and-linux
 http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-connector-through-tomcat-or-externally
 
+Using Eclipse with JDK6 in DEVELOPMENT environment
+--------------------------------------------------
+Scooter's own compiler is based on JDK5. Therefore if your Eclipse auto compiler is JDK6, the Scooter's compiler may not work. Solution: Replace scooter\lib\j2ee\tools.jar with tools.jar from JDK6.
+
 
 Summary of Releases
 ===================
+
+scooter-1.2.2 2012-01-29
+ + Fixed bug: Failed to display window-style pagination page links.
+ + Fixed bug: Failed to perform pagination in built-in data-browser pages for Oracle.
 
 scooter-1.2.1 2012-01-22
  + Fixed bug: Cannot run multiple apps in one container.

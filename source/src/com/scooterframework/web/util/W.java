@@ -1040,7 +1040,7 @@ public class W {
      */
     public static String windowStylePageLinks(Paginator paginator, 
     		String actionPath, int side, int window) {
-    	return windowStylePageLinks(paginator, actionPath, -1, -1, (String)null);
+    	return windowStylePageLinks(paginator, actionPath, side, window, (String)null);
     }
     
     /**

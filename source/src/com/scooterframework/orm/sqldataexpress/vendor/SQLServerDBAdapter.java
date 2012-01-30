@@ -7,7 +7,6 @@
  */
 package com.scooterframework.orm.sqldataexpress.vendor;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -107,7 +106,8 @@ public class SQLServerDBAdapter extends DBAdapter {
         newSqlB.append(remainSQL).append(") AS result WHERE rownumber > ");
         newSqlB.append(offset);
         
-        if (outputFilters == null) outputFilters = new HashMap<String, String>();
+        if (outputFilters == null) 
+        	throw new IllegalArgumentException("outputFilters cannot be null.");
         outputFilters.put(SqlServiceConstants.OUTPUT_FILTER_EXCEPT, "rownumber");
         
         return newSqlB.toString();

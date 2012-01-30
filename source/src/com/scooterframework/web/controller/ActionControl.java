@@ -1377,7 +1377,7 @@ public class ActionControl {
     		request.setAttribute(Constants.REQUEST_RENDERED, "true");
         } catch (Exception ex) {
         	String errorMessage = "Failed to render view \"" + viewFile + "\" because " + ex.getMessage();
-        	log.error(errorMessage);
+        	log.error(errorMessage, ex);
         	throw new NoTemplateHandlerException(errorMessage, viewExtension);
         }
     	
