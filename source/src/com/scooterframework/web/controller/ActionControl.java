@@ -1420,4 +1420,11 @@ public class ActionControl {
     public static FilterManager filterManagerFor(Class<?> clazz) {
     	return FilterManagerFactory.getInstance().getFilterManager(clazz);
     }
+    
+    /**
+     * Adds color to a string.
+     */
+    public static String color(String s, String color) {
+    	return String.format("<font color=\"%s\">%s</font>", color, s);
+    }
 }

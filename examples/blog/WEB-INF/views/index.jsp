@@ -52,3 +52,12 @@ as the processor in <tt>web.xml</tt>
 <b>Browse databases</b>: You need to choose <tt>com.scooterframework.web.controller.RestfulRequestProcessor</tt> 
 as the processor in <tt>web.xml</tt> and also set <tt>allow.databrowser=true</tt> in environment.properties file.
 <%}%>
+<br/><br/>
+
+<%if (MainActionServlet.isUsingRestfulProcessor() && EnvConfig.getInstance().allowDataBrowser()) {%>
+<b><%=W.labelLink("SQL Window", "/admin/sqlwindow")%></b>: run ad-hoc SQL statement
+<%} else {%>
+<b>Run ad-hoc SQL</b>: You need to choose <tt>com.scooterframework.web.controller.RestfulRequestProcessor</tt> 
+as the processor in <tt>web.xml</tt> and also set <tt>allow.databrowser=true</tt> in environment.properties file.
+<%}%>
+<br/><br/>

@@ -137,8 +137,7 @@ public class ScooterRequestFilter implements Filter {
         try {
         	chain.doFilter(request, response);
         } catch (Throwable ex) {
-        	ex.printStackTrace();
-        	log.error("Error from chain.doFilter: " + ex.getMessage());
+        	log.error("Error from chain.doFilter: " + ex.getMessage(), ex);
         }
         
         long after = System.currentTimeMillis();
@@ -169,11 +168,11 @@ public class ScooterRequestFilter implements Filter {
         String queryString = request.getQueryString();
         if (queryString != null) s += "?" + queryString;
         
-        if (skipStatic) return s;
-        
         CurrentThreadCacheClient.cacheHttpMethod(method);
         CurrentThreadCacheClient.cacheRequestPath(requestPath);
         CurrentThreadCacheClient.cacheRequestPathKey(requestPathKey);
+        
+        if (skipStatic) return s;
         
         //request header
         Properties headers = new Properties();

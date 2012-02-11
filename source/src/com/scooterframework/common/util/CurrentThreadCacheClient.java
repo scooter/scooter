@@ -154,4 +154,12 @@ public class CurrentThreadCacheClient {
 	public static String resource() {
 		return (String)CurrentThreadCache.get(Constants.RESOURCE);
 	}
+	
+	public static void cacheCacheable(String cacheable) {
+		CurrentThreadCache.set(Constants.REQUEST_CACHEABLE, cacheable);
+	}
+	
+	public static String cacheable() {
+		return (String)CurrentThreadCache.get(Constants.REQUEST_CACHEABLE);
+	}
 }

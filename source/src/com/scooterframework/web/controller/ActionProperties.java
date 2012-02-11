@@ -23,6 +23,7 @@ public class ActionProperties {
     public String model;
     public String format;
     public String resource;
+    public String cacheable;
     
     public boolean controllerCreated;
     public Object controllerInstance;
@@ -48,6 +49,7 @@ public class ActionProperties {
         returnString.append("model = " + model).append(SEPARATOR);
         returnString.append("format = " + format).append(SEPARATOR);
         returnString.append("resource = " + resource).append(SEPARATOR);
+        returnString.append("cacheable = " + cacheable).append(SEPARATOR);
         returnString.append("routeType = " + routeType).append(SEPARATOR);
         returnString.append("controllerCreated = " + controllerCreated).append(SEPARATOR);
         returnString.append("methodCreated = " + methodCreated).append(SEPARATOR);

@@ -7,19 +7,19 @@
 <h4>Have a fun drive!</h4>
 
 <b>Example 1: Regular non-AJAX link vs. AJAX link</b><br/>
-<a href="http://localhost:8080/ajaxtodo/time/current">Show Time (non ajax)</a>
-<a href="http://localhost:8080/ajaxtodo/time/current" data-ajax="true" data-target="#display_time">Show Time (ajax)</a>
+<a href="/ajaxtodo/time/current">Show Time (non ajax)</a>
+<a href="/ajaxtodo/time/current" data-ajax="true" data-target="#display_time">Show Time (ajax)</a>
 <span id="display_time"><i>&lt;&lt;Time will be displayed here&gt;&gt;</i></span>
 <br/><br/>
 
 <b>Example 2: Retrieving and showing JSON data</b><br/>
-<a href="http://localhost:8080/ajaxtodo/data/retrieve" data-ajax="true" data-target="#display_data" data-type="json" data-handler="json">Show json data</a>
+<a href="/ajaxtodo/data/retrieve" data-ajax="true" data-target="#display_data" data-type="json" data-handler="json">Show json data</a>
 <span id="display_data"><i>&lt;&lt;JSON data will be displayed below&gt;&gt;</i></span>
 <br/><br/>
 
 <b>Example 3: A complete sample app</b><br/>
 <p>You need to first turn on the database as specified by ajaxtodo_development in <tt>ajaxtodo/WEB-INF/config/database.properties</tt> and then install the database with <tt>ajaxtodo/static/docs/ajaxtodo_development.sql</tt>.</p>
-<a href="http://localhost:8080/ajaxtodo/entries">My AJAX-Backed Wiki-Powered TODO List</a> 
+<a href="/ajaxtodo/entries">My AJAX-Backed Wiki-Powered TODO List</a> 
 (using <a href="http://daringfireball.net/projects/markdown/basics" target="markdown">MarkDown</a> wiki syntax)
 
 <br/><br/>

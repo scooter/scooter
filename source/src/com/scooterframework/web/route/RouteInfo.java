@@ -29,6 +29,7 @@ public class RouteInfo {
 	String routeName;
     String viewPath;
     String resourceName;
+    String cacheable;
 	
 	public RouteInfo(RequestInfo requestInfo) {
 		this.requestInfo = requestInfo;
@@ -97,6 +98,10 @@ public class RouteInfo {
     public String getResourceName() {
         return resourceName;
     }
+    
+    public String getCacheable() {
+        return cacheable;
+    }
 	
 	/**
      * Returns a string representation of the object.
@@ -116,6 +121,7 @@ public class RouteInfo {
         returnString.append("model = " + model).append(SEPARATOR);
         returnString.append("modelClassName = " + modelClassName).append(SEPARATOR);
         returnString.append("action = " + action).append(SEPARATOR);
+        returnString.append("cacheable = " + cacheable).append(SEPARATOR);
         returnString.append("id = " + id).append(SEPARATOR);
         returnString.append("format = " + format).append(SEPARATOR);
         returnString.append("requiredFieldValues = " + requiredFieldValues).append(SEPARATOR);

@@ -9,6 +9,7 @@ package com.scooterframework.builtin.databrowser;
 
 import static com.scooterframework.web.controller.ActionControl.*;
 
+import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
 
 /**
@@ -17,6 +18,7 @@ import com.scooterframework.orm.sqldataexpress.config.DatabaseConfig;
  * @author (Fei) John Chen
  */
 public class ApplicationController {
+	protected LogUtil log = LogUtil.getLogger(this.getClass().getName());
     
     /**
      * Returns database name. 

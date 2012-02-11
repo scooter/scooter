@@ -582,8 +582,14 @@ public class Resource {
         RestRoute rr = new RestRoute(routeName, p);
         rr.setResourceName(this.name);
         rr.setModel(this.model);
+        if(rr.getCacheable() == null) rr.cacheable = getDefaultCacheable(methodsAllowed);
         return rr;
     }
+    
+	private String getDefaultCacheable(String httpMethod) {
+		return (RouteConstants.ROUTE_HTTP_METHOD_GET.equals(httpMethod)) 
+				? "true" : "false";
+	}
 
 
 

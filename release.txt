@@ -13,11 +13,16 @@ http://serverfault.com/questions/89955/unable-to-connect-to-mysql-through-jdbc-c
 
 Using Eclipse with JDK6 in DEVELOPMENT environment
 --------------------------------------------------
-Scooter's own compiler is based on JDK5. Therefore if your Eclipse auto compiler is JDK6, the Scooter's compiler may not work. Solution: Replace scooter\lib\j2ee\tools.jar with tools.jar from JDK6.
+Scooter's own compiler is based on JDK5. It may conflict with your Eclipse auto compiler if you use JDK6. Solution: Replace scooter\lib\j2ee\tools.jar with tools.jar from JDK6.
 
 
 Summary of Releases
 ===================
+
+scooter-1.3.0 2012-02-11
+ + New feature: Added Web Page Caching.
+ + New feature: Added built-in AJAX-based SQL Window to run ad-hoc SQL statement.
+ + Fixed bug: Ehcache plugin failed to create a separate cache for each model.
 
 scooter-1.2.2 2012-01-29
  + Fixed bug: Failed to display window-style pagination page links.

@@ -50,6 +50,7 @@ public class NamedRoute extends RegularRoute {
 		ri.routeType = getRouteType();
 		ri.routeName = getName();
         ri.viewPath = getViewPath(ri.controller);
+        ri.cacheable = getCacheable();
 		return ri;
 	}
     

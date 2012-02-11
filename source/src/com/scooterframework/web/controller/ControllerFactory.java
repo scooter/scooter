@@ -45,6 +45,7 @@ public class ControllerFactory {
             try {
                 controller = AutoLoadedObjectFactory.getInstance().newInstance(controllerClassName);
             } catch (Exception ex) {
+            	log.debug("Error in createController(): " + ex.getMessage());
                 if (EnvConfig.getInstance().allowAutoCRUD() || 
                     RouteConfig.getInstance().allowAutoREST()) {
                     log.debug("No controller class of \"" + controllerClassName + 

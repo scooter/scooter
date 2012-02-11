@@ -21,8 +21,10 @@
 	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/logging/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/markdown/markdownj-1.0.2b4-0.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/sitemesh/sitemesh-2.3.jar" sourcepath="C:/dev/devenv/sitemesh_2.3/src/java"/>
+	<classpathentry kind="lib" path="lib/sitemesh/sitemesh-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/stringtemplate/antlr-2.7.7.jar"/>
 	<classpathentry kind="lib" path="lib/stringtemplate/stringtemplate-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/caching/ehcache-web-2.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/caching/ehcache-core-2.5.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

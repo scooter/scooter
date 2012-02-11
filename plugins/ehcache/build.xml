@@ -20,7 +20,8 @@
             <include name="**/*.zip"/>
         </fileset>
         <fileset dir="${scooterlib.dir}">
-            <include name="scooter.jar"/>
+            <include name="**/*.jar"/>
+            <include name="**/*.zip"/>
         </fileset>
     </path>
 

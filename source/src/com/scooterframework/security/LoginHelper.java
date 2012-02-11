@@ -7,7 +7,9 @@
  */
 package com.scooterframework.security;
 
+import com.scooterframework.admin.Constants;
 import com.scooterframework.admin.EnvConfig;
+import com.scooterframework.common.util.CurrentThreadCache;
 import com.scooterframework.common.util.CurrentThreadCacheClient;
 import com.scooterframework.orm.activerecord.ActiveRecord;
 import com.scooterframework.web.controller.ACH;
@@ -46,7 +48,8 @@ public class LoginHelper {
         }
         
         String id = (userId != null)?userId.toString():null;
-        CurrentThreadCacheClient.cacheUserID(id);
+        if (id != null) 
+        	CurrentThreadCacheClient.cacheUserID(id);
         
         return id;
     }
@@ -163,6 +166,7 @@ public class LoginHelper {
      */
     public static void userLogout() {
         ACH.getAC().removeAllSessionData();
+        CurrentThreadCache.clear(Constants.USER_ID_VALUE);
     }
     
     public static final String SESSION_KEY_LOGIN_PASSWORD = "login_password";

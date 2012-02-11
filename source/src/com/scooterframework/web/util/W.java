@@ -787,7 +787,7 @@ public class W {
      * @param options configuration options of the select
      * @return html select string
      */
-    public static String displayHtmlSelect(String name, List<Object> dataList, String options) {
+    public static String displayHtmlSelect(String name, List<?> dataList, String options) {
         Map<String, String> optionsMap = Converters.convertStringToMap(options, ":", ";");
         String id = optionsMap.get("id");
         String cssClass = optionsMap.get("class");
@@ -825,7 +825,7 @@ public class W {
         }
         
         if (dataList != null) {
-            Iterator<Object> it = dataList.iterator();
+            Iterator<?> it = dataList.iterator();
             while (it.hasNext()) {
                 Object o = it.next();
                 String oid = "";
@@ -856,9 +856,8 @@ public class W {
         return selectSB.toString();
     }
     
-    @SuppressWarnings("unchecked")
-	public static String displayHtmlSelect(String name, String dataListKey, String options) {
-        return displayHtmlSelect(name, (List<Object>)get(dataListKey), options);
+	public static String displayHtmlSelect(String name, String dataList, String options) {
+        return displayHtmlSelect(name, Converters.convertStringToList(dataList), options);
     }
     
     /**

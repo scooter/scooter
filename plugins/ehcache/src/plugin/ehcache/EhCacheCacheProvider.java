@@ -15,7 +15,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.scooterframework.admin.ApplicationConfig;
-import com.scooterframework.admin.EnvConfig;
 import com.scooterframework.common.logging.LogUtil;
 import com.scooterframework.common.util.Converters;
 import com.scooterframework.cache.AbstractCacheProvider;
@@ -25,7 +24,15 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 
 /**
- * EhCacheCacheProvider class is a CacheProvider based on EhCache.
+ * EhCacheCacheProvider class is a CacheProvider based on EhCache. 
+ * 
+ * Its configuration file is searched based on the following orders:
+ * <ul>
+ *   <li>A file name under <tt>WEB-INF/config</tt> specified by the <tt>configFile</tt> property.</li>
+ *   <li>A full file name specified by the <tt>configFile</tt> property.</li>
+ *   <li>File <tt>ehcache.xml</tt> under <tt>WEB-INF/config</tt>.</li>
+ *   <li>File <tt>ehcache.xml</tt> on classpath.</li>
+ * </ul>
  *
  * @author (Fei) John Chen
  */
@@ -34,43 +41,39 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 
 	private final ConcurrentHashMap<String, Cache> chm = new ConcurrentHashMap<String, Cache>();
 	private CacheManager cacheManager;
-	private boolean useDefaultCacheNameIfAbsent;
 	private boolean useSerialization;
 
 	public EhCacheCacheProvider(Properties p) {
 		super(p);
 
 		String propertyFileName = super.getProperty(KEY_CACHE_PROVIDER_CONFIGFILE);
-		if (propertyFileName != null) {
-			try {
-				File f = new File(propertyFileName);
-				if (!f.exists()) {
-					String appPath = ApplicationConfig.getInstance().getApplicationPath();
-					f = new File(appPath + File.separatorChar + "WEB-INF/config"
-							+ File.separatorChar + propertyFileName);
-					if (!f.exists()) {
-						cacheManager = CacheManager.create(CacheManager.class.getResourceAsStream(propertyFileName));
-					}
-					else {
-						cacheManager = CacheManager.create(new FileInputStream(f));
-					}
+		if (propertyFileName == null) 
+			propertyFileName = "ehcache.xml";
+		
+		try {
+			String appPath = ApplicationConfig.getInstance().getApplicationPath();
+			File f = new File(appPath + File.separatorChar + "WEB-INF/config"
+					+ File.separatorChar + propertyFileName);
+			if (f.exists()) {
+				cacheManager = CacheManager.create(new FileInputStream(f));
+				log.debug("Created cacheManager based on config file 'WEB-INF/config/" + f.getName() + "'.");
+			}
+			else {
+				f = new File(propertyFileName);
+				if (f.exists()) {
+					cacheManager = CacheManager.create(new FileInputStream(f));
+					log.debug("Created cacheManager based on config file '" + f.getCanonicalPath() + "'.");
 				}
 				else {
-					cacheManager = CacheManager.create(new FileInputStream(f));
+					cacheManager = CacheManager.create(CacheManager.class.getResourceAsStream("/" + propertyFileName));
+					log.debug("Created cacheManager based on '" + propertyFileName + "' from classpath.");
 				}
 			}
-			catch(IOException ex) {
-				throw new IllegalArgumentException("Failed to load EhCache config file '" + propertyFileName + "'.");
-			}
 		}
-		else {
-			cacheManager = CacheManager.create(CacheManager.class.getResourceAsStream("/ehcache.xml"));
+		catch(IOException ex) {
+			throw new IllegalArgumentException("Failed to load EhCache config file '" + propertyFileName + "' : " + ex.getMessage());
 		}
-
-		if ("true".equals(super.getProperty("useDefaultCacheNameIfAbsent"))) {
-			useDefaultCacheNameIfAbsent = true;
-		}
-
+		
 		if ("true".equals(super.getProperty("useSerialization"))) {
 			useSerialization = true;
 		}
@@ -87,21 +90,19 @@ public class EhCacheCacheProvider extends AbstractCacheProvider {
 		if (cache == null) {
 			Ehcache ehcache = cacheManager.getEhcache(name);
 			if (ehcache == null) {
-				log.warn("There is no cache registered with name '" + name
-					+ "' in ehcache.xml. Will create a default cache.");
-				if (useDefaultCacheNameIfAbsent) {
-					String defaultCacheName = super.getProperty("defaultCacheName", EnvConfig.getInstance().getDefaultCacheName());
-				    log.debug("Default cache name: " + defaultCacheName);
-					ehcache = cacheManager.addCacheIfAbsent(defaultCacheName);
+				log.debug("There is no cache registered with name '" + name
+					+ "' in ehcache.xml. Will create a cache for it.");
+				if (name != null) {
+					ehcache = cacheManager.addCacheIfAbsent(name);
 				}
-
+				
 				if (ehcache == null) {
 					String error = "There is no cache registered with name '" + name + "' in ehcache.xml.";
 					log.error(error);
 					throw new IllegalArgumentException(error);
 				}
 			}
-			cache = new EhCacheCache(ehcache, useSerialization);
+			cache = new EhCacheCache(name, ehcache, useSerialization);
 			chm.put(name, cache);
 		}
 		return cache;

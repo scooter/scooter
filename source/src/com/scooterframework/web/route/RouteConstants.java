@@ -65,6 +65,7 @@ public class RouteConstants {
 	public static final String ROUTE_KEY_NAMESPACE = "namespace";
 	public static final String ROUTE_KEY_PATH_PREFIX = "path_prefix";
 	public static final String ROUTE_KEY_REQUIREMENTS = "requirements";
+	public static final String ROUTE_KEY_CACHEABLE = "cacheable";
 	
     //************************************************************************
     // Keys that are used only by Resource

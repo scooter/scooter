@@ -25,10 +25,12 @@ import net.sf.ehcache.Statistics;
 
 public class EhCacheCache implements Cache {
     private LogUtil log = LogUtil.getLogger(this.getClass().getName());
+    private String name;
 	private Ehcache delegate;
 	private boolean useSerialization;
 
-	public EhCacheCache(Ehcache delegate, boolean useSerialization) {
+	public EhCacheCache(String name, Ehcache delegate, boolean useSerialization) {
+		this.name = name;
 		this.delegate = delegate;
 		this.useSerialization = useSerialization;
 	}
@@ -38,7 +40,7 @@ public class EhCacheCache implements Cache {
 	}
 
 	public String getName() {
-		return delegate.getName();
+		return name;
 	}
 
 	@SuppressWarnings("unchecked")

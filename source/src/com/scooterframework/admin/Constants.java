@@ -36,6 +36,7 @@ public class Constants {
     public static final String REQUEST_PATH = "scooter.key.request.path";
     public static final String REQUEST_PATH_KEY = "scooter.key.request.path.key";
     public static final String REQUEST_URI = "scooter.key.request.uri";
+    public static final String REQUEST_CACHEABLE = "scooter.key.request.cacheable";
     public static final String LOCAL_REQUEST = "scooter.key.local.request";
     public static final String FILE_UPLOAD_REQUEST = "scooter.key.fileupload.request";
     public static final String FILE_UPLOAD_REQUEST_FILES = "scooter.key.fileupload.request.files";

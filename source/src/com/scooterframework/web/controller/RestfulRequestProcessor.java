@@ -98,6 +98,7 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
         aps.resource = routeInfo.getResourceName();
         aps.routeType = routeInfo.getRouteType();
         aps.requiredFieldValues = requiredFieldValues;
+        aps.cacheable = routeInfo.getCacheable();
         
         return aps;
     }
@@ -109,6 +110,8 @@ public class RestfulRequestProcessor extends BaseRequestProcessor {
         super.registerActionProperties(request, aps);
         CurrentThreadCacheClient.cacheResource(aps.resource);
         request.setAttribute(Constants.RESOURCE, aps.resource);
+        CurrentThreadCacheClient.cacheCacheable(aps.cacheable);
+        request.setAttribute(Constants.REQUEST_CACHEABLE, aps.cacheable);
         Map<String, String> requiredFieldValues = aps.requiredFieldValues;
         if (requiredFieldValues != null) {
         	CurrentThreadCacheClient.cacheFieldValues(requiredFieldValues);

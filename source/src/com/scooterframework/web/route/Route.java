@@ -42,6 +42,7 @@ abstract public class Route {
 	protected String namespace;
 	protected String pathPrefix;
     protected String requirements;
+    protected String cacheable;
 
 	protected boolean dynamicController;
 	protected boolean dynamicAction;
@@ -113,6 +114,7 @@ abstract public class Route {
 		ri.routeType = getRouteType();
 		ri.routeName = getName();
         ri.viewPath = getViewPath(ri.controller);
+        ri.cacheable = getCacheable();
 		return ri;
 	}
 
@@ -304,6 +306,10 @@ abstract public class Route {
 		return requirements;
 	}
 
+	public String getCacheable() {
+		return cacheable;
+	}
+
     /**
      * Returns screen URL which is a combination of <tt>path_prefix</tt> and
      * <tt>url</tt>.
@@ -416,6 +422,7 @@ abstract public class Route {
 		namespace = route.getNamespace();
 		pathPrefix = route.getPathPrefix();
 		requirements = route.getRequirements();
+		cacheable = route.cacheable;
 
 		dynamicController = route.dynamicController;
 		dynamicAction = route.dynamicAction;
@@ -450,6 +457,7 @@ abstract public class Route {
         returnString.append("namespace = " + namespace).append(SEPARATOR);
         returnString.append("pathPrefix = " + pathPrefix).append(SEPARATOR);
         returnString.append("requirements = " + requirements).append(SEPARATOR);
+        returnString.append("cacheable = " + cacheable).append(SEPARATOR);
         returnString.append("requiredFieldPositions = " + requiredFieldPositions).append(SEPARATOR);
         returnString.append("segmentCount = " + segmentCount);
 
@@ -475,6 +483,8 @@ abstract public class Route {
 		singular = p.getProperty(RouteConstants.ROUTE_KEY_SINGULAR);
 		namespace = p.getProperty(RouteConstants.ROUTE_KEY_NAMESPACE);
 		pathPrefix = p.getProperty(RouteConstants.ROUTE_KEY_PATH_PREFIX);
+
+		cacheable = p.getProperty(RouteConstants.ROUTE_KEY_CACHEABLE);
 
         //
         //parse requirements properties

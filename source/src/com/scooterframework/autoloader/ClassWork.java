@@ -69,7 +69,7 @@ public class ClassWork {
 			
 			cc.defrost();
 		} catch (Exception ex) {
-			throw new ClassNotFoundException("classWork failed on " + className + ": " + ex.getMessage());
+			throw new ClassNotFoundException("classWork failed on " + className + ": " + ex.getMessage(), ex);
 		}
 
 		return result;
@@ -90,7 +90,7 @@ public class ClassWork {
 				result = bytes;
 			}
 		} catch (Exception ex) {
-			throw new ClassNotFoundException("classWork failed on " + className + ": " + ex.getMessage());
+			throw new ClassNotFoundException("classWork failed on " + className + ": " + ex.getMessage(), ex);
 		}
 		
 		return result;
