@@ -856,8 +856,9 @@ public class W {
         return selectSB.toString();
     }
     
-	public static String displayHtmlSelect(String name, String dataList, String options) {
-        return displayHtmlSelect(name, Converters.convertStringToList(dataList), options);
+	@SuppressWarnings("unchecked")
+	public static String displayHtmlSelect(String name, String dataListKey, String options) {
+		return displayHtmlSelect(name, (List<Object>)get(dataListKey), options);
     }
     
     /**
